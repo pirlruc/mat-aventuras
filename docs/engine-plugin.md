@@ -44,6 +44,9 @@ Native Canvas/GLES engines remain as:
 - the **Robolectric fallback** (Godot native `.so` cannot load in unit tests)
 - the **playable fallback** if a future build drops the plugin classes
 
+Both native fallback Activities declare `:engine2d` / `:engine3d` so a device
+fallback still kills the engine heap. Robolectric ignores `android:process`.
+
 ## What this repo ships
 
 | Piece | Role |

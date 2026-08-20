@@ -67,6 +67,20 @@ class LocalRepository(
         database.profileDao().update(profile.toEntity())
     }
 
+    /**
+     * Applies [delta] in SQL so concurrent lesson taps and reward bonuses cannot
+     * clobber each other. Returns the stored profile, or null when [id] is unknown.
+     */
+    suspend fun addPoints(
+        id: Long,
+        delta: Int,
+    ): ChildProfile? {
+        val dao = database.profileDao()
+        if (dao.get(id) == null) return null
+        if (delta != 0) dao.addPoints(id, delta)
+        return dao.get(id)?.toDomain()
+    }
+
     /** Loads one profile, or null. */
     suspend fun getProfile(id: Long): ChildProfile? = database.profileDao().get(id)?.toDomain()
 
@@ -76,6 +90,10 @@ class LocalRepository(
     /** Every stored session. */
     suspend fun allSessions(): List<LearningSession> =
         database.sessionDao().all().map { it.toDomain() }
+
+    /** Sessions for one child, newest first. */
+    suspend fun sessionsFor(profileId: Long): List<LearningSession> =
+        database.sessionDao().forProfile(profileId).map { it.toDomain() }
 
     /** Inserts a session and returns its row id. */
     suspend fun saveSession(session: LearningSession): Long =

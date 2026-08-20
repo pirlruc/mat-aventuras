@@ -31,6 +31,16 @@ interface ProfileDao {
     /** Overwrites a profile row. */
     @Update
     suspend fun update(profile: ProfileEntity)
+
+    /**
+     * Adds [delta] to a profile's points without a read-modify-write race.
+     * The stored total never goes below zero.
+     */
+    @Query("UPDATE profiles SET points = MAX(0, points + :delta) WHERE id = :id")
+    suspend fun addPoints(
+        id: Long,
+        delta: Int,
+    )
 }
 
 /**
@@ -41,6 +51,10 @@ interface SessionDao {
     /** Sessions for one child, newest first. */
     @Query("SELECT * FROM sessions WHERE profileId = :profileId ORDER BY startedAtEpochMs DESC")
     fun observeFor(profileId: Long): Flow<List<SessionEntity>>
+
+    /** Sessions for one child (one-shot). */
+    @Query("SELECT * FROM sessions WHERE profileId = :profileId ORDER BY startedAtEpochMs DESC")
+    suspend fun forProfile(profileId: Long): List<SessionEntity>
 
     /** Every session in the database. */
     @Query("SELECT * FROM sessions")

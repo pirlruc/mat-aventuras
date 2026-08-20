@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.speech.SpeechEngine
@@ -45,9 +46,13 @@ class MainActivity : ComponentActivity() {
         resultCode: Int,
         data: Intent?,
     ) {
+        if (isDestroyed) return
+        if (isFinishing) return
         val finished = RewardReturn.onResult(resultCode, data, speech::speak)
         val app = application as MatAventurasApp
-        lifecycleScope.launch { RewardRecorder.apply(app.container, finished) }
+        lifecycleScope.launch(Dispatchers.IO) {
+            RewardRecorder.apply(app.container, finished)
+        }
     }
 
     override fun onDestroy() {

@@ -31,10 +31,14 @@ class MatAventurasApp : Application() {
 }
 
 /**
- * Room stays in the Compose process only.
+ * Room stays in the Compose process only. A blank name (unreadable
+ * `/proc/self/cmdline` on API 26–27) fails closed so an isolated engine
+ * process never opens the host database.
  */
-internal fun shouldOpenContainer(processName: String): Boolean =
-    !EnginePluginContract.isIsolatedProcessName(processName)
+internal fun shouldOpenContainer(processName: String): Boolean {
+    if (processName.isBlank()) return false
+    return !EnginePluginContract.isIsolatedProcessName(processName)
+}
 
 /**
  * Process name for this VM (`package:engine3d` in an isolated reward process).

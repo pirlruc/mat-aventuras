@@ -116,7 +116,7 @@ fun ParentDashboard(
 
     LaunchedEffect(profile?.id, unlocked) {
         val id = profile?.id ?: return@LaunchedEffect
-        val sessions = container.repository.allSessions()
+        val sessions = container.repository.sessionsFor(id)
         summary = container.analytics.summarise(id, sessions)
     }
 

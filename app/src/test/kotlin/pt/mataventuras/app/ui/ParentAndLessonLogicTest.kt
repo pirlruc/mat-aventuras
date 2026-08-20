@@ -49,30 +49,41 @@ class ParentAndLessonLogicTest {
         LessonRecorder.persist(
             container = app.container,
             profile = profile,
-            points = 60,
             module = LearningModule.ADDITION,
             hits = 6,
             misses = 0,
             startedAt = 1_000,
             nowMs = 4_000,
         )
-        val sessions = app.container.repository.allSessions().filter { it.profileId == id }
+        val sessions = app.container.repository.sessionsFor(id)
         assertEquals(1, sessions.size)
         assertEquals(6, sessions[0].hits)
         assertEquals(3_000, sessions[0].durationMs)
+        assertEquals(0, app.container.repository.getProfile(id)!!.points)
         assertTrue(app.container.repository.badgeCodes(id).contains("FIRST_STEPS"))
+        assertEquals(false, app.container.repository.avatarIds(id).contains(AvatarCode.RUNNER.name))
+        app.container.repository.addPoints(id, 60)
+        LessonRecorder.persist(
+            container = app.container,
+            profile = profile,
+            module = LearningModule.ADDITION,
+            hits = 6,
+            misses = 0,
+            startedAt = 5_000,
+            nowMs = 6_000,
+        )
+        assertEquals(60, app.container.repository.getProfile(id)!!.points)
         assertTrue(app.container.repository.avatarIds(id).contains(AvatarCode.RUNNER.name))
         LessonRecorder.persist(
             container = app.container,
             profile = profile.copy(id = 9_999),
-            points = 0,
             module = LearningModule.COUNTING,
             hits = 1,
             misses = 0,
             startedAt = 0,
             nowMs = 1,
         )
-        assertEquals(1, app.container.repository.allSessions().filter { it.profileId == id }.size)
+        assertEquals(2, app.container.repository.sessionsFor(id).size)
     }
 
     @Test
@@ -281,12 +292,25 @@ class ParentAndLessonLogicTest {
         RewardRecorder.apply(app.container, finished = true)
         assertEquals(55, app.container.repository.getProfile(id)!!.points)
         assertTrue(app.container.repository.avatarIds(id).contains(AvatarCode.RUNNER.name))
+        app.container.repository.addPoints(id, 10)
+        RewardRecorder.apply(app.container, finished = true)
+        assertEquals(80, app.container.repository.getProfile(id)!!.points)
+        LessonRecorder.persist(
+            container = app.container,
+            profile = start,
+            module = LearningModule.ADDITION,
+            hits = 1,
+            misses = 0,
+            startedAt = 1,
+            nowMs = 2,
+        )
+        assertEquals(80, app.container.repository.getProfile(id)!!.points)
         app.container.lastProfile.clear()
         RewardRecorder.apply(app.container, finished = true)
-        assertEquals(55, app.container.repository.getProfile(id)!!.points)
+        assertEquals(80, app.container.repository.getProfile(id)!!.points)
         app.container.lastProfile.save(9_999)
         RewardRecorder.apply(app.container, finished = true)
-        assertEquals(55, app.container.repository.getProfile(id)!!.points)
+        assertEquals(80, app.container.repository.getProfile(id)!!.points)
     }
 
     @Test

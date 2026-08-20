@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-20
-**Last agent focus:** Privacy/memory hardening and finsilo-style extra CI gates
+**Last agent focus:** Atomic reward points, fail-closed Room, engine teardown races
 
 ---
 
@@ -66,7 +66,8 @@ bash scripts/ci-local.sh
   clone them; it uses `scripts/` helpers and `config/kotlin.thresholds.yml`.
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
   can still gate `:domain`. With the SDK, coverage is required for all three.
-- `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`).
+- `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
+- Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`; this cloud run used
   `cursor/mat-aventuras-core-ade3` per the agent environment.
@@ -82,5 +83,7 @@ bash scripts/ci-local.sh
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
+
+Known follow-ups not in this pass: encrypted PIN DataStore, release R8 with Godot JNI keep rules, per-frame KartScene allocations.
 
 *Last updated: 2026-08-20*

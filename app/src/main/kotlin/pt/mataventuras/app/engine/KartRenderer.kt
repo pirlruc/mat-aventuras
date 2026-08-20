@@ -81,13 +81,15 @@ internal class KartRenderer(
      * Advances simulation and HUD without issuing GLES calls (unit tests).
      */
     internal fun tick(): Kart3dState {
-        val now = nowNs()
-        if (lastNs == 0L) lastNs = now
-        val dt = ((now - lastNs) / 1_000_000_000f).coerceAtMost(0.05f)
-        lastNs = now
-        val boost = boostRequested
-        boostRequested = false
-        state = engine.step(state, dt, steer, boost)
+        if (!state.finished) {
+            val now = nowNs()
+            if (lastNs == 0L) lastNs = now
+            val dt = ((now - lastNs) / 1_000_000_000f).coerceAtMost(0.05f)
+            lastNs = now
+            val boost = boostRequested
+            boostRequested = false
+            state = engine.step(state, dt, steer, boost)
+        }
         publishHud()
         return state
     }
@@ -96,6 +98,7 @@ internal class KartRenderer(
      * Ticks then draws the current [KartScene] through [gles].
      */
     internal fun drawScene(gles: KartGles) {
+        if (state.finished) return
         tick()
         if (state.finished) return
         gles.clear(GL10.GL_COLOR_BUFFER_BIT or GL10.GL_DEPTH_BUFFER_BIT)
@@ -132,12 +135,15 @@ internal class KartRenderer(
 
     private fun publishHud() {
         val hud = KartScene.hudFingerprint(state)
-        val justFinished = state.finished && !finishedPublished
-        if (hud != lastHud || justFinished) {
+        if (state.finished && !finishedPublished) {
+            finishedPublished = true
             lastHud = hud
-            if (justFinished) finishedPublished = true
-            onFrame(state, justFinished)
+            onFrame(state, true)
+            return
         }
+        if (hud == lastHud) return
+        lastHud = hud
+        onFrame(state, false)
     }
 
     private fun meshOf(id: KartMeshId): FloatBuffer =

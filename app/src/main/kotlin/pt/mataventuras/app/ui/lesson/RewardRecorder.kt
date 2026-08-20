@@ -8,6 +8,7 @@ import pt.mataventuras.app.di.AppContainer
 internal object RewardRecorder {
     /**
      * Awards bonus points and newly unlocked avatars when [finished] is true.
+     * Uses an atomic points update so an in-flight lesson tap cannot erase the bonus.
      */
     suspend fun apply(
         container: AppContainer,
@@ -16,12 +17,11 @@ internal object RewardRecorder {
         val delta = container.rewards.pointsForRewardFinish(finished)
         if (delta == 0) return
         val id = container.lastProfile.read() ?: return
-        val current = container.repository.getProfile(id) ?: return
-        val points = container.rewards.applyPoints(current.points, delta)
-        container.repository.updateProfile(current.copy(points = points))
+        val updated = container.repository.addPoints(id, delta) ?: return
         container.rewards.newAvatars(
             alreadyUnlocked = container.repository.avatarIds(id),
-            points = points,
+            points = updated.points,
         ).forEach { container.repository.unlockAvatar(id, it.name) }
+        container.publishProfile(id)
     }
 }

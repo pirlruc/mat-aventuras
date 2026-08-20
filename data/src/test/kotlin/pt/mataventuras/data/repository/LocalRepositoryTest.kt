@@ -48,10 +48,16 @@ class LocalRepositoryTest {
         assertEquals(AvatarCode.STARTER.name, profile.avatarId)
         repository.updateProfile(profile.copy(points = 12))
         assertEquals(12, repository.getProfile(id)!!.points)
+        assertEquals(27, repository.addPoints(id, 15)!!.points)
+        assertEquals(27, repository.addPoints(id, 0)!!.points)
+        assertEquals(0, repository.addPoints(id, -100)!!.points)
+        assertEquals(null, repository.addPoints(9_999, 5))
         repository.saveSession(
             LearningSession(0, id, LearningModule.COUNTING, 5, 1, 2_000, 1_000),
         )
         assertEquals(1, repository.allSessions().size)
+        assertEquals(1, repository.sessionsFor(id).size)
+        assertEquals(0, repository.sessionsFor(9_999).size)
         assertEquals(1, repository.observeSessions(id).first().size)
         repository.unlockBadge(id, "FIRST_STEPS")
         repository.unlockAvatar(id, AvatarCode.RUNNER.name)

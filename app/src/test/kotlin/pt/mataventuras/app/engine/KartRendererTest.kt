@@ -87,9 +87,13 @@ class KartRendererTest {
         assertTrue(renderer.snapshot().finished)
         val published = finishedFrames
         assertTrue(published >= 1)
+        val speed = renderer.snapshot().speed
         renderer.drawScene(gles)
         renderer.drawScene(gles)
+        renderer.tick()
+        renderer.tick()
         assertEquals(published, finishedFrames)
+        assertEquals(speed, renderer.snapshot().speed, 0f)
     }
 
     @Test

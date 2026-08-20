@@ -27,7 +27,7 @@ object EnginePluginContract {
     /** Isolated process for the 3D kart (Godot or native GLES). */
     const val PROCESS_ENGINE_3D: String = ":engine3d"
 
-    /** Isolated process for the Godot 2D runner. Native Canvas tests stay in-process. */
+    /** Isolated process for the Godot 2D runner (and the native Canvas fallback). */
     const val PROCESS_ENGINE_2D: String = ":engine2d"
 
     /**
@@ -61,8 +61,10 @@ object EnginePluginContract {
         }
 
     /**
-     * Native 2D Canvas may stay in the Compose process. Any plugin, and all 3D,
-     * must use an isolated process so the engine heap dies on `finish()`.
+     * Native 2D Canvas may stay in the Compose process for the plugin resolver
+     * (`usingPlugin = false`). The fallback Activity still declares `:engine2d`
+     * so a device fallback kills the Canvas heap. Any plugin, and all 3D, must
+     * use an isolated process so the engine heap dies on `finish()`.
      */
     fun requiresIsolatedProcess(
         kind: EngineKind,

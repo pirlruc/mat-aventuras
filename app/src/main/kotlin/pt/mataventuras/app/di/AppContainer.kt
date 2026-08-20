@@ -3,6 +3,9 @@ package pt.mataventuras.app.di
 import android.content.Context
 import android.os.Build
 import androidx.room.Room
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.repository.LocalRepository
@@ -49,6 +52,19 @@ class AppContainer(
 
     /** Parental summary. */
     val analytics = ParentAnalytics()
+
+    private val profileTouchFlow = MutableSharedFlow<Long>(extraBufferCapacity = 8)
+
+    /**
+     * Profile ids whose Room row changed outside Compose (reward bonus).
+     * Lesson and home collectors reload so the +15 finish bonus is visible.
+     */
+    val profileTouches: SharedFlow<Long> = profileTouchFlow.asSharedFlow()
+
+    /** Notifies open screens to reload [id] from Room. */
+    fun publishProfile(id: Long) {
+        profileTouchFlow.tryEmit(id)
+    }
 }
 
 /**

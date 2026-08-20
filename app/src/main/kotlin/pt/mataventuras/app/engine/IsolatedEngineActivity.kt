@@ -21,6 +21,11 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
      */
     internal var pauseableSurface: GLSurfaceView? = null
 
+    private val rewardLock = Any()
+
+    @Volatile
+    private var rewardSettled: Boolean = false
+
     override fun onPause() {
         pauseEngineSurface()
         super.onPause()
@@ -28,10 +33,11 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        resumeEngineSurface()
+        if (!rewardSettled) resumeEngineSurface()
     }
 
     override fun onDestroy() {
+        pauseEngineSurface()
         pauseableSurface = null
         super.onDestroy()
     }
@@ -49,6 +55,22 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     internal fun resumeEngineSurface() {
         pauseableSurface?.onResume()
     }
+
+    /**
+     * Drops continuous rendering once the reward has a result.
+     * [GLSurfaceView.setRenderMode] requires a GL thread; skip when none exists
+     * (Robolectric, or finish before [setRenderer]).
+     */
+    internal fun stopEngineSurface() {
+        val surface = pauseableSurface ?: return
+        runCatching { surface.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY }
+        surface.onPause()
+    }
+
+    /**
+     * True after [completeReward] has already delivered a result.
+     */
+    internal fun isRewardSettled(): Boolean = rewardSettled
 
     /**
      * Mascot extra, or empty when the host omitted it.
@@ -74,20 +96,31 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
 
     /**
      * Returns [EnginePluginContract.RESULT_FINISHED] and finishes this process's Activity.
+     * A second call, or a call after destroy, is ignored so back-press cannot
+     * cancel a just-finished reward.
      */
-    internal fun completeReward(ok: Boolean) {
+    internal fun completeReward(ok: Boolean): Boolean {
+        synchronized(rewardLock) {
+            if (isDestroyed) return false
+            if (isFinishing) return false
+            if (rewardSettled) return false
+            rewardSettled = true
+        }
+        stopEngineSurface()
         val code = if (ok) RESULT_OK else RESULT_CANCELED
         setResult(
             code,
             Intent().putExtra(EnginePluginContract.RESULT_FINISHED, ok),
         )
         finish()
+        return true
     }
 
     /**
      * [completeReward] posted to the UI thread (Godot callbacks arrive on the render thread).
      */
     internal fun completeRewardOnUi(ok: Boolean) {
+        if (isDestroyed) return
         runOnUiThread { completeReward(ok) }
     }
 }

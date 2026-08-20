@@ -22,6 +22,7 @@ PLUGIN_PROCESSES = {
     "pt.mataventuras.plugin.KartPluginActivity": ":engine3d",
     "pt.mataventuras.plugin.RunnerPluginActivity": ":engine2d",
     "pt.mataventuras.app.engine.Kart3dActivity": ":engine3d",
+    "pt.mataventuras.app.engine.Platformer2dActivity": ":engine2d",
 }
 
 

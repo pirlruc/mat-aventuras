@@ -28,6 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
@@ -58,8 +60,17 @@ fun LessonScreen(
     var points by remember { mutableIntStateOf(profile.points) }
     var confirmingExit by remember { mutableStateOf(false) }
     val startedAt = remember { System.currentTimeMillis() }
+    val pointsGate = remember { Mutex() }
 
     LaunchedEffect(exercise.prompt) { onSpeak(exercise.spoken) }
+    LaunchedEffect(profile.id) {
+        container.profileTouches.collect { id ->
+            if (id != profile.id) return@collect
+            pointsGate.withLock {
+                points = container.repository.getProfile(id)?.points ?: points
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -88,8 +99,11 @@ fun LessonScreen(
                         streak = 0
                     }
                     scope.launch {
-                        val current = container.repository.getProfile(profile.id) ?: return@launch
-                        container.repository.updateProfile(current.copy(points = points))
+                        pointsGate.withLock {
+                            val stored =
+                                container.repository.addPoints(profile.id, delta) ?: return@withLock
+                            points = stored.points
+                        }
                     }
                     if (container.rewards.shouldOpenReward(streak)) {
                         onSpeak(VoiceScripts.LETS_PLAY)
@@ -109,7 +123,7 @@ fun LessonScreen(
                 VoiceScripts.confirmExit(profile.ageGroup)?.let(onSpeak)
             } else {
                 scope.launch {
-                    LessonRecorder.persist(container, profile, points, module, hits, misses, startedAt)
+                    LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
                     onExit()
                 }
             }

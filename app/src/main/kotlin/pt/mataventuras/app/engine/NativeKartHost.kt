@@ -52,6 +52,7 @@ internal object NativeKartHost {
         val view =
             GLSurfaceView(activity).apply {
                 setEGLContextClientVersion(1)
+                setPreserveEGLContextOnPause(false)
                 setRenderer(session.renderer)
                 renderMode = renderMode(showUi)
                 setOnTouchListener { v, event ->

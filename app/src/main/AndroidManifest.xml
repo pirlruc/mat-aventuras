@@ -61,6 +61,8 @@
             android:name=".engine.Platformer2dActivity"
             android:exported="false"
             android:launchMode="singleInstance"
+            android:process=":engine2d"
+            android:excludeFromRecents="true"
             android:taskAffinity=""
             android:theme="@style/Theme.MatAventuras.Game" />
 

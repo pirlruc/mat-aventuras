@@ -163,7 +163,11 @@ class GodotPluginHostTest {
         assertTrue(activities.any { it.name == EnginePluginContract.PLUGIN_RUNNER_CLASS })
         assertTrue(
             activities
-                .filter { it.name.contains("Plugin") || it.name.endsWith("Kart3dActivity") }
+                .filter {
+                    it.name.contains("Plugin") ||
+                        it.name.endsWith("Kart3dActivity") ||
+                        it.name.endsWith("Platformer2dActivity")
+                }
                 .all { EnginePluginContract.isIsolatedProcessName(it.processName.orEmpty()) },
         )
     }
@@ -175,6 +179,8 @@ class GodotPluginHostTest {
         assertTrue(shouldOpenContainer("pt.mataventuras.app"))
         assertFalse(shouldOpenContainer("pt.mataventuras.app:engine3d"))
         assertFalse(shouldOpenContainer("pt.mataventuras.app:engine2d"))
+        assertFalse(shouldOpenContainer(""))
+        assertFalse(shouldOpenContainer("   "))
         currentProcessName()
         currentProcessName("pt.mataventuras.app:engine3d")
         assertEquals(
@@ -194,6 +200,7 @@ class GodotPluginHostTest {
         assertTrue(hostProcessName().isNotBlank())
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         assertFalse(app.bindHostGraph("pt.mataventuras.app:engine3d"))
+        assertFalse(app.bindHostGraph(""))
         val nativeKartController =
             Robolectric.buildActivity(
                 Kart3dActivity::class.java,
@@ -202,13 +209,41 @@ class GodotPluginHostTest {
                     .putExtra(EngineLauncher.EXTRA_NAME, "Ana"),
             ).setup()
         nativeKartController.get().closeFinished()
+        assertTrue(nativeKartController.get().isRewardSettled())
+        assertFalse(nativeKartController.get().completeReward(ok = false))
+        nativeKartController.get().stopEngineSurface()
+        nativeKartController.get().completeRewardOnUi(true)
+        nativeKartController.pause()
+        nativeKartController.resume()
         nativeKartController.get().pauseEngineSurface()
         nativeKartController.get().resumeEngineSurface()
         nativeKartController.get().pauseableSurface =
-            android.opengl.GLSurfaceView(nativeKartController.get())
+            android.opengl.GLSurfaceView(nativeKartController.get()).also { view ->
+                view.setEGLContextClientVersion(1)
+                view.setRenderer(
+                    object : android.opengl.GLSurfaceView.Renderer {
+                        override fun onSurfaceCreated(
+                            gl: javax.microedition.khronos.opengles.GL10?,
+                            config: javax.microedition.khronos.egl.EGLConfig?,
+                        ) = Unit
+
+                        override fun onSurfaceChanged(
+                            gl: javax.microedition.khronos.opengles.GL10?,
+                            width: Int,
+                            height: Int,
+                        ) = Unit
+
+                        override fun onDrawFrame(gl: javax.microedition.khronos.opengles.GL10?) = Unit
+                    },
+                )
+            }
         nativeKartController.get().pauseEngineSurface()
         nativeKartController.get().resumeEngineSurface()
+        nativeKartController.get().stopEngineSurface()
         destroy(nativeKartController)
+        assertTrue(nativeKartController.get().isDestroyed)
+        nativeKartController.get().completeRewardOnUi(ok = false)
+        assertFalse(nativeKartController.get().completeReward(ok = true))
         val namelessController =
             Robolectric.buildActivity(
                 Kart3dActivity::class.java,
@@ -216,7 +251,11 @@ class GodotPluginHostTest {
                     .putExtra(EngineLauncher.EXTRA_MASCOT, "hero_pup"),
             ).setup()
         assertEquals("", namelessController.get().childName())
+        namelessController.get().finish()
+        assertFalse(namelessController.get().completeReward(ok = true))
         destroy(namelessController)
+        assertTrue(namelessController.get().isDestroyed)
+        assertFalse(namelessController.get().completeReward(ok = false))
         val nativeRunnerController =
             Robolectric.buildActivity(
                 Platformer2dActivity::class.java,
@@ -225,7 +264,11 @@ class GodotPluginHostTest {
                     .putExtra(EngineLauncher.EXTRA_NAME, "Ana"),
             ).setup()
         nativeRunnerController.get().completeReward(ok = true)
+        assertTrue(nativeRunnerController.get().isRewardSettled())
+        assertFalse(nativeRunnerController.get().completeReward(ok = false))
         destroy(nativeRunnerController)
+        nativeRunnerController.get().completeRewardOnUi(ok = true)
+        assertFalse(nativeRunnerController.get().completeReward(ok = true))
     }
 
     private fun destroy(controller: ActivityController<*>) {

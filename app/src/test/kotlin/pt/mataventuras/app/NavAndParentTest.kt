@@ -102,6 +102,9 @@ class NavAndParentTest {
             android.content.Intent().putExtra(pt.mataventuras.app.engine.EngineLauncher.RESULT_FINISHED, true),
         )
         activity.onEngineResult(android.app.Activity.RESULT_CANCELED, null)
+        activity.finish()
+        activity.onEngineResult(android.app.Activity.RESULT_CANCELED, null)
         controller.destroy()
+        activity.onEngineResult(android.app.Activity.RESULT_OK, null)
     }
 }

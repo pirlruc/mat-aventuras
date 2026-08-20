@@ -12,11 +12,12 @@ import pt.mataventuras.domain.progress.LessonProgress
 internal object LessonRecorder {
     /**
      * Persists the round and unlocks any newly earned rewards.
+     * Points are not rewritten here — lesson taps and reward bonuses already
+     * used [pt.mataventuras.data.repository.LocalRepository.addPoints].
      */
     suspend fun persist(
         container: AppContainer,
         profile: ChildProfile,
-        points: Int,
         module: LearningModule,
         hits: Int,
         misses: Int,
@@ -24,7 +25,6 @@ internal object LessonRecorder {
         nowMs: Long = System.currentTimeMillis(),
     ) {
         val current = container.repository.getProfile(profile.id) ?: return
-        container.repository.updateProfile(current.copy(points = points))
         container.repository.saveSession(
             LearningSession(
                 id = 0,
@@ -36,14 +36,14 @@ internal object LessonRecorder {
                 startedAtEpochMs = startedAt,
             ),
         )
-        val sessions = container.repository.allSessions().filter { it.profileId == profile.id }
+        val sessions = container.repository.sessionsFor(profile.id)
         val alreadyBadges = container.repository.badgeCodes(profile.id)
         val alreadyAvatars = container.repository.avatarIds(profile.id)
         container.rewards.newBadges(
             alreadyUnlocked = alreadyBadges,
             totals = LessonProgress.totals(sessions, hits, misses),
         ).forEach { container.repository.unlockBadge(profile.id, it.name) }
-        container.rewards.newAvatars(alreadyAvatars, points).forEach {
+        container.rewards.newAvatars(alreadyAvatars, current.points).forEach {
             container.repository.unlockAvatar(profile.id, it.name)
         }
     }

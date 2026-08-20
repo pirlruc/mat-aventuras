@@ -41,6 +41,7 @@ internal object NativeRunnerHost {
         val mascot = activity.launchMascot()
         activity.setContent {
             var state by remember { mutableStateOf(loop.state) }
+            var done by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
                 while (!loop.state.finished) {
                     withFrameNanos {
@@ -48,9 +49,15 @@ internal object NativeRunnerHost {
                         state = loop.state
                     }
                 }
-                activity.completeReward(ok = true)
+                if (!done) {
+                    done = true
+                    activity.completeReward(ok = true)
+                }
             }
-            BackHandler { activity.completeReward(ok = false) }
+            BackHandler(enabled = !done) {
+                done = true
+                activity.completeReward(ok = false)
+            }
             Canvas(
                 modifier =
                     Modifier

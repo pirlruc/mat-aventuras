@@ -47,6 +47,13 @@ fun NavGraph(
     LaunchedEffect(Unit) {
         continueProfile = ProfileResume.continueCandidate(container.lastProfile, container.repository)
     }
+    LaunchedEffect(Unit) {
+        container.profileTouches.collect { id ->
+            val current = profile ?: return@collect
+            if (current.id != id) return@collect
+            profile = container.repository.getProfile(id) ?: current
+        }
+    }
 
     MatAventurasTheme(ageGroup) {
         when (val current = destination) {
