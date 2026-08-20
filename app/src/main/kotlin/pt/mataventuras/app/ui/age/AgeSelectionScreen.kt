@@ -68,13 +68,13 @@ fun AgeSelectionScreen(
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Image(
             painter = painterResource(R.drawable.ic_launcher_foreground),
             contentDescription = "Ícone de ${VoiceScripts.APP_TITLE}",
             modifier = Modifier
-                .size(120.dp)
+                .size(96.dp)
                 .clip(CircleShape),
         )
         Text(

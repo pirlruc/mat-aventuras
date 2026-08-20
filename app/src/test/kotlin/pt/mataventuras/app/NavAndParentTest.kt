@@ -38,10 +38,10 @@ class NavAndParentTest {
         compose.setContent {
             NavGraph(container = app.container, onSpeak = {}, onReward = { _, _, _ -> })
         }
-        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performClick()
-        compose.onNodeWithText("Como te chamas?").assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performScrollTo().performClick()
+        compose.onNodeWithText("Como te chamas?").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Como te chamas?").performTextInput("Ana")
-        compose.onNodeWithText("Vamos começar!").performClick()
+        compose.onNodeWithText("Vamos começar!").performScrollTo().performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }
@@ -51,7 +51,7 @@ class NavAndParentTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Quantas estrelas vês?").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }
@@ -59,7 +59,7 @@ class NavAndParentTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Continuar como Ana").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText("Continuar como Ana").performClick()
+        compose.onNodeWithText("Continuar como Ana").performScrollTo().performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }

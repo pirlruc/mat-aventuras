@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -57,12 +58,12 @@ class AppUiTest {
             AgeSelectionScreen(onSpeak = {}, onConfirm = { _, _, _ -> })
         }
         compose.onNodeWithText(VoiceScripts.APP_TITLE).assertIsDisplayed()
-        compose.onNodeWithText(VoiceScripts.AGE_SELECTION).assertIsDisplayed()
-        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performClick()
-        compose.onNodeWithText(VoiceScripts.AGE_THREE_PREVIEW).assertIsDisplayed()
-        compose.onNodeWithText("Como te chamas?").assertIsDisplayed()
-        compose.onNodeWithText(VoiceScripts.SEVEN_YEARS).performClick()
-        compose.onNodeWithText(VoiceScripts.AGE_SEVEN_PREVIEW).assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.AGE_SELECTION).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.AGE_THREE_PREVIEW).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Como te chamas?").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.SEVEN_YEARS).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.AGE_SEVEN_PREVIEW).performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -92,9 +93,9 @@ class AppUiTest {
                 mascot = friend
             })
         }
-        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performClick()
-        compose.onNodeWithContentDescription("Cão Herói").performClick()
-        compose.onNodeWithText("Vamos começar!").performClick()
+        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Cão Herói").performScrollTo().performClick()
+        compose.onNodeWithText("Vamos começar!").performScrollTo().performClick()
         assertEquals("Amigo", name)
         assertEquals(Mascot.HERO_PUP, mascot)
     }

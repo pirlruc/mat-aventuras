@@ -182,7 +182,7 @@ class ParentAndLessonLogicTest {
         clickWrongShape()
         repeat(3) { clickMatchingShape() }
         assertTrue(rewards >= 1)
-        compose.onNodeWithText("Sair").performClick()
+        compose.onNodeWithText("Sair").performScrollTo().performClick()
     }
 
     @Test
@@ -210,7 +210,7 @@ class ParentAndLessonLogicTest {
         }
         clickAnyNumericOption()
         clickAnyNumericOption()
-        compose.onNodeWithText("Sair").performClick()
+        compose.onNodeWithText("Sair").performScrollTo().performClick()
         assertTrue(true)
     }
 
@@ -261,11 +261,11 @@ class ParentAndLessonLogicTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText(VoiceScripts.LEAVE).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
-        compose.onNodeWithText(VoiceScripts.STAY).assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.STAY).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.STAY).performClick()
-        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
-        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performScrollTo().performClick()
         compose.waitUntil(8_000) { left }
     }
 
