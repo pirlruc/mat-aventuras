@@ -35,34 +35,70 @@ class GodotPluginHostTest {
         assertFalse(GodotRuntime.shouldEmbed())
         assertTrue(GodotRuntime.isRobolectricFingerprint("Robolectric"))
         assertFalse(GodotRuntime.isRobolectricFingerprint("user/release-keys"))
-        assertEquals(
-            listOf(
-                "--rendering-method",
-                "gl_compatibility",
-                "--rendering-driver",
-                "opengl3",
-                "--scene",
-                GodotRuntime.SCENE_KART,
-            ),
-            GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART),
-        )
-        assertEquals(
-            listOf(
-                "--rendering-method",
-                "gl_compatibility",
-                "--rendering-driver",
-                "opengl3",
-                "--scene",
-                GodotRuntime.SCENE_RUNNER,
-            ),
-            GodotRuntime.commandLineFor(GodotRuntime.SCENE_RUNNER),
-        )
-        assertFalse(GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART).contains("--path"))
+        assertTrue(GodotRuntime.commandLineFor().isEmpty())
+        assertFalse(GodotRuntime.commandLineFor().contains("--path"))
+        assertFalse(GodotRuntime.commandLineFor().contains("--scene"))
         assertEquals("command_line_params", GodotRuntime.EXTRA_COMMAND_LINE)
-        assertTrue(GodotRuntime.shouldRestartHost(false, finishing = false, destroyed = false))
-        assertFalse(GodotRuntime.shouldRestartHost(true, finishing = false, destroyed = false))
-        assertFalse(GodotRuntime.shouldRestartHost(false, finishing = true, destroyed = false))
-        assertFalse(GodotRuntime.shouldRestartHost(false, finishing = false, destroyed = true))
+        assertEquals("godot_isolated_rebirth", GodotRuntime.REBIRTH_MARKER)
+        assertTrue(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = false,
+                destroyed = false,
+                rebirthConsumed = false,
+            ),
+        )
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = true,
+                finishing = false,
+                destroyed = false,
+                rebirthConsumed = false,
+            ),
+        )
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = true,
+                destroyed = false,
+                rebirthConsumed = false,
+            ),
+        )
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = false,
+                destroyed = true,
+                rebirthConsumed = false,
+            ),
+        )
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = false,
+                destroyed = false,
+                rebirthConsumed = true,
+            ),
+        )
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val rebirth =
+            GodotRuntime.isolatedRebirthIntent(
+                EngineLauncher.intentFor(
+                    ctx,
+                    AgeGroup.SEVEN_YEARS,
+                    Mascot.MISCHIEVOUS_ALIEN,
+                    "Rui",
+                    pt.mataventuras.domain.model.EngineKind.THREE_D,
+                ),
+                EnginePluginContract.PLUGIN_KART_CLASS,
+            )
+        assertEquals(EnginePluginContract.PLUGIN_KART_CLASS, rebirth.component!!.className)
+        assertTrue(rebirth.flags and android.content.Intent.FLAG_ACTIVITY_NEW_TASK != 0)
+        assertTrue(rebirth.flags and android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK != 0)
+        val nameless = android.content.Intent().putExtra("name", "Ana")
+        val copied = GodotRuntime.isolatedRebirthIntent(nameless, EnginePluginContract.PLUGIN_RUNNER_CLASS)
+        assertEquals("Ana", copied.getStringExtra("name"))
+        assertTrue(copied.flags and android.content.Intent.FLAG_ACTIVITY_NEW_TASK != 0)
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
@@ -188,9 +224,11 @@ class GodotPluginHostTest {
         assertTrue(project.contains("boot_splash/show_image=false"))
         assertTrue(project.contains("res://boot.tscn"))
         assertTrue(project.contains("import_etc2_astc=true"))
+        val boot = ctx.assets.open("boot.tscn").bufferedReader().readText()
+        assertTrue(boot.contains("call_deferred"))
+        assertTrue(boot.contains("change_scene_to_file"))
         ctx.assets.open("kart.tscn").close()
         ctx.assets.open("runner.tscn").close()
-        ctx.assets.open("boot.tscn").close()
         ctx.assets.open("kart.gd").close()
         ctx.assets.open("runner.gd").close()
         ctx.assets.open("host.gd").close()

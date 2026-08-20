@@ -77,6 +77,9 @@ bash scripts/ci-local.sh
   is false when `Build.FINGERPRINT` contains `robolectric`).
 - Godot JNI types live in `pt.mataventuras.app.engine.godot` and are excluded
   from `:app` Kover because `libgodot_android.so` cannot load in unit tests.
+- Do not pass `--path` / `--scene` / renderer flags to the Godot library
+  command line. First-time GLES restart must kill the isolated engine process,
+  not `Activity.recreate()` and not ProcessPhoenix.
 
 ## Suggested next work
 

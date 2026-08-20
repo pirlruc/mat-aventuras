@@ -119,9 +119,9 @@ keeps the same Intent extras and isolated process. Unity is not embedded.
 (age 7, `:engine3d`). `MainActivity` uses `StartActivityForResult` so Compose
 is not hosting a Godot view.
 
-On device those Activities attach `GodotFragment` with `--scene res://kart.tscn`
-or `res://runner.tscn`. Under Robolectric they attach `NativeKartHost` /
-`NativeRunnerHost` instead.
+On device those Activities attach `GodotFragment`. `boot.tscn` switches to
+`res://kart.tscn` or `res://runner.tscn` through the `MatAventuras` plugin.
+Under Robolectric they attach `NativeKartHost` / `NativeRunnerHost` instead.
 
 Simulation is in `:domain` (`Platformer2dEngine`, `Kart3dEngine`) so physics
 is unit-tested without an emulator.
