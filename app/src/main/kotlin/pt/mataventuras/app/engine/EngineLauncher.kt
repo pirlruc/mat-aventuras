@@ -88,7 +88,8 @@ object EngineLauncher {
         context: Context,
         data: Intent?,
     ): Intent? {
-        if (data?.getBooleanExtra(RESULT_RESTART, false) != true) return null
+        if (data == null) return null
+        if (!data.getBooleanExtra(RESULT_RESTART, false)) return null
         val className = data.getStringExtra(EXTRA_ENGINE_CLASS)?.trim()?.takeIf { it.isNotBlank() } ?: return null
         return Intent().setClassName(context.packageName, className).apply {
             putExtra(EXTRA_MASCOT, data.getStringExtra(EXTRA_MASCOT).orEmpty())

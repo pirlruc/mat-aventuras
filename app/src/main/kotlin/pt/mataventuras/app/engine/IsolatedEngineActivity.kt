@@ -129,9 +129,9 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
         result: Intent,
     ): Boolean {
         synchronized(rewardLock) {
+            if (rewardSettled) return false
             if (isDestroyed) return false
             if (isFinishing) return false
-            if (rewardSettled) return false
             rewardSettled = true
         }
         stopEngineSurface()

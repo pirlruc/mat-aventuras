@@ -116,5 +116,6 @@ class NavAndParentTest {
         controller.pause().stop()
         controller.destroy()
         activity.onEngineResult(android.app.Activity.RESULT_OK, null)
+        Robolectric.buildActivity(MainActivity::class.java).destroy()
     }
 }

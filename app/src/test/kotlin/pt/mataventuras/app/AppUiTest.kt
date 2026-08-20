@@ -165,6 +165,16 @@ class AppUiTest {
                     .putExtra(EngineLauncher.EXTRA_ENGINE_CLASS, "  "),
             ),
         )
+        val namelessRestart =
+            android.content.Intent()
+                .putExtra(EngineLauncher.RESULT_RESTART, true)
+                .putExtra(
+                    EngineLauncher.EXTRA_ENGINE_CLASS,
+                    pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS,
+                )
+        val namelessRelaunch = EngineLauncher.relaunchIntent(ctx, namelessRestart)!!
+        assertEquals("", namelessRelaunch.getStringExtra(EngineLauncher.EXTRA_MASCOT))
+        assertEquals("", namelessRelaunch.getStringExtra(EngineLauncher.EXTRA_NAME))
     }
 
     @Test
