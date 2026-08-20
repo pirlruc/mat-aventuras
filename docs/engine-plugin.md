@@ -77,11 +77,19 @@ Normalised X in `[0, 1]` (`EngineInputMap`, copied in `kart.gd`):
 ## Godot project
 
 Files live in `app/src/main/assets/` (no hidden `.godot` directory;
-`use_hidden_project_data_directory=false`). Command line:
+`use_hidden_project_data_directory=false`). `run/main_scene` is a tiny
+inlined `boot.tscn` that calls `change_scene_to_file` with
+`MatAventuras.rewardScene()`. Command line:
 
-`--scene res://kart.tscn` (or `res://runner.tscn`). Do not pass `--path`:
-Godot 4.6+ Android loads `project.godot` from APK assets and ignores path
-overrides, which otherwise yields a blank screen.
+`--rendering-method gl_compatibility --rendering-driver opengl3 --scene res://kart.tscn`
+(or `res://runner.tscn`). Do not pass `--path`: Godot 4.6+ Android loads
+`project.godot` from APK assets and ignores path overrides, which otherwise
+yields a blank screen.
+
+The Godot boot splash image is disabled so the default robot icon cannot
+loop. `config/features` is `GL Compatibility` to match GLES. When the
+engine asks to restart after first-time renderer setup, the fragment
+recreates the isolated Activity once (`ProcessPhoenix` stays stripped).
 
 GDScript talks to Android:
 

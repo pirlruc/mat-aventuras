@@ -30,13 +30,18 @@ android {
 androidComponents {
     beforeVariants { variant ->
         if (variant.buildType == "release") {
-            variant.enableUnitTest = false
+            (variant as com.android.build.api.variant.HasHostTestsBuilder)
+                .hostTests
+                .getValue(com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE)
+                .enable = false
         }
     }
 }
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+    // Keep Java *_Impl so Kover filters and existing tests stay valid.
+    arg("room.generateKotlin", "false")
 }
 
 dependencies {

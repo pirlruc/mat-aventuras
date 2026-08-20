@@ -36,14 +36,33 @@ class GodotPluginHostTest {
         assertTrue(GodotRuntime.isRobolectricFingerprint("Robolectric"))
         assertFalse(GodotRuntime.isRobolectricFingerprint("user/release-keys"))
         assertEquals(
-            listOf("--scene", GodotRuntime.SCENE_KART),
+            listOf(
+                "--rendering-method",
+                "gl_compatibility",
+                "--rendering-driver",
+                "opengl3",
+                "--scene",
+                GodotRuntime.SCENE_KART,
+            ),
             GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART),
         )
         assertEquals(
-            listOf("--scene", GodotRuntime.SCENE_RUNNER),
+            listOf(
+                "--rendering-method",
+                "gl_compatibility",
+                "--rendering-driver",
+                "opengl3",
+                "--scene",
+                GodotRuntime.SCENE_RUNNER,
+            ),
             GodotRuntime.commandLineFor(GodotRuntime.SCENE_RUNNER),
         )
         assertFalse(GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART).contains("--path"))
+        assertEquals("command_line_params", GodotRuntime.EXTRA_COMMAND_LINE)
+        assertTrue(GodotRuntime.shouldRestartHost(false, finishing = false, destroyed = false))
+        assertFalse(GodotRuntime.shouldRestartHost(true, finishing = false, destroyed = false))
+        assertFalse(GodotRuntime.shouldRestartHost(false, finishing = true, destroyed = false))
+        assertFalse(GodotRuntime.shouldRestartHost(false, finishing = false, destroyed = true))
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
@@ -165,12 +184,18 @@ class GodotPluginHostTest {
         val project = ctx.assets.open("project.godot").bufferedReader().readText()
         assertTrue(project.contains("use_hidden_project_data_directory=false"))
         assertTrue(project.contains("gl_compatibility"))
+        assertTrue(project.contains("GL Compatibility"))
+        assertTrue(project.contains("boot_splash/show_image=false"))
+        assertTrue(project.contains("res://boot.tscn"))
         assertTrue(project.contains("import_etc2_astc=true"))
         ctx.assets.open("kart.tscn").close()
         ctx.assets.open("runner.tscn").close()
+        ctx.assets.open("boot.tscn").close()
         ctx.assets.open("kart.gd").close()
         ctx.assets.open("runner.gd").close()
         ctx.assets.open("host.gd").close()
+        assertEquals("res://kart.tscn", GodotBridge.rewardScene(""))
+        assertEquals("res://runner.tscn", GodotBridge.rewardScene(GodotRuntime.SCENE_RUNNER))
     }
 
     @Test

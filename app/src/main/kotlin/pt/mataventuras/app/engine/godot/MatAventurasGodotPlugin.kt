@@ -13,6 +13,7 @@ import pt.mataventuras.app.engine.IsolatedEngineActivity
 internal class MatAventurasGodotPlugin(
     godot: Godot,
     private val host: IsolatedEngineActivity,
+    private val scene: String,
 ) : GodotPlugin(godot) {
     override fun getPluginName(): String = GodotRuntime.PLUGIN_NAME
 
@@ -21,6 +22,9 @@ internal class MatAventurasGodotPlugin(
 
     @UsedByGodot
     fun childName(): String = GodotBridge.childName(host)
+
+    @UsedByGodot
+    fun rewardScene(): String = GodotBridge.rewardScene(scene)
 
     @UsedByGodot
     fun completeReward(ok: Boolean) {

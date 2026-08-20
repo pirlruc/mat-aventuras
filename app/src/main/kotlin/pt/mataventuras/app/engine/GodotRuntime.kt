@@ -20,6 +20,9 @@ object GodotRuntime {
     /** Runtime plugin name exposed to GDScript as `Engine.get_singleton`. */
     const val PLUGIN_NAME: String = "MatAventuras"
 
+    /** Intent extra GodotActivity / Godot.java read for launch arguments. */
+    const val EXTRA_COMMAND_LINE: String = "command_line_params"
+
     /**
      * True when this process should create a GodotFragment.
      */
@@ -31,9 +34,27 @@ object GodotRuntime {
      *
      * Godot 4.6+ loads `project.godot` from APK assets and disables `--path`
      * overrides. `--path .` pointed at the process CWD and produced a blank
-     * screen with an English engine error. Pass `--scene` only.
+     * screen with an English engine error. Force GLES so the boot splash can
+     * hand off to [scene] without a Vulkan restart loop.
      */
-    fun commandLineFor(scene: String): List<String> = listOf("--scene", scene)
+    fun commandLineFor(scene: String): List<String> =
+        listOf(
+            "--rendering-method",
+            "gl_compatibility",
+            "--rendering-driver",
+            "opengl3",
+            "--scene",
+            scene,
+        )
+
+    /**
+     * True when the isolated host should recreate after Godot's first-time GLES setup.
+     */
+    fun shouldRestartHost(
+        alreadyRestarted: Boolean,
+        finishing: Boolean,
+        destroyed: Boolean,
+    ): Boolean = !alreadyRestarted && !finishing && !destroyed
 
     /**
      * True when [fingerprint] is a Robolectric VM.

@@ -92,6 +92,16 @@ internal object UiLogic {
     fun showsPlayGrid(kind: PlayKind): Boolean = kind == PlayKind.SUDOKU || kind == PlayKind.SOUP
 
     /**
+     * Letter soup is a drag board; sudoku stays a static frame.
+     */
+    fun showsSoupBoard(kind: PlayKind): Boolean = kind == PlayKind.SOUP
+
+    /**
+     * Sudoku uses the disabled cell grid.
+     */
+    fun showsSudokuGrid(kind: PlayKind): Boolean = kind == PlayKind.SUDOKU
+
+    /**
      * Cipher shows a legend plus the coded symbols.
      */
     fun showsCipherLegend(kind: PlayKind): Boolean = kind == PlayKind.CIPHER
@@ -398,4 +408,119 @@ internal object UiLogic {
         val seconds = (ms / 1000L) % 60L
         return "${minutes}m ${seconds}s"
     }
+
+    /**
+     * Cell under a pointer in a soup grid, or null when the pointer is in a gap.
+     */
+    fun soupIndexAt(
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+        columns: Int,
+        cellCount: Int,
+        gap: Float,
+    ): Int? {
+        if (columns <= 0 || cellCount <= 0 || width <= 0f || height <= 0f) return null
+        val rows = boardRowCount(cellCount, columns)
+        val cellW = (width - gap * (columns - 1)) / columns
+        val cellH = (height - gap * (rows - 1)) / rows
+        if (cellW <= 0f || cellH <= 0f) return null
+        val col = soupSlot(x, cellW, gap, columns) ?: return null
+        val row = soupSlot(y, cellH, gap, rows) ?: return null
+        val index = row * columns + col
+        return if (index in 0 until cellCount) index else null
+    }
+
+    /**
+     * Slot index along one axis of a gapped grid, or null in the padding.
+     */
+    fun soupSlot(
+        offset: Float,
+        cell: Float,
+        gap: Float,
+        count: Int,
+    ): Int? {
+        var start = 0f
+        for (i in 0 until count) {
+            val end = start + cell
+            if (offset >= start && offset <= end) return i
+            start = end + gap
+        }
+        return null
+    }
+
+    /**
+     * True when [a] and [b] share an edge or a corner.
+     */
+    fun soupAreAdjacent(
+        a: Int,
+        b: Int,
+        columns: Int,
+    ): Boolean {
+        if (columns <= 0 || a == b) return false
+        val dCol = kotlin.math.abs(a % columns - b % columns)
+        val dRow = kotlin.math.abs(a / columns - b / columns)
+        return dCol <= 1 && dRow <= 1
+    }
+
+    /**
+     * Grows a soup path when [next] is a new neighbour of the last cell.
+     */
+    fun soupExtendPath(
+        path: List<Int>,
+        next: Int,
+        columns: Int,
+    ): List<Int> {
+        if (path.isEmpty()) return listOf(next)
+        if (path.last() == next || next in path) return path
+        return if (soupAreAdjacent(path.last(), next, columns)) path + next else path
+    }
+
+    /**
+     * Outcome when the child lifts the finger after a soup slide.
+     */
+    fun soupReleaseKind(
+        selected: List<Int>,
+        targets: List<Int>,
+    ): SoupRelease {
+        if (selected.isEmpty() || targets.isEmpty()) return SoupRelease.IGNORE
+        if (selected == targets || selected == targets.asReversed()) return SoupRelease.HIT
+        return if (selected.size < targets.size) SoupRelease.IGNORE else SoupRelease.MISS
+    }
+
+    /**
+     * Board index to score, or null when the gesture is incomplete.
+     */
+    fun soupPickIndex(
+        selected: List<Int>,
+        targets: List<Int>,
+        cellCount: Int,
+    ): Int? {
+        val kind = soupReleaseKind(selected, targets)
+        if (kind == SoupRelease.IGNORE) return null
+        return if (kind == SoupRelease.HIT) targets.first() else soupMissIndex(targets, cellCount)
+    }
+
+    /**
+     * A cell that is not part of the hidden word, used to record a miss.
+     */
+    fun soupMissIndex(
+        targets: List<Int>,
+        cellCount: Int,
+    ): Int = (0 until cellCount).firstOrNull { it !in targets } ?: 0
+
+    /**
+     * Highlight colour while a soup path is held.
+     */
+    fun soupSelectedArgb(selected: Boolean): Long = if (selected) 0xFFFFCC80 else 0xFF90CAF9
+}
+
+/**
+ * Result of a soup pointer-up. IGNORE leaves the current exercise in place.
+ */
+internal enum class SoupRelease {
+    IGNORE,
+    HIT,
+    MISS,
 }

@@ -23,6 +23,7 @@ android {
     }
     // Godot stores project files (and optional hidden dirs) under assets/.
     androidResources {
+        noCompress += listOf("gd", "tscn", "godot", "cfg", "uid", "import")
         ignoreAssetsPattern =
             "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
     }
@@ -69,7 +70,10 @@ android {
 androidComponents {
     beforeVariants { variant ->
         if (variant.buildType == "release") {
-            variant.enableUnitTest = false
+            (variant as com.android.build.api.variant.HasHostTestsBuilder)
+                .hostTests
+                .getValue(com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE)
+                .enable = false
         }
     }
 }
@@ -78,6 +82,7 @@ dependencies {
     implementation(project(":data"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.fragment.ktx)

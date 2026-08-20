@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="GDScript" id="1_boot"]
+script/source = "extends Node
+
+## Leaves the boot splash immediately and loads the kart or runner scene.
+func _ready() -> void:
+	var path := \"res://kart.tscn\"
+	if Engine.has_singleton(\"MatAventuras\"):
+		var next := str(Engine.get_singleton(\"MatAventuras\").rewardScene())
+		if not next.is_empty():
+			path = next
+	get_tree().change_scene_to_file(path)
+"
+
+[node name="Boot" type="Node"]
+script = SubResource("1_boot")
