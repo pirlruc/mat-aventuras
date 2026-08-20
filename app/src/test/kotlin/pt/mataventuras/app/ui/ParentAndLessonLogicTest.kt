@@ -1,12 +1,10 @@
 package pt.mataventuras.app.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -192,10 +190,10 @@ class ParentAndLessonLogicTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Sair").fetchSemanticsNodes().isNotEmpty()
         }
-        clickWrongShape()
+        clickWrong()
         var attempts = 0
         while (rewards < 1 && attempts < 12) {
-            clickMatchingShape()
+            clickCorrect()
             attempts += 1
         }
         assertTrue(rewards >= 1)
@@ -223,10 +221,10 @@ class ParentAndLessonLogicTest {
             }
         }
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Quantas estrelas vês?").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
-        clickAnyNumericOption()
-        clickAnyNumericOption()
+        clickCorrect()
+        clickCorrect()
         compose.onNodeWithText("Sair").performScrollTo().performClick()
         assertTrue(true)
     }
@@ -363,45 +361,19 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText("Voltar").performClick()
     }
 
-    private fun visibleShapePrompt(): String? {
-        val shapes = listOf("círculo", "quadrado", "triângulo", "rectângulo", "estrela")
-        return shapes.firstOrNull { shape ->
-            compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()
-        }
-    }
-
-    private fun clickMatchingShape() {
-        compose.waitUntil(8_000) { visibleShapePrompt() != null }
-        val shape = visibleShapePrompt() ?: return
-        compose.onNodeWithTag("option:$shape").performClick()
-        compose.waitForIdle()
-    }
-
-    private fun clickWrongShape() {
-        compose.waitUntil(8_000) { visibleShapePrompt() != null }
-        val prompt = visibleShapePrompt() ?: return
-        val shapes = listOf("círculo", "quadrado", "triângulo", "rectângulo", "estrela")
-        val other =
-            shapes.first { shape ->
-                shape != prompt &&
-                    compose.onAllNodesWithTag("option:$shape").fetchSemanticsNodes().isNotEmpty()
-            }
-        compose.onNodeWithTag("option:$other").performClick()
-        compose.waitForIdle()
-    }
-
-    private fun clickAnyNumericOption() {
+    private fun clickCorrect() {
         compose.waitUntil(8_000) {
-            (1..10).any { n ->
-                compose.onAllNodes(hasText(n.toString()) and hasClickAction()).fetchSemanticsNodes().isNotEmpty()
-            }
+            compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
-        for (n in 1..10) {
-            val nodes = compose.onAllNodes(hasText(n.toString()) and hasClickAction()).fetchSemanticsNodes()
-            if (nodes.isNotEmpty()) {
-                compose.onNode(hasText(n.toString()) and hasClickAction()).performClick()
-                return
-            }
+        compose.onAllNodesWithTag("correct-answer").onFirst().performClick()
+        compose.waitForIdle()
+    }
+
+    private fun clickWrong() {
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithTag("distractor").fetchSemanticsNodes().isNotEmpty()
         }
+        compose.onAllNodesWithTag("distractor").onFirst().performClick()
+        compose.waitForIdle()
     }
 }

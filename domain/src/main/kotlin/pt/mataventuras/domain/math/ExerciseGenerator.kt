@@ -10,10 +10,17 @@ import pt.mataventuras.domain.model.LearningModule
 class ExerciseGenerator(
     private val random: Random = Random.Default,
 ) {
+    private val boards: PlayBoardFactory = PlayBoardFactory(random, ::numericOptions)
+
     /**
-     * Next exercise for [module].
+     * Next exercise for [module], mixing classic buttons with boards.
      */
-    fun generate(module: LearningModule): Exercise =
+    fun generate(module: LearningModule): Exercise {
+        val kind = PlayKinds.pick(module, random)
+        return if (kind == PlayKind.CHOICE) classic(module) else boards.make(kind, module)
+    }
+
+    private fun classic(module: LearningModule): Exercise =
         when (module) {
             LearningModule.COUNTING -> counting()
             LearningModule.SHAPES -> shape()

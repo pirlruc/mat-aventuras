@@ -2,7 +2,6 @@ package pt.mataventuras.domain.math
 
 import kotlin.random.Random
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.domain.model.LearningModule
@@ -15,9 +14,8 @@ class ExerciseGeneratorTest {
         LearningModule.entries.forEach { module ->
             val exercise = generator.generate(module)
             assertEquals(module, exercise.module)
-            assertEquals(4, exercise.options.size)
+            assertTrue(exercise.options.size >= 2)
             assertTrue(exercise.isCorrect(exercise.correctIndex))
-            assertFalse(exercise.isCorrect((exercise.correctIndex + 1) % 4))
         }
     }
 

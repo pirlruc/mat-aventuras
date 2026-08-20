@@ -33,8 +33,10 @@ object VoiceScripts {
     const val START: String = "Vamos começar!"
     const val YOUR_NAME: String = "Como te chamas?"
     const val CHOOSE_FRIEND: String = "Escolhe o teu amigo:"
-    const val AGE_THREE_PREVIEW: String = "Contar, formas e números. Prémio: apanha os anéis!"
-    const val AGE_SEVEN_PREVIEW: String = "Somar, subtrair, multiplicar e lógica. Prémio: corre no kart!"
+    const val AGE_THREE_PREVIEW: String =
+        "Contar, formas e números. Sopa, puzzle e códigos. Prémio: apanha os anéis!"
+    const val AGE_SEVEN_PREVIEW: String =
+        "Somar, subtrair, multiplicar e lógica. Sudoku, sopa e códigos. Prémio: corre no kart!"
     const val REWARD_FINISHED: String = "Boa! Ganhaste um prémio. Vamos continuar."
     const val REWARD_RETURN: String = "Boa! Vamos continuar."
 

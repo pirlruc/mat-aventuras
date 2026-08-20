@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +40,8 @@ import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
+import pt.mataventuras.domain.math.Exercise
+import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
@@ -79,6 +82,32 @@ fun LessonScreen(
         }
     }
 
+    val onPick: (Int) -> Unit = { index ->
+        val current = exercise
+        val correct = current.isCorrect(index)
+        onSpeak(if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN)
+        val delta = container.rewards.pointsForAttempt(correct)
+        points = container.rewards.applyPoints(points, delta)
+        if (correct) {
+            hits += 1
+            streak += 1
+        } else {
+            misses += 1
+            streak = 0
+        }
+        scope.launch {
+            pointsGate.withLock {
+                val stored = container.repository.addPoints(profile.id, delta) ?: return@withLock
+                points = stored.points
+            }
+        }
+        if (container.rewards.shouldOpenReward(streak)) {
+            onSpeak(VoiceScripts.LETS_PLAY)
+            onReward(profile.ageGroup)
+        }
+        exercise = container.generator.generate(module)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -94,13 +123,22 @@ fun LessonScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        if (UiLogic.showsStarGrid(module, exercise.visualCount)) {
+        if (UiLogic.showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {
             StarGrid(exercise.visualCount)
         }
-        if (UiLogic.showsNumberHero(module)) {
+        if (UiLogic.showsNumberHero(module, exercise.play.kind)) {
             NumberHero(exercise.visualCount)
         }
-        UiLogic.targetShapeToDraw(module, exercise.targetShape)?.let { ShapeGlyph(it) }
+        UiLogic.targetShapeToDraw(module, exercise.targetShape, exercise.play.kind)?.let { ShapeGlyph(it) }
+        if (UiLogic.showsPlayGrid(exercise.play.kind)) {
+            PlayGrid(exercise = exercise, onPick = onPick)
+        }
+        if (UiLogic.showsCipherLegend(exercise.play.kind)) {
+            CipherPanel(exercise)
+        }
+        if (UiLogic.showsPuzzleFrame(exercise.play.kind)) {
+            PuzzleFrame(exercise)
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -112,40 +150,17 @@ fun LessonScreen(
             },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            exercise.options.forEach { text ->
-                Button(
-                    onClick = {
-                        val chosenIndex = exercise.options.indexOf(text)
-                        val correct = chosenIndex >= 0 && exercise.isCorrect(chosenIndex)
-                        onSpeak(if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN)
-                        val delta = container.rewards.pointsForAttempt(correct)
-                        points = container.rewards.applyPoints(points, delta)
-                        if (correct) {
-                            hits += 1
-                            streak += 1
-                        } else {
-                            misses += 1
-                            streak = 0
-                        }
-                        scope.launch {
-                            pointsGate.withLock {
-                                val stored =
-                                    container.repository.addPoints(profile.id, delta) ?: return@withLock
-                                points = stored.points
-                            }
-                        }
-                        if (container.rewards.shouldOpenReward(streak)) {
-                            onSpeak(VoiceScripts.LETS_PLAY)
-                            onReward(profile.ageGroup)
-                        }
-                        exercise = container.generator.generate(module)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp)
-                        .testTag("option:$text"),
-                ) {
-                    VisualOption(module = module, text = text)
+            if (UiLogic.showsOptionPalette(exercise.play.kind)) {
+                exercise.options.forEachIndexed { index, text ->
+                    Button(
+                        onClick = { onPick(index) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp)
+                            .testTag(UiLogic.answerTag(exercise.isCorrect(index))),
+                    ) {
+                        VisualOption(module = module, text = text)
+                    }
                 }
             }
         }
@@ -164,6 +179,104 @@ fun LessonScreen(
         if (LessonFlow.showsStay(confirmingExit)) {
             Button(onClick = { confirmingExit = false }) { Text(VoiceScripts.STAY) }
         }
+    }
+}
+
+@Composable
+private fun PlayGrid(
+    exercise: Exercise,
+    onPick: (Int) -> Unit,
+) {
+    val columns = exercise.play.columns.coerceAtLeast(1)
+    val cells = exercise.play.cells.ifEmpty { exercise.options }
+    val tappable = exercise.play.kind == PlayKind.SOUP
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        cells.chunked(columns).forEachIndexed { row, rowCells ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                rowCells.forEachIndexed { col, cell ->
+                    val index = row * columns + col
+                    val hole = UiLogic.isBoardHole(cell)
+                    Button(
+                        onClick = { if (tappable) onPick(index) },
+                        enabled = tappable,
+                        colors = ButtonDefaults.buttonColors(
+                            disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
+                            disabledContentColor = Color(0xFF0D47A1),
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(72.dp)
+                            .testTag(
+                                if (tappable) {
+                                    UiLogic.answerTag(exercise.isCorrect(index))
+                                } else {
+                                    "board-cell-$index"
+                                },
+                            ),
+                    ) {
+                        GridCellFace(module = exercise.module, cell = cell)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CipherPanel(exercise: Exercise) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        exercise.play.cells.forEach { line ->
+            Text(line, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        }
+        Text(
+            exercise.play.cipherCode,
+            fontSize = 40.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF0D47A1),
+        )
+    }
+}
+
+@Composable
+private fun PuzzleFrame(exercise: Exercise) {
+    val cells = exercise.play.cells.ifEmpty { listOf("1", "2", "3", "?") }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        cells.chunked(2).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { cell ->
+                    val hole = UiLogic.isBoardHole(cell)
+                    Button(
+                        onClick = {},
+                        enabled = false,
+                        colors = ButtonDefaults.buttonColors(
+                            disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
+                            disabledContentColor = Color(0xFF0D47A1),
+                        ),
+                        modifier = Modifier.size(72.dp),
+                    ) {
+                        GridCellFace(module = exercise.module, cell = cell)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GridCellFace(
+    module: LearningModule,
+    cell: String,
+) {
+    val label = UiLogic.holeLabel(cell)
+    val shape = UiLogic.shapeKind(label)
+    val dots = UiLogic.optionInt(label) ?: 0
+    when {
+        shape != null -> ShapeGlyph(shape)
+        dots > 0 && module == LearningModule.COUNTING -> DotStrip(dots)
+        else -> Text(label, fontWeight = FontWeight.Bold, fontSize = 22.sp)
     }
 }
 

@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.app.di.isRobolectricFingerprint
 import pt.mataventuras.app.di.pinIterationsFor
+import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
@@ -57,7 +58,42 @@ class UiLogicTest {
         assertEquals("2 certos · 20 pts", UiLogic.lessonScoreLine(2, 20))
         assertEquals(3, UiLogic.starCenters(3, 120f).size)
         assertEquals(0, UiLogic.starCenters(0, 100f).size)
-        assertTrue(UiLogic.lessonFillsViewport(AgeGroup.SEVEN_YEARS))
+        assertFalse(UiLogic.showsStarGrid(LearningModule.COUNTING, 3, PlayKind.CIPHER))
+        assertFalse(UiLogic.showsNumberHero(LearningModule.NUMBERS, PlayKind.SUDOKU))
+        assertEquals(
+            null,
+            UiLogic.targetShapeToDraw(
+                LearningModule.SHAPES,
+                GeometricShape.CIRCLE,
+                PlayKind.SOUP,
+            ),
+        )
+        assertEquals(
+            GeometricShape.CIRCLE,
+            UiLogic.targetShapeToDraw(
+                LearningModule.SHAPES,
+                GeometricShape.CIRCLE,
+                PlayKind.PUZZLE,
+            ),
+        )
+        assertTrue(UiLogic.showsPlayGrid(PlayKind.SOUP))
+        assertTrue(UiLogic.showsPlayGrid(PlayKind.SUDOKU))
+        assertFalse(UiLogic.showsPlayGrid(PlayKind.CHOICE))
+        assertTrue(UiLogic.showsCipherLegend(PlayKind.CIPHER))
+        assertFalse(UiLogic.showsCipherLegend(PlayKind.CHOICE))
+        assertTrue(UiLogic.showsPuzzleFrame(PlayKind.PUZZLE))
+        assertFalse(UiLogic.showsPuzzleFrame(PlayKind.CHOICE))
+        assertTrue(UiLogic.showsOptionPalette(PlayKind.CHOICE))
+        assertFalse(UiLogic.showsOptionPalette(PlayKind.SOUP))
+        assertEquals("correct-answer", UiLogic.answerTag(true))
+        assertEquals("distractor", UiLogic.answerTag(false))
+        assertEquals(3, UiLogic.boardRowCount(9, 3))
+        assertEquals(0, UiLogic.boardRowCount(4, 0))
+        assertEquals("?", UiLogic.holeLabel(""))
+        assertEquals("3", UiLogic.holeLabel("3"))
+        assertTrue(UiLogic.isBoardHole(""))
+        assertTrue(UiLogic.isBoardHole("?"))
+        assertFalse(UiLogic.isBoardHole("2"))
         assertFalse(UiLogic.lessonFillsViewport(AgeGroup.THREE_YEARS))
     }
 

@@ -3,6 +3,7 @@ package pt.mataventuras.app.ui
 import android.speech.tts.TextToSpeech
 import kotlin.math.cos
 import kotlin.math.sin
+import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
@@ -24,12 +25,16 @@ internal object UiLogic {
     fun showsStarGrid(
         module: LearningModule,
         visualCount: Int,
-    ): Boolean = visualCount > 0 && module == LearningModule.COUNTING
+        kind: PlayKind = PlayKind.CHOICE,
+    ): Boolean = kind == PlayKind.CHOICE && visualCount > 0 && module == LearningModule.COUNTING
 
     /**
      * Huge numeral for "which number is this" (age 3).
      */
-    fun showsNumberHero(module: LearningModule): Boolean = module == LearningModule.NUMBERS
+    fun showsNumberHero(
+        module: LearningModule,
+        kind: PlayKind = PlayKind.CHOICE,
+    ): Boolean = kind == PlayKind.CHOICE && module == LearningModule.NUMBERS
 
     /**
      * Target silhouette above shape options, when the exercise names a shape.
@@ -37,7 +42,11 @@ internal object UiLogic {
     fun targetShapeToDraw(
         module: LearningModule,
         target: GeometricShape?,
-    ): GeometricShape? = if (showsShapeGlyph(module)) target else null
+        kind: PlayKind = PlayKind.CHOICE,
+    ): GeometricShape? {
+        if (!showsShapeGlyph(module) || target == null) return null
+        return if (kind == PlayKind.SOUP || kind == PlayKind.SUDOKU) null else target
+    }
 
     /**
      * Shape names become glyphs on the option buttons.
@@ -73,6 +82,49 @@ internal object UiLogic {
         module: LearningModule,
         baseDp: Int,
     ): Int = if (showsShapeGlyph(module) || showsDotStrip(module)) baseDp + 16 else baseDp
+
+    /**
+     * Soup and sudoku draw a cell grid.
+     */
+    fun showsPlayGrid(kind: PlayKind): Boolean = kind == PlayKind.SUDOKU || kind == PlayKind.SOUP
+
+    /**
+     * Cipher shows a legend plus the coded symbols.
+     */
+    fun showsCipherLegend(kind: PlayKind): Boolean = kind == PlayKind.CIPHER
+
+    /**
+     * Puzzle shows a 2x2 frame with a glowing hole.
+     */
+    fun showsPuzzleFrame(kind: PlayKind): Boolean = kind == PlayKind.PUZZLE
+
+    /**
+     * Soup cells are the answers; other kinds keep a palette.
+     */
+    fun showsOptionPalette(kind: PlayKind): Boolean = kind != PlayKind.SOUP
+
+    /**
+     * Test tag for a tappable answer.
+     */
+    fun answerTag(correct: Boolean): String = if (correct) "correct-answer" else "distractor"
+
+    /**
+     * Rows needed to lay out [cellCount] in [columns].
+     */
+    fun boardRowCount(
+        cellCount: Int,
+        columns: Int,
+    ): Int = if (columns <= 0) 0 else (cellCount + columns - 1) / columns
+
+    /**
+     * Empty sudoku cells show a question mark.
+     */
+    fun holeLabel(cell: String): String = cell.ifEmpty { "?" }
+
+    /**
+     * Puzzle and sudoku holes glow so the missing piece is obvious.
+     */
+    fun isBoardHole(cell: String): Boolean = cell.isEmpty() || cell == "?"
 
     /**
      * Vertices of an upward triangle centred on ([cx], [cy]).
