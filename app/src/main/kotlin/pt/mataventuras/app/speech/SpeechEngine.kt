@@ -2,6 +2,7 @@ package pt.mataventuras.app.speech
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import pt.mataventuras.app.ui.UiLogic
 import java.util.Locale
 
 /**
@@ -15,16 +16,22 @@ class SpeechEngine(context: Context) : TextToSpeech.OnInitListener {
         if (status != TextToSpeech.SUCCESS) return
         val pt = Locale("pt", "PT")
         val result = tts.setLanguage(pt)
-        ready = result != TextToSpeech.LANG_MISSING_DATA &&
-            result != TextToSpeech.LANG_NOT_SUPPORTED
+        ready = UiLogic.languageSupported(result)
         tts.setSpeechRate(0.92f)
+    }
+
+    /**
+     * Marks the engine ready (unit tests).
+     */
+    internal fun markReadyForTest() {
+        ready = true
     }
 
     /**
      * Speaks [text] in pt-PT when the engine is ready.
      */
     fun speak(text: String) {
-        if (!ready || text.isBlank()) return
+        if (!UiLogic.shouldSpeak(ready, text)) return
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "mat-aventuras")
     }
 

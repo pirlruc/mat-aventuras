@@ -20,9 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.app.ui.theme.titleSpSize
-import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.mascotFor
@@ -69,16 +69,16 @@ fun HomeScreen(
                 Text(ModuleTitles.of(module, mascot), fontWeight = FontWeight.Bold)
             }
         }
-        if (profile.ageGroup == AgeGroup.SEVEN_YEARS) {
+        if (UiLogic.usesIconNav(profile.ageGroup)) {
+            TextButton(onClick = onLeaderboard) { Text("★") }
+            TextButton(onClick = onParents) { Text("· · ·") }
+        } else {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = onLeaderboard, modifier = Modifier.weight(1f)) {
                     Text(VoiceScripts.LEADERBOARD)
                 }
                 TextButton(onClick = onParents) { Text(VoiceScripts.PARENT_DASHBOARD) }
             }
-        } else {
-            TextButton(onClick = onLeaderboard) { Text("★") }
-            TextButton(onClick = onParents) { Text("· · ·") }
         }
     }
 }

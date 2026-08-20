@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import pt.mataventuras.app.di.AppContainer
+import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LeaderboardEntry
 import pt.mataventuras.domain.model.UnlockedAvatar
@@ -97,12 +98,12 @@ fun LeaderboardAndRewardsScreen(
         Text("Distintivos")
         BadgeCode.entries.forEach { code ->
             val owned = badges.any { it.code == code.name }
-            Text(if (owned) "★ ${code.title}" else "☆ ${code.title} — ${code.description}")
+            Text(UiLogic.badgeLine(owned, code))
         }
         Text("Avatares")
         AvatarCode.entries.forEach { code ->
             val owned = avatars.any { it.avatarId == code.name }
-            Text(if (owned) "★ ${code.title}" else "☆ ${code.title} (${code.minPoints} pts)")
+            Text(UiLogic.avatarLine(owned, code))
         }
         Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Voltar") }
     }

@@ -115,65 +115,33 @@ class KartRendererTest {
         assertEquals(0f, session.renderer.steer, 0f)
         session.renderer.tick()
         assertTrue(hud >= 1)
-        assertEquals(0, done)
+        repeat(400) { session.renderer.tick() }
+        assertTrue(session.renderer.snapshot().finished)
+        assertTrue(done >= 1)
     }
 
     @Test
-    fun glesAdapterAndRendererOverridesRunThroughAProxy() {
-        var frames = 0
-        val renderer =
-            KartRenderer(
-                mascot = Mascot.SPEEDY_HEDGEHOG,
-                engine = Kart3dEngine(),
-                nowNs = {
-                    frames += 1
-                    frames * 50_000_000L
-                },
-                lapsTarget = 1,
-                onFrame = { _, _ -> },
-            )
-        val loader = android.opengl.GLSurfaceView::class.java.classLoader
-        val gl10Class = Class.forName("javax.microedition.khronos.opengles.GL10", true, loader)
-        val gl =
-            Proxy.newProxyInstance(gl10Class.classLoader, arrayOf(gl10Class)) { _, method, _ ->
-                when (method.returnType) {
-                    java.lang.Void.TYPE -> null
-                    java.lang.Integer.TYPE -> 0
-                    java.lang.Boolean.TYPE -> false
-                    java.lang.Float.TYPE -> 0f
-                    else -> null
-                }
-            }
-        val adapter =
-            KartGlesEs1::class.java.constructors.first().newInstance(gl) as KartGles
-        adapter.clearColor(0.1f, 0.2f, 0.3f, 1f)
-        adapter.enable(1)
-        adapter.shadeModel(2)
-        adapter.viewport(0, 0, 8, 8)
-        adapter.matrixMode(3)
-        adapter.loadIdentity()
-        adapter.loadMatrixf(FloatArray(16), 0)
-        adapter.clear(4)
-        adapter.pushMatrix()
-        adapter.translatef(1f, 2f, 3f)
-        adapter.rotatef(10f, 0f, 1f, 0f)
-        adapter.scalef(1f, 1f, 1f)
-        adapter.color4f(1f, 1f, 1f, 1f)
-        adapter.enableClientState(5)
-        adapter.vertexPointer(3, 0, 0, java.nio.ByteBuffer.allocateDirect(36))
-        adapter.drawArrays(4, 0, 3)
-        adapter.disableClientState(5)
-        adapter.popMatrix()
-        val created =
-            KartRenderer::class.java.methods.first { it.name == "onSurfaceCreated" }
-        created.invoke(renderer, gl, null)
-        val changed =
-            KartRenderer::class.java.methods.first { it.name == "onSurfaceChanged" }
-        changed.invoke(renderer, gl, 320, 240)
-        val draw =
-            KartRenderer::class.java.methods.first { it.name == "onDrawFrame" }
-        draw.invoke(renderer, gl)
-        assertTrue(renderer.snapshot().lapsTarget == 1)
+    fun androidGlesAdapterForwardsToGles10() {
+        val gles = KartGlesAndroid
+        gles.clearColor(0.1f, 0.2f, 0.3f, 1f)
+        gles.enable(1)
+        gles.shadeModel(2)
+        gles.viewport(0, 0, 8, 8)
+        gles.matrixMode(3)
+        gles.loadIdentity()
+        gles.loadMatrixf(FloatArray(16), 0)
+        gles.clear(4)
+        gles.pushMatrix()
+        gles.translatef(1f, 2f, 3f)
+        gles.rotatef(10f, 0f, 1f, 0f)
+        gles.scalef(1f, 1f, 1f)
+        gles.color4f(1f, 1f, 1f, 1f)
+        gles.enableClientState(5)
+        gles.vertexPointer(3, 0, 0, java.nio.ByteBuffer.allocateDirect(36))
+        gles.drawArrays(4, 0, 3)
+        gles.disableClientState(5)
+        gles.popMatrix()
+        assertTrue(true)
     }
 
     private fun recordingGles(): KartGles {

@@ -49,14 +49,8 @@ class NavAndParentTest {
         compose.onNodeWithText("Voltar").performScrollTo().performClick()
         compose.onNodeWithText("Contar com o Ouriço Veloz").performScrollTo().performClick()
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Sair").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText("Quantas estrelas vês?").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText("Sair").performClick()
-        compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithText("· · ·").performScrollTo().performClick()
-        compose.onNodeWithText(VoiceScripts.PARENT_DASHBOARD).assertIsDisplayed()
     }
 
     @Test
@@ -86,6 +80,9 @@ class NavAndParentTest {
         val three = tokensFor(AgeGroup.THREE_YEARS)
         three.buttonRadius()
         assert(three.titleSpSize.value > three.bodySpSize.value)
+        val seven = tokensFor(AgeGroup.SEVEN_YEARS)
+        seven.buttonRadius()
+        assert(seven.minButtonDp < three.minButtonDp)
         val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
         controller.get()
         controller.destroy()

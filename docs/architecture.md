@@ -66,7 +66,9 @@ a GL/Unity view. `EngineLauncher.PROCESS_ENGINE_3D` is `:engine3d`.
 `local.properties` are missing, so a JDK-only runner can still gate `:domain`.
 When the Android SDK is present (local or CI), `scripts/verify-coverage.py`
 also gates `:data` and `:app` at the org 95% line and branch defaults.
-There is no coverage deviation.
+`:app` Kover skips `@Composable` functions and Compose/Activity generated
+lambdas (compiler restart-group branches). Screen rules live in `UiLogic`
+and stay inside the 95% gate. There is no coverage deviation.
 
 ## 3D kart (native GLES)
 

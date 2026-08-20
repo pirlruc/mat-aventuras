@@ -113,7 +113,7 @@ internal class KartRenderer(
         gl: GL10,
         config: EGLConfig?,
     ) {
-        prepare(KartGlesEs1(gl))
+        prepare(KartGlesAndroid)
     }
 
     override fun onSurfaceChanged(
@@ -121,11 +121,11 @@ internal class KartRenderer(
         width: Int,
         height: Int,
     ) {
-        resize(KartGlesEs1(gl), width, height)
+        resize(KartGlesAndroid, width, height)
     }
 
     override fun onDrawFrame(gl: GL10) {
-        drawScene(KartGlesEs1(gl))
+        drawScene(KartGlesAndroid)
     }
 
     private fun publishHud() {

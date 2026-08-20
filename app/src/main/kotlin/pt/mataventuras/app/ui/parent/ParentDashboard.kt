@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.parent.ParentSummary
@@ -58,7 +59,7 @@ fun ParentDashboard(
 
     LaunchedEffect(Unit) {
         settingPin = !container.pinRepository.isSet()
-        message = if (settingPin) VoiceScripts.SET_PIN else VoiceScripts.ENTER_PIN
+        message = UiLogic.pinPrompt(settingPin)
         onSpeak(message)
     }
 
@@ -106,7 +107,7 @@ fun ParentDashboard(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text(if (settingPin) "Guardar PIN" else "Entrar") }
+            ) { Text(UiLogic.pinSubmitLabel(settingPin)) }
             Spacer(Modifier.height(8.dp))
             Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Voltar") }
         }
@@ -129,30 +130,23 @@ fun ParentDashboard(
     ) {
         Text(VoiceScripts.PARENT_DASHBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(VoiceScripts.STAYS_ON_DEVICE, style = MaterialTheme.typography.bodyMedium)
-        if (profile == null || data == null) {
+        if (UiLogic.waitingForProfile(profile, data)) {
             Text("Escolhe um perfil de criança primeiro.")
         } else {
-            Text(profile.name, style = MaterialTheme.typography.titleLarge)
-            MetricCard("Precisão", "${(data.accuracy * 100).toInt()} %")
+            Text(profile!!.name, style = MaterialTheme.typography.titleLarge)
+            MetricCard("Precisão", "${(data!!.accuracy * 100).toInt()} %")
             LinearProgressIndicator(
                 progress = { data.accuracy.toFloat() },
                 modifier = Modifier.fillMaxWidth(),
             )
             MetricCard("Acertos / erros", "${data.hits} / ${data.misses}")
-            MetricCard("Tempo", ParentLabels.formatDuration(data.totalTimeMs))
+            MetricCard("Tempo", UiLogic.formatDuration(data.totalTimeMs))
             Text("Por módulo", fontWeight = FontWeight.Bold)
             data.byModule.forEach { module ->
-                Text(
-                    "${module.module.name.lowercase()} — ${(module.accuracy * 100).toInt()}% " +
-                        "(${module.hits} certos, ${ParentLabels.formatDuration(module.timeMs)})",
-                )
+                Text(UiLogic.modulePerformanceLine(module))
             }
             Text("Áreas a melhorar", fontWeight = FontWeight.Bold)
-            if (data.needsWork.isEmpty()) {
-                Text("Nenhum módulo abaixo de 70% com amostra suficiente.")
-            } else {
-                data.needsWork.forEach { Text("• ${it.name.lowercase()}") }
-            }
+            UiLogic.needsWorkLines(data.needsWork).forEach { Text(it) }
         }
         Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Fechar") }
     }

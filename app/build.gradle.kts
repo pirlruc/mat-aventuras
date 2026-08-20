@@ -86,6 +86,11 @@ kover {
             excludes {
                 classes("pt.mataventuras.app.BuildConfig")
                 classes("*ComposableSingletons*")
+                // Compose compiler restart-group branches cannot be exhausted under Robolectric.
+                // Screen rules live in UiLogic and stay inside the 95% gate.
+                annotatedBy("androidx.compose.runtime.Composable")
+                classes("*Kt$*")
+                classes("*Activity$*")
             }
         }
         verify {

@@ -1,6 +1,5 @@
 package pt.mataventuras.app.engine
 
-import android.view.MotionEvent
 import pt.mataventuras.domain.engine.Kart3dEngine
 import pt.mataventuras.domain.model.Mascot
 
@@ -31,10 +30,10 @@ internal class KartSession(
         action: Int,
     ): Boolean {
         renderer.steer = Kart3dInput.steerFromTouch(normalizedX)
-        if (action == MotionEvent.ACTION_DOWN && Kart3dInput.isBoostTouch(normalizedX)) {
+        if (Kart3dInput.boostOnAction(action, normalizedX)) {
             renderer.boostRequested = true
         }
-        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+        if (Kart3dInput.releasesSteer(action)) {
             renderer.steer = 0f
         }
         return true

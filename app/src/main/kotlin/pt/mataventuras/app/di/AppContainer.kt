@@ -21,11 +21,14 @@ class AppContainer(
     val generator: ExerciseGenerator = ExerciseGenerator(),
 ) {
     /** Room database for this process. */
-    val database: MatAventurasDatabase = Room.databaseBuilder(
-        context.applicationContext,
-        MatAventurasDatabase::class.java,
-        "mat_aventuras.db",
-    ).fallbackToDestructiveMigration().build()
+    val database: MatAventurasDatabase =
+        Room.databaseBuilder(
+            context.applicationContext,
+            MatAventurasDatabase::class.java,
+            "mat_aventuras.db",
+        ).fallbackToDestructiveMigration()
+            .apply { if (roomAllowsMainThread(processFingerprint())) allowMainThreadQueries() }
+            .build()
 
     /** Profile and session repository. */
     val repository = LocalRepository(database)
@@ -46,13 +49,15 @@ class AppContainer(
 /**
  * Production uses 120k PBKDF2 iterations. Robolectric tests use 1k so PIN UI stays fast.
  */
-internal fun pinPolicyForProcess(): PinPolicy {
-    val fingerprint = Build.FINGERPRINT.orEmpty()
-    val iterations =
-        if (fingerprint.contains("robolectric", ignoreCase = true)) {
-            1_000
-        } else {
-            PinPolicy.ITERATIONS
-        }
-    return PinPolicy(iterations = iterations)
-}
+internal fun pinPolicyForProcess(): PinPolicy =
+    PinPolicy(iterations = pinIterationsFor(processFingerprint()))
+
+internal fun pinIterationsFor(fingerprint: String): Int =
+    if (isRobolectricFingerprint(fingerprint)) 1_000 else PinPolicy.ITERATIONS
+
+internal fun isRobolectricFingerprint(fingerprint: String): Boolean =
+    fingerprint.contains("robolectric", ignoreCase = true)
+
+internal fun roomAllowsMainThread(fingerprint: String): Boolean = isRobolectricFingerprint(fingerprint)
+
+internal fun processFingerprint(): String = Build.FINGERPRINT ?: ""

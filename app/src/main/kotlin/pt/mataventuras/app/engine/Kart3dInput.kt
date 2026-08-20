@@ -18,4 +18,18 @@ object Kart3dInput {
      * Returns true when the tap is in the boost band.
      */
     fun isBoostTouch(nx: Float): Boolean = nx in 0.34f..0.66f
+
+    /**
+     * Centre-band boost is armed only on [android.view.MotionEvent.ACTION_DOWN].
+     */
+    fun boostOnAction(
+        action: Int,
+        nx: Float,
+    ): Boolean = action == android.view.MotionEvent.ACTION_DOWN && isBoostTouch(nx)
+
+    /**
+     * Finger up or cancel clears steering.
+     */
+    fun releasesSteer(action: Int): Boolean =
+        action == android.view.MotionEvent.ACTION_UP || action == android.view.MotionEvent.ACTION_CANCEL
 }

@@ -99,6 +99,10 @@ class AppUiTest {
         engine.speak("Olá")
         engine.speak("  ")
         engine.release()
+        val ready = SpeechEngine(ApplicationProvider.getApplicationContext())
+        ready.markReadyForTest()
+        ready.speak("Olá")
+        ready.release()
         assertTrue(true)
     }
 
@@ -120,7 +124,18 @@ class AppUiTest {
         val sprites = PlatformerScene.sprites(two.loop.state, Mascot.HERO_PUP, 800f, 480f)
         assertTrue(sprites.size >= 6)
         assertTrue(PlatformerScene.groundTop(480f) > 300f)
-        two.completeReward(ok = false)
+        two.completeReward(ok = true)
+        val cancelled =
+            Robolectric.buildActivity(
+                Platformer2dActivity::class.java,
+                EngineLauncher.intentFor(
+                    ApplicationProvider.getApplicationContext(),
+                    AgeGroup.THREE_YEARS,
+                    Mascot.HERO_PUP,
+                    "Ana",
+                ),
+            ).setup().get()
+        cancelled.completeReward(ok = false)
 
         val three =
             Robolectric.buildActivity(
@@ -138,6 +153,14 @@ class AppUiTest {
         three.session.renderer.tick()
         three.session.handleTouch(0.9f, MotionEvent.ACTION_UP)
         three.closeFinished()
+
+        val fallback =
+            Robolectric.buildActivity(
+                Kart3dActivity::class.java,
+                android.content.Intent(ApplicationProvider.getApplicationContext(), Kart3dActivity::class.java),
+            ).setup().get()
+        assertTrue(fallback.window != null)
+        fallback.closeFinished()
     }
 
     @Test
@@ -155,12 +178,16 @@ class AppUiTest {
             loop.tick()
         }
         assertTrue(loop.state.x > 0f)
-        val idle = Platformer2dLoop(nowNs = {
-            ns += 50_000_000L
-            ns
-        })
+        val idle =
+            Platformer2dLoop(
+                ringsTarget = 99,
+                nowNs = {
+                    ns += 50_000_000L
+                    ns
+                },
+            )
         repeat(200) { idle.tick() }
-        assertTrue(!idle.state.alive || idle.state.x > 20f)
+        assertTrue(idle.state.x > 20f || !idle.state.alive)
         idle.tick()
     }
 }

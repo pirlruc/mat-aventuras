@@ -35,6 +35,12 @@ class Kart3dInputTest {
         assertTrue(Kart3dInput.isBoostTouch(0.66f))
         assertEquals(-1f, Kart3dInput.steerFromTouch(0.33f), 0.001f)
         assertEquals(1f, Kart3dInput.steerFromTouch(0.67f), 0.001f)
+        assertTrue(Kart3dInput.boostOnAction(0, 0.5f))
+        assertFalse(Kart3dInput.boostOnAction(0, 0.1f))
+        assertFalse(Kart3dInput.boostOnAction(1, 0.5f))
+        assertTrue(Kart3dInput.releasesSteer(1))
+        assertTrue(Kart3dInput.releasesSteer(3))
+        assertFalse(Kart3dInput.releasesSteer(0))
     }
 
     @Test

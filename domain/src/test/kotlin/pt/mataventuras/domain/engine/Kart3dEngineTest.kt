@@ -44,12 +44,14 @@ class Kart3dEngineTest {
     fun hardSteerCanLeaveTheAsphalt() {
         var state = engine.initial()
         var left = false
-        repeat(80) {
-            state = engine.step(state, 0.05f, steer = -1f, boost = false)
+        repeat(250) {
+            state = engine.step(state, 0.05f, steer = -1f, boost = true)
             if (state.offTrack) left = true
         }
         assertTrue(left)
-        assertEquals("Volta à pista!", KartHud.offTrackLabel(state))
+        val recovered = engine.step(state.copy(x = 0f, z = 0f), 0.05f, 0f, false)
+        assertTrue(recovered.offTrack)
+        assertEquals("Volta à pista!", KartHud.offTrackLabel(recovered))
     }
 
     @Test

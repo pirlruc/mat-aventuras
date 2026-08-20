@@ -1,10 +1,10 @@
 package pt.mataventuras.app.engine
 
+import android.opengl.GLES10
 import java.nio.Buffer
-import javax.microedition.khronos.opengles.GL10
 
 /**
- * ES1 calls used by [KartRenderer]. Tests implement this without loading `GL10`.
+ * ES1 calls used by [KartRenderer]. Tests implement this without `GL10`.
  */
 internal interface KartGles {
     /** `glClearColor`. */
@@ -103,26 +103,24 @@ internal interface KartGles {
 }
 
 /**
- * Forwards [KartGles] to a real ES1 context.
+ * Forwards [KartGles] to [GLES10] statics (current EGL context).
  */
-internal class KartGlesEs1(
-    private val gl: GL10,
-) : KartGles {
+internal object KartGlesAndroid : KartGles {
     override fun clearColor(
         r: Float,
         g: Float,
         b: Float,
         a: Float,
     ) {
-        gl.glClearColor(r, g, b, a)
+        GLES10.glClearColor(r, g, b, a)
     }
 
     override fun enable(cap: Int) {
-        gl.glEnable(cap)
+        GLES10.glEnable(cap)
     }
 
     override fun shadeModel(mode: Int) {
-        gl.glShadeModel(mode)
+        GLES10.glShadeModel(mode)
     }
 
     override fun viewport(
@@ -131,34 +129,34 @@ internal class KartGlesEs1(
         width: Int,
         height: Int,
     ) {
-        gl.glViewport(x, y, width, height)
+        GLES10.glViewport(x, y, width, height)
     }
 
     override fun matrixMode(mode: Int) {
-        gl.glMatrixMode(mode)
+        GLES10.glMatrixMode(mode)
     }
 
     override fun loadIdentity() {
-        gl.glLoadIdentity()
+        GLES10.glLoadIdentity()
     }
 
     override fun loadMatrixf(
         m: FloatArray,
         offset: Int,
     ) {
-        gl.glLoadMatrixf(m, offset)
+        GLES10.glLoadMatrixf(m, offset)
     }
 
     override fun clear(mask: Int) {
-        gl.glClear(mask)
+        GLES10.glClear(mask)
     }
 
     override fun pushMatrix() {
-        gl.glPushMatrix()
+        GLES10.glPushMatrix()
     }
 
     override fun popMatrix() {
-        gl.glPopMatrix()
+        GLES10.glPopMatrix()
     }
 
     override fun translatef(
@@ -166,7 +164,7 @@ internal class KartGlesEs1(
         y: Float,
         z: Float,
     ) {
-        gl.glTranslatef(x, y, z)
+        GLES10.glTranslatef(x, y, z)
     }
 
     override fun rotatef(
@@ -175,7 +173,7 @@ internal class KartGlesEs1(
         y: Float,
         z: Float,
     ) {
-        gl.glRotatef(angle, x, y, z)
+        GLES10.glRotatef(angle, x, y, z)
     }
 
     override fun scalef(
@@ -183,7 +181,7 @@ internal class KartGlesEs1(
         y: Float,
         z: Float,
     ) {
-        gl.glScalef(x, y, z)
+        GLES10.glScalef(x, y, z)
     }
 
     override fun color4f(
@@ -192,15 +190,15 @@ internal class KartGlesEs1(
         b: Float,
         a: Float,
     ) {
-        gl.glColor4f(r, g, b, a)
+        GLES10.glColor4f(r, g, b, a)
     }
 
     override fun enableClientState(cap: Int) {
-        gl.glEnableClientState(cap)
+        GLES10.glEnableClientState(cap)
     }
 
     override fun disableClientState(cap: Int) {
-        gl.glDisableClientState(cap)
+        GLES10.glDisableClientState(cap)
     }
 
     override fun vertexPointer(
@@ -209,7 +207,7 @@ internal class KartGlesEs1(
         stride: Int,
         pointer: Buffer,
     ) {
-        gl.glVertexPointer(size, type, stride, pointer)
+        GLES10.glVertexPointer(size, type, stride, pointer)
     }
 
     override fun drawArrays(
@@ -217,6 +215,6 @@ internal class KartGlesEs1(
         first: Int,
         count: Int,
     ) {
-        gl.glDrawArrays(mode, first, count)
+        GLES10.glDrawArrays(mode, first, count)
     }
 }

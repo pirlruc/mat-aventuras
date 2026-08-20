@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pt.mataventuras.app.di.AppContainer
+import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
@@ -64,7 +65,7 @@ fun LessonScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        if (exercise.visualCount > 0 && module != LearningModule.NUMBERS) {
+        if (UiLogic.showsStarGrid(module, exercise.visualCount)) {
             StarGrid(exercise.visualCount)
         }
         exercise.options.forEachIndexed { index, text ->
@@ -96,7 +97,7 @@ fun LessonScreen(
                     .height(tokens.minButtonDp.dp),
             ) { Text(text, fontWeight = FontWeight.Bold) }
         }
-        Text("$hits certos · $points pts")
+        Text(UiLogic.lessonScoreLine(hits, points))
         Button(onClick = {
             scope.launch {
                 LessonRecorder.persist(container, profile, points, module, hits, misses, startedAt)
@@ -109,11 +110,7 @@ fun LessonScreen(
 @Composable
 private fun StarGrid(count: Int) {
     Canvas(modifier = Modifier.size(220.dp)) {
-        val columns = 5
-        val step = size.minDimension / 6f
-        repeat(count) { i ->
-            val cx = (i % columns) * step + step
-            val cy = (i / columns) * step + step
+        UiLogic.starCenters(count, size.minDimension).forEach { (cx, cy) ->
             drawCircle(Color(0xFFFFC107), radius = 16f, center = Offset(cx, cy))
         }
     }

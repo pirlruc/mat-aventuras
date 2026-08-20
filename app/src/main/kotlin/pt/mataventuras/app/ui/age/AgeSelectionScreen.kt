@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.tokensFor
@@ -109,7 +110,7 @@ fun AgeSelectionScreen(
                             containerColor = Color(candidate.primaryArgb),
                         ),
                         modifier = Modifier
-                            .size(if (ageGroup == AgeGroup.THREE_YEARS) 64.dp else 48.dp)
+                            .size(UiLogic.mascotChipDp(ageGroup!!).dp)
                             .semantics { contentDescription = candidate.displayName },
                         shape = CircleShape,
                     ) {
@@ -120,7 +121,7 @@ fun AgeSelectionScreen(
             Button(
                 onClick = {
                     val chosen = ageGroup ?: return@Button
-                    val finalName = name.trim().ifBlank { "Amigo" }
+                    val finalName = UiLogic.fallbackChildName(name)
                     onConfirm(chosen, finalName, mascot)
                 },
                 enabled = ageGroup != null,
@@ -143,18 +144,18 @@ private fun AgeButton(
     huge: Boolean,
     onClick: () -> Unit,
 ) {
-    val side = if (huge) 180.dp else 150.dp
+    val side = UiLogic.ageButtonSideDp(huge).dp
     Button(
         onClick = onClick,
         modifier = Modifier
             .size(side)
             .clip(RoundedCornerShape(28.dp)),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) color else color.copy(alpha = 0.55f),
+            containerColor = color.copy(alpha = UiLogic.ageButtonAlpha(selected)),
         ),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(if (huge) "🧸" else "🚀", fontSize = 40.sp)
+            Text(UiLogic.ageButtonEmoji(huge), fontSize = 40.sp)
             Spacer(Modifier.height(8.dp))
             Text(label, fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         }
