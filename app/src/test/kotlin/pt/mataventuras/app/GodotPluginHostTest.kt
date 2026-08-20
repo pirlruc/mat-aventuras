@@ -36,13 +36,14 @@ class GodotPluginHostTest {
         assertTrue(GodotRuntime.isRobolectricFingerprint("Robolectric"))
         assertFalse(GodotRuntime.isRobolectricFingerprint("user/release-keys"))
         assertEquals(
-            listOf("--path", ".", "--scene", GodotRuntime.SCENE_KART),
+            listOf("--scene", GodotRuntime.SCENE_KART),
             GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART),
         )
         assertEquals(
-            listOf("--path", ".", "--scene", GodotRuntime.SCENE_RUNNER),
+            listOf("--scene", GodotRuntime.SCENE_RUNNER),
             GodotRuntime.commandLineFor(GodotRuntime.SCENE_RUNNER),
         )
+        assertFalse(GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART).contains("--path"))
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)

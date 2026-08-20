@@ -1,9 +1,12 @@
 package pt.mataventuras.app.ui.age
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -161,22 +164,32 @@ fun AgeSelectionScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(VoiceScripts.CHOOSE_FRIEND, fontSize = tokens.bodySp.sp)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Mascot.entries.forEach { candidate ->
+                    val chosen = mascot == candidate
                     Button(
                         onClick = {
                             mascot = candidate
                             onSpeak("Eu sou o ${candidate.displayName}!")
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(candidate.primaryArgb),
+                            containerColor = Color(candidate.primaryArgb)
+                                .copy(alpha = UiLogic.ageButtonAlpha(chosen)),
                         ),
+                        border = BorderStroke(
+                            UiLogic.selectionBorderDp(chosen).dp,
+                            Color(UiLogic.selectionHighlightArgb(chosen)),
+                        ),
+                        contentPadding = PaddingValues(0.dp),
                         modifier = Modifier
                             .size(UiLogic.mascotChipDp(ageGroup!!).dp)
                             .semantics { contentDescription = candidate.displayName },
                         shape = CircleShape,
                     ) {
-                        Text(candidate.displayName.take(1), fontWeight = FontWeight.Bold)
+                        Text(UiLogic.mascotGlyph(candidate), fontSize = 26.sp)
                     }
                 }
             }
@@ -213,12 +226,16 @@ private fun AgeButton(
     huge: Boolean,
     onClick: () -> Unit,
 ) {
-    val side = UiLogic.ageButtonSideDp(huge).dp
+    val side = UiLogic.ageButtonSideDp().dp
     Button(
         onClick = onClick,
         modifier = Modifier
             .size(side)
             .clip(RoundedCornerShape(28.dp)),
+        border = BorderStroke(
+            UiLogic.selectionBorderDp(selected).dp,
+            Color(UiLogic.selectionHighlightArgb(selected)),
+        ),
         colors = ButtonDefaults.buttonColors(
             containerColor = color.copy(alpha = UiLogic.ageButtonAlpha(selected)),
         ),

@@ -27,9 +27,13 @@ object GodotRuntime {
         !isRobolectricFingerprint(fingerprint)
 
     /**
-     * Command line for a packaged Godot project in the APK assets root.
+     * Command line for a packaged Godot 4 Android-library project.
+     *
+     * Godot 4.6+ loads `project.godot` from APK assets and disables `--path`
+     * overrides. `--path .` pointed at the process CWD and produced a blank
+     * screen with an English engine error. Pass `--scene` only.
      */
-    fun commandLineFor(scene: String): List<String> = listOf("--path", ".", "--scene", scene)
+    fun commandLineFor(scene: String): List<String> = listOf("--scene", scene)
 
     /**
      * True when [fingerprint] is a Robolectric VM.

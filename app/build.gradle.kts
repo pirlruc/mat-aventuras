@@ -51,6 +51,9 @@ android {
         }
         jniLibs {
             pickFirsts += "**/libc++_shared.so"
+            // Godot ships uncompressed .so files that some devices fail to map
+            // unless they are extracted at install time.
+            useLegacyPackaging = true
         }
     }
     testOptions {

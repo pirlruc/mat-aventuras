@@ -1,9 +1,13 @@
 package pt.mataventuras.app.ui
 
 import android.speech.tts.TextToSpeech
+import kotlin.math.cos
+import kotlin.math.sin
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
+import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
+import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.parent.ModulePerformance
 import pt.mataventuras.domain.parent.ParentSummary
 import pt.mataventuras.domain.progress.AvatarCode
@@ -15,12 +19,90 @@ import pt.mataventuras.domain.voice.VoiceScripts
  */
 internal object UiLogic {
     /**
-     * Star-grid is for counting/shapes visuals, not digit recognition.
+     * Star-grid is for counting visuals, not digit recognition.
      */
     fun showsStarGrid(
         module: LearningModule,
         visualCount: Int,
-    ): Boolean = visualCount > 0 && module != LearningModule.NUMBERS
+    ): Boolean = visualCount > 0 && module == LearningModule.COUNTING
+
+    /**
+     * Huge numeral for "which number is this" (age 3).
+     */
+    fun showsNumberHero(module: LearningModule): Boolean = module == LearningModule.NUMBERS
+
+    /**
+     * Target silhouette above shape options, when the exercise names a shape.
+     */
+    fun targetShapeToDraw(
+        module: LearningModule,
+        target: GeometricShape?,
+    ): GeometricShape? = if (showsShapeGlyph(module)) target else null
+
+    /**
+     * Shape names become glyphs on the option buttons.
+     */
+    fun showsShapeGlyph(module: LearningModule): Boolean = module == LearningModule.SHAPES
+
+    /**
+     * Counting and number options also show a dot strip.
+     */
+    fun showsDotStrip(module: LearningModule): Boolean =
+        module == LearningModule.COUNTING || module == LearningModule.NUMBERS
+
+    /**
+     * Age-7 lessons fill the viewport instead of packing against the top.
+     */
+    fun lessonFillsViewport(age: AgeGroup): Boolean = age == AgeGroup.SEVEN_YEARS
+
+    /**
+     * Shape for an option label, or null when the label is not a shape name.
+     */
+    fun shapeKind(option: String): GeometricShape? =
+        GeometricShape.entries.firstOrNull { it.displayName == option }
+
+    /**
+     * Numeric option value, or null when the label is not a number.
+     */
+    fun optionInt(option: String): Int? = option.toIntOrNull()
+
+    /**
+     * Extra height so glyphs and dots fit inside the option chip.
+     */
+    fun optionMinHeightDp(
+        module: LearningModule,
+        baseDp: Int,
+    ): Int = if (showsShapeGlyph(module) || showsDotStrip(module)) baseDp + 16 else baseDp
+
+    /**
+     * Vertices of an upward triangle centred on ([cx], [cy]).
+     */
+    fun triangleVertices(
+        cx: Float,
+        cy: Float,
+        radius: Float,
+    ): List<Pair<Float, Float>> =
+        listOf(
+            cx to cy - radius,
+            cx - radius to cy + radius,
+            cx + radius to cy + radius,
+        )
+
+    /**
+     * 10-point star polygon centred on ([cx], [cy]).
+     */
+    fun starVertices(
+        cx: Float,
+        cy: Float,
+        radius: Float,
+    ): List<Pair<Float, Float>> {
+        val inner = radius * 0.4f
+        return List(10) { i ->
+            val angle = (Math.PI / 2.0) + i * Math.PI / 5.0
+            val rad = if (i % 2 == 0) radius else inner
+            cx + (cos(angle) * rad).toFloat() to cy - (sin(angle) * rad).toFloat()
+        }
+    }
 
     /**
      * Score line under the options.
@@ -74,17 +156,39 @@ internal object UiLogic {
     /**
      * Mascot chip size in dp.
      */
-    fun mascotChipDp(age: AgeGroup): Int = if (age == AgeGroup.THREE_YEARS) 64 else 48
+    fun mascotChipDp(age: AgeGroup): Int = if (age == AgeGroup.THREE_YEARS) 72 else 56
 
     /**
-     * Age-button side in dp.
+     * Age-button side in dp. Both bands share a side so the chips match.
      */
-    fun ageButtonSideDp(huge: Boolean): Int = if (huge) 180 else 150
+    fun ageButtonSideDp(): Int = 168
 
     /**
-     * Selected age buttons are fully opaque.
+     * Selected chips are fully opaque; unselected stay readable.
      */
-    fun ageButtonAlpha(selected: Boolean): Float = if (selected) 1f else 0.55f
+    fun ageButtonAlpha(selected: Boolean): Float = if (selected) 1f else 0.7f
+
+    /**
+     * Selection ring width in dp.
+     */
+    fun selectionBorderDp(selected: Boolean): Int = if (selected) 6 else 2
+
+    /**
+     * Selection ring colour. Amber when chosen, slate otherwise.
+     */
+    fun selectionHighlightArgb(selected: Boolean): Long = if (selected) 0xFFE65100 else 0xFF90A4AE
+
+    /**
+     * Friend icon shown on the mascot colour chip.
+     */
+    fun mascotGlyph(mascot: Mascot): String =
+        when (mascot) {
+            Mascot.SPEEDY_HEDGEHOG -> "🦔"
+            Mascot.HERO_PUP -> "🐶"
+            Mascot.PINK_PIGLET -> "🐷"
+            Mascot.BRAVE_PLUMBER -> "🔧"
+            Mascot.MISCHIEVOUS_ALIEN -> "👽"
+        }
 
     /**
      * Emoji on the age button.
