@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import pt.mataventuras.app.ui.HomeNav
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.app.ui.theme.titleSpSize
@@ -76,15 +77,13 @@ fun HomeScreen(
         if (UiLogic.usesIconNav(profile.ageGroup)) {
             TextButton(
                 onClick = {
-                    onSpeak(VoiceScripts.LEADERBOARD)
-                    onLeaderboard()
+                    HomeNav.announceAndGo(onSpeak, VoiceScripts.LEADERBOARD, onLeaderboard)
                 },
                 modifier = Modifier.semantics { contentDescription = VoiceScripts.LEADERBOARD },
             ) { Text("★") }
             TextButton(
                 onClick = {
-                    onSpeak(VoiceScripts.PARENT_DASHBOARD)
-                    onParents()
+                    HomeNav.announceAndGo(onSpeak, VoiceScripts.PARENT_DASHBOARD, onParents)
                 },
                 modifier = Modifier.semantics { contentDescription = VoiceScripts.PARENT_DASHBOARD },
             ) { Text("· · ·") }

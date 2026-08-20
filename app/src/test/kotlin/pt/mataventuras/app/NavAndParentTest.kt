@@ -96,7 +96,12 @@ class NavAndParentTest {
         seven.buttonRadius()
         assert(seven.minButtonDp < three.minButtonDp)
         val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
-        controller.get()
+        val activity = controller.get()
+        activity.onEngineResult(
+            android.app.Activity.RESULT_OK,
+            android.content.Intent().putExtra(pt.mataventuras.app.engine.EngineLauncher.RESULT_FINISHED, true),
+        )
+        activity.onEngineResult(android.app.Activity.RESULT_CANCELED, null)
         controller.destroy()
     }
 }
