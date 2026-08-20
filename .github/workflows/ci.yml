@@ -54,6 +54,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - name: Python tools
         run: |
@@ -76,6 +77,6 @@ jobs:
 
       - name: Domain tests and coverage (KT-TEST-002, CI-022)
         run: |
-          ./gradlew --no-daemon :dominio:ktlintCheck :dominio:detekt \
-            :dominio:test :dominio:koverXmlReport :dominio:koverVerify
-          .ci-venv/bin/python scripts/verificar-cobertura.py
+          ./gradlew --no-daemon :domain:ktlintCheck :domain:detekt \
+            :domain:test :domain:koverXmlReport :domain:koverVerify
+          .ci-venv/bin/python scripts/verify-coverage.py

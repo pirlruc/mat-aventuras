@@ -14,7 +14,7 @@ milestones:
     epics:
       - id: MAT-001
         status: open
-        title: Native Compose host with isolated 2D/3D reward motors
+        title: Native Compose host with isolated 2D/3D reward engines
         overview:
           problem: >-
             A kids' math app for ages 3 and 7 must mix Jetpack Compose learning
@@ -24,10 +24,10 @@ milestones:
             that fight for RAM after a Compose-to-game transition.
           goal: >-
             Ship a native Kotlin architecture where Compose owns menus,
-            lessons, parental PIN, and rewards; a lightweight 2D motor and a
-            process-isolated 3D motor handle reward levels; Room/DataStore are
-            the only persistence; and CI gates :dominio against the pinned
-            Kotlin guardrails.
+            lessons, parental PIN, and rewards; a lightweight 2D engine and a
+            process-isolated 3D engine handle reward levels; Room/DataStore are
+            the only persistence; identifiers/docs are English; UI copy is
+            pt-PT; and CI gates :domain against the pinned Kotlin guardrails.
         architecture:
           target: >-
             In the context of a native Android educational math game for ages
@@ -35,22 +35,23 @@ milestones:
             and a local-only privacy constraint, we decided to host all
             learning and dashboards in Jetpack Compose and run reward
             mini-games as dedicated Activities (Compose Canvas 2D in-process;
-            GLES 3D in android:process :motor3d), rejecting Unity/Godot AAR
+            GLES 3D in android:process :engine3d), rejecting Unity/Godot AAR
             embedding for v1, to achieve killable 3D heaps and 100% on-device
             data, accepting lower cinematic fidelity until a later Epic
             re-evaluates a single optional engine plugin.
           modules:
-            - dominio/
-            - dados/
+            - domain/
+            - data/
             - app/
-            - docs/arquitectura.md
+            - docs/architecture.md
         acceptance_criteria:
           - Age selection UI adapts tokens for 3-year-olds versus 7-year-olds
           - Parental dashboard is PIN-gated; PIN hash never stored in plaintext
           - Local leaderboard and badges persist in Room with no network calls
-          - 3yo rewards launch the 2D motor; 7yo rewards launch the isolated 3D motor
+          - 3yo rewards launch the 2D engine; 7yo rewards launch the isolated 3D engine
           - App declares no INTERNET permission; user data never leaves the device
-          - :dominio unit tests and coverage gate read kotlin/profile.thresholds.yml
+          - :domain unit tests and coverage gate read kotlin/profile.thresholds.yml
+          - Source identifiers, comments, KDoc, and docs are English; UI/TTS is pt-PT
         guardrail_refs:
           - KT-BUILD-001
           - KT-API-001
@@ -87,10 +88,10 @@ milestones:
             title: Domain models, math generators, PIN, rewards
             instructions:
               files:
-                - dominio/src/main/kotlin/pt/mataventuras/dominio
-                - dominio/src/test/kotlin/pt/mataventuras/dominio
+                - domain/src/main/kotlin/pt/mataventuras/domain
+                - domain/src/test/kotlin/pt/mataventuras/domain
             verification:
-              - ./gradlew :dominio:ktlintCheck :dominio:detekt :dominio:test :dominio:koverVerify
+              - ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
             guardrail_refs:
               - KT-API-001
               - KT-TEST-001
@@ -102,9 +103,9 @@ milestones:
             title: Room persistence and local leaderboard
             instructions:
               files:
-                - dados/src/main/kotlin/pt/mataventuras/dados
+                - data/src/main/kotlin/pt/mataventuras/data
             verification:
-              - Room schema matches docs/arquitectura.md
+              - Room schema matches docs/architecture.md
               - No Retrofit/Firebase/HTTP client in the graph
             guardrail_refs:
               - KT-API-001
@@ -118,9 +119,9 @@ milestones:
                 - app/src/main/kotlin/pt/mataventuras/app
                 - app/src/main/AndroidManifest.xml
             verification:
-              - EcrãSeleçãoIdade, PainelPais, and ClassificaçãoERecompensas exist
-              - AtividadeMotor3D uses android:process :motor3d
-              - All user-visible strings are pt-PT
+              - AgeSelectionScreen, ParentDashboard, and LeaderboardAndRewardsScreen exist
+              - Kart3dActivity uses android:process :engine3d
+              - All user-visible strings are pt-PT; identifiers are English
             guardrail_refs:
               - KT-API-004
               - KT-PERF-001
@@ -132,7 +133,7 @@ milestones:
             instructions:
               files:
                 - .github/workflows/ci.yml
-                - scripts/verificar-cobertura.py
+                - scripts/verify-coverage.py
                 - gradle/libs.versions.toml
             verification:
               - CI quality job pins actions by SHA
@@ -143,6 +144,23 @@ milestones:
               - KT-BUILD-001
               - KT-TEST-002
 
+          - id: MAT-001-T6
+            status: open
+            title: English identifiers and docs; pt-PT UI only
+            instructions:
+              files:
+                - domain/
+                - data/
+                - app/
+                - docs/architecture.md
+                - README.md
+            verification:
+              - Gradle modules are :domain, :data, :app
+              - VoiceScripts and strings.xml values remain pt-PT
+              - python3 .github/scaffold/scripts/lint-doc-links.py --root .
+            guardrail_refs:
+              - KT-API-004
+
   - name: Phase 2 — Learning content
     status: open
     epics:
@@ -151,19 +169,19 @@ milestones:
         title: Instrumented coverage and richer lesson packs
         overview:
           problem: >-
-            Foundation CI can gate :dominio on the JVM, but Compose UI and Room
+            Foundation CI can gate :domain on the JVM, but Compose UI and Room
             DAOs still lack emulator coverage, and lesson variety is a first
             playable slice rather than a full curriculum.
           goal: >-
-            Add instrumented tests that lift :app/:dados toward org coverage
+            Add instrumented tests that lift :app/:data toward org coverage
             defaults, expand exercise packs, and then retire the MAT-001
             coverage deviation.
         architecture:
-          target: Android instrumented test source sets plus additional GeradorExercicios packs
+          target: Android instrumented test source sets plus additional ExerciseGenerator packs
           modules:
             - app/
-            - dados/
-            - dominio/
+            - data/
+            - domain/
         acceptance_criteria:
           - Instrumented tests run in CI on an emulator
           - MAT-001 KT-TEST-002 deviation is reviewed and removed or tightened
@@ -177,9 +195,128 @@ milestones:
             instructions:
               files:
                 - app/src/androidTest
-                - dados/src/androidTest
+                - data/src/androidTest
                 - .github/workflows/ci.yml
             verification:
-              - Instrumented coverage reported for :app and :dados
+              - Instrumented coverage reported for :app and :data
             guardrail_refs:
               - KT-TEST-002
+
+  - name: Phase 3 — Hardening and engines
+    status: open
+    epics:
+      - id: MAT-003
+        status: open
+        title: Optional isolated engine plugin
+        overview:
+          problem: >-
+            v1 GLES/Canvas rewards are playable but not cinematic. Embedding
+            Unity or Godot in the Compose process would revive the RAM spike
+            MAT-001 rejected.
+          goal: >-
+            Keep EngineLauncher as the only host contract and allow a later
+            drop-in Godot/Unity Activity in android:process :engine3d (or
+            :engine2d) with no networking, analytics, or cloud save.
+        architecture:
+          target: >-
+            Same Intent extras as EngineLauncher (mascot, name, finished
+            result). Plugin process must die on Activity finish. Compose host
+            must not hold a GL/Unity view.
+          modules:
+            - app/src/main/kotlin/pt/mataventuras/app/engine
+            - docs/architecture.md
+        acceptance_criteria:
+          - Plugin Activity uses an isolated process
+          - No INTERNET permission introduced by the plugin
+          - Domain simulation APIs remain the fallback when the plugin is absent
+        guardrail_refs:
+          - KT-API-004
+          - KT-PERF-001
+          - KT-SEC-001
+        tasks:
+          - id: MAT-003-T1
+            status: open
+            title: Document plugin contract and reject in-process embedding
+            instructions:
+              files:
+                - docs/architecture.md
+                - app/src/main/kotlin/pt/mataventuras/app/engine/EngineLauncher.kt
+            verification:
+              - Architecture lists the Intent contract and process name
+            guardrail_refs:
+              - KT-API-004
+
+      - id: MAT-004
+        status: open
+        title: Remaining Kotlin and CI guardrail gates
+        overview:
+          problem: >-
+            Phase 1 CI is a single quality job that gates :domain coverage and
+            YAML/docs links. Org Kotlin/CI/supply-chain packs still require
+            SAST, secret scanning, split workflows, docs coverage measurement,
+            maintainability-index enforcement, Android lint, and a license
+            allow-list before a public artifact.
+          goal: >-
+            Close or explicitly deviate the remaining KT-*, CI-*, and SC-*
+            items that MAT-001 did not implement, without inventing ADR files.
+        architecture:
+          target: >-
+            Split or add workflows for quality, test, docs, and security;
+            keep action SHA pins; read numeric gates from
+            docs/guardrails/*/profile.thresholds.yml (CI-022 fail-closed).
+          modules:
+            - .github/workflows/
+            - scripts/verify-coverage.py
+            - docs/guardrail-deviations.yml
+            - config/detekt.yml
+        acceptance_criteria:
+          - Quality, tests, docs, and security are separate jobs or workflows
+          - Secret scan and SAST run on non-Dependabot PRs
+          - KDoc/API docs coverage is measured or a dated deviation exists
+          - Dependabot open-pull-requests-limit stays at the org default of 5
+        guardrail_refs:
+          - KT-BUILD-002
+          - KT-CPLX-002
+          - KT-DOC-001
+          - KT-SEC-002
+          - KT-SEC-003
+          - CI-004
+          - CI-006
+          - CI-009
+          - CI-010
+          - CI-011
+          - CI-012
+          - CI-023
+          - CI-029
+          - SC-LIC-001
+        tasks:
+          - id: MAT-004-T1
+            status: open
+            title: Split CI jobs and add secret/SAST scans
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+            verification:
+              - Separate jobs exist for quality, tests, docs, and security
+              - New actions are pinned by SHA
+            guardrail_refs:
+              - CI-006
+              - CI-012
+              - KT-SEC-002
+              - KT-SEC-003
+
+          - id: MAT-004-T2
+            status: open
+            title: Docs coverage, maintainability index, Android lint
+            instructions:
+              files:
+                - config/detekt.yml
+                - .github/workflows/ci.yml
+            verification:
+              - KDoc coverage or a recorded deviation
+              - detekt or equivalent enforces min_maintainability_index
+              - Android lint runs when the SDK is present
+            guardrail_refs:
+              - KT-DOC-001
+              - KT-CPLX-002
+              - KT-BUILD-002

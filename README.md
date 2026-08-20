@@ -1,51 +1,54 @@
 # Mat Aventuras
 
-Jogo educativo de matemática para Android, em **português de Portugal**,
-para crianças de **3** e **7** anos. Tudo corre no aparelho: não há contas
-na nuvem nem tabela de classificação online.
+Native Android educational math game for children aged **3** and **7**.
+User-visible UI, TTS, and dialogue are **Portuguese from Portugal**.
+Source identifiers, comments, KDoc, and documentation are **English**.
 
-## O que já existe (MAT-001)
+Everything runs on the device: no cloud accounts and no online leaderboard.
 
-- Ecrã de selecção de idade com UI adaptativa
-- Lições (contar, formas, números, contas, lógica)
-- Mascotes genéricos (Ouriço Veloz, Cão Herói, Porquinho Rosa,
+## What exists (MAT-001)
+
+- Age-adaptive selection UI
+- Lessons (counting, shapes, numbers, arithmetic, logic)
+- Generic mascots (Ouriço Veloz, Cão Herói, Porquinho Rosa,
   Canalizador Valente, Extraterrestre Travesso)
-- Prémios 2D (3 anos) e 3D em processo isolado (7 anos)
-- Classificação e distintivos locais (Room)
-- Painel dos pais com PIN
+- 2D rewards (age 3) and process-isolated 3D rewards (age 7)
+- Local leaderboard and badges (Room)
+- PIN-gated parental dashboard
 
-A decisão de arquitectura vive no Epic **MAT-001** (`docs/issues.yml`),
-não num ficheiro ADR. Ver [docs/arquitectura.md](docs/arquitectura.md).
+The architecture decision lives in Epic **MAT-001** (`docs/issues.yml`),
+not in an ADR file. See [docs/architecture.md](docs/architecture.md).
 
-## Metodologia e guardrails
+## Methodology and guardrails
 
-- Processo: [github-issue-adr](https://github.com/pirlruc/methodologies/tree/1.2.0/github-issue-adr) @ tag `1.2.0`
+- Process: [github-issue-adr](https://github.com/pirlruc/methodologies/tree/1.2.0/github-issue-adr) @ tag `1.2.0`
 - Guardrails: submodule `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.3.0` (`0354a747`)
 - Scaffold: submodule `.github/scaffold/` → [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.2.0` (`aac408cc`)
 
-CI precisa do secret `COMPANION_READ_TOKEN` (Contents: Read em `pirlruc/guardrails` e `pirlruc/github-scaffold`) para materializar os submódulos privados.
+CI needs the secret `COMPANION_READ_TOKEN` (Contents: Read on `pirlruc/guardrails`
+and `pirlruc/github-scaffold`) to materialise the private submodules.
 
-## Compilar
+## Build
 
-JDK 17+. Com o Android SDK:
+JDK 17+. With the Android SDK:
 
 ```bash
-echo "sdk.dir=/caminho/para/Android/Sdk" > local.properties
+echo "sdk.dir=/path/to/Android/Sdk" > local.properties
 ./gradlew :app:assembleDebug
 ```
 
-Sem SDK, só o módulo de domínio (testes e cobertura):
+Without an SDK, only the domain module (tests and coverage):
 
 ```bash
-./gradlew :dominio:test :dominio:koverVerify :dominio:detekt
-python3 scripts/verificar-cobertura.py
+./gradlew :domain:test :domain:koverVerify :domain:detekt
+python3 scripts/verify-coverage.py
 ```
 
-## Privacidade
+## Privacy
 
-A aplicação **não** pede a permissão `INTERNET`. Perfis, sessões, PIN e
-classificação ficam em Room/DataStore.
+The app **does not** request the `INTERNET` permission. Profiles, sessions,
+PIN, and the leaderboard stay in Room/DataStore.
 
-## Licença
+## License
 
 Apache License 2.0.

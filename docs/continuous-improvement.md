@@ -9,7 +9,7 @@ You analyze and recommend — you do **not** implement product changes in this
 pass. Translate actionable findings into `docs/issues.yml` entries.
 
 **In scope:** improvements, bugs, and design flaws in this repository's
-Kotlin modules, Compose UI, motors, Gradle/CI, and docs — not only process
+Kotlin modules, Compose UI, engines, Gradle/CI, and docs — not only process
 hygiene.
 
 ## Automation context
@@ -31,7 +31,7 @@ Execute these steps **in order**.
 ### 1. Derive inventory and prior work
 
 From the checkout: read `README.md`, `docs/ai-agent-handoff.md`, `docs/issues.yml`,
-and `docs/arquitectura.md`. List Gradle modules, workflows, and Cursor rules
+and `docs/architecture.md`. List Gradle modules, workflows, and Cursor rules
 that actually exist. List every epic/task `id` already in the manifest.
 Note pins as they appear in the README — do not assume versions from memory.
 
@@ -47,8 +47,8 @@ templates, and docs.
 
 | Surface | Role |
 | --- | --- |
-| `:dominio` | JVM models, math, PIN, rewards, motor simulation |
-| `:dados` / `:app` | Room, Compose, Activities (absent when SDK missing) |
+| `:domain` | JVM models, math, PIN, rewards, engine simulation |
+| `:data` / `:app` | Room, Compose, Activities (absent when SDK missing) |
 | CI / scripts | Threshold consumption, action SHA pins |
 | `docs/issues.yml` | Authored backlog |
 | Guardrails pin | `docs/guardrails/` submodule |

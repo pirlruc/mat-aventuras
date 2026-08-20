@@ -16,8 +16,10 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     patterns: ["*"]
+    open-pull-requests-limit: 5
     multi-ecosystem-group: all-dependencies
   - package-ecosystem: gradle
     directory: /
     patterns: ["*"]
+    open-pull-requests-limit: 5
     multi-ecosystem-group: all-dependencies

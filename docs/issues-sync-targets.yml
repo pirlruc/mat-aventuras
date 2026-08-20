@@ -14,6 +14,8 @@ labels:
 
 milestones:
   - name: Phase 1 — Foundation
-    description: Native Compose host, local persistence, isolated 2D/3D motors
+    description: Native Compose host, local persistence, isolated 2D/3D engines
   - name: Phase 2 — Learning content
-    description: Broader exercise packs, instrumented coverage, optional engine plugins
+    description: Broader exercise packs, instrumented coverage
+  - name: Phase 3 — Hardening and engines
+    description: Remaining guardrail CI gates and optional isolated engine plugin

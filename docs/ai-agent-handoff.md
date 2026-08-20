@@ -3,13 +3,15 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-20
-**Last agent focus:** MAT-001 foundation (Compose host, local Room, isolated motors)
+**Last agent focus:** English identifiers and docs; pt-PT UI only
 
 ---
 
 ## What this repo is
 
-Native Kotlin/Compose educational math game (pt-PT) for ages 3 and 7.
+Native Kotlin/Compose educational math game for ages 3 and 7.
+**UI/TTS/dialogue:** Portuguese from Portugal.
+**Code, comments, KDoc, documentation:** English.
 Privacy: on-device only. Decision log: GitHub Epics via github-issue-adr;
 authored backlog is `docs/issues.yml`.
 
@@ -25,8 +27,10 @@ authored backlog is `docs/issues.yml`.
 
 | Epic | Status | Notes |
 | --- | --- | --- |
-| MAT-001 | open (implemented in tree; issues not yet synced) | Architecture + playable core |
+| MAT-001 | open (implemented in tree; issues not yet synced) | Compose host, local Room, isolated engines |
 | MAT-002 | open | Instrumented coverage; retire KT-TEST-002 deviation |
+| MAT-003 | open | Optional Godot/Unity drop-in `EngineLauncher` plugin |
+| MAT-004 | open | Remaining guardrail/CI gaps (SAST, split jobs, docs coverage) |
 
 GitHub labels/milestones and issue sync need a write token:
 
@@ -43,8 +47,8 @@ publishing issues without approval).
 ```bash
 python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only
 python3 .github/scaffold/scripts/lint-doc-links.py --root .
-./gradlew :dominio:ktlintCheck :dominio:detekt :dominio:test :dominio:koverVerify
-python3 scripts/verificar-cobertura.py
+./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
+python3 scripts/verify-coverage.py
 ```
 
 With Android SDK: `./gradlew :app:assembleDebug`
@@ -54,17 +58,19 @@ With Android SDK: `./gradlew :app:assembleDebug`
 - Private companion repos: submodule clone needs a PAT with Contents: Read
   on `pirlruc/guardrails` and `pirlruc/github-scaffold`. `.gitmodules` URLs
   are token-free HTTPS.
-- `:app` / `:dados` are skipped when `ANDROID_HOME` is unset so JDK-only CI
-  can still gate `:dominio`.
-- 3D Activity runs in `:motor3d` and must not open Room.
+- `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
+  can still gate `:domain`.
+- 3D Activity runs in `:engine3d` and must not open Room.
 - Do not add `docs/adr/`. Epic MAT-001 is the decision record.
 - Scaffold branch convention is `feature-*`; this cloud run used
   `cursor/mat-aventuras-core-ade3` per the agent environment.
+- VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
 
 ## Suggested next work
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002: emulator CI, tighten KT-TEST-002.
-3. Optional MAT-003: Godot/Unity as drop-in `LancadorMotor` process plugin.
+3. MAT-004: split CI jobs, SAST/secret scan, KDoc coverage measurement.
+4. MAT-003: Godot/Unity as drop-in `EngineLauncher` process plugin.
 
 *Last updated: 2026-08-20*
