@@ -1,9 +1,6 @@
 package pt.mataventuras.app
 
-import android.app.ActivityManager
 import android.app.Application
-import android.content.Context
-import android.os.Build
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.domain.engine.EnginePluginContract
 
@@ -18,7 +15,7 @@ class MatAventurasApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if (!shouldOpenContainer(currentProcessName(this))) return
+        if (!shouldOpenContainer(currentProcessName())) return
         container = AppContainer(this)
     }
 }
@@ -32,14 +29,4 @@ internal fun shouldOpenContainer(processName: String): Boolean =
 /**
  * Process name for this VM (`package:engine3d` in an isolated reward process).
  */
-internal fun currentProcessName(
-    context: Context,
-    sdk: Int = Build.VERSION.SDK_INT,
-    pid: Int = android.os.Process.myPid(),
-): String {
-    if (sdk >= Build.VERSION_CODES.P) {
-        return getProcessName()
-    }
-    val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    return manager.runningAppProcesses?.firstOrNull { it.pid == pid }?.processName.orEmpty()
-}
+internal fun currentProcessName(name: String = Application.getProcessName()): String = name

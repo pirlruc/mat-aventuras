@@ -11,9 +11,23 @@ import pt.mataventuras.domain.voice.VoiceScripts
  */
 internal object NativeKartHost {
     /**
-     * Builds the playable kart view tree and returns the session for tests.
+     * Continuous on device; dirty-only under Robolectric so Espresso can idle.
      */
-    fun attach(activity: IsolatedEngineActivity): KartSession {
+    fun renderMode(embed: Boolean = GodotRuntime.shouldEmbed()): Int =
+        if (embed) {
+            GLSurfaceView.RENDERMODE_CONTINUOUSLY
+        } else {
+            GLSurfaceView.RENDERMODE_WHEN_DIRTY
+        }
+
+    /**
+     * Builds the playable kart session. [showUi] is false under Robolectric so
+     * GLSurfaceView does not keep Espresso busy.
+     */
+    fun attach(
+        activity: IsolatedEngineActivity,
+        showUi: Boolean = GodotRuntime.shouldEmbed(),
+    ): KartSession {
         val mascot = activity.launchMascot()
         val hudLap = hudText(activity)
         val hudRings = hudText(activity)
@@ -31,11 +45,15 @@ internal object NativeKartHost {
                     activity.completeRewardOnUi(true)
                 },
             )
+        if (!showUi) {
+            activity.setContentView(hudHint)
+            return session
+        }
         val view =
             GLSurfaceView(activity).apply {
                 setEGLContextClientVersion(1)
                 setRenderer(session.renderer)
-                renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+                renderMode = renderMode(showUi)
                 setOnTouchListener { v, event ->
                     val nx = event.x / v.width.coerceAtLeast(1)
                     session.handleTouch(nx, event.action)

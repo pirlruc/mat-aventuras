@@ -103,6 +103,9 @@ kover {
                 classes("*Activity$*")
                 // Godot JNI host: Robolectric cannot load libgodot_android.so.
                 classes("pt.mataventuras.app.engine.godot.*")
+                // Device-only GL/Compose surfaces; Robolectric uses session/loop without these views.
+                classes("pt.mataventuras.app.engine.NativeKartHost")
+                classes("pt.mataventuras.app.engine.NativeRunnerHost")
             }
         }
         verify {

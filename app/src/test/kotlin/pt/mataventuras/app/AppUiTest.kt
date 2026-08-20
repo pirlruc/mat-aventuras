@@ -189,16 +189,13 @@ class AppUiTest {
 
     @Test
     fun rewardActivitiesStart() {
-        val two =
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val twoController =
             Robolectric.buildActivity(
                 Platformer2dActivity::class.java,
-                EngineLauncher.intentFor(
-                    ApplicationProvider.getApplicationContext(),
-                    AgeGroup.THREE_YEARS,
-                    Mascot.HERO_PUP,
-                    "Ana",
-                ),
-            ).setup().get()
+                EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.HERO_PUP, "Ana"),
+            ).setup()
+        val two = twoController.get()
         assertTrue(two.hasWindowFocus() || two.window != null)
         two.loop.jumping = true
         repeat(40) { two.loop.tick() }
@@ -207,42 +204,38 @@ class AppUiTest {
         assertTrue(PlatformerScene.groundTop(480f) > 300f)
         assertEquals("hero_pup" to "Ana", two.extrasSnapshot())
         two.completeReward(ok = true)
-        val cancelled =
+        twoController.pause().stop().destroy()
+        val cancelledController =
             Robolectric.buildActivity(
                 Platformer2dActivity::class.java,
-                EngineLauncher.intentFor(
-                    ApplicationProvider.getApplicationContext(),
-                    AgeGroup.THREE_YEARS,
-                    Mascot.HERO_PUP,
-                    "Ana",
-                ),
-            ).setup().get()
-        cancelled.completeReward(ok = false)
+                EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.HERO_PUP, "Ana"),
+            ).setup()
+        cancelledController.get().completeReward(ok = false)
+        cancelledController.pause().stop().destroy()
 
-        val three =
+        val threeController =
             Robolectric.buildActivity(
                 Kart3dActivity::class.java,
-                EngineLauncher.intentFor(
-                    ApplicationProvider.getApplicationContext(),
-                    AgeGroup.SEVEN_YEARS,
-                    Mascot.MISCHIEVOUS_ALIEN,
-                    "Rui",
-                ),
-            ).setup().get()
+                EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.MISCHIEVOUS_ALIEN, "Rui"),
+            ).setup()
+        val three = threeController.get()
         assertTrue(three.window != null)
         three.session.handleTouch(0.1f, MotionEvent.ACTION_DOWN)
         three.session.handleTouch(0.5f, MotionEvent.ACTION_DOWN)
         three.session.renderer.tick()
         three.session.handleTouch(0.9f, MotionEvent.ACTION_UP)
         three.closeFinished()
+        threeController.pause().stop().destroy()
 
-        val fallback =
+        val fallbackController =
             Robolectric.buildActivity(
                 Kart3dActivity::class.java,
-                android.content.Intent(ApplicationProvider.getApplicationContext(), Kart3dActivity::class.java),
-            ).setup().get()
+                android.content.Intent(ctx, Kart3dActivity::class.java),
+            ).setup()
+        val fallback = fallbackController.get()
         assertTrue(fallback.window != null)
         fallback.closeFinished()
+        fallbackController.pause().stop().destroy()
     }
 
     @Test
