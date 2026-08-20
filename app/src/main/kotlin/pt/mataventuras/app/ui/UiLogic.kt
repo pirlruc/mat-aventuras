@@ -118,6 +118,16 @@ internal object UiLogic {
         }
 
     /**
+     * False while a previous tap is still being scored.
+     */
+    fun shouldAcceptAnswer(busy: Boolean): Boolean = !busy
+
+    /**
+     * Repeat the current prompt after a reward Activity covered the host.
+     */
+    fun shouldRepeatSpokenPrompt(stoppedInBackground: Boolean): Boolean = stoppedInBackground
+
+    /**
      * Soup cells are the answers; other kinds keep a palette.
      */
     fun showsOptionPalette(kind: PlayKind): Boolean = kind != PlayKind.SOUP

@@ -35,14 +35,18 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.LessonFlow
@@ -79,13 +83,34 @@ fun LessonScreen(
     val startedAt = remember { System.currentTimeMillis() }
     val pointsGate = remember { Mutex() }
     val pointsTicket = remember { AtomicInteger(0) }
+    val pickLock = remember { AtomicBoolean(false) }
     val fillViewport = UiLogic.lessonFillsViewport(profile.ageGroup)
     val view = LocalView.current
     val cues = remember { AnswerCuePlayer.device() }
     var flashCorrect by remember { mutableStateOf(true) }
     var flashTick by remember { mutableIntStateOf(0) }
+    val spoken = remember { mutableStateOf(exercise.spoken) }
+    spoken.value = exercise.spoken
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(cues) { onDispose { cues.release() } }
+
+    DisposableEffect(lifecycleOwner) {
+        var stopped = false
+        val observer =
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_STOP -> stopped = true
+                    Lifecycle.Event.ON_RESUME -> {
+                        if (UiLogic.shouldRepeatSpokenPrompt(stopped)) onSpeak(spoken.value)
+                        stopped = false
+                    }
+                    else -> Unit
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(exercise.prompt) { onSpeak(exercise.spoken) }
     LaunchedEffect(profile.id) {
@@ -97,7 +122,9 @@ fun LessonScreen(
         }
     }
 
-    val onPick: (Int) -> Unit = { index ->
+    val onPick: (Int) -> Unit = handler@{ index ->
+        if (!UiLogic.shouldAcceptAnswer(pickLock.get())) return@handler
+        if (!pickLock.compareAndSet(false, true)) return@handler
         val current = exercise
         val correct = current.isCorrect(index)
         flashCorrect = correct
@@ -124,7 +151,9 @@ fun LessonScreen(
             onSpeak(VoiceScripts.LETS_PLAY)
             onReward(profile.ageGroup)
         }
-        exercise = container.generator.generate(module, UiLogic.lessonLevel(hits))    }
+        exercise = container.generator.generate(module, UiLogic.lessonLevel(hits))
+        pickLock.set(false)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
