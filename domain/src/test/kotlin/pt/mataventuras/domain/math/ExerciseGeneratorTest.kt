@@ -2,6 +2,7 @@ package pt.mataventuras.domain.math
 
 import kotlin.random.Random
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.domain.model.LearningModule
@@ -16,6 +17,10 @@ class ExerciseGeneratorTest {
             assertEquals(module, exercise.module)
             assertTrue(exercise.options.size >= 2)
             assertTrue(exercise.isCorrect(exercise.correctIndex))
+            if (exercise.play.targetIndices.isEmpty()) {
+                val wrong = (exercise.correctIndex + 1) % exercise.options.size
+                assertFalse(exercise.isCorrect(wrong))
+            }
         }
     }
 
@@ -25,6 +30,13 @@ class ExerciseGeneratorTest {
         assertTrue(exercise.visualCount in 1..10)
         assertEquals(exercise.visualCount.toString(), exercise.options[exercise.correctIndex])
         assertTrue(exercise.prompt.contains("estrelas"))
+        assertFalse(exercise.isCorrect((exercise.correctIndex + 1) % exercise.options.size))
+    }
+
+    @Test
+    fun additionUsesSumOrGap() {
+        val usesGap = (0..8).map { ExerciseGenerator(Random(it)).addition().prompt.contains("+ ?") }.toSet()
+        assertEquals(2, usesGap.size)
     }
 
     @Test

@@ -27,13 +27,16 @@ class PlayBoardFactory(
         }
 
     internal fun sudoku(module: LearningModule): Exercise =
-        if (module == LearningModule.SHAPES) shapeSudoku() else numberSudoku(module)
+        if (module == LearningModule.SHAPES) {
+            shapeSudoku()
+        } else {
+            numberSudoku(module)
+        }
 
     internal fun soup(module: LearningModule): Exercise =
         when (module) {
             LearningModule.LOGIC -> wordSoup()
-            LearningModule.COUNTING -> countSoup()
-            LearningModule.NUMBERS -> numberSoup()
+            LearningModule.COUNTING, LearningModule.NUMBERS -> huntSoup(module)
             else -> shapeSoup()
         }
 
@@ -44,7 +47,7 @@ class PlayBoardFactory(
             } else {
                 random.nextInt(1, 10).toString()
             }
-        val others = numericOrShapes(piece, module)
+        val others = numericOrShapes(piece)
         val options = (others + piece).shuffled(random)
         return Exercise(
             module = module,
@@ -132,14 +135,30 @@ class PlayBoardFactory(
         )
     }
 
-    private fun countSoup(): Exercise {
-        val target = random.nextInt(1, 10)
-        val cells = (1..9).toList().shuffled(random).map { it.toString() }
+    private fun huntSoup(module: LearningModule): Exercise {
+        val counting = module == LearningModule.COUNTING
+        val target = if (counting) random.nextInt(1, 10) else random.nextInt(0, 10)
+        val cells =
+            if (counting) {
+                (1..9).toList().shuffled(random).map { it.toString() }
+            } else {
+                val others = (0..9).filter { it != target }
+                MutableList(9) { others[random.nextInt(others.size)].toString() }.also { list ->
+                    list[random.nextInt(9)] = target.toString()
+                }
+            }
         val index = cells.indexOf(target.toString())
+        val prompt = if (counting) "Toca na caixa com $target estrelas." else "Toca no número $target."
+        val spoken =
+            if (counting) {
+                "Procura a caixa com $target estrelas."
+            } else {
+                "Encontra o número $target na sopa. Toca-lhe."
+            }
         return Exercise(
-            module = LearningModule.COUNTING,
-            prompt = "Toca na caixa com $target estrelas.",
-            spoken = "Procura a caixa com $target estrelas.",
+            module = module,
+            prompt = prompt,
+            spoken = spoken,
             options = cells,
             correctIndex = index,
             visualCount = target,
@@ -153,32 +172,9 @@ class PlayBoardFactory(
         )
     }
 
-    private fun numberSoup(): Exercise {
-        val target = random.nextInt(0, 10)
-        val others = (0..9).filter { it != target }
-        val cells = MutableList(9) { others[random.nextInt(others.size)].toString() }
-        val index = random.nextInt(9)
-        cells[index] = target.toString()
-        return Exercise(
-            module = LearningModule.NUMBERS,
-            prompt = "Toca no número $target.",
-            spoken = "Encontra o número $target na sopa. Toca-lhe.",
-            options = cells.toList(),
-            correctIndex = index,
-            visualCount = target,
-            play =
-                PlayBoard(
-                    kind = PlayKind.SOUP,
-                    cells = cells.toList(),
-                    columns = 3,
-                    targetIndices = listOf(index),
-                ),
-        )
-    }
-
     private fun wordSoup(): Exercise {
         val word = WORDS[random.nextInt(WORDS.size)]
-        val pool = LETTERS.filter { it !in word }.ifEmpty { LETTERS }
+        val pool = LETTERS.filter { it !in word }
         val letters = MutableList(16) { pool[random.nextInt(pool.length)].toString() }
         val row = random.nextInt(4)
         val start = row * 4
@@ -280,12 +276,9 @@ class PlayBoardFactory(
         )
     }
 
-    private fun numericOrShapes(
-        piece: String,
-        module: LearningModule,
-    ): List<String> {
+    private fun numericOrShapes(piece: String): List<String> {
         val asNumber = piece.toIntOrNull()
-        return if (asNumber != null && module != LearningModule.SHAPES) {
+        return if (asNumber != null) {
             numericOptions(asNumber, 1, 10).map { it.toString() }.filter { it != piece }.take(3)
         } else {
             GeometricShape.entries.map { it.displayName }.filter { it != piece }.take(3)

@@ -17,11 +17,8 @@ class ExerciseGenerator(
      */
     fun generate(module: LearningModule): Exercise {
         val kind = PlayKinds.pick(module, random)
-        return if (kind == PlayKind.CHOICE) classic(module) else boards.make(kind, module)
-    }
-
-    private fun classic(module: LearningModule): Exercise =
-        when (module) {
+        if (kind != PlayKind.CHOICE) return boards.make(kind, module)
+        return when (module) {
             LearningModule.COUNTING -> counting()
             LearningModule.SHAPES -> shape()
             LearningModule.NUMBERS -> number()
@@ -30,6 +27,7 @@ class ExerciseGenerator(
             LearningModule.MULTIPLICATION -> multiplication()
             LearningModule.LOGIC -> logic()
         }
+    }
 
     internal fun counting(): Exercise {
         val quantity = random.nextInt(1, 11)
