@@ -236,28 +236,38 @@ milestones:
     epics:
       - id: MAT-003
         status: open
-        title: Optional isolated engine plugin
+        title: Isolated Godot 4 reward engine
         overview:
           problem: >-
             v1 GLES/Canvas rewards are playable but not cinematic. Embedding
             Unity or Godot in the Compose process would revive the RAM spike
-            MAT-001 rejected.
+            MAT-001 rejected. Unity-as-a-library is a heavier, proprietary
+            player that is harder to keep local-only.
           goal: >-
-            Keep EngineLauncher as the only host contract and allow a later
-            drop-in Godot/Unity Activity in android:process :engine3d (or
-            :engine2d) with no networking, analytics, or cloud save.
+            Adopt Godot 4 (MIT, Maven Central AAR, gl_compatibility) as the
+            single reward engine in android:process :engine3d and :engine2d,
+            with native Canvas/GLES as the Robolectric fallback, no
+            networking, analytics, or cloud save.
         architecture:
           target: >-
-            Same Intent extras as EngineLauncher (mascot, name, finished
-            result). Plugin process must die on Activity finish. Compose host
-            must not hold a GL/Unity view.
+            In the context of isolated reward mini-games on mid-tier tablets,
+            we decided to embed Godot 4 (not Unity) via org.godotengine:godot
+            in KartPluginActivity (:engine3d) and RunnerPluginActivity
+            (:engine2d), rejecting Unity-as-a-library for heap size, MIT
+            licensing, and a strip-able INTERNET merge, accepting a
+            Robolectric native fallback because libgodot_android cannot load
+            in unit tests.
           modules:
+            - app/src/main/kotlin/pt/mataventuras/plugin
             - app/src/main/kotlin/pt/mataventuras/app/engine
+            - app/src/main/assets
             - docs/architecture.md
+            - docs/engine-plugin.md
         acceptance_criteria:
           - Plugin Activity uses an isolated process
           - No INTERNET permission introduced by the plugin
-          - Domain simulation APIs remain the fallback when the plugin is absent
+          - Domain simulation APIs remain the fallback when Godot cannot embed
+          - Godot 4 is the adopted engine; Unity is not shipped
         guardrail_refs:
           - KT-API-004
           - KT-PERF-001
@@ -313,17 +323,23 @@ milestones:
               - KT-SEC-001
 
           - id: MAT-003-T3
-            status: open
-            title: Optional Godot or Unity isolated-process plugin
+            status: done
+            title: Adopt Godot 4 in isolated processes
             instructions:
               files:
+                - gradle/libs.versions.toml
+                - app/src/main/kotlin/pt/mataventuras/plugin
                 - app/src/main/kotlin/pt/mataventuras/app/engine
+                - app/src/main/assets
+                - app/src/main/AndroidManifest.xml
                 - docs/architecture.md
+                - docs/engine-plugin.md
             verification:
               - Plugin Activity uses android:process :engine3d or :engine2d
               - Intent extras match EngineLauncher (mascot, name, finished)
               - Merged manifest still has no INTERNET permission
-              - Domain Kart3dEngine and Platformer2dEngine remain the fallback
+              - Domain Kart3dEngine and Platformer2dEngine remain the Robolectric fallback
+              - org.godotengine:godot is pinned; Unity is not a dependency
             guardrail_refs:
               - KT-PERF-001
               - KT-SEC-001

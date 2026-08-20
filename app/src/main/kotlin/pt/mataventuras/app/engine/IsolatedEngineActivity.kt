@@ -1,33 +1,35 @@
 package pt.mataventuras.app.engine
 
 import android.content.Intent
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.model.Mascot
 
 /**
- * Base Activity for native rewards and Godot/Unity plugin hosts.
+ * Base Activity for native rewards and the Godot plugin host.
  *
  * Subclasses must not open Room or request INTERNET. 3D (and any plugin)
  * should run in an isolated process so `finish()` kills the engine heap.
+ * Extends [FragmentActivity] so a Godot fragment can attach on device
+ * without sharing the Compose process.
  */
-abstract class IsolatedEngineActivity : ComponentActivity() {
+abstract class IsolatedEngineActivity : FragmentActivity() {
     /**
      * Mascot extra, or empty when the host omitted it.
      */
-    protected fun mascotCode(): String =
+    internal fun mascotCode(): String =
         intent.getStringExtra(EnginePluginContract.EXTRA_MASCOT).orEmpty()
 
     /**
      * Child display name extra, or empty.
      */
-    protected fun childName(): String =
+    internal fun childName(): String =
         intent.getStringExtra(EnginePluginContract.EXTRA_NAME).orEmpty()
 
     /**
      * Resolves the mascot for tinting; unknown codes fall back to the hedgehog.
      */
-    protected fun launchMascot(): Mascot = Mascot.fromCode(mascotCode())
+    internal fun launchMascot(): Mascot = Mascot.fromCode(mascotCode())
 
     /**
      * Extras snapshot for tests and plugin hosts that need both fields.
@@ -44,5 +46,12 @@ abstract class IsolatedEngineActivity : ComponentActivity() {
             Intent().putExtra(EnginePluginContract.RESULT_FINISHED, ok),
         )
         finish()
+    }
+
+    /**
+     * [completeReward] posted to the UI thread (Godot callbacks arrive on the render thread).
+     */
+    internal fun completeRewardOnUi(ok: Boolean) {
+        runOnUiThread { completeReward(ok) }
     }
 }

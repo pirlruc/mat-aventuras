@@ -3,8 +3,8 @@ package pt.mataventuras.domain.engine
 import pt.mataventuras.domain.model.EngineKind
 
 /**
- * Chooses the reward Activity class. A Godot/Unity AAR wins when its contract
- * class is on the classpath; otherwise the native Kotlin engine is used.
+ * Chooses the reward Activity class. The in-tree Godot plugin Activities win
+ * when present on the classpath; otherwise the native Kotlin engine is used.
  */
 object EnginePluginResolver {
     /**

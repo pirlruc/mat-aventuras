@@ -10,19 +10,18 @@ import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.engineKindFor
 
 /**
- * Native host → reward engine. 2D stays in-process; 3D runs in `:engine3d`.
+ * Native host → reward engine. Age 3 launches the Godot runner in `:engine2d`;
+ * age 7 launches the Godot kart in `:engine3d`. Native Canvas/GLES Activities
+ * remain as the fallback when plugin classes are absent and for unit tests.
  *
- * Plugin contract (MAT-003): a Godot/Unity Activity may replace
+ * Plugin contract (MAT-003): a Godot Activity replaces
  * [Kart3dActivity] or [Platformer2dActivity] when it:
  * 1. uses `android:process=":engine3d"` (or `:engine2d`) so the heap dies on finish,
  * 2. reads [EXTRA_MASCOT] and [EXTRA_NAME] from the launching Intent,
  * 3. returns [RESULT_FINISHED] via `setResult`,
  * 4. does not open Room, request INTERNET, or start analytics/cloud save.
  *
- * The Compose host must not hold a GL/Unity view. Domain simulation remains the
- * fallback when a plugin AAR is absent. Drop `libs/engine-plugin.aar` whose
- * Activities use [EnginePluginContract.PLUGIN_KART_CLASS] /
- * [EnginePluginContract.PLUGIN_RUNNER_CLASS] to select the plugin at runtime.
+ * The Compose host must not hold a Godot view.
  */
 object EngineLauncher {
     /** Intent extra: mascot code. */
@@ -35,12 +34,12 @@ object EngineLauncher {
     const val RESULT_FINISHED: String = EnginePluginContract.RESULT_FINISHED
 
     /**
-     * Isolated process name for the 3D (or later plugin) Activity.
+     * Isolated process name for the 3D (Godot or native GLES) Activity.
      */
     const val PROCESS_ENGINE_3D: String = EnginePluginContract.PROCESS_ENGINE_3D
 
     /**
-     * Isolated process name for a plugin 2D runner.
+     * Isolated process name for the Godot 2D runner.
      */
     const val PROCESS_ENGINE_2D: String = EnginePluginContract.PROCESS_ENGINE_2D
 

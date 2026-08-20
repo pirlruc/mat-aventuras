@@ -1,8 +1,8 @@
 package pt.mataventuras.domain.engine
 
 /**
- * Normalised touch bands shared by the native kart and a later Godot/Unity
- * input map. X is 0 at the left edge and 1 at the right.
+ * Normalised touch bands shared by the native kart and the Godot kart.
+ * X is 0 at the left edge and 1 at the right.
  */
 object EngineInputMap {
     /** Taps left of this value steer left. */

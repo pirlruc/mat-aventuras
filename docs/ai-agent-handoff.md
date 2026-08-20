@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-20
-**Last agent focus:** Godot/Unity isolated-process plugin host wiring (MAT-003-T4)
+**Last agent focus:** Adopt Godot 4 (not Unity) in isolated processes (MAT-003-T3)
 
 ---
 
@@ -15,6 +15,9 @@ Native Kotlin/Compose educational math game for ages 3 and 7.
 Privacy: on-device only. Decision log: GitHub Epics via github-issue-adr;
 authored backlog is `docs/issues.yml`.
 
+Reward engines: **Godot 4** in `:engine2d` (age 3) and `:engine3d` (age 7).
+Unity is not used. Native Canvas/GLES is the Robolectric fallback.
+
 ## Pins
 
 | Companion | How | Value |
@@ -22,6 +25,7 @@ authored backlog is `docs/issues.yml`.
 | methodologies | annotated tag in docs | `1.2.0` |
 | guardrails | submodule SHA `docs/guardrails/` | `0354a747` (tag `1.3.0`) |
 | github-scaffold | submodule SHA `.github/scaffold/` | `aac408cc` (tag `1.2.0`) |
+| Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
 
 ## Delivery status
 
@@ -29,7 +33,7 @@ authored backlog is `docs/issues.yml`.
 | --- | --- | --- |
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
 | MAT-002 | open | Emulator instrumented tests remain; Robolectric 95% and richer packs are in tree |
-| MAT-003 | open | Resolver + IsolatedEngineActivity + optional AAR hook in tree; Godot/Unity AAR is MAT-003-T3 |
+| MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin Activities + assets; native fallback under Robolectric |
 | MAT-004 | open in GitHub until human sync; tasks done in tree | Split CI, SAST, gitleaks binary, KDoc/MI/license scripts |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
@@ -62,18 +66,21 @@ bash scripts/ci-local.sh
   are token-free HTTPS.
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
   can still gate `:domain`. With the SDK, coverage is required for all three.
-- 3D Activity runs in `:engine3d` and must not open Room.
-- Do not add `docs/adr/`. Epic MAT-001 is the decision record.
+- 3D/Godot Activities run in `:engine3d` / `:engine2d` and must not open Room
+  (`MatAventurasApp.shouldOpenContainer`).
+- Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`; this cloud run used
   `cursor/mat-aventuras-core-ade3` per the agent environment.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
 - Run `:domain:ktlintFormat` before `:domain:ktlintCheck` (parallel format+check races).
+- Never construct `GodotFragment` under Robolectric (`GodotRuntime.shouldEmbed`
+  is false when `Build.FINGERPRINT` contains `robolectric`).
+- Godot JNI types live in `pt.mataventuras.app.engine.godot` and are excluded
+  from `:app` Kover because `libgodot_android.so` cannot load in unit tests.
 
 ## Suggested next work
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
-2. MAT-002-T1: emulator instrumented tests in CI.
-3. MAT-003-T3: drop a Godot/Unity AAR into `libs/engine-plugin.aar` that
-   implements `pt.mataventuras.plugin.*` Activities in `:engine3d` / `:engine2d`.
+2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 
 *Last updated: 2026-08-20*

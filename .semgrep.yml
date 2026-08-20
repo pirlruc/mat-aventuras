@@ -3,8 +3,11 @@ rules:
     languages: [xml]
     severity: ERROR
     message: INTERNET permission is forbidden (100% on-device).
-    pattern: |
-      <uses-permission android:name="android.permission.INTERNET"/>
+    patterns:
+      - pattern: |
+          <uses-permission android:name="android.permission.INTERNET"/>
+      - pattern-not: |
+          <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
   - id: mat-aventuras-no-runtime-exec
     languages: [kotlin]
     severity: ERROR

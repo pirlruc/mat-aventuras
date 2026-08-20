@@ -1,85 +1,65 @@
-# Godot / Unity plugin (MAT-003)
+# Godot 4 plugin (MAT-003)
 
-Godot and Unity **run on Android**. The problem is not the engine; it is
-**which process** owns the native heap.
+Mat Aventuras adopts **Godot 4** (not Unity) as the reward engine. The Compose
+host still never holds a Godot view: kart and runner Activities run in
+`:engine3d` and `:engine2d` so `finish()` kills the native heap.
 
-## Do you need a custom engine library?
+## Why Godot 4, not Unity
 
-No. You do not need a renderer written only for Mat Aventuras.
+Both engines run on Android. For this app the constraint is **RAM + privacy +
+cold start on mid-tier tablets**, not cinematic tooling.
 
-You need:
+| | Godot 4 | Unity-as-a-library |
+| --- | --- | --- |
+| License | MIT (`org.godotengine:godot`) | Proprietary editor + runtime |
+| Install | Maven Central AAR | Unity Hub export / custom gradle |
+| Typical isolated-process heap | Smaller (tens–low hundreds of MB) | Often 200–400 MB |
+| Analytics / cloud | None in the stock library | Easy to pull in services |
+| `INTERNET` | Strip at manifest merge | Harder to guarantee gone |
+| Mid-tier tablets | `gl_compatibility` + ETC2 | Heavier player |
 
-1. A **stock** Godot 4 Android `aar` **or** Unity-as-a-library export of the
-   reward levels (kart and/or ring runner).
-2. A **thin Activity adapter** (this repo’s contract) that:
-   - lives in `android:process=":engine3d"` (kart) or `:engine2d` (runner),
-   - reads Intent extras `mascot` and `name`,
-   - calls `setResult` with extra `finished`,
-   - never opens Room, never requests `INTERNET`, never talks to analytics.
+Godot 4.7.1 is pinned in `gradle/libs.versions.toml`. Rendering uses
+**gl_compatibility** (OpenGL ES) rather than Vulkan so mid-tier tablets stay
+reliable.
 
-The Compose host never holds a `GodotView` / `UnityPlayer`. It starts the
-plugin Activity with `StartActivityForResult`. When that Activity `finish()`es,
-Android kills the isolated process and the 200–400 MB engine heap goes with it.
+## Process contract (unchanged)
 
-Native 2D Canvas stays in the Compose process on purpose (it is small). A
-Godot/Unity **2D** plugin must still use `:engine2d` because those runtimes
-are not small.
+1. Stock Godot Android library (`implementation(libs.godot)`).
+2. Thin Activities at the contract names:
+   - `pt.mataventuras.plugin.KartPluginActivity` → `:engine3d`
+   - `pt.mataventuras.plugin.RunnerPluginActivity` → `:engine2d`
+3. Intent extras `mascot` and `name`; result extra `finished`.
+4. No Room in those processes (`MatAventurasApp` skips `AppContainer`).
+5. Merged manifest has **no** `INTERNET` / network permissions (`tools:node="remove"`).
 
-## What this repo already wires
+The Compose host starts those Activities with `StartActivityForResult`. When
+they `finish()`, Android kills the isolated process.
+
+Native Canvas/GLES engines remain as:
+
+- the **Robolectric fallback** (Godot native `.so` cannot load in unit tests)
+- the **playable fallback** if a future build drops the plugin classes
+
+## What this repo ships
 
 | Piece | Role |
 | --- | --- |
-| `EnginePluginContract` | Extra keys, process names, plugin class names, forbidden permissions |
-| `EnginePluginResolver` | Prefer plugin class if it is on the classpath; else native |
-| `EngineLauncher` | Builds the Intent the host fires |
-| `IsolatedEngineActivity` | Base class: extras + `completeReward` |
-| `EngineInputMap` | Left / centre / right touch bands for the kart |
-| `libs/engine-plugin.aar` | Optional drop-in. If the file exists, Gradle compiles it in |
+| `org.godotengine:godot:4.7.1.stable` | Official Android library |
+| `GodotRuntime` | Embed on device; skip on Robolectric |
+| `GodotRewardBinder` | Godot fragment vs native host |
+| `KartPluginActivity` / `RunnerPluginActivity` | Contract Activities |
+| `assets/project.godot` + kart/runner scenes | Packaged Godot project |
+| `MatAventuras` singleton | GDScript ↔ extras / `completeReward` |
+| `Kart3dEngine` / `Platformer2dEngine` | Domain simulation + native fallback |
 
-Default APK (no AAR): age 3 → `Platformer2dActivity`, age 7 → `Kart3dActivity`
-in `:engine3d`.
-
-With AAR on the classpath providing:
-
-- `pt.mataventuras.plugin.RunnerPluginActivity`
-- `pt.mataventuras.plugin.KartPluginActivity`
-
-the host launches those instead. Domain simulation (`Platformer2dEngine`,
-`Kart3dEngine`) stays as the fallback and as the source of truth for tests.
-
-## Drop-in steps
-
-1. Export Godot 4 (`gradle_build` / custom Android build) or Unity as a
-   library. Strip networking, ads, Game Center, and analytics from the export.
-2. Implement the two Activity classes (see `samples/engine-plugin/`).
-   Subclass `IsolatedEngineActivity` **or** copy `completeReward` if the
-   player Activity must extend `Godot` / `UnityPlayerActivity` instead.
-3. In the plugin manifest:
-
-```xml
-<activity
-    android:name="pt.mataventuras.plugin.KartPluginActivity"
-    android:process=":engine3d"
-    android:exported="false"
-    android:excludeFromRecents="true"
-    android:taskAffinity="" />
-<activity
-    android:name="pt.mataventuras.plugin.RunnerPluginActivity"
-    android:process=":engine2d"
-    android:exported="false"
-    android:excludeFromRecents="true"
-    android:taskAffinity="" />
-```
-
-4. Merge-time: confirm the **application** manifest still has **no**
-   `INTERNET` (or `ACCESS_NETWORK_STATE`). `EnginePluginContract.manifestAllowed`
-   is the checklist the host uses in tests.
-5. Copy the AAR to `libs/engine-plugin.aar` and assemble. Do not commit the
-   binary (`libs/*.aar` is gitignored).
+Default APK: age 3 → `RunnerPluginActivity` in `:engine2d`, age 7 →
+`KartPluginActivity` in `:engine3d`. On a real device that is Godot. Under
+Robolectric the same Activities attach native Canvas/GLES instead of
+`GodotFragment`.
 
 ## Input map (kart)
 
-Normalised X in `[0, 1]`:
+Normalised X in `[0, 1]` (`EngineInputMap`, copied in `kart.gd`):
 
 - `< 0.34` steer left
 - `0.34 … 0.66` boost (centre tap)
@@ -87,8 +67,19 @@ Normalised X in `[0, 1]`:
 
 2D runner: any tap jumps.
 
-## Still later (MAT-003-T3)
+## Godot project
 
-- Actual Godot/Unity project and AAR
-- Asset pipeline (kart mesh, rings, mascot tint)
-- Emulator instrumented test of the swap (MAT-002-T1)
+Files live in `app/src/main/assets/` (no hidden `.godot` directory;
+`use_hidden_project_data_directory=false`). Command line:
+
+`--path . --scene res://kart.tscn` (or `res://runner.tscn`)
+
+GDScript talks to Android:
+
+```
+Engine.get_singleton("MatAventuras").completeReward(true)
+```
+
+HUD copy is pt-PT (`Volta`, `Anéis`, `Impulso`).
+
+Emulator instrumented coverage of Godot init remains MAT-002-T1.

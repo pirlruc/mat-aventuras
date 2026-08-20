@@ -20,8 +20,8 @@ infinite exercise generator. The reward engine also changes with age.
 
 | Age | Lesson modules | Reward mini-game |
 | --- | --- | --- |
-| **3 years** | Counting 1–10; shapes; digits 0–9 | 2D side-scroller: tap to jump, collect rings |
-| **7 years** | Addition (incl. missing addend); subtraction; multiplication; logic (even sequence, largest, smallest) | Isolated GLES kart: steer, boost, collect rings |
+| **3 years** | Counting 1–10; shapes; digits 0–9 | 2D ring runner (Godot in `:engine2d`) |
+| **7 years** | Addition (incl. missing addend); subtraction; multiplication; logic (even sequence, largest, smallest) | Isolated Godot kart in `:engine3d` |
 
 ## What exists (MAT-001)
 
@@ -38,10 +38,9 @@ infinite exercise generator. The reward engine also changes with age.
 The architecture decision lives in Epic **MAT-001** (`docs/issues.yml`),
 not in an ADR file. See [docs/architecture.md](docs/architecture.md).
 
-Godot/Unity is **not** embedded in v1. A stock Godot 4 or Unity-as-a-library
-export can drop in later **in an isolated process** — see
-[docs/engine-plugin.md](docs/engine-plugin.md). The host already resolves
-plugin Activities when `libs/engine-plugin.aar` is present.
+Godot 4 is the reward engine (isolated `:engine2d` / `:engine3d` processes).
+Unity is not used. Native Canvas/GLES remain the unit-test fallback. See
+[docs/engine-plugin.md](docs/engine-plugin.md).
 
 ## Methodology and guardrails
 

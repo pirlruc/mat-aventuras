@@ -14,7 +14,8 @@ import pt.mataventuras.domain.progress.LeaderboardCalculator
 import pt.mataventuras.domain.progress.RewardsEngine
 
 /**
- * Process-local graph. Constructed in the default process only — not in `:engine3d`.
+ * Process-local graph. Constructed in the default process only — not in
+ * `:engine2d` or `:engine3d`.
  */
 class AppContainer(
     context: Context,

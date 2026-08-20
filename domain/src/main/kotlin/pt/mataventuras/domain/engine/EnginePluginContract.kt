@@ -3,17 +3,18 @@ package pt.mataventuras.domain.engine
 import pt.mataventuras.domain.model.EngineKind
 
 /**
- * Shared Intent and process contract for native rewards and a later Godot/Unity
- * plugin. Identifiers are English; the plugin Activity still speaks pt-PT HUD.
+ * Shared Intent and process contract for native rewards and the Godot 4 plugin.
+ * Identifiers are English; the plugin Activity still speaks pt-PT HUD.
  *
- * Godot and Unity are valid on Android. They must not share the Compose
- * process: after `finish()` those runtimes keep a large native heap. The
- * plugin Activity therefore runs in [PROCESS_ENGINE_3D] or [PROCESS_ENGINE_2D]
- * so the OS kills that heap. The game does **not** need a custom engine
- * library — only a thin Activity that wraps a stock Godot 4 `aar` or
- * Unity-as-a-library export and keeps this contract.
+ * Godot 4 is the adopted engine (MIT, official Android library, smaller heap
+ * than Unity-as-a-library). It must not share the Compose process: after
+ * `finish()` the runtime keeps a large native heap. Plugin Activities therefore
+ * run in [PROCESS_ENGINE_3D] or [PROCESS_ENGINE_2D] so the OS kills that heap.
  */
 object EnginePluginContract {
+    /** Adopted engine. Unity-as-a-library is not used. */
+    const val ADOPTED_ENGINE: String = "godot"
+
     /** Intent extra: mascot code (`speedy_hedgehog`, …). */
     const val EXTRA_MASCOT: String = "mascot"
 
@@ -23,20 +24,20 @@ object EnginePluginContract {
     /** Result extra: true when the reward level completed. */
     const val RESULT_FINISHED: String = "finished"
 
-    /** Isolated process for the 3D kart (native GLES or plugin). */
+    /** Isolated process for the 3D kart (Godot or native GLES). */
     const val PROCESS_ENGINE_3D: String = ":engine3d"
 
-    /** Isolated process for a plugin 2D runner (Godot/Unity). Native Canvas stays in-process. */
+    /** Isolated process for the Godot 2D runner. Native Canvas tests stay in-process. */
     const val PROCESS_ENGINE_2D: String = ":engine2d"
 
     /**
-     * Fully-qualified Activity a Godot/Unity AAR must provide for age 3.
+     * Fully-qualified Activity the Godot host provides for age 3.
      * Absent class → native Canvas 2D Activity.
      */
     const val PLUGIN_RUNNER_CLASS: String = "pt.mataventuras.plugin.RunnerPluginActivity"
 
     /**
-     * Fully-qualified Activity a Godot/Unity AAR must provide for age 7.
+     * Fully-qualified Activity the Godot host provides for age 7.
      * Absent class → native GLES kart Activity.
      */
     const val PLUGIN_KART_CLASS: String = "pt.mataventuras.plugin.KartPluginActivity"
@@ -67,6 +68,12 @@ object EnginePluginContract {
         kind: EngineKind,
         usingPlugin: Boolean,
     ): Boolean = kind == EngineKind.THREE_D || usingPlugin
+
+    /**
+     * True when [processName] is an isolated reward process (`:engine2d` / `:engine3d`).
+     */
+    fun isIsolatedProcessName(processName: String): Boolean =
+        processName.endsWith(PROCESS_ENGINE_2D) || processName.endsWith(PROCESS_ENGINE_3D)
 
     /**
      * True when [permission] must not appear on a plugin (or host) manifest.

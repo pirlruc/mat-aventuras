@@ -5,7 +5,7 @@ import pt.mataventuras.domain.engine.EngineInputMap
 
 /**
  * Touch mapping for the isolated kart process (left steer, right steer, centre boost).
- * Bands come from [EngineInputMap] so a Godot/Unity plugin can reuse the same numbers.
+ * Bands come from [EngineInputMap] so the Godot kart reuses the same numbers.
  */
 object Kart3dInput {
     /**

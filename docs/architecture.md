@@ -2,7 +2,7 @@
 
 Technical guide for the native Android educational math game.
 Methodology: [github-issue-adr @ 1.2.0](https://github.com/pirlruc/methodologies/tree/1.2.0/github-issue-adr).
-Decision record: Epic **MAT-001** in `docs/issues.yml` (not an ADR markdown file).
+Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (not ADR markdown files).
 Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.3.0`.
 
 Language split: **code, comments, KDoc, and this documentation are English**.
@@ -19,76 +19,68 @@ rejecting Unity/Godot AAR embedding for v1, to achieve killable 3D heaps
 and 100% on-device data, accepting lower cinematic fidelity until a later
 Epic re-evaluates a single optional engine plugin.
 
-## Why not Unity or Godot in v1
+MAT-003 re-evaluated that plugin and **adopted Godot 4** in `:engine2d` /
+`:engine3d`. Compose still never holds the engine view. Unity is not used.
+
+## Isolation first, then one engine
 
 Embedding Unity **and** Godot as Android libraries is the failure mode the
-prompt’s performance constraint warns about: two runtimes, two asset
-pipelines, and a Compose Activity that cannot reclaim 200–400 MB after
-`finish()`. A single exported engine is viable later (MAT-003) if it is
-loaded in an isolated process and unloaded on exit. v1 ships playable 2D/3D
-engines in-process Kotlin so the host APK stays lean.
+performance constraint warns about: two runtimes, two asset pipelines, and a
+Compose Activity that cannot reclaim 200–400 MB after `finish()`. MAT-001
+therefore kept playable native 2D/3D engines. MAT-003 loads **one** engine
+(Godot 4) in isolated processes so the heap dies on `finish()`.
 
 | Layer | Technology | Process |
 | --- | --- | --- |
 | Menus, lessons, parental PIN, leaderboard | Jetpack Compose | default |
-| 2D side-scroller reward (age 3) | Compose Canvas + `Platformer2dEngine` | default |
-| 3D kart reward (age 7) | GLES + `Kart3dEngine` | `:engine3d` |
-| Persistence | Room + DataStore | default only (3D returns extras) |
+| 2D ring runner (age 3) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
+| 3D kart (age 7) | Godot 4; native GLES fallback | `:engine3d` |
+| Persistence | Room + DataStore | default only (engines return extras) |
 
 The 3D Activity does **not** open Room. It returns `RESULT_FINISHED`
 via `setResult`. When it finishes, the `:engine3d` process dies and the
-GLES heap is gone. The host Compose UI is not paused under a Unity player.
+engine heap is gone. The host Compose UI is not paused under a Godot view.
 
-### Later engine plugin (MAT-003)
+### Adopted engine: Godot 4 (MAT-003)
 
-A Godot 4 `aar` or Unity-as-a-library Activity may replace `Kart3dActivity`
-(or `Platformer2dActivity`) when it keeps this contract:
+**Godot 4** is the reward engine. Unity-as-a-library is not used.
 
-1. `android:process=":engine3d"` (or `:engine2d`) so the heap dies on `finish()`.
-2. Launch extras: `EngineLauncher.EXTRA_MASCOT` (mascot code) and
-   `EngineLauncher.EXTRA_NAME` (child display name).
-3. Result extra: `EngineLauncher.RESULT_FINISHED` (`true` when the level
-   completed). The host uses `StartActivityForResult`.
-4. No `INTERNET` permission, no Room, no analytics, no cloud save.
+Godot wins on this product because it is MIT-licensed, ships as
+`org.godotengine:godot` on Maven Central, starts a smaller isolated-process
+heap than Unity, and has no bundled analytics. Rendering is forced to
+`gl_compatibility` plus ETC2 so mid-tier tablets stay reliable. Unity would
+add a heavier player, a proprietary export pipeline, and a harder INTERNET
+strip.
 
-v1 ships the native GLES kart as the fallback. The Compose host must not hold
-a GL/Unity view. `EngineLauncher.PROCESS_ENGINE_3D` is `:engine3d`.
+Plugin Activities:
 
-### What is still needed for Godot or Unity (MAT-003)
+- age 3 → `pt.mataventuras.plugin.RunnerPluginActivity` in `:engine2d`
+- age 7 → `pt.mataventuras.plugin.KartPluginActivity` in `:engine3d`
 
-v1 **does not** ship Godot or Unity binaries. The host **can** adopt a stock
-Godot 4 `aar` or Unity-as-a-library export without a custom game engine:
-the constraint is an **isolated Android process**, not a bespoke renderer.
-
-Already in tree (this pass):
-
-- `EnginePluginContract` / `EnginePluginResolver` — classpath swap
-- `IsolatedEngineActivity` — extras + `completeReward`
-- `EngineInputMap` — shared kart touch bands
-- Optional `libs/engine-plugin.aar` Gradle hook
-- Templates in `samples/engine-plugin/`
+Contract: extras `mascot` / `name`, result `finished`, no Room, no `INTERNET`.
+The Compose host uses `StartActivityForResult` only. Robolectric cannot load
+`libgodot_android.so`, so those Activities attach the native Canvas/GLES
+hosts instead of `GodotFragment`. Domain `Kart3dEngine` /
+`Platformer2dEngine` stay the simulation source of truth.
 
 See [docs/engine-plugin.md](engine-plugin.md).
 
-A later plugin still needs:
+Native Canvas 2D (`Platformer2dActivity`) and GLES 3D (`Kart3dActivity`)
+remain in-tree as the fallback and as the unit-test hosts.
 
-1. A Godot 4 Android `aar` **or** a Unity-as-a-library project that provides
-   `pt.mataventuras.plugin.KartPluginActivity` and/or
-   `pt.mataventuras.plugin.RunnerPluginActivity`.
-2. `android:process=":engine3d"` (kart) or `:engine2d` (runner) so the engine
-   heap dies on `finish()`.
-3. Intent extras `EXTRA_MASCOT` and `EXTRA_NAME`; result extra
-   `RESULT_FINISHED` via `setResult` (`RESULT_OK` when the level completed).
-4. Asset pipeline (kart, track, rings, mascot tint) matching
-   `EngineInputMap` (2D: tap to jump; 3D: left/right thirds steer, centre boost).
-5. Networking, analytics, and cloud-save **stripped** from the engine export.
-   Confirm the merged manifest still has **no** `INTERNET` permission
-   (`EnginePluginContract.manifestAllowed`).
-6. The Compose host must **not** hold a GL/Unity view.
-7. Emulator instrumented coverage of the swap remains MAT-002-T1.
+## Why Unity is not used
 
-Until an AAR is dropped in `libs/engine-plugin.aar`, the playable engines are
-Kotlin Canvas (age 3) and GLES in `:engine3d` (age 7).
+Embedding Unity **and** Godot together is the failure mode the performance
+constraint warns about. A single engine is enough; Godot is that engine.
+Unity-as-a-library would still have to live in `:engine2d` / `:engine3d`,
+but it is a worse fit for APK size, heap, and a local-only privacy policy.
+
+| Layer | Technology | Process |
+| --- | --- | --- |
+| Menus, lessons, parental PIN, leaderboard | Jetpack Compose | default |
+| 2D ring runner (age 3) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
+| 3D kart (age 7) | Godot 4; native GLES fallback | `:engine3d` |
+| Persistence | Room + DataStore | default only (engines return extras) |
 
 ## Modules
 
@@ -117,9 +109,25 @@ spoiler, wheels). `Kart3dActivity` in `:engine3d` only issues ES1 calls and a
 pt-PT HUD (`Volta`, `Anéis`, `Impulso`). Touch: left third steers left, right
 third steers right, centre taps boost.
 
-A later Godot/Unity plugin (MAT-003-T1) may replace `Kart3dActivity` if it
-keeps the same Intent extras and isolated process. v1 does **not** embed
-Unity or Godot.
+A later Godot scene pack may replace the procedural kart/runner meshes if it
+keeps the same Intent extras and isolated process. Unity is not embedded.
+
+## Game engine wrapper
+
+`EngineLauncher.intentFor(context, ageGroup, mascot, name)` picks
+`RunnerPluginActivity` (age 3, `:engine2d`) or `KartPluginActivity`
+(age 7, `:engine3d`). `MainActivity` uses `StartActivityForResult` so Compose
+is not hosting a Godot view.
+
+On device those Activities attach `GodotFragment` with `--scene res://kart.tscn`
+or `res://runner.tscn`. Under Robolectric they attach `NativeKartHost` /
+`NativeRunnerHost` instead.
+
+Simulation is in `:domain` (`Platformer2dEngine`, `Kart3dEngine`) so physics
+is unit-tested without an emulator.
+
+The 3D renderer keeps reused `FloatBuffer`s for grass, track, start line, and
+box meshes (KT-PERF-001). Scene instances come from `KartScene` in `:domain`.
 
 ## State and local storage
 
@@ -196,24 +204,12 @@ Finishing a reward Activity awards 15 bonus points on the last profile.
 
 | Age | Lessons (Compose, mascot-hosted) | Reward mini-game |
 | --- | --- | --- |
-| **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D ring-collecting side-scroller (`Platformer2dActivity`) |
-| **7** | Addition incl. missing addend (`ADDITION`); subtraction (`SUBTRACTION`); multiplication (`MULTIPLICATION`); logic even/largest/smallest (`LOGIC`) | Oval-track 3D kart with steer and boost (`Kart3dActivity` in `:engine3d`) |
+| **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D ring runner (`RunnerPluginActivity` in `:engine2d`; native Canvas fallback) |
+| **7** | Addition incl. missing addend (`ADDITION`); subtraction (`SUBTRACTION`); multiplication (`MULTIPLICATION`); logic even/largest/smallest (`LOGIC`) | Oval-track 3D kart (`KartPluginActivity` in `:engine3d`; native GLES fallback) |
 
 Age 7 confirms before leaving a lesson (`VoiceScripts.confirmExit`).
 Age 3 leaves immediately. A finished reward returns `RESULT_FINISHED`;
 the host speaks a pt-PT line and applies bonus points.
-
-## Game engine wrapper
-
-`EngineLauncher.intentFor(context, ageGroup, mascot, name)` picks
-`Platformer2dActivity` or `Kart3dActivity`. `MainActivity` uses
-`StartActivityForResult` so Compose is not hosting a GL view.
-
-Simulation is in `:domain` (`Platformer2dEngine`, `Kart3dEngine`) so physics
-is unit-tested without an emulator.
-
-The 3D renderer keeps reused `FloatBuffer`s for grass, track, start line, and
-box meshes (KT-PERF-001). Scene instances come from `KartScene` in `:domain`.
 
 ## Testing policy (KT-TEST-003)
 

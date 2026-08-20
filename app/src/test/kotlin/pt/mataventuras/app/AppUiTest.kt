@@ -43,8 +43,14 @@ class AppUiTest {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val two = EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, "Ana")
         val three = EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER, "Rui")
-        assertEquals(Platformer2dActivity::class.java.name, two.component!!.className)
-        assertEquals(Kart3dActivity::class.java.name, three.component!!.className)
+        assertEquals(
+            pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS,
+            two.component!!.className,
+        )
+        assertEquals(
+            pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS,
+            three.component!!.className,
+        )
         assertEquals("speedy_hedgehog", two.getStringExtra(EngineLauncher.EXTRA_MASCOT))
         assertEquals(EngineLauncher.PROCESS_ENGINE_3D, ":engine3d")
         assertEquals("Rui", three.getStringExtra(EngineLauncher.EXTRA_NAME))
@@ -53,6 +59,16 @@ class AppUiTest {
         assertEquals(":engine2d", EngineLauncher.processFor(AgeGroup.THREE_YEARS, usingPlugin = true))
         assertEquals(":engine3d", EngineLauncher.processFor(AgeGroup.SEVEN_YEARS, usingPlugin = false))
         assertTrue(EngineLauncher.isClassPresent(Kart3dActivity::class.java.name))
+        assertTrue(
+            EngineLauncher.isClassPresent(
+                pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS,
+            ),
+        )
+        assertTrue(
+            EngineLauncher.isClassPresent(
+                pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS,
+            ),
+        )
         assertFalse(EngineLauncher.isClassPresent("pt.mataventuras.plugin.MissingEngineActivity"))
         assertFalse(EngineLauncher.wouldUsePlugin(pt.mataventuras.domain.model.EngineKind.THREE_D) { false })
         assertTrue(

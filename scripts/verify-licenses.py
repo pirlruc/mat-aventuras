@@ -40,6 +40,8 @@ KNOWN: dict[str, str] = {
     "io.gitlab.arturbosch.detekt:detekt-gradle-plugin": "Apache-2.0",
     "org.jlleitschuh.gradle:ktlint-gradle": "MIT",
     "org.jetbrains.kotlinx:kover-gradle-plugin": "Apache-2.0",
+    "org.godotengine:godot": "MIT",
+    "androidx.fragment:fragment-ktx": "Apache-2.0",
 }
 
 

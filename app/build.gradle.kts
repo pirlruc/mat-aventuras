@@ -17,6 +17,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
+    // Godot stores project files (and optional hidden dirs) under assets/.
+    androidResources {
+        ignoreAssetsPattern =
+            "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -40,6 +45,9 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        jniLibs {
+            pickFirsts += "**/libc++_shared.so"
+        }
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true
@@ -55,15 +63,15 @@ androidComponents {
     }
 }
 
-val enginePluginAar = rootProject.file("libs/engine-plugin.aar")
-
 dependencies {
     implementation(project(":data"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.godot)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
@@ -80,9 +88,6 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
-    if (enginePluginAar.isFile) {
-        implementation(files(enginePluginAar))
-    }
 }
 
 kover {
@@ -96,6 +101,8 @@ kover {
                 annotatedBy("androidx.compose.runtime.Composable")
                 classes("*Kt$*")
                 classes("*Activity$*")
+                // Godot JNI host: Robolectric cannot load libgodot_android.so.
+                classes("pt.mataventuras.app.engine.godot.*")
             }
         }
         verify {
