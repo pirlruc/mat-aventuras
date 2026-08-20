@@ -152,6 +152,17 @@ class GodotPluginHostTest {
         val perms = info.requestedPermissions?.toList().orEmpty()
         assertTrue(EnginePluginContract.manifestAllowed(perms))
         assertFalse(perms.any { it.endsWith("INTERNET") })
+        val appInfo = ctx.packageManager.getApplicationInfo(ctx.packageName, 0)
+        assertEquals(0, appInfo.flags and android.content.pm.ApplicationInfo.FLAG_ALLOW_BACKUP)
+        val activities =
+            ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_ACTIVITIES).activities
+        assertTrue(activities.any { it.name == EnginePluginContract.PLUGIN_KART_CLASS })
+        assertTrue(activities.any { it.name == EnginePluginContract.PLUGIN_RUNNER_CLASS })
+        assertTrue(
+            activities
+                .filter { it.name.contains("Plugin") || it.name.endsWith("Kart3dActivity") }
+                .all { EnginePluginContract.isIsolatedProcessName(it.processName) },
+        )
     }
 
     @Test
@@ -163,6 +174,19 @@ class GodotPluginHostTest {
         assertFalse(shouldOpenContainer("pt.mataventuras.app:engine2d"))
         currentProcessName()
         currentProcessName("pt.mataventuras.app:engine3d")
+        assertEquals(
+            "pt.mataventuras.app:engine3d",
+            resolveProcessName(sdk = 26, procCmdline = "pt.mataventuras.app:engine3d\u0000"),
+        )
+        assertFalse(
+            shouldOpenContainer(
+                resolveProcessName(sdk = 26, procCmdline = "pt.mataventuras.app:engine2d\u0000"),
+            ),
+        )
+        assertEquals("pkg", parseProcCmdline("pkg\u0000"))
+        assertEquals("", procCmdlineOrEmpty { throw IllegalStateException("proc") })
+        assertEquals("ok", procCmdlineOrEmpty { "ok" })
+        assertEquals("device", resolveProcessName(sdk = 28, api28Name = "device"))
         val nativeKartController =
             Robolectric.buildActivity(
                 Kart3dActivity::class.java,
@@ -171,6 +195,12 @@ class GodotPluginHostTest {
                     .putExtra(EngineLauncher.EXTRA_NAME, "Ana"),
             ).setup()
         nativeKartController.get().closeFinished()
+        nativeKartController.get().pauseEngineSurface()
+        nativeKartController.get().resumeEngineSurface()
+        nativeKartController.get().pauseableSurface =
+            android.opengl.GLSurfaceView(nativeKartController.get())
+        nativeKartController.get().pauseEngineSurface()
+        nativeKartController.get().resumeEngineSurface()
         destroy(nativeKartController)
         val nativeRunnerController =
             Robolectric.buildActivity(

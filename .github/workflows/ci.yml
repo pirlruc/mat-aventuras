@@ -77,7 +77,8 @@ jobs:
             docs/guardrail-deviations.yml \
             docs/issues-sync-targets.yml \
             .github/dependabot.yml \
-            .github/workflows/ci.yml
+            .github/workflows/ci.yml \
+            .github/workflows/hardening.yml
           .ci-venv/bin/python .github/scaffold/scripts/issues-sync.py \
             --yaml docs/issues.yml --validate-only
 
@@ -90,6 +91,9 @@ jobs:
 
       - name: Maintainability index (KT-CPLX-002)
         run: python3 scripts/verify-maintainability.py
+
+      - name: Privacy manifest (backup / isolation)
+        run: python3 scripts/verify-privacy-manifest.py
 
       - name: Shellcheck (CI-023)
         run: shellcheck scripts/*.sh

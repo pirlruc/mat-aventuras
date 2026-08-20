@@ -40,6 +40,8 @@ internal class KartRenderer(
     @Volatile
     var boostRequested: Boolean = false
 
+    private var finishedPublished: Boolean = false
+
     /**
      * Latest simulation snapshot (for tests).
      */
@@ -130,9 +132,11 @@ internal class KartRenderer(
 
     private fun publishHud() {
         val hud = KartScene.hudFingerprint(state)
-        if (hud != lastHud || state.finished) {
+        val justFinished = state.finished && !finishedPublished
+        if (hud != lastHud || justFinished) {
             lastHud = hud
-            onFrame(state, state.finished)
+            if (justFinished) finishedPublished = true
+            onFrame(state, justFinished)
         }
     }
 

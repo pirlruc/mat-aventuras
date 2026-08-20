@@ -419,3 +419,38 @@ milestones:
               - KT-DOC-001
               - KT-CPLX-002
               - KT-BUILD-002
+
+          - id: MAT-004-T3
+            status: done
+            title: Privacy hardening and finsilo-style extra CI gates
+            instructions:
+              files:
+                - app/src/main/AndroidManifest.xml
+                - app/src/main/res/xml/data_extraction_rules.xml
+                - .github/workflows/hardening.yml
+                - scripts/verify-privacy-manifest.py
+                - scripts/run-mobsfscan.sh
+            verification:
+              - android:allowBackup is false and dataExtractionRules deny Room/DataStore
+              - API 26–27 isolated processes still skip Room via /proc/self/cmdline
+              - hardening.yml runs wrapper validation, dependency-review, mobsfscan, privacy manifest
+            guardrail_refs:
+              - KT-SEC-001
+              - KT-SEC-002
+              - CI-005
+              - CI-012
+              - KT-PERF-001
+
+          - id: MAT-004-T4
+            status: open
+            title: CodeQL and OSV/SBOM gates (remaining finsilo security jobs)
+            instructions:
+              files:
+                - .github/workflows
+            verification:
+              - CodeQL java-kotlin job fails on High/Critical
+              - CycloneDX SBOM + OSV Scanner run on a built APK
+            guardrail_refs:
+              - KT-SEC-002
+              - SC-SBOM-001
+              - SC-SBOM-002

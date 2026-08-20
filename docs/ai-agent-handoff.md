@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-20
-**Last agent focus:** Adopt Godot 4 (not Unity) in isolated processes (MAT-003-T3)
+**Last agent focus:** Privacy/memory hardening and finsilo-style extra CI gates
 
 ---
 
@@ -34,7 +34,7 @@ Unity is not used. Native Canvas/GLES is the Robolectric fallback.
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
 | MAT-002 | open | Emulator instrumented tests remain; Robolectric 95% and richer packs are in tree |
 | MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin Activities + assets; native fallback under Robolectric |
-| MAT-004 | open in GitHub until human sync; tasks done in tree | Split CI, SAST, gitleaks binary, KDoc/MI/license scripts |
+| MAT-004 | open in GitHub until human sync; T1–T3 done in tree | Split CI, SAST, gitleaks, privacy hardening workflow; CodeQL/OSV still open (T4) |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
 KT-DELIV-001 (500-line PR soft limit) is not a gap for this first PR.
@@ -66,8 +66,7 @@ bash scripts/ci-local.sh
   are token-free HTTPS.
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
   can still gate `:domain`. With the SDK, coverage is required for all three.
-- 3D/Godot Activities run in `:engine3d` / `:engine2d` and must not open Room
-  (`MatAventurasApp.shouldOpenContainer`).
+- `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`).
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`; this cloud run used
   `cursor/mat-aventuras-core-ade3` per the agent environment.
@@ -82,5 +81,6 @@ bash scripts/ci-local.sh
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
+3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 
 *Last updated: 2026-08-20*

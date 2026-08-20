@@ -16,6 +16,10 @@ android {
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        ndk {
+            // Drop 32-bit x86; keep ARM tablets and x86_64 emulators.
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        }
     }
     // Godot stores project files (and optional hidden dirs) under assets/.
     androidResources {

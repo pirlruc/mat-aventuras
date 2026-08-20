@@ -14,12 +14,17 @@ internal class KartSession(
     private val onHud: (String, String) -> Unit,
     private val onFinished: () -> Unit,
 ) {
+    private var rewardCompleted: Boolean = false
+
     /** Renderer driven by this session. */
     val renderer: KartRenderer =
         KartRenderer(mascot, engine, nowNs, lapsTarget) { state, finished ->
             val overlay = kartOverlay(state)
             onHud(overlay.first, overlay.second)
-            if (finished) onFinished()
+            if (finished && !rewardCompleted) {
+                rewardCompleted = true
+                onFinished()
+            }
         }
 
     /**

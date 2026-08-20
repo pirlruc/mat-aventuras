@@ -85,8 +85,11 @@ class KartRendererTest {
         renderer.resize(gles, 400, 300)
         repeat(400) { renderer.drawScene(gles) }
         assertTrue(renderer.snapshot().finished)
-        assertTrue(finishedFrames >= 1)
+        val published = finishedFrames
+        assertTrue(published >= 1)
         renderer.drawScene(gles)
+        renderer.drawScene(gles)
+        assertEquals(published, finishedFrames)
     }
 
     @Test
@@ -117,7 +120,10 @@ class KartRendererTest {
         assertTrue(hud >= 1)
         repeat(400) { session.renderer.tick() }
         assertTrue(session.renderer.snapshot().finished)
-        assertTrue(done >= 1)
+        val completions = done
+        assertEquals(1, completions)
+        repeat(8) { session.renderer.tick() }
+        assertEquals(1, done)
     }
 
     @Test

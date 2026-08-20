@@ -148,6 +148,9 @@ accuracy from sessions (`LeaderboardCalculator`).
 
 PIN state is **not** in Room. `PinRepository` stores PBKDF2 hash + salt
 + lockout in DataStore (`parent_pin`). Plaintext PIN is never persisted.
+`android:allowBackup` is **false**, `fullBackupContent` is false, and
+`dataExtractionRules` exclude databases, shared prefs, and files so ADB
+backup and device-to-device transfer cannot copy profiles or the PIN hash.
 
 ### Parental PIN
 

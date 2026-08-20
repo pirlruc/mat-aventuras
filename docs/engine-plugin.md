@@ -31,6 +31,10 @@ reliable.
 3. Intent extras `mascot` and `name`; result extra `finished`.
 4. No Room in those processes (`MatAventurasApp` skips `AppContainer`).
 5. Merged manifest has **no** `INTERNET` / network permissions (`tools:node="remove"`).
+6. `allowBackup` is false. Godot's `FileProvider` and `ProcessPhoenix` are
+   `tools:node="remove"` so the reward APK cannot grant URIs or spawn `:phoenix`.
+7. Native GLES fallback pauses `GLSurfaceView` with the Activity. The APK
+   ships `armeabi-v7a`, `arm64-v8a`, and `x86_64` (no 32-bit x86).
 
 The Compose host starts those Activities with `StartActivityForResult`. When
 they `finish()`, Android kills the isolated process.

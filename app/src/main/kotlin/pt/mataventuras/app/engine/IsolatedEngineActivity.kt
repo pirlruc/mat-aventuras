@@ -1,6 +1,7 @@
 package pt.mataventuras.app.engine
 
 import android.content.Intent
+import android.opengl.GLSurfaceView
 import androidx.fragment.app.FragmentActivity
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.model.Mascot
@@ -14,6 +15,41 @@ import pt.mataventuras.domain.model.Mascot
  * without sharing the Compose process.
  */
 abstract class IsolatedEngineActivity : FragmentActivity() {
+    /**
+     * Native GLES surface to pause with the Activity. Null on the Godot path
+     * and under Robolectric (no continuous GL thread).
+     */
+    internal var pauseableSurface: GLSurfaceView? = null
+
+    override fun onPause() {
+        pauseEngineSurface()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        resumeEngineSurface()
+    }
+
+    override fun onDestroy() {
+        pauseableSurface = null
+        super.onDestroy()
+    }
+
+    /**
+     * Stops the native GL thread so a backgrounded fallback does not keep drawing.
+     */
+    internal fun pauseEngineSurface() {
+        pauseableSurface?.onPause()
+    }
+
+    /**
+     * Restarts the native GL thread after [onPause].
+     */
+    internal fun resumeEngineSurface() {
+        pauseableSurface?.onResume()
+    }
+
     /**
      * Mascot extra, or empty when the host omitted it.
      */

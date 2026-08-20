@@ -184,6 +184,8 @@ class AppUiTest {
         ready.markReadyForTest()
         ready.speak("Olá")
         ready.release()
+        ready.onInit(TextToSpeech.SUCCESS)
+        ready.speak("Olá")
         assertTrue(true)
     }
 

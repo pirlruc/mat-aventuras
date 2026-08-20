@@ -59,6 +59,7 @@ internal object NativeKartHost {
                     session.handleTouch(nx, event.action)
                 }
             }
+        activity.pauseableSurface = view
         val overlay =
             LinearLayout(activity).apply {
                 orientation = LinearLayout.VERTICAL

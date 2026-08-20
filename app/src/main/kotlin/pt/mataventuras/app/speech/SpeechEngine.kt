@@ -11,9 +11,10 @@ import java.util.Locale
 class SpeechEngine(context: Context) : TextToSpeech.OnInitListener {
     private val tts = TextToSpeech(context.applicationContext, this)
     private var ready = false
+    private var released = false
 
     override fun onInit(status: Int) {
-        if (status != TextToSpeech.SUCCESS) return
+        if (released || status != TextToSpeech.SUCCESS) return
         val pt = Locale("pt", "PT")
         val result = tts.setLanguage(pt)
         ready = UiLogic.languageSupported(result)
@@ -31,7 +32,7 @@ class SpeechEngine(context: Context) : TextToSpeech.OnInitListener {
      * Speaks [text] in pt-PT when the engine is ready.
      */
     fun speak(text: String) {
-        if (!UiLogic.shouldSpeak(ready, text)) return
+        if (released || !UiLogic.shouldSpeak(ready, text)) return
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "mat-aventuras")
     }
 
@@ -39,6 +40,8 @@ class SpeechEngine(context: Context) : TextToSpeech.OnInitListener {
      * Releases the TTS engine.
      */
     fun release() {
+        released = true
+        ready = false
         tts.stop()
         tts.shutdown()
     }

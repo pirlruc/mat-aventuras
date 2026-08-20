@@ -13,3 +13,8 @@ rules:
     severity: ERROR
     message: Process execution from app code is forbidden.
     pattern: Runtime.getRuntime().exec(...)
+  - id: mat-aventuras-no-adb-backup
+    languages: [xml]
+    severity: ERROR
+    message: ADB/cloud backup must stay disabled so PIN hashes and profiles never leave the device.
+    pattern: android:allowBackup="true"

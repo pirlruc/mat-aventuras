@@ -76,7 +76,8 @@ bash scripts/ci-local.sh
 ## Privacy
 
 The app **does not** request the `INTERNET` permission. Profiles, sessions,
-PIN, and the leaderboard stay in Room/DataStore.
+PIN, and the leaderboard stay in Room/DataStore. Android backup and
+device-to-device transfer are disabled so those stores cannot leave the tablet.
 
 ## License
 
