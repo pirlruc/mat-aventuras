@@ -21,6 +21,7 @@ import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.engine.Kart3dActivity
 import pt.mataventuras.app.engine.Platformer2dActivity
 import pt.mataventuras.app.engine.Platformer2dLoop
+import pt.mataventuras.app.engine.PlatformerRect
 import pt.mataventuras.app.engine.PlatformerScene
 import pt.mataventuras.app.speech.SpeechEngine
 import pt.mataventuras.app.ui.age.AgeSelectionScreen
@@ -179,7 +180,9 @@ class AppUiTest {
         engine.onInit(TextToSpeech.SUCCESS)
         engine.speak("Olá")
         engine.speak("  ")
+        engine.stop()
         engine.release()
+        engine.stop()
         val ready = SpeechEngine(ApplicationProvider.getApplicationContext())
         ready.markReadyForTest()
         ready.speak("Olá")
@@ -203,6 +206,14 @@ class AppUiTest {
         repeat(40) { two.loop.tick() }
         val sprites = PlatformerScene.sprites(two.loop.state, Mascot.HERO_PUP, 800f, 480f)
         assertTrue(sprites.size >= 6)
+        assertEquals(Mascot.HERO_PUP.primaryArgb, sprites.last { it.argb == Mascot.HERO_PUP.primaryArgb }.argb)
+        assertTrue(PlatformerScene.hatArgb(Mascot.HERO_PUP.primaryArgb) != Mascot.HERO_PUP.primaryArgb)
+        val collected = two.loop.state.copy(x = 32f, collectedMask = 31)
+        val tiles = ArrayList<PlatformerRect>(48)
+        PlatformerScene.fillTiles(tiles, collected, Mascot.PINK_PIGLET, 400f, 300f)
+        assertTrue(tiles.isNotEmpty())
+        PlatformerScene.fillTiles(tiles, collected.copy(x = 0f), Mascot.BRAVE_PLUMBER, 200f, 200f)
+        assertTrue(tiles.any { it.argb == PlatformerScene.BRICK_ARGB })
         assertTrue(PlatformerScene.groundTop(480f) > 300f)
         assertEquals("hero_pup" to "Ana", two.extrasSnapshot())
         two.completeReward(ok = true)

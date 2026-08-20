@@ -13,34 +13,45 @@ class PlayBoardFactory(
 ) {
     /**
      * Board for [kind] in [module]. [kind] is never [PlayKind.CHOICE].
+     * [level] 0..3 grows the grid and the cipher alphabet.
      */
     fun make(
         kind: PlayKind,
         module: LearningModule,
+        level: Int = 0,
     ): Exercise =
         when (kind) {
-            PlayKind.SUDOKU -> sudoku(module)
-            PlayKind.SOUP -> soup(module)
-            PlayKind.PUZZLE -> puzzle(module)
-            PlayKind.CIPHER -> cipher(module)
+            PlayKind.SUDOKU -> sudoku(module, level)
+            PlayKind.SOUP -> soup(module, level)
+            PlayKind.PUZZLE -> puzzle(module, level)
+            PlayKind.CIPHER -> cipher(module, level)
             PlayKind.CHOICE -> error("CHOICE is built by ExerciseGenerator.")
         }
 
-    internal fun sudoku(module: LearningModule): Exercise =
+    internal fun sudoku(
+        module: LearningModule,
+        level: Int = 0,
+    ): Exercise =
         if (module == LearningModule.SHAPES) {
-            shapeSudoku()
+            shapeSudoku(level)
         } else {
-            numberSudoku(module)
+            numberSudoku(module, level)
         }
 
-    internal fun soup(module: LearningModule): Exercise =
+    internal fun soup(
+        module: LearningModule,
+        level: Int = 0,
+    ): Exercise =
         when (module) {
-            LearningModule.LOGIC -> wordSoup()
-            LearningModule.COUNTING, LearningModule.NUMBERS -> huntSoup(module)
-            else -> shapeSoup()
+            LearningModule.LOGIC -> wordSoup(level)
+            LearningModule.COUNTING, LearningModule.NUMBERS -> huntSoup(module, level)
+            else -> shapeSoup(level)
         }
 
-    internal fun puzzle(module: LearningModule): Exercise {
+    internal fun puzzle(
+        module: LearningModule,
+        level: Int = 0,
+    ): Exercise {
         val piece =
             if (module == LearningModule.SHAPES) {
                 GeometricShape.entries[random.nextInt(GeometricShape.entries.size)].displayName
@@ -49,6 +60,9 @@ class PlayBoardFactory(
             }
         val others = numericOrShapes(piece)
         val options = (others + piece).shuffled(random)
+        val n = if (level >= 2) 3 else 2
+        val last = n * n - 1
+        val cells = List(n * n) { i -> if (i == last) "?" else (i + 1).toString() }
         return Exercise(
             module = module,
             prompt = "Qual é a peça que falta?",
@@ -57,22 +71,25 @@ class PlayBoardFactory(
             correctIndex = options.indexOf(piece),
             targetShape = GeometricShape.entries.firstOrNull { it.displayName == piece },
             visualCount = piece.toIntOrNull() ?: 0,
-            play = PlayBoard(kind = PlayKind.PUZZLE, cells = listOf("1", "2", "3", "?"), columns = 2),
+            play = PlayBoard(kind = PlayKind.PUZZLE, cells = cells, columns = n),
         )
     }
 
-    internal fun cipher(module: LearningModule): Exercise =
+    internal fun cipher(
+        module: LearningModule,
+        level: Int = 0,
+    ): Exercise =
         when (module) {
-            LearningModule.COUNTING, LearningModule.NUMBERS -> countCipher(module)
-            LearningModule.LOGIC -> wordCipher()
-            else -> mathCipher(module)
+            LearningModule.COUNTING, LearningModule.NUMBERS -> countCipher(module, level)
+            LearningModule.LOGIC -> wordCipher(level)
+            else -> mathCipher(module, level)
         }
 
-    private fun shapeSudoku(): Exercise {
-        val first = GeometricShape.CIRCLE.displayName
-        val second = GeometricShape.SQUARE.displayName
-        val full = listOf(first, second, second, first)
-        val hole = random.nextInt(4)
+    private fun shapeSudoku(level: Int): Exercise {
+        val n = 2 + minOf(level, 1)
+        val glyphs = GeometricShape.entries.take(n).map { it.displayName }
+        val full = List(n * n) { i -> glyphs[(i / n + i % n) % n] }
+        val hole = random.nextInt(full.size)
         val answer = full[hole]
         val cells = full.mapIndexed { i, value -> if (i == hole) "" else value }
         val others = GeometricShape.entries.map { it.displayName }.filter { it != answer }.take(3)
@@ -84,23 +101,20 @@ class PlayBoardFactory(
             options = options,
             correctIndex = options.indexOf(answer),
             targetShape = GeometricShape.entries.first { it.displayName == answer },
-            play = PlayBoard(kind = PlayKind.SUDOKU, cells = cells, columns = 2),
+            play = PlayBoard(kind = PlayKind.SUDOKU, cells = cells, columns = n),
         )
     }
 
-    private fun numberSudoku(module: LearningModule): Exercise {
-        val mini = module == LearningModule.NUMBERS
-        val full =
-            if (mini) {
-                listOf(1, 2, 2, 1)
-            } else {
-                List(16) { i -> (i / 4 + i % 4) % 4 + 1 }
-            }
+    private fun numberSudoku(
+        module: LearningModule,
+        level: Int,
+    ): Exercise {
+        val n = if (module == LearningModule.NUMBERS) 2 + minOf(level, 1) else 4 + minOf(level, 2)
+        val full = List(n * n) { i -> (i / n + i % n) % n + 1 }
         val hole = random.nextInt(full.size)
         val answer = full[hole]
         val cells = full.mapIndexed { i, value -> if (i == hole) "" else value.toString() }
-        val maxDigit = if (mini) 2 else 4
-        val options = numericOptions(answer, 1, maxDigit).map { it.toString() }
+        val options = numericOptions(answer, 1, n).map { it.toString() }
         return Exercise(
             module = module,
             prompt = "Que número falta?",
@@ -108,15 +122,17 @@ class PlayBoardFactory(
             options = options,
             correctIndex = options.indexOf(answer.toString()),
             visualCount = answer,
-            play = PlayBoard(kind = PlayKind.SUDOKU, cells = cells, columns = if (mini) 2 else 4),
+            play = PlayBoard(kind = PlayKind.SUDOKU, cells = cells, columns = n),
         )
     }
 
-    private fun shapeSoup(): Exercise {
+    private fun shapeSoup(level: Int): Exercise {
+        val size = 3 + minOf(level, 2)
+        val n = size * size
         val target = GeometricShape.entries[random.nextInt(GeometricShape.entries.size)]
         val others = GeometricShape.entries.filter { it != target }
-        val cells = MutableList(9) { others[random.nextInt(others.size)].displayName }
-        val index = random.nextInt(9)
+        val cells = MutableList(n) { others[random.nextInt(others.size)].displayName }
+        val index = random.nextInt(n)
         cells[index] = target.displayName
         return Exercise(
             module = LearningModule.SHAPES,
@@ -129,22 +145,28 @@ class PlayBoardFactory(
                 PlayBoard(
                     kind = PlayKind.SOUP,
                     cells = cells.toList(),
-                    columns = 3,
+                    columns = size,
                     targetIndices = listOf(index),
                 ),
         )
     }
 
-    private fun huntSoup(module: LearningModule): Exercise {
+    private fun huntSoup(
+        module: LearningModule,
+        level: Int,
+    ): Exercise {
+        val size = 3 + minOf(level, 2)
+        val n = size * size
         val counting = module == LearningModule.COUNTING
         val target = if (counting) random.nextInt(1, 10) else random.nextInt(0, 10)
         val cells =
-            if (counting) {
+            if (counting && n == 9) {
                 (1..9).toList().shuffled(random).map { it.toString() }
             } else {
-                val others = (0..9).filter { it != target }
-                MutableList(9) { others[random.nextInt(others.size)].toString() }.also { list ->
-                    list[random.nextInt(9)] = target.toString()
+                val lo = if (counting) 1 else 0
+                val others = (lo..9).filter { it != target }
+                MutableList(n) { others[random.nextInt(others.size)].toString() }.also { list ->
+                    list[random.nextInt(n)] = target.toString()
                 }
             }
         val index = cells.indexOf(target.toString())
@@ -166,18 +188,22 @@ class PlayBoardFactory(
                 PlayBoard(
                     kind = PlayKind.SOUP,
                     cells = cells,
-                    columns = 3,
+                    columns = size,
                     targetIndices = listOf(index),
                 ),
         )
     }
 
-    private fun wordSoup(): Exercise {
-        val word = WORDS[random.nextInt(WORDS.size)]
+    private fun wordSoup(level: Int): Exercise {
+        val size = 4 + minOf(level, 2)
+        val candidates = WORDS.filter { it.length <= size }
+        val word = candidates[random.nextInt(candidates.size)]
         val pool = LETTERS.filter { it !in word }
-        val letters = MutableList(16) { pool[random.nextInt(pool.length)].toString() }
-        val row = random.nextInt(4)
-        val start = row * 4
+        val letters = MutableList(size * size) { pool[random.nextInt(pool.length)].toString() }
+        val maxCol = size - word.length
+        val col = if (maxCol <= 0) 0 else random.nextInt(maxCol + 1)
+        val row = random.nextInt(size)
+        val start = row * size + col
         val path =
             word.mapIndexed { i, char ->
                 val index = start + i
@@ -194,15 +220,17 @@ class PlayBoardFactory(
                 PlayBoard(
                     kind = PlayKind.SOUP,
                     cells = letters.toList(),
-                    columns = 4,
+                    columns = size,
                     targetIndices = path,
                 ),
         )
     }
 
-    private fun wordCipher(): Exercise {
-        val word = WORDS[random.nextInt(WORDS.size)]
-        val symbols = listOf("▲", "●", "■", "◆")
+    private fun wordCipher(level: Int): Exercise {
+        val width = 4 + minOf(level, 2)
+        val candidates = WORDS.filter { it.length == width }
+        val word = candidates[random.nextInt(candidates.size)]
+        val symbols = SYMBOLS.take(word.length)
         val legend = word.mapIndexed { i, ch -> "${symbols[i]}=$ch" }
         val code = word.indices.joinToString("") { symbols[it] }
         val others = WORDS.filter { it != word }.shuffled(random).take(3)
@@ -223,55 +251,77 @@ class PlayBoardFactory(
         )
     }
 
-    private fun countCipher(module: LearningModule): Exercise {
-        val value = random.nextInt(1, 5)
-        val options = numericOptions(value, 1, 9).map { it.toString() }
+    private fun countCipher(
+        module: LearningModule,
+        level: Int,
+    ): Exercise {
+        val kinds = 1 + minOf(level, 2)
+        val stars = random.nextInt(1, 4)
+        val dots = if (kinds > 1) random.nextInt(0, 3) else 0
+        val boxes = if (kinds > 2) random.nextInt(0, 3) else 0
+        val value = stars + dots * 2 + boxes * 3
+        val legend = ArrayList<String>(kinds)
+        legend.add("⭐=1")
+        if (kinds > 1) legend.add("●=2")
+        if (kinds > 2) legend.add("■=3")
+        val code = "⭐".repeat(stars) + "●".repeat(dots) + "■".repeat(boxes)
+        val spoken =
+            if (kinds == 1) {
+                "Cada estrela vale um. Quantas são?"
+            } else {
+                "Lê a legenda. Que número é o código?"
+            }
+        val options = numericOptions(value, 1, 12).map { it.toString() }
         return Exercise(
             module = module,
             prompt = "O código diz que número?",
-            spoken = "Cada estrela vale um. Quantas são?",
+            spoken = spoken,
             options = options,
             correctIndex = options.indexOf(value.toString()),
             visualCount = value,
             play =
                 PlayBoard(
                     kind = PlayKind.CIPHER,
-                    cells = listOf("⭐=1"),
-                    columns = 1,
-                    cipherCode = List(value) { "⭐" }.joinToString(""),
+                    cells = legend,
+                    columns = legend.size,
+                    cipherCode = code,
                 ),
         )
     }
 
-    private fun mathCipher(module: LearningModule): Exercise {
-        val left = random.nextInt(2, 6)
-        val right = random.nextInt(1, 5)
+    private fun mathCipher(
+        module: LearningModule,
+        level: Int,
+    ): Exercise {
+        val left = random.nextInt(2 + level, 6 + level * 2)
+        val right = random.nextInt(1, 5 + level)
+        val mulBit = if (module == LearningModule.MULTIPLICATION) 1 else 0
+        val subBit = if (module == LearningModule.SUBTRACTION) 1 else 0
+        val third = (1 - mulBit) * (level / 2).coerceAtMost(1) * random.nextInt(1, 4)
         val answer =
-            when (module) {
-                LearningModule.SUBTRACTION -> left
-                LearningModule.MULTIPLICATION -> left * right
-                else -> left + right
+            left * (mulBit * (right - 1) + 1) + (1 - subBit) * (1 - mulBit) * (right + third)
+        val promptLeft = left + subBit * (right + third)
+        val infix = " ${listOf("+", "−", "×")[subBit + 2 * mulBit]} "
+        val cells =
+            if (third == 0) {
+                listOf("▲=$promptLeft", "●=$right")
+            } else {
+                listOf("▲=$promptLeft", "●=$right", "■=$third")
             }
-        val promptLeft = if (module == LearningModule.SUBTRACTION) left + right else left
-        val symbol =
-            when (module) {
-                LearningModule.SUBTRACTION -> "−"
-                LearningModule.MULTIPLICATION -> "×"
-                else -> "+"
-            }
-        val options = numericOptions(answer, 1, 40).map { it.toString() }
+        val code = if (third == 0) "▲$infix●" else "▲$infix●$infix■"
+        val options = numericOptions(answer, 1, 80).map { it.toString() }
         return Exercise(
             module = module,
-            prompt = "▲ $symbol ● = ?",
+            prompt = "$code = ?",
             spoken = "Triângulo vale $promptLeft. Círculo vale $right. Quanto é?",
             options = options,
             correctIndex = options.indexOf(answer.toString()),
             play =
                 PlayBoard(
                     kind = PlayKind.CIPHER,
-                    cells = listOf("▲=$promptLeft", "●=$right"),
-                    columns = 2,
-                    cipherCode = "▲ $symbol ●",
+                    cells = cells,
+                    columns = cells.size,
+                    cipherCode = code,
                 ),
         )
     }
@@ -286,7 +336,22 @@ class PlayBoardFactory(
     }
 
     private companion object {
-        val WORDS: List<String> = listOf("dois", "três", "seis", "sete", "oito", "nove")
+        val WORDS: List<String> =
+            listOf(
+                "dois",
+                "três",
+                "seis",
+                "sete",
+                "oito",
+                "nove",
+                "cinco",
+                "vinte",
+                "treze",
+                "quatro",
+                "quinze",
+                "trinta",
+            )
+        val SYMBOLS: List<String> = listOf("▲", "●", "■", "◆", "★", "♥")
         const val LETTERS: String = "abcdefghijklmnopqrstuvwxyz"
     }
 }

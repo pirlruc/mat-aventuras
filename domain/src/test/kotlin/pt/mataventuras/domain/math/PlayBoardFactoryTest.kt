@@ -124,4 +124,58 @@ class PlayBoardFactoryTest {
         }
         assertTrue(failed)
     }
+
+    @Test
+    fun harderLevelsGrowBoardsAndCipherAlphabets() {
+        val shapeSudoku = factory.sudoku(LearningModule.SHAPES, 2)
+        assertEquals(3, shapeSudoku.play.columns)
+        assertEquals(9, shapeSudoku.play.cells.size)
+        val mini = factory.sudoku(LearningModule.NUMBERS, 3)
+        assertEquals(3, mini.play.columns)
+        val logic = factory.sudoku(LearningModule.LOGIC, 2)
+        assertEquals(6, logic.play.columns)
+        assertEquals(36, logic.play.cells.size)
+        val shapeSoup = factory.soup(LearningModule.SHAPES, 2)
+        assertEquals(5, shapeSoup.play.columns)
+        assertEquals(25, shapeSoup.options.size)
+        val countSoup = factory.soup(LearningModule.COUNTING, 2)
+        assertEquals(5, countSoup.play.columns)
+        assertEquals(25, countSoup.options.size)
+        val numberSoup = factory.soup(LearningModule.NUMBERS, 1)
+        assertEquals(4, numberSoup.play.columns)
+        val words = factory.soup(LearningModule.LOGIC, 2)
+        assertEquals(6, words.play.columns)
+        assertEquals(36, words.options.size)
+        (0..24).forEach { seed ->
+            PlayBoardFactory(Random(seed), generator::numericOptions).soup(LearningModule.LOGIC, 2)
+        }
+        val puzzle = factory.puzzle(LearningModule.COUNTING, 2)
+        assertEquals(3, puzzle.play.columns)
+        assertEquals(9, puzzle.play.cells.size)
+        val easyPuzzle = factory.puzzle(LearningModule.SHAPES, 0)
+        assertEquals(2, easyPuzzle.play.columns)
+        val countCode = factory.cipher(LearningModule.COUNTING, 0)
+        assertEquals(1, countCode.play.cells.size)
+        val mixed = factory.cipher(LearningModule.NUMBERS, 2)
+        assertEquals(3, mixed.play.cells.size)
+        assertTrue(mixed.play.cipherCode.contains("■"))
+        val mid = factory.cipher(LearningModule.COUNTING, 1)
+        assertEquals(2, mid.play.cells.size)
+        val wordCode = factory.cipher(LearningModule.LOGIC, 2)
+        assertEquals(6, wordCode.options[wordCode.correctIndex].length)
+        assertEquals(6, wordCode.play.cells.size)
+        val five = factory.cipher(LearningModule.LOGIC, 1)
+        assertEquals(5, five.play.cells.size)
+        val add = factory.cipher(LearningModule.ADDITION, 2)
+        assertEquals(3, add.play.cells.size)
+        val mul = factory.cipher(LearningModule.MULTIPLICATION, 2)
+        assertEquals(2, mul.play.cells.size)
+        val sub = factory.cipher(LearningModule.SUBTRACTION, 2)
+        assertTrue(sub.play.cells.size >= 2)
+        assertEquals(5, factory.make(PlayKind.SOUP, LearningModule.SHAPES, 2).play.columns)
+        val wide =
+            (0..80).map { ExerciseGenerator(Random(it)).generate(LearningModule.LOGIC, 3) }
+                .filter { it.play.kind == PlayKind.SUDOKU }
+        assertTrue(wide.any { it.play.columns == 6 })
+    }
 }

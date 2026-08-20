@@ -55,6 +55,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStop() {
+        if (::speech.isInitialized) speech.stop()
+        super.onStop()
+    }
+
     override fun onDestroy() {
         speech.release()
         super.onDestroy()

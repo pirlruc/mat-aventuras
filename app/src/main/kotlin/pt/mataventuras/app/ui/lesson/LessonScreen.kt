@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.atomic.AtomicInteger
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
@@ -69,7 +70,7 @@ fun LessonScreen(
 ) {
     val tokens = LocalUiTokens.current
     val scope = rememberCoroutineScope()
-    var exercise by remember { mutableStateOf(container.generator.generate(module)) }
+    var exercise by remember { mutableStateOf(container.generator.generate(module, 0)) }
     var hits by remember { mutableIntStateOf(0) }
     var misses by remember { mutableIntStateOf(0) }
     var streak by remember { mutableIntStateOf(0) }
@@ -77,6 +78,7 @@ fun LessonScreen(
     var confirmingExit by remember { mutableStateOf(false) }
     val startedAt = remember { System.currentTimeMillis() }
     val pointsGate = remember { Mutex() }
+    val pointsTicket = remember { AtomicInteger(0) }
     val fillViewport = UiLogic.lessonFillsViewport(profile.ageGroup)
     val view = LocalView.current
     val cues = remember { AnswerCuePlayer.device() }
@@ -104,6 +106,7 @@ fun LessonScreen(
         onSpeak(if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN)
         val delta = container.rewards.pointsForAttempt(correct)
         points = container.rewards.applyPoints(points, delta)
+        val ticket = pointsTicket.incrementAndGet()
         if (correct) {
             hits += 1
             streak += 1
@@ -114,15 +117,14 @@ fun LessonScreen(
         scope.launch {
             pointsGate.withLock {
                 val stored = container.repository.addPoints(profile.id, delta) ?: return@withLock
-                points = stored.points
+                if (ticket == pointsTicket.get()) points = stored.points
             }
         }
         if (container.rewards.shouldOpenReward(streak)) {
             onSpeak(VoiceScripts.LETS_PLAY)
             onReward(profile.ageGroup)
         }
-        exercise = container.generator.generate(module)
-    }
+        exercise = container.generator.generate(module, UiLogic.lessonLevel(hits))    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -255,6 +257,7 @@ private fun PlayGrid(
     val columns = exercise.play.columns.coerceAtLeast(1)
     val cells = exercise.play.cells.ifEmpty { exercise.options }
     val tappable = exercise.play.kind == PlayKind.SOUP
+    val cellDp = UiLogic.playCellHeightDp(columns)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         cells.chunked(columns).forEachIndexed { row, rowCells ->
             Row(
@@ -273,7 +276,7 @@ private fun PlayGrid(
                         ),
                         modifier = Modifier
                             .weight(1f)
-                            .height(72.dp)
+                            .height(cellDp.dp)
                             .testTag(
                                 if (tappable) {
                                     UiLogic.answerTag(exercise.isCorrect(index))
@@ -308,8 +311,10 @@ private fun CipherPanel(exercise: Exercise) {
 @Composable
 private fun PuzzleFrame(exercise: Exercise) {
     val cells = exercise.play.cells.ifEmpty { listOf("1", "2", "3", "?") }
+    val columns = exercise.play.columns.coerceAtLeast(2)
+    val cellDp = UiLogic.playCellHeightDp(columns)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        cells.chunked(2).forEach { row ->
+        cells.chunked(columns).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { cell ->
                     val hole = UiLogic.isBoardHole(cell)
@@ -320,7 +325,7 @@ private fun PuzzleFrame(exercise: Exercise) {
                             disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
                             disabledContentColor = Color(0xFF0D47A1),
                         ),
-                        modifier = Modifier.size(72.dp),
+                        modifier = Modifier.size(cellDp.dp),
                     ) {
                         GridCellFace(module = exercise.module, cell = cell)
                     }

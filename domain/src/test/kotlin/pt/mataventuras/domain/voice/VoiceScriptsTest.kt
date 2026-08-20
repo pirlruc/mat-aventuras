@@ -29,6 +29,7 @@ class VoiceScriptsTest {
         assertTrue(VoiceScripts.LETS_PLAY.contains("prémio"))
         assertTrue(VoiceScripts.STAYS_ON_DEVICE.contains("aparelho"))
         assertTrue(VoiceScripts.STEER_HINT.contains("guiar"))
+        assertTrue(VoiceScripts.JUMP_HINT.contains("moedas"))
     }
 
     @Test

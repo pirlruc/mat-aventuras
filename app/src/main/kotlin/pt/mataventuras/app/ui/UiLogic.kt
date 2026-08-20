@@ -97,9 +97,25 @@ internal object UiLogic {
     fun showsCipherLegend(kind: PlayKind): Boolean = kind == PlayKind.CIPHER
 
     /**
-     * Puzzle shows a 2x2 frame with a glowing hole.
+     * Puzzle shows a frame with a glowing hole.
      */
     fun showsPuzzleFrame(kind: PlayKind): Boolean = kind == PlayKind.PUZZLE
+
+    /**
+     * Lesson board size / cipher alphabet from consecutive hits (0, 3, 6, 9+).
+     */
+    fun lessonLevel(hits: Int): Int = (hits / 3).coerceIn(0, 3)
+
+    /**
+     * Sudoku/soup cell height so 5×5 and 6×6 boards still fit.
+     */
+    fun playCellHeightDp(columns: Int): Int =
+        when {
+            columns >= 6 -> 44
+            columns >= 5 -> 52
+            columns >= 4 -> 56
+            else -> 72
+        }
 
     /**
      * Soup cells are the answers; other kinds keep a palette.

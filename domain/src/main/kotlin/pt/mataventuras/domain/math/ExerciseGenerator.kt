@@ -14,10 +14,14 @@ class ExerciseGenerator(
 
     /**
      * Next exercise for [module], mixing classic buttons with boards.
+     * [level] 0..3 grows interactive boards as the child strings hits together.
      */
-    fun generate(module: LearningModule): Exercise {
+    fun generate(
+        module: LearningModule,
+        level: Int = 0,
+    ): Exercise {
         val kind = PlayKinds.pick(module, random)
-        if (kind != PlayKind.CHOICE) return boards.make(kind, module)
+        if (kind != PlayKind.CHOICE) return boards.make(kind, module, level)
         return when (module) {
             LearningModule.COUNTING -> counting()
             LearningModule.SHAPES -> shape()

@@ -2,6 +2,7 @@ package pt.mataventuras.app.engine
 
 import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.Platformer2dState
+import pt.mataventuras.domain.engine.PlatformerWorld
 
 /**
  * Frame loop for the age-3 Canvas reward. Testable without `withFrameNanos`.
@@ -32,8 +33,9 @@ internal class Platformer2dLoop(
         val jump = jumping
         jumping = false
         state = engine.step(state, dt, jump)
-        val ring = (state.x / 8f).toInt() * 8f + 6f
-        state = engine.collect(state, ring)
+        PlatformerWorld.COIN_X.forEachIndexed { i, coinX ->
+            state = engine.collect(state, coinX, coinIndex = i)
+        }
         return state
     }
 }

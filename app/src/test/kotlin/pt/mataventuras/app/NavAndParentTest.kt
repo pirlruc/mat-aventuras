@@ -105,6 +105,7 @@ class NavAndParentTest {
         activity.onEngineResult(android.app.Activity.RESULT_CANCELED, null)
         activity.finish()
         activity.onEngineResult(android.app.Activity.RESULT_CANCELED, null)
+        controller.pause().stop()
         controller.destroy()
         activity.onEngineResult(android.app.Activity.RESULT_OK, null)
     }

@@ -29,7 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.domain.model.ChildProfile
@@ -84,7 +86,8 @@ fun ParentDashboard(
                 onClick = {
                     scope.launch {
                         if (settingPin) {
-                            val (result, created) = gate.setPin(pin, confirmation)
+                            val (result, created) =
+                                withContext(Dispatchers.Default) { gate.setPin(pin, confirmation) }
                             when (result) {
                                 PinGateResult.Unlocked -> {
                                     container.pinRepository.save(created!!)
@@ -94,7 +97,8 @@ fun ParentDashboard(
                             }
                         } else {
                             val state = container.pinRepository.read() ?: return@launch
-                            val (result, next) = gate.unlock(state, pin)
+                            val (result, next) =
+                                withContext(Dispatchers.Default) { gate.unlock(state, pin) }
                             container.pinRepository.save(next)
                             when (result) {
                                 PinGateResult.Unlocked -> unlocked = true

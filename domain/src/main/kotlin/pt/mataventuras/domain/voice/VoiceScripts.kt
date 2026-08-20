@@ -26,6 +26,7 @@ object VoiceScripts {
     const val PIN_LOCKED: String = "Demasiadas tentativas. Espera um minuto."
     const val STAYS_ON_DEVICE: String = "Tudo fica neste aparelho. Não enviamos dados."
     const val STEER_HINT: String = "Esquerda e direita para guiar. No meio: impulso!"
+    const val JUMP_HINT: String = "Toca para saltar. Apanha as moedas!"
     const val LEAVE: String = "Sair"
     const val CONFIRM_LEAVE: String = "Sim, sair"
     const val STAY: String = "Ficar"
@@ -34,7 +35,7 @@ object VoiceScripts {
     const val YOUR_NAME: String = "Como te chamas?"
     const val CHOOSE_FRIEND: String = "Escolhe o teu amigo:"
     const val AGE_THREE_PREVIEW: String =
-        "Contar, formas e números. Sopa, puzzle e códigos. Prémio: apanha os anéis!"
+        "Contar, formas e números. Sopa, puzzle e códigos. Prémio: salta e apanha as moedas!"
     const val AGE_SEVEN_PREVIEW: String =
         "Somar, subtrair, multiplicar e lógica. Sudoku, sopa e códigos. Prémio: corre no kart!"
     const val REWARD_FINISHED: String = "Boa! Ganhaste um prémio. Vamos continuar."
