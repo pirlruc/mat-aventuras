@@ -1,5 +1,7 @@
 package pt.mataventuras.app.ui
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -365,15 +367,23 @@ class ParentAndLessonLogicTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onAllNodesWithTag("correct-answer").onFirst().performClick()
-        compose.waitForIdle()
+        val before = scoreLine()
+        compose.onAllNodesWithTag("correct-answer").onFirst().performScrollTo().performClick()
+        compose.waitUntil(8_000) { scoreLine() != before }
     }
 
     private fun clickWrong() {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithTag("distractor").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onAllNodesWithTag("distractor").onFirst().performClick()
+        compose.onAllNodesWithTag("distractor").onFirst().performScrollTo().performClick()
         compose.waitForIdle()
+    }
+
+    private fun scoreLine(): String {
+        val nodes = compose.onAllNodesWithText("certos", substring = true).fetchSemanticsNodes()
+        return nodes.joinToString { node ->
+            node.config.getOrNull(SemanticsProperties.Text).toString()
+        }
     }
 }
