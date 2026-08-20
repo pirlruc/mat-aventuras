@@ -46,6 +46,13 @@ class ChildProfileTest {
     fun engineKindPerAgeGroup() {
         assertEquals(EngineKind.TWO_D, engineKindFor(AgeGroup.THREE_YEARS))
         assertEquals(EngineKind.THREE_D, engineKindFor(AgeGroup.SEVEN_YEARS))
+        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeGroup.THREE_YEARS))
+        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeGroup.THREE_YEARS, kotlin.random.Random(0)))
+        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeGroup.THREE_YEARS, kotlin.random.Random(1)))
+        val seven =
+            (0..40).map { pickRewardKind(AgeGroup.SEVEN_YEARS, kotlin.random.Random(it)) }.toSet()
+        assertTrue(EngineKind.TWO_D in seven)
+        assertTrue(EngineKind.THREE_D in seven)
     }
 
     @Test

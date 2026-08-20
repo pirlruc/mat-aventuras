@@ -43,7 +43,22 @@ class AppUiTest {
     fun engineLauncherPicksIsolatedProcessActivities() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val two = EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, "Ana")
-        val three = EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER, "Rui")
+        val three =
+            EngineLauncher.intentFor(
+                ctx,
+                AgeGroup.SEVEN_YEARS,
+                Mascot.BRAVE_PLUMBER,
+                "Rui",
+                pt.mataventuras.domain.model.EngineKind.THREE_D,
+            )
+        val sevenRunner =
+            EngineLauncher.intentFor(
+                ctx,
+                AgeGroup.SEVEN_YEARS,
+                Mascot.BRAVE_PLUMBER,
+                "Rui",
+                pt.mataventuras.domain.model.EngineKind.TWO_D,
+            )
         assertEquals(
             pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS,
             two.component!!.className,
@@ -51,6 +66,10 @@ class AppUiTest {
         assertEquals(
             pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS,
             three.component!!.className,
+        )
+        assertEquals(
+            pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS,
+            sevenRunner.component!!.className,
         )
         assertEquals("speedy_hedgehog", two.getStringExtra(EngineLauncher.EXTRA_MASCOT))
         assertEquals(EngineLauncher.PROCESS_ENGINE_3D, ":engine3d")
@@ -78,7 +97,13 @@ class AppUiTest {
             },
         )
         val pluginKart =
-            EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER, "Rui") { className ->
+            EngineLauncher.intentFor(
+                ctx,
+                AgeGroup.SEVEN_YEARS,
+                Mascot.BRAVE_PLUMBER,
+                "Rui",
+                pt.mataventuras.domain.model.EngineKind.THREE_D,
+            ) { className ->
                 className == pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS
             }
         assertEquals(
@@ -229,7 +254,13 @@ class AppUiTest {
         val threeController =
             Robolectric.buildActivity(
                 Kart3dActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.MISCHIEVOUS_ALIEN, "Rui"),
+                EngineLauncher.intentFor(
+                    ctx,
+                    AgeGroup.SEVEN_YEARS,
+                    Mascot.MISCHIEVOUS_ALIEN,
+                    "Rui",
+                    pt.mataventuras.domain.model.EngineKind.THREE_D,
+                ),
             ).setup()
         val three = threeController.get()
         assertTrue(three.window != null)

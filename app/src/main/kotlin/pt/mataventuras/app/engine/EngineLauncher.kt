@@ -8,11 +8,13 @@ import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.engineKindFor
+import pt.mataventuras.domain.model.pickRewardKind
 
 /**
  * Native host → reward engine. Age 3 launches the Godot runner in `:engine2d`;
- * age 7 launches the Godot kart in `:engine3d`. Native Canvas/GLES Activities
- * remain as the fallback when plugin classes are absent and for unit tests.
+ * age 7 randomly launches that platformer or the Godot kart in `:engine3d`.
+ * Native Canvas/GLES Activities remain as the fallback when plugin classes
+ * are absent and for unit tests.
  *
  * Plugin contract (MAT-003): a Godot Activity replaces
  * [Kart3dActivity] or [Platformer2dActivity] when it:
@@ -63,7 +65,7 @@ object EngineLauncher {
         }
 
     /**
-     * Intent for the age-appropriate reward Activity.
+     * Intent for the reward Activity. [kind] defaults to a random pick at age 7.
      * [pluginPresent] is injected in tests; production uses [isClassPresent].
      */
     fun intentFor(
@@ -71,9 +73,9 @@ object EngineLauncher {
         ageGroup: AgeGroup,
         mascot: Mascot,
         name: String,
+        kind: EngineKind = pickRewardKind(ageGroup),
         pluginPresent: (String) -> Boolean = { isClassPresent(it) },
     ): Intent {
-        val kind = engineKindFor(ageGroup)
         val className =
             EnginePluginResolver.classNameFor(
                 kind = kind,
