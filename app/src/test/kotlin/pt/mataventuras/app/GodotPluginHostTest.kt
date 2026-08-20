@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -99,6 +100,16 @@ class GodotPluginHostTest {
         val copied = GodotRuntime.isolatedRebirthIntent(nameless, EnginePluginContract.PLUGIN_RUNNER_CLASS)
         assertEquals("Ana", copied.getStringExtra("name"))
         assertTrue(copied.flags and android.content.Intent.FLAG_ACTIVITY_NEW_TASK != 0)
+        val packaged = android.content.Intent().setPackage(ctx.packageName)
+        val fromPkg =
+            GodotRuntime.isolatedRebirthIntent(packaged, EnginePluginContract.PLUGIN_RUNNER_CLASS)
+        assertEquals(EnginePluginContract.PLUGIN_RUNNER_CLASS, fromPkg.component!!.className)
+        val blankPkg =
+            GodotRuntime.isolatedRebirthIntent(
+                android.content.Intent().setPackage(""),
+                EnginePluginContract.PLUGIN_KART_CLASS,
+            )
+        assertNull(blankPkg.component)
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)

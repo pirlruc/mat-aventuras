@@ -116,10 +116,11 @@ kover {
                 // Godot JNI host: Robolectric cannot load libgodot_android.so.
                 classes("pt.mataventuras.app.engine.godot.*")
                 // Device-only GL/Compose surfaces; Robolectric uses session/loop without these views.
-                classes("pt.mataventuras.app.engine.NativeKartHost")
-                classes("pt.mataventuras.app.engine.NativeRunnerHost")
-                // Canvas DrawScope lambdas are not @Composable, so they slip the annotation filter.
+                classes("pt.mataventuras.app.engine.NativeKartHost*")
+                classes("pt.mataventuras.app.engine.NativeRunnerHost*")
+                // Compose file facades still emit non-@Composable restart-group branches.
                 classes("pt.mataventuras.app.ui.lesson.LessonScreenKt")
+                classes("pt.mataventuras.app.ui.navigation.NavGraphKt")
             }
         }
         verify {
