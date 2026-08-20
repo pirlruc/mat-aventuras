@@ -8,6 +8,7 @@ python3 scripts/verify-kdoc.py
 python3 scripts/verify-maintainability.py
 python3 scripts/verify-licenses.py
 python3 scripts/verify-privacy-manifest.py
+python3 scripts/validate-issues.py docs/issues.yml
 
 ./gradlew --no-daemon \
   :domain:ktlintCheck \

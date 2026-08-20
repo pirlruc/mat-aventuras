@@ -53,7 +53,7 @@ publishing issues without approval).
 
 ```bash
 python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only
-python3 .github/scaffold/scripts/lint-doc-links.py --root .
+python3 scripts/lint-doc-links.py --root .
 ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
 python3 scripts/verify-coverage.py
 bash scripts/ci-local.sh
@@ -61,9 +61,9 @@ bash scripts/ci-local.sh
 
 ## Known pitfalls
 
-- Private companion repos: submodule clone needs a PAT with Contents: Read
-  on `pirlruc/guardrails` and `pirlruc/github-scaffold`. `.gitmodules` URLs
-  are token-free HTTPS.
+- Private companion repos: local submodule clone needs a PAT with Contents: Read
+  on `pirlruc/guardrails` and `pirlruc/github-scaffold`. GitHub Actions does not
+  clone them; it uses `scripts/` helpers and `config/kotlin.thresholds.yml`.
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
   can still gate `:domain`. With the SDK, coverage is required for all three.
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`).

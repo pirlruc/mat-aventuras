@@ -48,8 +48,9 @@ Unity is not used. Native Canvas/GLES remain the unit-test fallback. See
 - Guardrails: submodule `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.3.0` (`0354a747`)
 - Scaffold: submodule `.github/scaffold/` → [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.2.0` (`aac408cc`)
 
-CI needs the secret `COMPANION_READ_TOKEN` (Contents: Read on `pirlruc/guardrails`
-and `pirlruc/github-scaffold`) to materialise the private submodules.
+CI needs no companion token: helpers live in `scripts/` and thresholds in
+`config/kotlin.thresholds.yml`. Cloning `docs/guardrails` / `.github/scaffold`
+locally still needs a PAT with Contents: Read on those private repos.
 
 ## Build
 

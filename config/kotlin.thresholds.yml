@@ -1,0 +1,10 @@
+# Org-default numeric gates for Kotlin repositories.
+# CI should read this file as the single source of truth for thresholds.
+# Repos may override values with a recorded justification (Epic required when lowering a gate).
+
+statement_coverage: 95          # KT-TEST-002
+branch_coverage: 95             # KT-TEST-002
+doc_coverage: 95                # KT-DOC-001
+max_cyclomatic_complexity: 10   # KT-CPLX-001
+min_maintainability_index: 40   # KT-CPLX-002
+pr_size_soft_limit_lines: 500   # KT-DELIV-001

@@ -225,8 +225,9 @@ the host speaks a pt-PT line and applies bonus points.
 
 ## Guardrails
 
-Pinned at `docs/guardrails/`. CI reads
-`docs/guardrails/kotlin/profile.thresholds.yml` (CI-022 fail-closed).
+Pinned at `docs/guardrails/` when that submodule is cloned. GitHub Actions
+reads the same numbers from `config/kotlin.thresholds.yml` (CI-022 fail-closed)
+because the companion repos are private.
 `:domain` kover verify is 95% line + branch. When the Android SDK is present,
 `:data` and `:app` use the same numeric gate (Robolectric unit tests).
 Remaining emulator instrumented tests are tracked in MAT-002-T1.
@@ -234,8 +235,8 @@ Remaining emulator instrumented tests are tracked in MAT-002-T1.
 Local parity (CI-008):
 
 ```bash
-python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only
-python3 .github/scaffold/scripts/lint-doc-links.py --root .
+python3 scripts/validate-issues.py docs/issues.yml
+python3 scripts/lint-doc-links.py --root .
 ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
 python3 scripts/verify-coverage.py
 bash scripts/ci-local.sh

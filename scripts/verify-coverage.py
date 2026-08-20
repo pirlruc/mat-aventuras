@@ -15,7 +15,10 @@ except ImportError:
     sys.exit(2)
 
 ROOT = Path(__file__).resolve().parents[1]
-THRESHOLDS = ROOT / "docs" / "guardrails" / "kotlin" / "profile.thresholds.yml"
+THRESHOLDS_CANDIDATES = (
+    ROOT / "docs" / "guardrails" / "kotlin" / "profile.thresholds.yml",
+    ROOT / "config" / "kotlin.thresholds.yml",
+)
 REQUIRED = ("statement_coverage", "branch_coverage")
 
 
@@ -112,8 +115,20 @@ def check_report(name: str, path: Path, thresholds: dict) -> bool:
     return ok
 
 
+def thresholds_path() -> Path:
+    for path in THRESHOLDS_CANDIDATES:
+        if path.is_file():
+            return path
+    print(
+        "error: missing thresholds file "
+        + " or ".join(str(path) for path in THRESHOLDS_CANDIDATES),
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+
 def main() -> int:
-    thresholds = load_thresholds(THRESHOLDS)
+    thresholds = load_thresholds(thresholds_path())
     ok = True
     for name, path in reports():
         ok = check_report(name, path, thresholds) and ok

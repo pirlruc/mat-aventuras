@@ -1,4 +1,6 @@
 # Quality, tests, docs, security (CI-006 / CI-009–012). Action pins are SHAs (CI-001).
+# Companion repos are private; CI uses vendored scripts/thresholds so
+# COMPANION_READ_TOKEN is not required (gitlinks stay pinned for local clones).
 name: ci
 
 on:
@@ -33,31 +35,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Resolve companion gitlinks
-        id: pins
+      - name: Companion gitlinks are pinned
         run: |
           test -n "$(git rev-parse 'HEAD:docs/guardrails')"
           test -n "$(git rev-parse 'HEAD:.github/scaffold')"
-          echo "guardrails=$(git rev-parse 'HEAD:docs/guardrails')" >> "${GITHUB_OUTPUT}"
-          echo "scaffold=$(git rev-parse 'HEAD:.github/scaffold')" >> "${GITHUB_OUTPUT}"
-
-      - name: Checkout pinned pirlruc/guardrails
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: pirlruc/guardrails
-          path: docs/guardrails
-          ref: ${{ steps.pins.outputs.guardrails }}
-          token: ${{ secrets.COMPANION_READ_TOKEN }}
-          persist-credentials: false
-
-      - name: Checkout pinned pirlruc/github-scaffold
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: pirlruc/github-scaffold
-          path: .github/scaffold
-          ref: ${{ steps.pins.outputs.scaffold }}
-          token: ${{ secrets.COMPANION_READ_TOKEN }}
-          persist-credentials: false
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
@@ -72,15 +53,14 @@ jobs:
 
       - name: Parse YAML and issue manifest
         run: |
-          .ci-venv/bin/python .github/scaffold/scripts/validate-yaml.py \
+          .ci-venv/bin/python scripts/validate-yaml.py \
             docs/issues.yml \
             docs/guardrail-deviations.yml \
             docs/issues-sync-targets.yml \
             .github/dependabot.yml \
             .github/workflows/ci.yml \
             .github/workflows/hardening.yml
-          .ci-venv/bin/python .github/scaffold/scripts/issues-sync.py \
-            --yaml docs/issues.yml --validate-only
+          .ci-venv/bin/python scripts/validate-issues.py docs/issues.yml
 
       - name: Domain static analysis
         run: |
@@ -105,21 +85,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
-
-      - name: Resolve companion gitlinks
-        id: pins
-        run: |
-          echo "guardrails=$(git rev-parse 'HEAD:docs/guardrails')" >> "${GITHUB_OUTPUT}"
-          echo "scaffold=$(git rev-parse 'HEAD:.github/scaffold')" >> "${GITHUB_OUTPUT}"
-
-      - name: Checkout pinned pirlruc/guardrails
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: pirlruc/guardrails
-          path: docs/guardrails
-          ref: ${{ steps.pins.outputs.guardrails }}
-          token: ${{ secrets.COMPANION_READ_TOKEN }}
           persist-credentials: false
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
@@ -155,22 +120,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Resolve companion gitlinks
-        id: pins
-        run: |
-          echo "scaffold=$(git rev-parse 'HEAD:.github/scaffold')" >> "${GITHUB_OUTPUT}"
-
-      - name: Checkout pinned pirlruc/github-scaffold
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: pirlruc/github-scaffold
-          path: .github/scaffold
-          ref: ${{ steps.pins.outputs.scaffold }}
-          token: ${{ secrets.COMPANION_READ_TOKEN }}
-          persist-credentials: false
-
       - name: Lint relative markdown links
-        run: python3 .github/scaffold/scripts/lint-doc-links.py --root .
+        run: python3 scripts/lint-doc-links.py --root .
 
   security:
     if: github.actor != 'dependabot[bot]'
@@ -194,8 +145,8 @@ jobs:
       - name: SAST (semgrep local rules, KT-SEC-003)
         run: |
           python3 -m venv .ci-venv
-          .ci-venv/bin/pip install -q "semgrep==1.110.0"
-          .ci-venv/bin/semgrep --config .semgrep.yml --error --quiet
+          .ci-venv/bin/pip install -q "setuptools>=70,<82" "semgrep==1.128.1"
+          .ci-venv/bin/semgrep --config .semgrep.yml --error --quiet --metrics off
 
       - name: License allow/deny (SC-LIC-001)
         run: python3 scripts/verify-licenses.py
