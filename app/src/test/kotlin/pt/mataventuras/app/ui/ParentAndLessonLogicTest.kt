@@ -4,7 +4,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -191,7 +193,11 @@ class ParentAndLessonLogicTest {
             compose.onAllNodesWithText("Sair").fetchSemanticsNodes().isNotEmpty()
         }
         clickWrongShape()
-        repeat(3) { clickMatchingShape() }
+        var attempts = 0
+        while (rewards < 1 && attempts < 12) {
+            clickMatchingShape()
+            attempts += 1
+        }
         assertTrue(rewards >= 1)
         compose.onNodeWithText("Sair").performScrollTo().performClick()
     }
@@ -272,11 +278,11 @@ class ParentAndLessonLogicTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText(VoiceScripts.LEAVE).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
-        compose.onNodeWithText(VoiceScripts.STAY).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.STAY).assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.STAY).performClick()
-        compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
-        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performClick()
         compose.waitUntil(8_000) { left }
     }
 
@@ -357,38 +363,31 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText("Voltar").performClick()
     }
 
-    private fun clickMatchingShape() {
+    private fun visibleShapePrompt(): String? {
         val shapes = listOf("círculo", "quadrado", "triângulo", "rectângulo", "estrela")
-        compose.waitUntil(8_000) {
-            shapes.any { shape ->
-                compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()
-            }
-        }
-        for (shape in shapes) {
-            if (compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()) {
-                compose.onNode(hasText(shape) and hasClickAction()).performClick()
-                return
-            }
+        return shapes.firstOrNull { shape ->
+            compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()
         }
     }
 
+    private fun clickMatchingShape() {
+        compose.waitUntil(8_000) { visibleShapePrompt() != null }
+        val shape = visibleShapePrompt() ?: return
+        compose.onNodeWithTag("option:$shape").performClick()
+        compose.waitForIdle()
+    }
+
     private fun clickWrongShape() {
+        compose.waitUntil(8_000) { visibleShapePrompt() != null }
+        val prompt = visibleShapePrompt() ?: return
         val shapes = listOf("círculo", "quadrado", "triângulo", "rectângulo", "estrela")
-        compose.waitUntil(8_000) {
-            shapes.any { shape ->
-                compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()
-            }
-        }
-        val prompt =
-            shapes.first { shape ->
-                compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()
-            }
         val other =
             shapes.first { shape ->
                 shape != prompt &&
-                    compose.onAllNodes(hasText(shape) and hasClickAction()).fetchSemanticsNodes().isNotEmpty()
+                    compose.onAllNodesWithTag("option:$shape").fetchSemanticsNodes().isNotEmpty()
             }
-        compose.onNode(hasText(other) and hasClickAction()).performClick()
+        compose.onNodeWithTag("option:$other").performClick()
+        compose.waitForIdle()
     }
 
     private fun clickAnyNumericOption() {

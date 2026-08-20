@@ -28,6 +28,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -111,10 +112,11 @@ fun LessonScreen(
             },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            exercise.options.forEachIndexed { index, text ->
+            exercise.options.forEach { text ->
                 Button(
                     onClick = {
-                        val correct = exercise.isCorrect(index)
+                        val chosenIndex = exercise.options.indexOf(text)
+                        val correct = chosenIndex >= 0 && exercise.isCorrect(chosenIndex)
                         onSpeak(if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN)
                         val delta = container.rewards.pointsForAttempt(correct)
                         points = container.rewards.applyPoints(points, delta)
@@ -140,7 +142,8 @@ fun LessonScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp),
+                        .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp)
+                        .testTag("option:$text"),
                 ) {
                     VisualOption(module = module, text = text)
                 }

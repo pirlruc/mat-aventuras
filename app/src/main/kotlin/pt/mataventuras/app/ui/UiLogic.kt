@@ -156,7 +156,7 @@ internal object UiLogic {
     /**
      * Mascot chip size in dp.
      */
-    fun mascotChipDp(age: AgeGroup): Int = if (age == AgeGroup.THREE_YEARS) 72 else 56
+    fun mascotChipDp(age: AgeGroup): Int = if (age == AgeGroup.THREE_YEARS) 64 else 52
 
     /**
      * Age-button side in dp. Both bands share a side so the chips match.

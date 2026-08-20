@@ -91,8 +91,8 @@ class UiLogicTest {
     fun ageAndRewardCopy() {
         assertEquals("Amigo", UiLogic.fallbackChildName("  "))
         assertEquals("Rui", UiLogic.fallbackChildName(" Rui "))
-        assertEquals(72, UiLogic.mascotChipDp(AgeGroup.THREE_YEARS))
-        assertEquals(56, UiLogic.mascotChipDp(AgeGroup.SEVEN_YEARS))
+        assertEquals(64, UiLogic.mascotChipDp(AgeGroup.THREE_YEARS))
+        assertEquals(52, UiLogic.mascotChipDp(AgeGroup.SEVEN_YEARS))
         assertEquals(168, UiLogic.ageButtonSideDp())
         assertEquals(1f, UiLogic.ageButtonAlpha(true), 0f)
         assertEquals(0.7f, UiLogic.ageButtonAlpha(false), 0f)

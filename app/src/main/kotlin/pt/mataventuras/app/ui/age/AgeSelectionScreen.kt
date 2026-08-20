@@ -3,7 +3,6 @@ package pt.mataventuras.app.ui.age
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,7 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -164,10 +166,7 @@ fun AgeSelectionScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(VoiceScripts.CHOOSE_FRIEND, fontSize = tokens.bodySp.sp)
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Mascot.entries.forEach { candidate ->
                     val chosen = mascot == candidate
                     Button(
@@ -186,10 +185,17 @@ fun AgeSelectionScreen(
                         contentPadding = PaddingValues(0.dp),
                         modifier = Modifier
                             .size(UiLogic.mascotChipDp(ageGroup!!).dp)
-                            .semantics { contentDescription = candidate.displayName },
+                            .semantics {
+                                contentDescription = candidate.displayName
+                                role = Role.Button
+                            },
                         shape = CircleShape,
                     ) {
-                        Text(UiLogic.mascotGlyph(candidate), fontSize = 26.sp)
+                        Text(
+                            UiLogic.mascotGlyph(candidate),
+                            fontSize = 26.sp,
+                            modifier = Modifier.clearAndSetSemantics { },
+                        )
                     }
                 }
             }

@@ -117,6 +117,8 @@ kover {
                 // Device-only GL/Compose surfaces; Robolectric uses session/loop without these views.
                 classes("pt.mataventuras.app.engine.NativeKartHost")
                 classes("pt.mataventuras.app.engine.NativeRunnerHost")
+                // Canvas DrawScope lambdas are not @Composable, so they slip the annotation filter.
+                classes("pt.mataventuras.app.ui.lesson.LessonScreenKt")
             }
         }
         verify {
