@@ -55,6 +55,8 @@ androidComponents {
     }
 }
 
+val enginePluginAar = rootProject.file("libs/engine-plugin.aar")
+
 dependencies {
     implementation(project(":data"))
     implementation(libs.androidx.core.ktx)
@@ -78,6 +80,9 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
+    if (enginePluginAar.isFile) {
+        implementation(files(enginePluginAar))
+    }
 }
 
 kover {

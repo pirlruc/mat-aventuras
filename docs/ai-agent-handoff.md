@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-20
-**Last agent focus:** Branded entry/icon, reward result points, age-7 exit confirm
+**Last agent focus:** Godot/Unity isolated-process plugin host wiring (MAT-003-T4)
 
 ---
 
@@ -29,7 +29,7 @@ authored backlog is `docs/issues.yml`.
 | --- | --- | --- |
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
 | MAT-002 | open | Emulator instrumented tests remain; Robolectric 95% and richer packs are in tree |
-| MAT-003 | open | Native oval kart + plugin Intent contract in tree; Godot/Unity AAR is MAT-003-T3 |
+| MAT-003 | open | Resolver + IsolatedEngineActivity + optional AAR hook in tree; Godot/Unity AAR is MAT-003-T3 |
 | MAT-004 | open in GitHub until human sync; tasks done in tree | Split CI, SAST, gitleaks binary, KDoc/MI/license scripts |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
@@ -73,7 +73,7 @@ bash scripts/ci-local.sh
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002-T1: emulator instrumented tests in CI.
-3. MAT-003-T3: optional Godot/Unity drop-in still isolated in `:engine3d`
-   (contract is documented; AAR is not in tree).
+3. MAT-003-T3: drop a Godot/Unity AAR into `libs/engine-plugin.aar` that
+   implements `pt.mataventuras.plugin.*` Activities in `:engine3d` / `:engine2d`.
 
 *Last updated: 2026-08-20*

@@ -48,6 +48,34 @@ class AppUiTest {
         assertEquals("speedy_hedgehog", two.getStringExtra(EngineLauncher.EXTRA_MASCOT))
         assertEquals(EngineLauncher.PROCESS_ENGINE_3D, ":engine3d")
         assertEquals("Rui", three.getStringExtra(EngineLauncher.EXTRA_NAME))
+        assertEquals(EngineLauncher.PROCESS_ENGINE_2D, ":engine2d")
+        assertEquals(null, EngineLauncher.processFor(AgeGroup.THREE_YEARS, usingPlugin = false))
+        assertEquals(":engine2d", EngineLauncher.processFor(AgeGroup.THREE_YEARS, usingPlugin = true))
+        assertEquals(":engine3d", EngineLauncher.processFor(AgeGroup.SEVEN_YEARS, usingPlugin = false))
+        assertTrue(EngineLauncher.isClassPresent(Kart3dActivity::class.java.name))
+        assertFalse(EngineLauncher.isClassPresent("pt.mataventuras.plugin.MissingEngineActivity"))
+        assertFalse(EngineLauncher.wouldUsePlugin(pt.mataventuras.domain.model.EngineKind.THREE_D) { false })
+        assertTrue(
+            EngineLauncher.wouldUsePlugin(pt.mataventuras.domain.model.EngineKind.THREE_D) {
+                it == pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS
+            },
+        )
+        val pluginKart =
+            EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER, "Rui") { className ->
+                className == pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS
+            }
+        assertEquals(
+            pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS,
+            pluginKart.component!!.className,
+        )
+        val pluginRunner =
+            EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, "Ana") { className ->
+                className == pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS
+            }
+        assertEquals(
+            pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS,
+            pluginRunner.component!!.className,
+        )
         assertTrue(EngineLauncher.isFinished(android.app.Activity.RESULT_OK, true))
         assertFalse(EngineLauncher.isFinished(android.app.Activity.RESULT_OK, false))
         assertFalse(EngineLauncher.isFinished(android.app.Activity.RESULT_CANCELED, true))
@@ -161,6 +189,7 @@ class AppUiTest {
         val sprites = PlatformerScene.sprites(two.loop.state, Mascot.HERO_PUP, 800f, 480f)
         assertTrue(sprites.size >= 6)
         assertTrue(PlatformerScene.groundTop(480f) > 300f)
+        assertEquals("hero_pup" to "Ana", two.extrasSnapshot())
         two.completeReward(ok = true)
         val cancelled =
             Robolectric.buildActivity(

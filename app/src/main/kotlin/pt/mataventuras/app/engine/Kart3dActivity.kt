@@ -1,13 +1,10 @@
 package pt.mataventuras.app.engine
 
-import android.content.Intent
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.ComponentActivity
-import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
@@ -17,15 +14,12 @@ import pt.mataventuras.domain.voice.VoiceScripts
  * Drop-in plugins must keep this process name and the [EngineLauncher] extras;
  * they must not open Room or request INTERNET.
  */
-class Kart3dActivity : ComponentActivity() {
+class Kart3dActivity : IsolatedEngineActivity() {
     internal lateinit var session: KartSession
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val mascot =
-            Mascot.fromCode(
-                intent.getStringExtra(EngineLauncher.EXTRA_MASCOT) ?: "",
-            )
+        val mascot = launchMascot()
         val hudLap = hudText()
         val hudRings = hudText()
         val hudHint = hudText().apply { text = VoiceScripts.STEER_HINT }
@@ -72,11 +66,7 @@ class Kart3dActivity : ComponentActivity() {
      * Returns [EngineLauncher.RESULT_FINISHED] and finishes (isolated process then dies).
      */
     internal fun closeFinished() {
-        setResult(
-            RESULT_OK,
-            Intent().putExtra(EngineLauncher.RESULT_FINISHED, true),
-        )
-        finish()
+        completeReward(true)
     }
 
     private fun hudText(): TextView =

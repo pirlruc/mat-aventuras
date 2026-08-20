@@ -56,26 +56,39 @@ a GL/Unity view. `EngineLauncher.PROCESS_ENGINE_3D` is `:engine3d`.
 
 ### What is still needed for Godot or Unity (MAT-003)
 
-v1 **does not** ship Godot or Unity. The host contract already exists
-(`EngineLauncher`). A later plugin still needs:
+v1 **does not** ship Godot or Unity binaries. The host **can** adopt a stock
+Godot 4 `aar` or Unity-as-a-library export without a custom game engine:
+the constraint is an **isolated Android process**, not a bespoke renderer.
+
+Already in tree (this pass):
+
+- `EnginePluginContract` / `EnginePluginResolver` — classpath swap
+- `IsolatedEngineActivity` — extras + `completeReward`
+- `EngineInputMap` — shared kart touch bands
+- Optional `libs/engine-plugin.aar` Gradle hook
+- Templates in `samples/engine-plugin/`
+
+See [docs/engine-plugin.md](engine-plugin.md).
+
+A later plugin still needs:
 
 1. A Godot 4 Android `aar` **or** a Unity-as-a-library project that provides
-   an Activity replacing `Kart3dActivity` and/or `Platformer2dActivity`.
+   `pt.mataventuras.plugin.KartPluginActivity` and/or
+   `pt.mataventuras.plugin.RunnerPluginActivity`.
 2. `android:process=":engine3d"` (kart) or `:engine2d` (runner) so the engine
    heap dies on `finish()`.
 3. Intent extras `EXTRA_MASCOT` and `EXTRA_NAME`; result extra
    `RESULT_FINISHED` via `setResult` (`RESULT_OK` when the level completed).
-4. Gradle flavor or source-set swap so the plugin Activity is selected when
-   the AAR is present, with domain simulation remaining the fallback.
-5. Asset pipeline (kart, track, rings, mascot tint) and touch mapping that
-   matches v1 (2D: tap to jump; 3D: left/right thirds steer, centre boost).
-6. Networking, analytics, and cloud-save **stripped** from the engine export.
-   Confirm the merged manifest still has **no** `INTERNET` permission.
-7. The Compose host must **not** hold a GL/Unity view.
-8. Emulator instrumented coverage of the swap remains MAT-002-T1.
+4. Asset pipeline (kart, track, rings, mascot tint) matching
+   `EngineInputMap` (2D: tap to jump; 3D: left/right thirds steer, centre boost).
+5. Networking, analytics, and cloud-save **stripped** from the engine export.
+   Confirm the merged manifest still has **no** `INTERNET` permission
+   (`EnginePluginContract.manifestAllowed`).
+6. The Compose host must **not** hold a GL/Unity view.
+7. Emulator instrumented coverage of the swap remains MAT-002-T1.
 
-Until those land, the playable engines are Kotlin Canvas (age 3) and GLES
-in `:engine3d` (age 7).
+Until an AAR is dropped in `libs/engine-plugin.aar`, the playable engines are
+Kotlin Canvas (age 3) and GLES in `:engine3d` (age 7).
 
 ## Modules
 

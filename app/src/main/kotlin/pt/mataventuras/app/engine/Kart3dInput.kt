@@ -1,35 +1,34 @@
 package pt.mataventuras.app.engine
 
+import android.view.MotionEvent
+import pt.mataventuras.domain.engine.EngineInputMap
+
 /**
  * Touch mapping for the isolated kart process (left steer, right steer, centre boost).
+ * Bands come from [EngineInputMap] so a Godot/Unity plugin can reuse the same numbers.
  */
 object Kart3dInput {
     /**
      * Maps a normalised horizontal tap to a steering value in `[-1, 1]`.
      */
-    fun steerFromTouch(nx: Float): Float =
-        when {
-            nx < 0.34f -> -1f
-            nx > 0.66f -> 1f
-            else -> 0f
-        }
+    fun steerFromTouch(nx: Float): Float = EngineInputMap.steerFromNormalizedX(nx)
 
     /**
      * Returns true when the tap is in the boost band.
      */
-    fun isBoostTouch(nx: Float): Boolean = nx in 0.34f..0.66f
+    fun isBoostTouch(nx: Float): Boolean = EngineInputMap.isBoostBand(nx)
 
     /**
-     * Centre-band boost is armed only on [android.view.MotionEvent.ACTION_DOWN].
+     * Centre-band boost is armed only on [MotionEvent.ACTION_DOWN].
      */
     fun boostOnAction(
         action: Int,
         nx: Float,
-    ): Boolean = action == android.view.MotionEvent.ACTION_DOWN && isBoostTouch(nx)
+    ): Boolean = action == MotionEvent.ACTION_DOWN && isBoostTouch(nx)
 
     /**
      * Finger up or cancel clears steering.
      */
     fun releasesSteer(action: Int): Boolean =
-        action == android.view.MotionEvent.ACTION_UP || action == android.view.MotionEvent.ACTION_CANCEL
+        action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL
 }

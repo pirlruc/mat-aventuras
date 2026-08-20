@@ -1,8 +1,6 @@
 package pt.mataventuras.app.engine
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
@@ -19,17 +17,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import pt.mataventuras.domain.model.Mascot
 
 /**
  * Age-3 2D reward. Compose Canvas host; no Unity/Godot.
  */
-class Platformer2dActivity : ComponentActivity() {
+class Platformer2dActivity : IsolatedEngineActivity() {
     internal val loop = Platformer2dLoop()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val mascot = Mascot.fromCode(intent.getStringExtra(EngineLauncher.EXTRA_MASCOT) ?: "")
+        val mascot = launchMascot()
         setContent {
             var state by remember { mutableStateOf(loop.state) }
             LaunchedEffect(Unit) {
@@ -63,14 +60,5 @@ class Platformer2dActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    /**
-     * Closes the reward Activity with a finished or cancelled result.
-     */
-    internal fun completeReward(ok: Boolean) {
-        val code = if (ok) RESULT_OK else RESULT_CANCELED
-        setResult(code, Intent().putExtra(EngineLauncher.RESULT_FINISHED, ok))
-        finish()
     }
 }

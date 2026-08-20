@@ -291,6 +291,27 @@ milestones:
               - KT-PERF-001
               - KT-API-004
 
+          - id: MAT-003-T4
+            status: done
+            title: Host resolver, isolated Activity base, optional AAR hook
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine/EnginePluginContract.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine/EnginePluginResolver.kt
+                - app/src/main/kotlin/pt/mataventuras/app/engine/IsolatedEngineActivity.kt
+                - app/src/main/kotlin/pt/mataventuras/app/engine/EngineLauncher.kt
+                - docs/engine-plugin.md
+                - samples/engine-plugin
+            verification:
+              - EnginePluginResolver prefers plugin class names when present
+              - EngineLauncher falls back to native Activities when they are absent
+              - app/build.gradle.kts compiles libs/engine-plugin.aar when the file exists
+              - IsolatedEngineActivity exposes extras and completeReward
+            guardrail_refs:
+              - KT-PERF-001
+              - KT-API-004
+              - KT-SEC-001
+
           - id: MAT-003-T3
             status: open
             title: Optional Godot or Unity isolated-process plugin

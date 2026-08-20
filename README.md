@@ -38,8 +38,10 @@ infinite exercise generator. The reward engine also changes with age.
 The architecture decision lives in Epic **MAT-001** (`docs/issues.yml`),
 not in an ADR file. See [docs/architecture.md](docs/architecture.md).
 
-Godot/Unity is **not** embedded in v1. The plugin contract for a later
-drop-in engine is documented under MAT-003 in `docs/architecture.md`.
+Godot/Unity is **not** embedded in v1. A stock Godot 4 or Unity-as-a-library
+export can drop in later **in an isolated process** — see
+[docs/engine-plugin.md](docs/engine-plugin.md). The host already resolves
+plugin Activities when `libs/engine-plugin.aar` is present.
 
 ## Methodology and guardrails
 
