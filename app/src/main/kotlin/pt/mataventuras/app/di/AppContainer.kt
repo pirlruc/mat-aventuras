@@ -31,7 +31,7 @@ class AppContainer(
             context.applicationContext,
             MatAventurasDatabase::class.java,
             "mat_aventuras.db",
-        ).fallbackToDestructiveMigration()
+        ).fallbackToDestructiveMigration(dropAllTables = true)
             .apply { if (roomAllowsMainThread(processFingerprint())) allowMainThreadQueries() }
             .build()
 

@@ -40,6 +40,8 @@ androidComponents {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+    // Keep Java *_Impl so Kover filters and existing tests stay valid.
+    arg("room.generateKotlin", "false")
 }
 
 dependencies {
