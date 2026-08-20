@@ -1,0 +1,22 @@
+# Recorded departures from the guardrails pinned at docs/guardrails/.
+#
+# One entry per deviation, and only here — issues-sync.py renders matching entries into the
+# Epic body, so nothing is copied into docs/issues.yml or into issue text by hand.
+#
+# Field definitions: https://github.com/pirlruc/guardrails#deviation-rule
+# Approval flow:     https://github.com/pirlruc/methodologies/blob/1.2.0/github-issue-adr/docs/process/guardrail-compliance.md
+
+deviations:
+  - id: KT-TEST-002
+    why: >-
+      KT-TEST-002 is per-module. :dominio (pure JVM) meets the org 95%
+      statement and branch gates. :app and :dados are Android Compose/Room
+      modules whose instrumentable lines require an emulator that Phase 1 CI
+      does not boot, so a coverage ratio for those modules is undefined in
+      this pipeline rather than lowered. MAT-002 adds instrumented coverage
+      and is the review point to apply the numeric gate to :app and :dados.
+    epic: MAT-001
+    owner: pirlruc
+    approved_by: Engineering Lead
+    review: 2026-11-20
+    details: docs/arquitectura.md

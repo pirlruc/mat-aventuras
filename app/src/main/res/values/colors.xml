@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="azul_ourico">#1E88E5</color>
+    <color name="creme">#FFF8E1</color>
+    <color name="ceu">#E3F2FD</color>
+    <color name="laranja">#FB8C00</color>
+    <color name="verde">#43A047</color>
+    <color name="rosa">#EC407A</color>
+    <color name="roxo">#7E57C2</color>
+    <color name="icone_fundo">#1565C0</color>
+</resources>

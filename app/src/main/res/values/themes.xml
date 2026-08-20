@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Tema.MatAventuras" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/azul_ourico</item>
+        <item name="android:navigationBarColor">@color/creme</item>
+        <item name="android:windowBackground">@color/creme</item>
+    </style>
+    <style name="Tema.MatAventuras.Jogo" parent="Tema.MatAventuras">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:keepScreenOn">true</item>
+    </style>
+</resources>

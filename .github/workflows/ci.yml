@@ -1,0 +1,81 @@
+# Quality, tests, docs, security (CI-006 / CI-009–012). Action pins are SHAs (CI-001).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve companion gitlinks
+        id: pins
+        run: |
+          test -n "$(git rev-parse 'HEAD:docs/guardrails')"
+          test -n "$(git rev-parse 'HEAD:.github/scaffold')"
+          echo "guardrails=$(git rev-parse 'HEAD:docs/guardrails')" >> "${GITHUB_OUTPUT}"
+          echo "scaffold=$(git rev-parse 'HEAD:.github/scaffold')" >> "${GITHUB_OUTPUT}"
+
+      - name: Checkout pinned pirlruc/guardrails
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/guardrails
+          path: docs/guardrails
+          ref: ${{ steps.pins.outputs.guardrails }}
+          token: ${{ secrets.COMPANION_READ_TOKEN }}
+          persist-credentials: false
+
+      - name: Checkout pinned pirlruc/github-scaffold
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/github-scaffold
+          path: .github/scaffold
+          ref: ${{ steps.pins.outputs.scaffold }}
+          token: ${{ secrets.COMPANION_READ_TOKEN }}
+          persist-credentials: false
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Python tools
+        run: |
+          python3 -m venv .ci-venv
+          .ci-venv/bin/pip install -q pyyaml
+
+      - name: Parse YAML and issue manifest
+        run: |
+          .ci-venv/bin/python .github/scaffold/scripts/validate-yaml.py \
+            docs/issues.yml \
+            docs/guardrail-deviations.yml \
+            docs/issues-sync-targets.yml \
+            .github/dependabot.yml \
+            .github/workflows/ci.yml
+          .ci-venv/bin/python .github/scaffold/scripts/issues-sync.py \
+            --yaml docs/issues.yml --validate-only
+
+      - name: Lint relative markdown links
+        run: python3 .github/scaffold/scripts/lint-doc-links.py --root .
+
+      - name: Domain tests and coverage (KT-TEST-002, CI-022)
+        run: |
+          ./gradlew --no-daemon :dominio:ktlintCheck :dominio:detekt \
+            :dominio:test :dominio:koverXmlReport :dominio:koverVerify
+          .ci-venv/bin/python scripts/verificar-cobertura.py

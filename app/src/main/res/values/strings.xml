@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nome_aplicacao">Mat Aventuras</string>
+    <string name="selecao_idade">Olá! Escolhe a tua idade.</string>
+    <string name="tres_anos">3 anos</string>
+    <string name="sete_anos">7 anos</string>
+    <string name="continuar">Continuar</string>
+    <string name="o_teu_nome">Como te chamas?</string>
+    <string name="classificacao">Classificação</string>
+    <string name="recompensas">Recompensas</string>
+    <string name="painel_pais">Painel dos pais</string>
+    <string name="introduz_pin">Introduz o PIN dos pais</string>
+    <string name="define_pin">Escolhe um PIN de quatro números</string>
+    <string name="confirmar_pin">Confirma o PIN</string>
+    <string name="voltar">Voltar</string>
+    <string name="muito_bem">Muito bem!</string>
+    <string name="tenta_outra_vez">Tenta outra vez.</string>
+    <string name="jogar_premio">Prémio</string>
+    <string name="pontos">Pontos</string>
+    <string name="precisao">Precisão</string>
+    <string name="tempo">Tempo</string>
+    <string name="a_melhorar">Áreas a melhorar</string>
+    <string name="sem_dados">Ainda não há sessões neste perfil.</string>
+    <string name="distintivos">Distintivos</string>
+    <string name="avatares">Avatares</string>
+    <string name="privacidade">Tudo fica neste aparelho. Não enviamos dados.</string>
+</resources>

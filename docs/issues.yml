@@ -1,0 +1,185 @@
+# Authored backlog for pirlruc/mat-aventuras.
+#
+# Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.2.0/github-issue-adr
+#
+# The Epic is the decision record — there are no ADR markdown files.
+# Deviations from guardrails go in docs/guardrail-deviations.yml, not here.
+#
+# `id` values are permanent: issues are matched by the [ID] in their title.
+
+milestones:
+  - name: Phase 1 — Foundation
+    status: open
+    epics:
+      - id: MAT-001
+        status: open
+        title: Native Compose host with isolated 2D/3D reward motors
+        overview:
+          problem: >-
+            A kids' math app for ages 3 and 7 must mix Jetpack Compose learning
+            UI with 2D and 3D reward games on mid-tier Android tablets, keep
+            every profile/leaderboard/analytics record on-device, and speak
+            Portuguese from Portugal, without embedding two commercial engines
+            that fight for RAM after a Compose-to-game transition.
+          goal: >-
+            Ship a native Kotlin architecture where Compose owns menus,
+            lessons, parental PIN, and rewards; a lightweight 2D motor and a
+            process-isolated 3D motor handle reward levels; Room/DataStore are
+            the only persistence; and CI gates :dominio against the pinned
+            Kotlin guardrails.
+        architecture:
+          target: >-
+            In the context of a native Android educational math game for ages
+            3 and 7, facing Compose-to-engine RAM spikes on mid-tier tablets
+            and a local-only privacy constraint, we decided to host all
+            learning and dashboards in Jetpack Compose and run reward
+            mini-games as dedicated Activities (Compose Canvas 2D in-process;
+            GLES 3D in android:process :motor3d), rejecting Unity/Godot AAR
+            embedding for v1, to achieve killable 3D heaps and 100% on-device
+            data, accepting lower cinematic fidelity until a later Epic
+            re-evaluates a single optional engine plugin.
+          modules:
+            - dominio/
+            - dados/
+            - app/
+            - docs/arquitectura.md
+        acceptance_criteria:
+          - Age selection UI adapts tokens for 3-year-olds versus 7-year-olds
+          - Parental dashboard is PIN-gated; PIN hash never stored in plaintext
+          - Local leaderboard and badges persist in Room with no network calls
+          - 3yo rewards launch the 2D motor; 7yo rewards launch the isolated 3D motor
+          - App declares no INTERNET permission; user data never leaves the device
+          - :dominio unit tests and coverage gate read kotlin/profile.thresholds.yml
+        guardrail_refs:
+          - KT-BUILD-001
+          - KT-API-001
+          - KT-API-004
+          - KT-CONC-001
+          - KT-TEST-001
+          - KT-TEST-002
+          - KT-CPLX-001
+          - KT-SEC-001
+          - KT-PERF-001
+          - CI-001
+          - CI-008
+          - CI-022
+          - SC-DEP-001
+        tasks:
+          - id: MAT-001-T1
+            status: open
+            title: Pin guardrails, scaffold, and authored backlog
+            instructions:
+              files:
+                - docs/guardrails
+                - .github/scaffold
+                - docs/issues.yml
+                - docs/guardrail-deviations.yml
+                - .github/ISSUE_TEMPLATE
+            verification:
+              - git submodule status docs/guardrails reports a SHA
+              - python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only
+            guardrail_refs:
+              - CI-008
+
+          - id: MAT-001-T2
+            status: open
+            title: Domain models, math generators, PIN, rewards
+            instructions:
+              files:
+                - dominio/src/main/kotlin/pt/mataventuras/dominio
+                - dominio/src/test/kotlin/pt/mataventuras/dominio
+            verification:
+              - ./gradlew :dominio:ktlintCheck :dominio:detekt :dominio:test :dominio:koverVerify
+            guardrail_refs:
+              - KT-API-001
+              - KT-TEST-001
+              - KT-TEST-002
+              - KT-CPLX-001
+
+          - id: MAT-001-T3
+            status: open
+            title: Room persistence and local leaderboard
+            instructions:
+              files:
+                - dados/src/main/kotlin/pt/mataventuras/dados
+            verification:
+              - Room schema matches docs/arquitectura.md
+              - No Retrofit/Firebase/HTTP client in the graph
+            guardrail_refs:
+              - KT-API-001
+              - KT-SEC-001
+
+          - id: MAT-001-T4
+            status: open
+            title: Compose screens and isolated game Activities
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app
+                - app/src/main/AndroidManifest.xml
+            verification:
+              - EcrãSeleçãoIdade, PainelPais, and ClassificaçãoERecompensas exist
+              - AtividadeMotor3D uses android:process :motor3d
+              - All user-visible strings are pt-PT
+            guardrail_refs:
+              - KT-API-004
+              - KT-PERF-001
+              - KT-CONC-001
+
+          - id: MAT-001-T5
+            status: open
+            title: Gradle CI reading pinned Kotlin thresholds
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+                - scripts/verificar-cobertura.py
+                - gradle/libs.versions.toml
+            verification:
+              - CI quality job pins actions by SHA
+              - Coverage script fails closed when thresholds keys are missing
+            guardrail_refs:
+              - CI-001
+              - CI-022
+              - KT-BUILD-001
+              - KT-TEST-002
+
+  - name: Phase 2 — Learning content
+    status: open
+    epics:
+      - id: MAT-002
+        status: open
+        title: Instrumented coverage and richer lesson packs
+        overview:
+          problem: >-
+            Foundation CI can gate :dominio on the JVM, but Compose UI and Room
+            DAOs still lack emulator coverage, and lesson variety is a first
+            playable slice rather than a full curriculum.
+          goal: >-
+            Add instrumented tests that lift :app/:dados toward org coverage
+            defaults, expand exercise packs, and then retire the MAT-001
+            coverage deviation.
+        architecture:
+          target: Android instrumented test source sets plus additional GeradorExercicios packs
+          modules:
+            - app/
+            - dados/
+            - dominio/
+        acceptance_criteria:
+          - Instrumented tests run in CI on an emulator
+          - MAT-001 KT-TEST-002 deviation is reviewed and removed or tightened
+        guardrail_refs:
+          - KT-TEST-002
+          - KT-DOC-001
+        tasks:
+          - id: MAT-002-T1
+            status: open
+            title: Emulator CI and Compose/Room coverage
+            instructions:
+              files:
+                - app/src/androidTest
+                - dados/src/androidTest
+                - .github/workflows/ci.yml
+            verification:
+              - Instrumented coverage reported for :app and :dados
+            guardrail_refs:
+              - KT-TEST-002

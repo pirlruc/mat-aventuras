@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Sem INTERNET: dados, classificação e voz ficam no aparelho. -->
+    <application
+        android:name=".MatAventurasApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/nome_aplicacao"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:localeConfig="@xml/locales_config"
+        android:theme="@style/Tema.MatAventuras"
+        android:usesCleartextTraffic="false">
+
+        <activity
+            android:name=".PrincipalActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|screenLayout">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".motor.AtividadeMotor2D"
+            android:exported="false"
+            android:theme="@style/Tema.MatAventuras.Jogo" />
+
+        <activity
+            android:name=".motor.AtividadeMotor3D"
+            android:exported="false"
+            android:process=":motor3d"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Tema.MatAventuras.Jogo" />
+    </application>
+</manifest>
