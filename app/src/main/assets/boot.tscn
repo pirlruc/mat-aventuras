@@ -17,6 +17,7 @@ func _load_reward() -> void:
 	var err := get_tree().change_scene_to_file(path)
 	if err != OK:
 		push_error(\"Failed to load reward scene: %s (%s)\" % [path, err])
+		Host.finish(false)
 "
 
 [node name="Boot" type="ColorRect"]

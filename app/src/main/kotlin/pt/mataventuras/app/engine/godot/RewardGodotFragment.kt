@@ -17,7 +17,7 @@ class RewardGodotFragment : GodotFragment() {
     override fun getCommandLine(): List<String> = GodotRuntime.commandLineFor()
 
     override fun getHostPlugins(engine: Godot): Set<GodotPlugin> {
-        val host = activity as IsolatedEngineActivity
+        val host = activity as? IsolatedEngineActivity ?: return emptySet()
         val scene = arguments?.getString(ARG_SCENE) ?: GodotRuntime.SCENE_KART
         return setOf(MatAventurasGodotPlugin(engine, host, scene))
     }
@@ -25,11 +25,6 @@ class RewardGodotFragment : GodotFragment() {
     override fun onGodotRestartRequested(instance: Godot) {
         val host = activity as? IsolatedEngineActivity ?: return
         host.runOnUiThread { GodotEmbed.restartHost(host) }
-    }
-
-    override fun onGodotMainLoopStarted() {
-        val host = activity as? IsolatedEngineActivity ?: return
-        GodotEmbed.clearRebirthMarker(host)
     }
 
     override fun onGodotForceQuit(instance: Godot) {

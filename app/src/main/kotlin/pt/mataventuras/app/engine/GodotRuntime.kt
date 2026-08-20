@@ -1,6 +1,5 @@
 package pt.mataventuras.app.engine
 
-import android.content.Intent
 import android.os.Build
 
 /**
@@ -24,9 +23,6 @@ object GodotRuntime {
     /** Intent extra GodotActivity reads for launch arguments. Unused by GodotFragment. */
     const val EXTRA_COMMAND_LINE: String = "command_line_params"
 
-    /** Per-process files-dir marker so a GLES rebirth cannot loop. */
-    const val REBIRTH_MARKER: String = "godot_isolated_rebirth"
-
     /**
      * True when this process should create a GodotFragment.
      */
@@ -45,31 +41,19 @@ object GodotRuntime {
     fun commandLineFor(): List<String> = emptyList()
 
     /**
-     * True when the isolated `:engine2d` / `:engine3d` process should be killed
-     * and the same plugin Activity relaunched. Activity.recreate() cannot unload
-     * `libgodot_android`. ProcessPhoenix would restart the Compose host.
+     * True when this isolated plugin Activity should ask the Compose host to
+     * relaunch it. Activity.recreate() cannot unload `libgodot_android`.
+     * Godot's ProcessPhoenix stays stripped: a default-intent rebirth would
+     * reincarnate the Compose host, and starting the same `singleInstance`
+     * Activity from a dying `:engine2d` / `:engine3d` process drops the
+     * host's `StartActivityForResult` contract.
      */
     fun shouldRestartHost(
         alreadyRestarted: Boolean,
         finishing: Boolean,
         destroyed: Boolean,
-        rebirthConsumed: Boolean,
-    ): Boolean = !alreadyRestarted && !finishing && !destroyed && !rebirthConsumed
-
-    /**
-     * Intent that relaunches [className] in a new isolated process after this one exits.
-     */
-    fun isolatedRebirthIntent(
-        source: Intent,
-        className: String,
-    ): Intent {
-        val next = Intent(source)
-        val pkg = source.component?.packageName ?: source.`package`
-        if (!pkg.isNullOrBlank()) {
-            next.setClassName(pkg, className)
-        }
-        return next.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-    }
+        fromRelaunch: Boolean,
+    ): Boolean = !alreadyRestarted && !finishing && !destroyed && !fromRelaunch
 
     /**
      * True when [fingerprint] is a Robolectric VM.

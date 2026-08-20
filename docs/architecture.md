@@ -121,7 +121,9 @@ is not hosting a Godot view.
 
 On device those Activities attach `GodotFragment`. `boot.tscn` switches to
 `res://kart.tscn` or `res://runner.tscn` through the `MatAventuras` plugin.
-Under Robolectric they attach `NativeKartHost` / `NativeRunnerHost` instead.
+A first-time GLES restart is returned to `MainActivity`, which relaunches
+the plugin Activity in a fresh isolated process. Under Robolectric they
+attach `NativeKartHost` / `NativeRunnerHost` instead.
 
 Simulation is in `:domain` (`Platformer2dEngine`, `Kart3dEngine`) so physics
 is unit-tested without an emulator.

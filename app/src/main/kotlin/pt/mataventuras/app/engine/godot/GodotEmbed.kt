@@ -4,7 +4,6 @@ import android.os.Bundle
 import pt.mataventuras.app.R
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.app.engine.IsolatedEngineActivity
-import java.io.File
 
 /**
  * Attaches [RewardGodotFragment] into [IsolatedEngineActivity].
@@ -24,6 +23,7 @@ internal object GodotEmbed {
         activity: IsolatedEngineActivity,
         scene: String,
     ) {
+        if (activity.isFinishing || activity.isDestroyed) return
         activity.setContentView(R.layout.godot_host)
         val existing = activity.supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
         if (existing is RewardGodotFragment) return
@@ -41,41 +41,36 @@ internal object GodotEmbed {
     }
 
     /**
-     * Kills this isolated engine process and relaunches the same plugin Activity.
+     * Asks the Compose host to relaunch this plugin Activity, then kills only
+     * this isolated JVM so `libgodot_android` unloads.
      *
-     * Godot cannot de-initialize native libs in-place. ProcessPhoenix is stripped
-     * because it would reincarnate the default (Compose) process. [Runtime.exit]
-     * only ends `:engine2d` / `:engine3d`.
+     * Godot's ProcessPhoenix stays stripped. Its default rebirth targets the
+     * launcher, and starting the same `singleInstance` Activity from a dying
+     * `:engine2d` / `:engine3d` process would drop `StartActivityForResult`.
      */
     fun restartHost(activity: IsolatedEngineActivity) {
-        val marker = rebirthFile(activity)
         if (!GodotRuntime.shouldRestartHost(
                 alreadyRestarted = restartedOnce,
                 finishing = activity.isFinishing,
                 destroyed = activity.isDestroyed,
-                rebirthConsumed = marker.exists(),
+                fromRelaunch = activity.isGodotRelaunch(),
             )
         ) {
             return
         }
+        if (!activity.requestEngineRestart()) return
         restartedOnce = true
-        runCatching { marker.writeText("1") }
-        activity.startActivity(
-            GodotRuntime.isolatedRebirthIntent(activity.intent, activity.javaClass.name),
-        )
-        activity.finish()
-        killIsolatedProcess()
+        if (!GodotRuntime.shouldEmbed()) return
+        val view = activity.window?.decorView
+        if (view != null) {
+            view.post { killIsolatedProcess() }
+        } else {
+            killIsolatedProcess()
+        }
     }
 
     /**
-     * Drops the rebirth marker after the Godot main loop has started.
-     */
-    fun clearRebirthMarker(activity: IsolatedEngineActivity) {
-        rebirthFile(activity).delete()
-    }
-
-    /**
-     * Ends the current JVM. Isolated to keep [restartHost] testable at the edges.
+     * Ends the current JVM. Isolated so Robolectric never calls it.
      */
     fun killIsolatedProcess() {
         Runtime.getRuntime().exit(0)
@@ -85,7 +80,4 @@ internal object GodotEmbed {
      * Command line used by [RewardGodotFragment] when arguments are missing.
      */
     fun fallbackScene(): String = GodotRuntime.SCENE_KART
-
-    private fun rebirthFile(activity: IsolatedEngineActivity): File =
-        File(activity.filesDir, "${GodotRuntime.REBIRTH_MARKER}_${activity.javaClass.simpleName}")
 }

@@ -19,7 +19,7 @@ var finished := false
 
 func _ready() -> void:
 	_build_world()
-	_update_hud()
+	_update_hud(false)
 
 
 func _build_world() -> void:
@@ -84,7 +84,9 @@ func _input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if finished:
 		return
+	delta = minf(delta, 0.05)
 	var speed := 1.1 + (1.4 if boosting else 0.0)
+	var show_boost := boosting
 	boosting = false
 	angle += speed * delta * (1.0 + steer * 0.15)
 	var radius := 7.0
@@ -96,14 +98,15 @@ func _process(delta: float) -> void:
 		angle -= TAU
 		lap += 1
 		rings = mini(rings + 3, RINGS_TARGET)
-		_update_hud()
 		if lap >= LAPS_TARGET:
 			_finish()
+			return
+	_update_hud(show_boost)
 
 
-func _update_hud() -> void:
+func _update_hud(show_boost: bool = false) -> void:
 	var shown := mini(lap + 1, LAPS_TARGET)
-	var boost_txt := "\nImpulso!" if boosting else ""
+	var boost_txt := "\nImpulso!" if show_boost else ""
 	hud.text = "Volta %d de %d\nAnéis %d/%d%s" % [shown, LAPS_TARGET, rings, RINGS_TARGET, boost_txt]
 
 

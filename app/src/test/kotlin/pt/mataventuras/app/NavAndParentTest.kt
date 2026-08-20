@@ -102,6 +102,14 @@ class NavAndParentTest {
             android.app.Activity.RESULT_OK,
             android.content.Intent().putExtra(pt.mataventuras.app.engine.EngineLauncher.RESULT_FINISHED, true),
         )
+        activity.onEngineResult(
+            android.app.Activity.RESULT_OK,
+            pt.mataventuras.app.engine.EngineLauncher.restartResultIntent(
+                pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS,
+                "hero_pup",
+                "Ana",
+            ),
+        )
         activity.onEngineResult(android.app.Activity.RESULT_CANCELED, null)
         activity.finish()
         activity.onEngineResult(android.app.Activity.RESULT_CANCELED, null)

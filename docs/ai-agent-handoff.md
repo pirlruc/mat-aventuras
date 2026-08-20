@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-20
-**Last agent focus:** Atomic reward points, fail-closed Room, engine teardown races
+**Last agent focus:** Godot GLES host relaunch, isolated Room skip, AGP 9 / Daemon Toolchain
 
 ---
 
@@ -78,8 +78,10 @@ bash scripts/ci-local.sh
 - Godot JNI types live in `pt.mataventuras.app.engine.godot` and are excluded
   from `:app` Kover because `libgodot_android.so` cannot load in unit tests.
 - Do not pass `--path` / `--scene` / renderer flags to the Godot library
-  command line. First-time GLES restart must kill the isolated engine process,
-  not `Activity.recreate()` and not ProcessPhoenix.
+  command line. First-time GLES restart must return a `restart` extra to
+  MainActivity (host relaunch), not `Activity.recreate()`, not ProcessPhoenix,
+  and not `startActivity` of the same `singleInstance` plugin from the dying
+  engine process.
 
 ## Suggested next work
 

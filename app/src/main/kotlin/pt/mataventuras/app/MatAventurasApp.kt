@@ -8,8 +8,8 @@ import java.io.File
 
 /**
  * Default-process application. Holds [AppContainer] for Compose screens.
- * Isolated engine processes (`:engine2d`, `:engine3d`) skip Room so Godot/GLES
- * heaps stay killable and never share the host database.
+ * Isolated processes (`:engine2d`, `:engine3d`, unused `:phoenix`) skip Room
+ * so Godot/GLES heaps stay killable and never share the host database.
  */
 class MatAventurasApp : Application() {
     lateinit var container: AppContainer
@@ -33,11 +33,12 @@ class MatAventurasApp : Application() {
 /**
  * Room stays in the Compose process only. A blank name (unreadable
  * `/proc/self/cmdline` on API 26–27) fails closed so an isolated engine
- * process never opens the host database.
+ * process never opens the host database. Any `package:suffix` name is skipped,
+ * including Godot's unused `:phoenix` ProcessPhoenix process.
  */
 internal fun shouldOpenContainer(processName: String): Boolean {
     if (processName.isBlank()) return false
-    return !EnginePluginContract.isIsolatedProcessName(processName)
+    return !EnginePluginContract.isNonDefaultProcessName(processName)
 }
 
 /**

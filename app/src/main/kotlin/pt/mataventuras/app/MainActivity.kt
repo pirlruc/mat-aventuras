@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Applies a reward Activity result to speech and the last profile.
+     * A GLES restart extra relaunches the same plugin Activity instead.
      */
     internal fun onEngineResult(
         resultCode: Int,
@@ -48,6 +49,10 @@ class MainActivity : ComponentActivity() {
     ) {
         if (isDestroyed) return
         if (isFinishing) return
+        EngineLauncher.relaunchIntent(this, data)?.let {
+            engineLauncher.launch(it)
+            return
+        }
         val finished = RewardReturn.onResult(resultCode, data, speech::speak)
         val app = application as MatAventurasApp
         lifecycleScope.launch(Dispatchers.IO) {

@@ -89,6 +89,7 @@ func _input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if finished:
 		return
+	delta = minf(delta, 0.05)
 	if jumping and on_ground:
 		vy = JUMP_V
 		on_ground = false

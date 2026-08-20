@@ -3,8 +3,9 @@
 
 Kids' profiles and the parental PIN hash must not be ADB-backupable. Reward
 Activities must stay in :engine2d / :engine3d. Godot's merged FileProvider and
-ProcessPhoenix must be stripped so the APK cannot share URIs or restart into
-an unexpected process.
+ProcessPhoenix must be stripped so the APK cannot grant URIs or reincarnate the
+Compose launcher. A GLES restart is a host relaunch (`restart` result extra),
+not ProcessPhoenix.
 """
 from __future__ import annotations
 

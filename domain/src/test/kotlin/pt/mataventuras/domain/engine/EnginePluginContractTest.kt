@@ -48,10 +48,16 @@ class EnginePluginContractTest {
         assertEquals("hero_pup", extras[EnginePluginContract.EXTRA_MASCOT])
         assertEquals("Ana", extras[EnginePluginContract.EXTRA_NAME])
         assertEquals("finished", EnginePluginContract.RESULT_FINISHED)
+        assertEquals("restart", EnginePluginContract.RESULT_RESTART)
         assertEquals("godot", EnginePluginContract.ADOPTED_ENGINE)
         assertTrue(EnginePluginContract.isIsolatedProcessName("pt.mataventuras.app:engine3d"))
         assertTrue(EnginePluginContract.isIsolatedProcessName("pt.mataventuras.app:engine2d"))
         assertFalse(EnginePluginContract.isIsolatedProcessName("pt.mataventuras.app"))
+        assertFalse(EnginePluginContract.isIsolatedProcessName("pt.mataventuras.app:phoenix"))
+        assertTrue(EnginePluginContract.isNonDefaultProcessName("pt.mataventuras.app:engine3d"))
+        assertTrue(EnginePluginContract.isNonDefaultProcessName("pt.mataventuras.app:phoenix"))
+        assertFalse(EnginePluginContract.isNonDefaultProcessName("pt.mataventuras.app"))
+        assertFalse(EnginePluginContract.isNonDefaultProcessName(""))
     }
 
     @Test

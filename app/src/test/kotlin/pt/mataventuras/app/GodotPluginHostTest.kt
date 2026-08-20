@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,13 +39,12 @@ class GodotPluginHostTest {
         assertFalse(GodotRuntime.commandLineFor().contains("--path"))
         assertFalse(GodotRuntime.commandLineFor().contains("--scene"))
         assertEquals("command_line_params", GodotRuntime.EXTRA_COMMAND_LINE)
-        assertEquals("godot_isolated_rebirth", GodotRuntime.REBIRTH_MARKER)
         assertTrue(
             GodotRuntime.shouldRestartHost(
                 alreadyRestarted = false,
                 finishing = false,
                 destroyed = false,
-                rebirthConsumed = false,
+                fromRelaunch = false,
             ),
         )
         assertFalse(
@@ -54,7 +52,7 @@ class GodotPluginHostTest {
                 alreadyRestarted = true,
                 finishing = false,
                 destroyed = false,
-                rebirthConsumed = false,
+                fromRelaunch = false,
             ),
         )
         assertFalse(
@@ -62,7 +60,7 @@ class GodotPluginHostTest {
                 alreadyRestarted = false,
                 finishing = true,
                 destroyed = false,
-                rebirthConsumed = false,
+                fromRelaunch = false,
             ),
         )
         assertFalse(
@@ -70,7 +68,7 @@ class GodotPluginHostTest {
                 alreadyRestarted = false,
                 finishing = false,
                 destroyed = true,
-                rebirthConsumed = false,
+                fromRelaunch = false,
             ),
         )
         assertFalse(
@@ -78,38 +76,10 @@ class GodotPluginHostTest {
                 alreadyRestarted = false,
                 finishing = false,
                 destroyed = false,
-                rebirthConsumed = true,
+                fromRelaunch = true,
             ),
         )
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
-        val rebirth =
-            GodotRuntime.isolatedRebirthIntent(
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeGroup.SEVEN_YEARS,
-                    Mascot.MISCHIEVOUS_ALIEN,
-                    "Rui",
-                    pt.mataventuras.domain.model.EngineKind.THREE_D,
-                ),
-                EnginePluginContract.PLUGIN_KART_CLASS,
-            )
-        assertEquals(EnginePluginContract.PLUGIN_KART_CLASS, rebirth.component!!.className)
-        assertTrue(rebirth.flags and android.content.Intent.FLAG_ACTIVITY_NEW_TASK != 0)
-        assertTrue(rebirth.flags and android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK != 0)
-        val nameless = android.content.Intent().putExtra("name", "Ana")
-        val copied = GodotRuntime.isolatedRebirthIntent(nameless, EnginePluginContract.PLUGIN_RUNNER_CLASS)
-        assertEquals("Ana", copied.getStringExtra("name"))
-        assertTrue(copied.flags and android.content.Intent.FLAG_ACTIVITY_NEW_TASK != 0)
-        val packaged = android.content.Intent().setPackage(ctx.packageName)
-        val fromPkg =
-            GodotRuntime.isolatedRebirthIntent(packaged, EnginePluginContract.PLUGIN_RUNNER_CLASS)
-        assertEquals(EnginePluginContract.PLUGIN_RUNNER_CLASS, fromPkg.component!!.className)
-        val blankPkg =
-            GodotRuntime.isolatedRebirthIntent(
-                android.content.Intent().setPackage(""),
-                EnginePluginContract.PLUGIN_KART_CLASS,
-            )
-        assertNull(blankPkg.component)
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
@@ -155,6 +125,7 @@ class GodotPluginHostTest {
         repeat(8) { runner.loop!!.tick() }
         assertEquals("hero_pup" to "Ana", runner.extrasSnapshot())
         runner.completeReward(ok = false)
+        assertFalse(runner.requestEngineRestart())
         destroy(runnerController)
 
         val sevenPlatform =
@@ -205,6 +176,49 @@ class GodotPluginHostTest {
     }
 
     @Test
+    fun pluginRestartReturnsHostRelaunchExtrasOnce() {
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val kartIntent =
+            EngineLauncher.intentFor(
+                ctx,
+                AgeGroup.SEVEN_YEARS,
+                Mascot.MISCHIEVOUS_ALIEN,
+                "Rui",
+                pt.mataventuras.domain.model.EngineKind.THREE_D,
+            )
+        val controller = Robolectric.buildActivity(KartPluginActivity::class.java, kartIntent).setup()
+        val kart = controller.get()
+        assertFalse(kart.isGodotRelaunch())
+        assertTrue(kart.requestEngineRestart())
+        assertTrue(kart.isRewardSettled())
+        assertTrue(kart.isFinishing)
+        assertFalse(kart.requestEngineRestart())
+        assertFalse(kart.completeReward(ok = true))
+        destroy(controller)
+        val relaunch =
+            EngineLauncher.relaunchIntent(
+                ctx,
+                EngineLauncher.restartResultIntent(
+                    EnginePluginContract.PLUGIN_KART_CLASS,
+                    "mischievous_alien",
+                    "Rui",
+                ),
+            )!!
+        assertTrue(relaunch.getBooleanExtra(EngineLauncher.EXTRA_GODOT_RELAUNCH, false))
+        val relaunched = Robolectric.buildActivity(KartPluginActivity::class.java, relaunch).setup()
+        assertTrue(relaunched.get().isGodotRelaunch())
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = false,
+                destroyed = false,
+                fromRelaunch = relaunched.get().isGodotRelaunch(),
+            ),
+        )
+        destroy(relaunched)
+    }
+
+    @Test
     fun bridgeReadsExtrasAndFinishesOnUiThread() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val kartController =
@@ -238,10 +252,14 @@ class GodotPluginHostTest {
         val boot = ctx.assets.open("boot.tscn").bufferedReader().readText()
         assertTrue(boot.contains("call_deferred"))
         assertTrue(boot.contains("change_scene_to_file"))
+        assertTrue(boot.contains("Host.finish"))
         ctx.assets.open("kart.tscn").close()
         ctx.assets.open("runner.tscn").close()
-        ctx.assets.open("kart.gd").close()
-        ctx.assets.open("runner.gd").close()
+        val kartScript = ctx.assets.open("kart.gd").bufferedReader().readText()
+        assertTrue(kartScript.contains("minf(delta"))
+        assertTrue(kartScript.contains("_update_hud(show_boost)"))
+        val runnerScript = ctx.assets.open("runner.gd").bufferedReader().readText()
+        assertTrue(runnerScript.contains("minf(delta"))
         ctx.assets.open("host.gd").close()
         assertEquals("res://kart.tscn", GodotBridge.rewardScene(""))
         assertEquals("res://runner.tscn", GodotBridge.rewardScene(GodotRuntime.SCENE_RUNNER))
@@ -273,6 +291,14 @@ class GodotPluginHostTest {
                 }
                 .all { EnginePluginContract.isIsolatedProcessName(it.processName.orEmpty()) },
         )
+        assertFalse(activities.any { it.name.contains("ProcessPhoenix") })
+        val providers =
+            ctx.packageManager
+                .getPackageInfo(ctx.packageName, PackageManager.GET_PROVIDERS)
+                .providers
+                ?.toList()
+                .orEmpty()
+        assertFalse(providers.any { it.name.contains("FileProvider") })
     }
 
     @Test
@@ -282,6 +308,7 @@ class GodotPluginHostTest {
         assertTrue(shouldOpenContainer("pt.mataventuras.app"))
         assertFalse(shouldOpenContainer("pt.mataventuras.app:engine3d"))
         assertFalse(shouldOpenContainer("pt.mataventuras.app:engine2d"))
+        assertFalse(shouldOpenContainer("pt.mataventuras.app:phoenix"))
         assertFalse(shouldOpenContainer(""))
         assertFalse(shouldOpenContainer("   "))
         currentProcessName()

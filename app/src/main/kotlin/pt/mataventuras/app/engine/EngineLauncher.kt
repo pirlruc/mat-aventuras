@@ -20,7 +20,8 @@ import pt.mataventuras.domain.model.pickRewardKind
  * [Kart3dActivity] or [Platformer2dActivity] when it:
  * 1. uses `android:process=":engine3d"` (or `:engine2d`) so the heap dies on finish,
  * 2. reads [EXTRA_MASCOT] and [EXTRA_NAME] from the launching Intent,
- * 3. returns [RESULT_FINISHED] via `setResult`,
+ * 3. returns [RESULT_FINISHED] via `setResult` (or [RESULT_RESTART] so the host
+ *    can relaunch after a first-time GLES restart),
  * 4. does not open Room, request INTERNET, or start analytics/cloud save.
  *
  * The Compose host must not hold a Godot view.
@@ -34,6 +35,18 @@ object EngineLauncher {
 
     /** Result extra: the reward level finished. */
     const val RESULT_FINISHED: String = EnginePluginContract.RESULT_FINISHED
+
+    /** Result extra: Godot asked the host to relaunch this isolated Activity. */
+    const val RESULT_RESTART: String = EnginePluginContract.RESULT_RESTART
+
+    /** Result extra: plugin Activity class to relaunch after a GLES restart. */
+    const val EXTRA_ENGINE_CLASS: String = "engine_class"
+
+    /**
+     * Launch extra set by the host when this Activity is already a GLES relaunch.
+     * The new isolated process must not bounce again.
+     */
+    const val EXTRA_GODOT_RELAUNCH: String = "godot_relaunch"
 
     /**
      * Isolated process name for the 3D (Godot or native GLES) Activity.
@@ -52,6 +65,37 @@ object EngineLauncher {
         resultCode: Int,
         finishedExtra: Boolean,
     ): Boolean = resultCode == android.app.Activity.RESULT_OK && finishedExtra
+
+    /**
+     * Result extras that tell the Compose host to relaunch [activityClassName].
+     */
+    fun restartResultIntent(
+        activityClassName: String,
+        mascotCode: String,
+        childName: String,
+    ): Intent =
+        Intent()
+            .putExtra(RESULT_RESTART, true)
+            .putExtra(EXTRA_ENGINE_CLASS, activityClassName)
+            .putExtra(EXTRA_MASCOT, mascotCode)
+            .putExtra(EXTRA_NAME, childName)
+
+    /**
+     * Intent that relaunches the plugin Activity after a Godot GLES restart.
+     * Null when [data] is not a restart result or the class extra is missing.
+     */
+    fun relaunchIntent(
+        context: Context,
+        data: Intent?,
+    ): Intent? {
+        if (data?.getBooleanExtra(RESULT_RESTART, false) != true) return null
+        val className = data.getStringExtra(EXTRA_ENGINE_CLASS)?.trim()?.takeIf { it.isNotBlank() } ?: return null
+        return Intent().setClassName(context.packageName, className).apply {
+            putExtra(EXTRA_MASCOT, data.getStringExtra(EXTRA_MASCOT).orEmpty())
+            putExtra(EXTRA_NAME, data.getStringExtra(EXTRA_NAME).orEmpty())
+            putExtra(EXTRA_GODOT_RELAUNCH, true)
+        }
+    }
 
     /**
      * True when [className] can be loaded by the app class loader.
