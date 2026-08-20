@@ -8,5 +8,6 @@
     <style name="Theme.MatAventuras.Game" parent="Theme.MatAventuras">
         <item name="android:windowFullscreen">true</item>
         <item name="android:keepScreenOn">true</item>
+        <item name="android:windowBackground">@color/hedgehog_blue</item>
     </style>
 </resources>

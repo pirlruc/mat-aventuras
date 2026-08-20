@@ -4,10 +4,13 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,14 +38,18 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -53,7 +60,6 @@ import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.domain.math.Exercise
-import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
@@ -158,8 +164,11 @@ fun LessonScreen(
             NumberHero(exercise.visualCount)
         }
         UiLogic.targetShapeToDraw(module, exercise.targetShape, exercise.play.kind)?.let { ShapeGlyph(it) }
-        if (UiLogic.showsPlayGrid(exercise.play.kind)) {
-            PlayGrid(exercise = exercise, onPick = onPick)
+        if (UiLogic.showsSudokuGrid(exercise.play.kind)) {
+            PlayGrid(exercise)
+        }
+        if (UiLogic.showsSoupBoard(exercise.play.kind)) {
+            SoupBoard(exercise = exercise, onPick = onPick)
         }
         if (UiLogic.showsCipherLegend(exercise.play.kind)) {
             CipherPanel(exercise)
@@ -283,13 +292,9 @@ private fun AnswerFlash(
 }
 
 @Composable
-private fun PlayGrid(
-    exercise: Exercise,
-    onPick: (Int) -> Unit,
-) {
+private fun PlayGrid(exercise: Exercise) {
     val columns = exercise.play.columns.coerceAtLeast(1)
     val cells = exercise.play.cells.ifEmpty { exercise.options }
-    val tappable = exercise.play.kind == PlayKind.SOUP
     val cellDp = UiLogic.playCellHeightDp(columns)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         cells.chunked(columns).forEachIndexed { row, rowCells ->
@@ -301,8 +306,8 @@ private fun PlayGrid(
                     val index = row * columns + col
                     val hole = UiLogic.isBoardHole(cell)
                     Button(
-                        onClick = { if (tappable) onPick(index) },
-                        enabled = tappable,
+                        onClick = {},
+                        enabled = false,
                         colors = ButtonDefaults.buttonColors(
                             disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
                             disabledContentColor = Color(0xFF0D47A1),
@@ -310,13 +315,7 @@ private fun PlayGrid(
                         modifier = Modifier
                             .weight(1f)
                             .height(cellDp.dp)
-                            .testTag(
-                                if (tappable) {
-                                    UiLogic.answerTag(exercise.isCorrect(index))
-                                } else {
-                                    "board-cell-$index"
-                                },
-                            ),
+                            .testTag("board-cell-$index"),
                     ) {
                         GridCellFace(module = exercise.module, cell = cell)
                     }
@@ -324,6 +323,114 @@ private fun PlayGrid(
             }
         }
     }
+}
+
+@Composable
+private fun SoupBoard(
+    exercise: Exercise,
+    onPick: (Int) -> Unit,
+) {
+    val columns = exercise.play.columns.coerceAtLeast(1)
+    val cells = exercise.play.cells.ifEmpty { exercise.options }
+    val targets = exercise.play.targetIndices
+    var selected by remember(exercise.prompt) { mutableStateOf(emptyList<Int>()) }
+    val cellDp = UiLogic.playCellHeightDp(columns)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(exercise.prompt, columns, cells.size) {
+                awaitEachGesture {
+                    val gap = 8.dp.toPx()
+                    val path = collectSoupPath(columns, cells.size, gap, size.width.toFloat(), size.height.toFloat()) {
+                        selected = it
+                    }
+                    UiLogic.soupPickIndex(path, targets, cells.size)?.let(onPick)
+                    selected = emptyList()
+                }
+            },
+    ) {
+        cells.chunked(columns).forEachIndexed { row, rowCells ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                rowCells.forEachIndexed { col, cell ->
+                    val index = row * columns + col
+                    SoupCell(
+                        module = exercise.module,
+                        cell = cell,
+                        correct = exercise.isCorrect(index),
+                        selected = index in selected,
+                        heightDp = cellDp,
+                        onTap = {
+                            UiLogic.soupPickIndex(listOf(index), targets, cells.size)?.let(onPick)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RowScope.SoupCell(
+    module: LearningModule,
+    cell: String,
+    correct: Boolean,
+    selected: Boolean,
+    heightDp: Int,
+    onTap: () -> Unit,
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .weight(1f)
+            .height(heightDp.dp)
+            .background(Color(UiLogic.soupSelectedArgb(selected)))
+            .testTag(UiLogic.answerTag(correct))
+            .semantics { onClick { onTap(); true } },
+    ) {
+        GridCellFace(module = module, cell = cell)
+    }
+}
+
+private suspend fun AwaitPointerEventScope.collectSoupPath(
+    columns: Int,
+    cellCount: Int,
+    gapPx: Float,
+    width: Float,
+    height: Float,
+    onPath: (List<Int>) -> Unit,
+): List<Int> {
+    val down = awaitFirstDown()
+    var path = listOfNotNull(
+        UiLogic.soupIndexAt(down.position.x, down.position.y, width, height, columns, cellCount, gapPx),
+    )
+    onPath(path)
+    while (true) {
+        val event = awaitPointerEvent()
+        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+        if (!change.pressed) {
+            change.consume()
+            break
+        }
+        val next = UiLogic.soupIndexAt(
+            change.position.x,
+            change.position.y,
+            width,
+            height,
+            columns,
+            cellCount,
+            gapPx,
+        )
+        if (next != null) {
+            path = UiLogic.soupExtendPath(path, next, columns)
+            onPath(path)
+        }
+        change.consume()
+    }
+    return path
 }
 
 @Composable

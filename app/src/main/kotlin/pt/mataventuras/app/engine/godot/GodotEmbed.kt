@@ -13,6 +13,9 @@ import pt.mataventuras.app.engine.IsolatedEngineActivity
 internal object GodotEmbed {
     private const val TAG: String = "godot"
 
+    @Volatile
+    private var restartedOnce: Boolean = false
+
     /**
      * Replaces the Activity content with a Godot fragment running [scene].
      */
@@ -20,6 +23,10 @@ internal object GodotEmbed {
         activity: IsolatedEngineActivity,
         scene: String,
     ) {
+        activity.intent.putExtra(
+            GodotRuntime.EXTRA_COMMAND_LINE,
+            GodotRuntime.commandLineFor(scene).toTypedArray(),
+        )
         activity.setContentView(R.layout.godot_host)
         val existing = activity.supportFragmentManager.findFragmentByTag(TAG)
         if (existing is RewardGodotFragment) return
@@ -34,6 +41,19 @@ internal object GodotEmbed {
             .beginTransaction()
             .replace(R.id.godot_fragment_container, fragment, TAG)
             .commitNowAllowingStateLoss()
+    }
+
+    /**
+     * Recreates the isolated host once. Godot asks for a process restart after
+     * first-time GLES setup; ProcessPhoenix is stripped from the manifest, so
+     * [IsolatedEngineActivity.recreate] completes init without a splash loop.
+     */
+    fun restartHost(activity: IsolatedEngineActivity) {
+        if (!GodotRuntime.shouldRestartHost(restartedOnce, activity.isFinishing, activity.isDestroyed)) {
+            return
+        }
+        restartedOnce = true
+        activity.recreate()
     }
 
     /**

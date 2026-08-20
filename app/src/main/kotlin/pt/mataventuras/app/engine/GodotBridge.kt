@@ -24,4 +24,9 @@ internal object GodotBridge {
     ) {
         host.completeRewardOnUi(ok)
     }
+
+    /**
+     * Scene path GDScript should `change_scene_to_file` after the boot node.
+     */
+    fun rewardScene(requested: String): String = requested.ifBlank { GodotRuntime.SCENE_KART }
 }

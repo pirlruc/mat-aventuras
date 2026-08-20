@@ -213,7 +213,7 @@ class PlayBoardFactory(
         return Exercise(
             module = LearningModule.LOGIC,
             prompt = "Encontra a palavra $word na sopa.",
-            spoken = "Procura a palavra $word. Toca numa letra dela.",
+            spoken = "Procura a palavra $word. Desliza o dedo por todas as letras.",
             options = letters.toList(),
             correctIndex = path.first(),
             play =

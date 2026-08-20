@@ -4,9 +4,14 @@ config_version=5
 
 [application]
 config/name="Mat Aventuras"
-run/main_scene="res://kart.tscn"
-config/features=PackedStringArray("4.7", "Mobile")
+run/main_scene="res://boot.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
 config/use_hidden_project_data_directory=false
+boot_splash/show_image=false
+boot_splash/fullsize=false
+boot_splash/use_filter=false
+boot_splash/minimum_display_time=0
+boot_splash/bg_color=Color(0.117647, 0.533333, 0.898039, 1)
 
 [autoload]
 Host="*res://host.gd"

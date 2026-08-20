@@ -30,7 +30,10 @@ android {
 androidComponents {
     beforeVariants { variant ->
         if (variant.buildType == "release") {
-            variant.enableUnitTest = false
+            (variant as com.android.build.api.variant.HasHostTestsBuilder)
+                .hostTests
+                .getValue(com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE)
+                .enable = false
         }
     }
 }

@@ -17,7 +17,13 @@ class RewardGodotFragment : GodotFragment() {
 
     override fun getHostPlugins(engine: Godot): Set<GodotPlugin> {
         val host = activity as IsolatedEngineActivity
-        return setOf(MatAventurasGodotPlugin(engine, host))
+        val scene = arguments?.getString(ARG_SCENE) ?: GodotRuntime.SCENE_KART
+        return setOf(MatAventurasGodotPlugin(engine, host, scene))
+    }
+
+    override fun onGodotRestartRequested(instance: Godot) {
+        val host = activity as? IsolatedEngineActivity ?: return
+        host.runOnUiThread { GodotEmbed.restartHost(host) }
     }
 
     companion object {
