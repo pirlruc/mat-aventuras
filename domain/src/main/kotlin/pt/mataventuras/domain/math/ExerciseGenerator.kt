@@ -10,11 +10,19 @@ import pt.mataventuras.domain.model.LearningModule
 class ExerciseGenerator(
     private val random: Random = Random.Default,
 ) {
+    private val boards: PlayBoardFactory = PlayBoardFactory(random, ::numericOptions)
+
     /**
-     * Next exercise for [module].
+     * Next exercise for [module], mixing classic buttons with boards.
+     * [level] 0..3 grows interactive boards as the child strings hits together.
      */
-    fun generate(module: LearningModule): Exercise =
-        when (module) {
+    fun generate(
+        module: LearningModule,
+        level: Int = 0,
+    ): Exercise {
+        val kind = PlayKinds.pick(module, random)
+        if (kind != PlayKind.CHOICE) return boards.make(kind, module, level)
+        return when (module) {
             LearningModule.COUNTING -> counting()
             LearningModule.SHAPES -> shape()
             LearningModule.NUMBERS -> number()
@@ -23,6 +31,7 @@ class ExerciseGenerator(
             LearningModule.MULTIPLICATION -> multiplication()
             LearningModule.LOGIC -> logic()
         }
+    }
 
     internal fun counting(): Exercise {
         val quantity = random.nextInt(1, 11)

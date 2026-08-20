@@ -31,13 +31,13 @@ object EnginePluginContract {
     const val PROCESS_ENGINE_2D: String = ":engine2d"
 
     /**
-     * Fully-qualified Activity the Godot host provides for age 3.
+     * Fully-qualified Activity the Godot host provides for the 2D platformer.
      * Absent class → native Canvas 2D Activity.
      */
     const val PLUGIN_RUNNER_CLASS: String = "pt.mataventuras.plugin.RunnerPluginActivity"
 
     /**
-     * Fully-qualified Activity the Godot host provides for age 7.
+     * Fully-qualified Activity the Godot host provides for the 3D kart.
      * Absent class → native GLES kart Activity.
      */
     const val PLUGIN_KART_CLASS: String = "pt.mataventuras.plugin.KartPluginActivity"

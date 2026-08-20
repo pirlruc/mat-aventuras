@@ -15,9 +15,12 @@ class ExerciseGeneratorTest {
         LearningModule.entries.forEach { module ->
             val exercise = generator.generate(module)
             assertEquals(module, exercise.module)
-            assertEquals(4, exercise.options.size)
+            assertTrue(exercise.options.size >= 2)
             assertTrue(exercise.isCorrect(exercise.correctIndex))
-            assertFalse(exercise.isCorrect((exercise.correctIndex + 1) % 4))
+            if (exercise.play.targetIndices.isEmpty()) {
+                val wrong = (exercise.correctIndex + 1) % exercise.options.size
+                assertFalse(exercise.isCorrect(wrong))
+            }
         }
     }
 
@@ -27,6 +30,13 @@ class ExerciseGeneratorTest {
         assertTrue(exercise.visualCount in 1..10)
         assertEquals(exercise.visualCount.toString(), exercise.options[exercise.correctIndex])
         assertTrue(exercise.prompt.contains("estrelas"))
+        assertFalse(exercise.isCorrect((exercise.correctIndex + 1) % exercise.options.size))
+    }
+
+    @Test
+    fun additionUsesSumOrGap() {
+        val usesGap = (0..8).map { ExerciseGenerator(Random(it)).addition().prompt.contains("+ ?") }.toSet()
+        assertEquals(2, usesGap.size)
     }
 
     @Test

@@ -1,10 +1,12 @@
 package pt.mataventuras.app.ui
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -190,8 +192,12 @@ class ParentAndLessonLogicTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Sair").fetchSemanticsNodes().isNotEmpty()
         }
-        clickWrongShape()
-        repeat(3) { clickMatchingShape() }
+        clickWrong()
+        var attempts = 0
+        while (rewards < 1 && attempts < 12) {
+            clickCorrect()
+            attempts += 1
+        }
         assertTrue(rewards >= 1)
         compose.onNodeWithText("Sair").performScrollTo().performClick()
     }
@@ -217,10 +223,10 @@ class ParentAndLessonLogicTest {
             }
         }
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Quantas estrelas vês?").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
-        clickAnyNumericOption()
-        clickAnyNumericOption()
+        clickCorrect()
+        clickCorrect()
         compose.onNodeWithText("Sair").performScrollTo().performClick()
         assertTrue(true)
     }
@@ -272,11 +278,11 @@ class ParentAndLessonLogicTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText(VoiceScripts.LEAVE).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
-        compose.onNodeWithText(VoiceScripts.STAY).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.STAY).assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.STAY).performClick()
-        compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
-        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performClick()
         compose.waitUntil(8_000) { left }
     }
 
@@ -357,52 +363,27 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText("Voltar").performClick()
     }
 
-    private fun clickMatchingShape() {
-        val shapes = listOf("círculo", "quadrado", "triângulo", "rectângulo", "estrela")
+    private fun clickCorrect() {
         compose.waitUntil(8_000) {
-            shapes.any { shape ->
-                compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()
-            }
+            compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
-        for (shape in shapes) {
-            if (compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()) {
-                compose.onNode(hasText(shape) and hasClickAction()).performClick()
-                return
-            }
-        }
+        val before = scoreLine()
+        compose.onAllNodesWithTag("correct-answer").onFirst().performScrollTo().performClick()
+        compose.waitUntil(8_000) { scoreLine() != before }
     }
 
-    private fun clickWrongShape() {
-        val shapes = listOf("círculo", "quadrado", "triângulo", "rectângulo", "estrela")
+    private fun clickWrong() {
         compose.waitUntil(8_000) {
-            shapes.any { shape ->
-                compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()
-            }
+            compose.onAllNodesWithTag("distractor").fetchSemanticsNodes().isNotEmpty()
         }
-        val prompt =
-            shapes.first { shape ->
-                compose.onAllNodesWithText("Toca no $shape.").fetchSemanticsNodes().isNotEmpty()
-            }
-        val other =
-            shapes.first { shape ->
-                shape != prompt &&
-                    compose.onAllNodes(hasText(shape) and hasClickAction()).fetchSemanticsNodes().isNotEmpty()
-            }
-        compose.onNode(hasText(other) and hasClickAction()).performClick()
+        compose.onAllNodesWithTag("distractor").onFirst().performScrollTo().performClick()
+        compose.waitForIdle()
     }
 
-    private fun clickAnyNumericOption() {
-        compose.waitUntil(8_000) {
-            (1..10).any { n ->
-                compose.onAllNodes(hasText(n.toString()) and hasClickAction()).fetchSemanticsNodes().isNotEmpty()
-            }
-        }
-        for (n in 1..10) {
-            val nodes = compose.onAllNodes(hasText(n.toString()) and hasClickAction()).fetchSemanticsNodes()
-            if (nodes.isNotEmpty()) {
-                compose.onNode(hasText(n.toString()) and hasClickAction()).performClick()
-                return
-            }
+    private fun scoreLine(): String {
+        val nodes = compose.onAllNodesWithText("certos", substring = true).fetchSemanticsNodes()
+        return nodes.joinToString { node ->
+            node.config.getOrNull(SemanticsProperties.Text).toString()
         }
     }
 }

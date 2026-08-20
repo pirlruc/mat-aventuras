@@ -50,5 +50,19 @@ class Platformer2dEngineTest {
         assertFalse(falling.alive)
         val short = engine.collect(engine.initial(), ringX = 0.5f, radius = 0.1f)
         assertEquals(0, short.rings)
+        var tagged = engine.collect(engine.initial(), ringX = 0f, coinIndex = 0)
+        assertEquals(1, tagged.rings)
+        tagged = engine.collect(tagged, ringX = 0f, coinIndex = 0)
+        assertEquals(1, tagged.rings)
+        tagged = engine.collect(tagged, ringX = 0f, coinIndex = 1)
+        assertEquals(2, tagged.rings)
+        var ledge = engine.initial().copy(x = 16f)
+        ledge = engine.step(ledge, 0.05f, jumping = true)
+        repeat(24) { ledge = engine.step(ledge, 0.05f, jumping = false) }
+        assertTrue(ledge.onGround)
+        assertTrue(ledge.y >= 3f || ledge.alive)
+        assertEquals(28f, PlatformerWorld.PIT_LEFT)
+        assertEquals(2, PlatformerWorld.LEDGES.size)
+        assertEquals(5, PlatformerWorld.COIN_X.size)
     }
 }

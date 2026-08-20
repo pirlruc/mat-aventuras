@@ -36,13 +36,14 @@ class GodotPluginHostTest {
         assertTrue(GodotRuntime.isRobolectricFingerprint("Robolectric"))
         assertFalse(GodotRuntime.isRobolectricFingerprint("user/release-keys"))
         assertEquals(
-            listOf("--path", ".", "--scene", GodotRuntime.SCENE_KART),
+            listOf("--scene", GodotRuntime.SCENE_KART),
             GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART),
         )
         assertEquals(
-            listOf("--path", ".", "--scene", GodotRuntime.SCENE_RUNNER),
+            listOf("--scene", GodotRuntime.SCENE_RUNNER),
             GodotRuntime.commandLineFor(GodotRuntime.SCENE_RUNNER),
         )
+        assertFalse(GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART).contains("--path"))
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
@@ -60,7 +61,13 @@ class GodotPluginHostTest {
     fun pluginActivitiesUseNativeFallbackAndKeepExtras() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val kartIntent =
-            EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.MISCHIEVOUS_ALIEN, "Rui")
+            EngineLauncher.intentFor(
+                ctx,
+                AgeGroup.SEVEN_YEARS,
+                Mascot.MISCHIEVOUS_ALIEN,
+                "Rui",
+                pt.mataventuras.domain.model.EngineKind.THREE_D,
+            )
         assertEquals(EnginePluginContract.PLUGIN_KART_CLASS, kartIntent.component!!.className)
         val kartController = Robolectric.buildActivity(KartPluginActivity::class.java, kartIntent).setup()
         val kart = kartController.get()
@@ -83,6 +90,16 @@ class GodotPluginHostTest {
         assertEquals("hero_pup" to "Ana", runner.extrasSnapshot())
         runner.completeReward(ok = false)
         destroy(runnerController)
+
+        val sevenPlatform =
+            EngineLauncher.intentFor(
+                ctx,
+                AgeGroup.SEVEN_YEARS,
+                Mascot.HERO_PUP,
+                "Rui",
+                pt.mataventuras.domain.model.EngineKind.TWO_D,
+            )
+        assertEquals(EnginePluginContract.PLUGIN_RUNNER_CLASS, sevenPlatform.component!!.className)
     }
 
     @Test
@@ -91,7 +108,13 @@ class GodotPluginHostTest {
         val kartController =
             Robolectric.buildActivity(
                 KartPluginActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER, "Rui"),
+                EngineLauncher.intentFor(
+                    ctx,
+                    AgeGroup.SEVEN_YEARS,
+                    Mascot.BRAVE_PLUMBER,
+                    "Rui",
+                    pt.mataventuras.domain.model.EngineKind.THREE_D,
+                ),
             ).setup()
         val kart = kartController.get()
         var kartScene = ""
@@ -121,7 +144,13 @@ class GodotPluginHostTest {
         val kartController =
             Robolectric.buildActivity(
                 KartPluginActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER, "Rui"),
+                EngineLauncher.intentFor(
+                    ctx,
+                    AgeGroup.SEVEN_YEARS,
+                    Mascot.BRAVE_PLUMBER,
+                    "Rui",
+                    pt.mataventuras.domain.model.EngineKind.THREE_D,
+                ),
             ).setup()
         val kart = kartController.get()
         assertEquals("brave_plumber", GodotBridge.mascotCode(kart))

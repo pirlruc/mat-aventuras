@@ -37,6 +37,14 @@ class SpeechEngine(context: Context) : TextToSpeech.OnInitListener {
     }
 
     /**
+     * Stops playback without shutting the engine down.
+     */
+    fun stop() {
+        if (released) return
+        tts.stop()
+    }
+
+    /**
      * Releases the TTS engine.
      */
     fun release() {

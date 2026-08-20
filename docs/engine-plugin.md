@@ -79,7 +79,9 @@ Normalised X in `[0, 1]` (`EngineInputMap`, copied in `kart.gd`):
 Files live in `app/src/main/assets/` (no hidden `.godot` directory;
 `use_hidden_project_data_directory=false`). Command line:
 
-`--path . --scene res://kart.tscn` (or `res://runner.tscn`)
+`--scene res://kart.tscn` (or `res://runner.tscn`). Do not pass `--path`:
+Godot 4.6+ Android loads `project.godot` from APK assets and ignores path
+overrides, which otherwise yields a blank screen.
 
 GDScript talks to Android:
 
