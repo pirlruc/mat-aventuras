@@ -1,7 +1,11 @@
 package pt.mataventuras.app.ui.lesson
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -29,6 +34,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,6 +78,12 @@ fun LessonScreen(
     val startedAt = remember { System.currentTimeMillis() }
     val pointsGate = remember { Mutex() }
     val fillViewport = UiLogic.lessonFillsViewport(profile.ageGroup)
+    val view = LocalView.current
+    val cues = remember { AnswerCuePlayer.device() }
+    var flashCorrect by remember { mutableStateOf(true) }
+    var flashTick by remember { mutableIntStateOf(0) }
+
+    DisposableEffect(cues) { onDispose { cues.release() } }
 
     LaunchedEffect(exercise.prompt) { onSpeak(exercise.spoken) }
     LaunchedEffect(profile.id) {
@@ -85,6 +98,9 @@ fun LessonScreen(
     val onPick: (Int) -> Unit = { index ->
         val current = exercise
         val correct = current.isCorrect(index)
+        flashCorrect = correct
+        flashTick += 1
+        cues.play(correct) { code -> view.performHapticFeedback(code) }
         onSpeak(if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN)
         val delta = container.rewards.pointsForAttempt(correct)
         points = container.rewards.applyPoints(points, delta)
@@ -108,20 +124,21 @@ fun LessonScreen(
         exercise = container.generator.generate(module)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .then(
-                if (fillViewport) {
-                    Modifier
-                } else {
-                    Modifier.verticalScroll(rememberScrollState())
-                },
-            )
-            .padding(20.dp),
-        verticalArrangement = if (fillViewport) Arrangement.Top else Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(
+                    if (fillViewport) {
+                        Modifier
+                    } else {
+                        Modifier.verticalScroll(rememberScrollState())
+                    },
+                )
+                .padding(20.dp),
+            verticalArrangement = if (fillViewport) Arrangement.Top else Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         if (UiLogic.showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {
             StarGrid(exercise.visualCount)
@@ -178,6 +195,54 @@ fun LessonScreen(
         }) { Text(LessonFlow.exitLabel(confirmingExit)) }
         if (LessonFlow.showsStay(confirmingExit)) {
             Button(onClick = { confirmingExit = false }) { Text(VoiceScripts.STAY) }
+        }
+        }
+        AnswerFlash(correct = flashCorrect, tick = flashTick)
+    }
+}
+
+@Composable
+private fun AnswerFlash(
+    correct: Boolean,
+    tick: Int,
+) {
+    val alpha = remember { Animatable(0f) }
+    LaunchedEffect(tick) {
+        if (tick == 0) return@LaunchedEffect
+        alpha.snapTo(1f)
+        alpha.animateTo(0f, animationSpec = tween(UiLogic.answerFlashMs()))
+    }
+    val fade = alpha.value
+    if (!UiLogic.showsAnswerFlash(fade)) return
+    val color = Color(UiLogic.answerFlashArgb(correct))
+    val scale = UiLogic.answerFlashScale(fade)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(UiLogic.answerFlashScrimArgb(correct)).copy(alpha = fade * 0.55f))
+            .testTag("answer-flash"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.graphicsLayer {
+                this.alpha = fade
+                scaleX = scale
+                scaleY = scale
+            },
+        ) {
+            Text(
+                UiLogic.answerFlashGlyph(correct),
+                fontSize = 96.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = color,
+            )
+            Text(
+                UiLogic.answerFlashCaption(correct),
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = color,
+            )
         }
     }
 }

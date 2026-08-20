@@ -1,6 +1,9 @@
 package pt.mataventuras.app.ui
 
+import android.media.ToneGenerator
+import android.os.Build
 import android.speech.tts.TextToSpeech
+import android.view.HapticFeedbackConstants
 import kotlin.math.cos
 import kotlin.math.sin
 import pt.mataventuras.domain.math.PlayKind
@@ -125,6 +128,71 @@ internal object UiLogic {
      * Puzzle and sudoku holes glow so the missing piece is obvious.
      */
     fun isBoardHole(cell: String): Boolean = cell.isEmpty() || cell == "?"
+
+    /**
+     * Glyph on the correct/wrong flash (kids can read a tick or cross).
+     */
+    fun answerFlashGlyph(correct: Boolean): String = if (correct) "✓" else "✗"
+
+    /**
+     * Caption under the flash glyph. Same pt-PT lines TTS already speaks.
+     */
+    fun answerFlashCaption(correct: Boolean): String =
+        if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN
+
+    /**
+     * Solid colour for the flash glyph.
+     */
+    fun answerFlashArgb(correct: Boolean): Long = if (correct) 0xFF2E7D32 else 0xFFC62828
+
+    /**
+     * Scrim behind the flash so the board still peeks through.
+     */
+    fun answerFlashScrimArgb(correct: Boolean): Long = if (correct) 0x882E7D32 else 0x88C62828
+
+    /**
+     * Flash length in milliseconds.
+     */
+    fun answerFlashMs(): Int = 480
+
+    /**
+     * Scale of the flash glyph for [alpha] 0..1.
+     */
+    fun answerFlashScale(alpha: Float): Float = 0.85f + 0.35f * alpha
+
+    /**
+     * Draw the flash only while it is still fading.
+     */
+    fun showsAnswerFlash(alpha: Float): Boolean = alpha > 0f
+
+    /**
+     * ToneGenerator programme: ack on a hit, nack on a miss.
+     */
+    fun answerTone(correct: Boolean): Int =
+        if (correct) ToneGenerator.TONE_PROP_ACK else ToneGenerator.TONE_PROP_NACK
+
+    /**
+     * How long the chime plays.
+     */
+    fun answerToneMs(correct: Boolean): Int = if (correct) 180 else 260
+
+    /**
+     * STREAM_MUSIC volume for [ToneGenerator] (0..100).
+     */
+    fun answerVolumePercent(): Int = 80
+
+    /**
+     * View haptic code. CONFIRM/REJECT need API 30; older devices get a click or long-press.
+     */
+    fun answerHaptic(
+        correct: Boolean,
+        sdkInt: Int = Build.VERSION.SDK_INT,
+    ): Int =
+        if (sdkInt >= 30) {
+            if (correct) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.REJECT
+        } else {
+            if (correct) HapticFeedbackConstants.CONTEXT_CLICK else HapticFeedbackConstants.LONG_PRESS
+        }
 
     /**
      * Vertices of an upward triangle centred on ([cx], [cy]).
