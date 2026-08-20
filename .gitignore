@@ -1,0 +1,18 @@
+.gradle/
+build/
+**/build/
+local.properties
+*.iml
+.idea/
+.DS_Store
+captures/
+.externalNativeBuild
+.cxx
+*.apk
+*.ap_
+*.aab
+.ci-venv/
+.kotlin/
+**/__pycache__/
+# Drop-in Godot/Unity AAR (see docs/engine-plugin.md). Do not commit binaries.
+libs/*.aar

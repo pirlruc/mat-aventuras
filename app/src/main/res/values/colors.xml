@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="hedgehog_blue">#1E88E5</color>
+    <color name="cream">#FFF8E1</color>
+    <color name="sky">#E3F2FD</color>
+    <color name="orange">#FB8C00</color>
+    <color name="green">#43A047</color>
+    <color name="pink">#EC407A</color>
+    <color name="purple">#7E57C2</color>
+    <color name="icon_background">#1565C0</color>
+</resources>

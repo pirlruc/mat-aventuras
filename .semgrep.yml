@@ -1,0 +1,20 @@
+rules:
+  - id: mat-aventuras-no-internet-permission
+    languages: [xml]
+    severity: ERROR
+    message: INTERNET permission is forbidden (100% on-device).
+    patterns:
+      - pattern: |
+          <uses-permission android:name="android.permission.INTERNET"/>
+      - pattern-not: |
+          <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
+  - id: mat-aventuras-no-runtime-exec
+    languages: [kotlin]
+    severity: ERROR
+    message: Process execution from app code is forbidden.
+    pattern: Runtime.getRuntime().exec(...)
+  - id: mat-aventuras-no-adb-backup
+    languages: [xml]
+    severity: ERROR
+    message: ADB/cloud backup must stay disabled so PIN hashes and profiles never leave the device.
+    pattern: android:allowBackup="true"

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reference isolated-process attributes. The real entries are in app/src/main/AndroidManifest.xml. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name="pt.mataventuras.plugin.KartPluginActivity"
+            android:process=":engine3d"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity="" />
+        <activity
+            android:name="pt.mataventuras.plugin.RunnerPluginActivity"
+            android:process=":engine2d"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity="" />
+    </application>
+</manifest>

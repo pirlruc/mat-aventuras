@@ -1,0 +1,38 @@
+complexity:
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 10
+  ComplexCondition:
+    active: true
+    threshold: 4
+  LongMethod:
+    active: true
+    threshold: 60
+  LongParameterList:
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 8
+  TooManyFunctions:
+    active: true
+    thresholdInClasses: 15
+
+comments:
+  UndocumentedPublicClass:
+    active: true
+    excludes: ["**/test/**"]
+    searchInInnerObject: false
+  UndocumentedPublicFunction:
+    active: true
+    excludes: ["**/test/**"]
+
+style:
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: true
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  ReturnCount:
+    active: true
+    max: 3

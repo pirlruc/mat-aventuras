@@ -1,0 +1,152 @@
+# Quality, tests, docs, security (CI-006 / CI-009–012). Action pins are SHAs (CI-001).
+# Companion repos are private; CI uses vendored scripts/thresholds so
+# COMPANION_READ_TOKEN is not required (gitlinks stay pinned for local clones).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 1 * *" # monthly security re-analysis (CI-029)
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dependabot:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: echo "Secret-using jobs are skipped for Dependabot."
+
+  quality:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Companion gitlinks are pinned
+        run: |
+          test -n "$(git rev-parse 'HEAD:docs/guardrails')"
+          test -n "$(git rev-parse 'HEAD:.github/scaffold')"
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Python tools
+        run: |
+          python3 -m venv .ci-venv
+          .ci-venv/bin/pip install -q pyyaml
+
+      - name: Parse YAML and issue manifest
+        run: |
+          .ci-venv/bin/python scripts/validate-yaml.py \
+            docs/issues.yml \
+            docs/guardrail-deviations.yml \
+            docs/issues-sync-targets.yml \
+            .github/dependabot.yml \
+            .github/workflows/ci.yml \
+            .github/workflows/hardening.yml
+          .ci-venv/bin/python scripts/validate-issues.py docs/issues.yml
+
+      - name: Domain static analysis
+        run: |
+          ./gradlew --no-daemon :domain:ktlintCheck :domain:detekt
+
+      - name: KDoc coverage (KT-DOC-001)
+        run: python3 scripts/verify-kdoc.py
+
+      - name: Maintainability index (KT-CPLX-002)
+        run: python3 scripts/verify-maintainability.py
+
+      - name: Privacy manifest (backup / isolation)
+        run: python3 scripts/verify-privacy-manifest.py
+
+      - name: Shellcheck (CI-023)
+        run: shellcheck scripts/*.sh
+
+  test:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3.2.2
+
+      - name: Domain tests
+        run: |
+          ./gradlew --no-daemon :domain:test :domain:koverXmlReport :domain:koverVerify
+
+      - name: Android unit tests, coverage, and lint (KT-TEST-002, KT-BUILD-002)
+        run: |
+          ./gradlew --no-daemon \
+            :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug \
+            :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerifyDebug \
+            :app:lintDebug
+
+      - name: Coverage thresholds (CI-022)
+        run: |
+          python3 -m pip install -q pyyaml
+          python3 scripts/verify-coverage.py
+
+  docs:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Lint relative markdown links
+        run: python3 scripts/lint-doc-links.py --root .
+
+  security:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Secret scan (gitleaks MIT binary, KT-SEC-002)
+        run: |
+          ver="8.24.3"
+          curl -fsSL -o /tmp/gitleaks.tgz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${ver}/gitleaks_${ver}_linux_x64.tar.gz"
+          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
+          /tmp/gitleaks version
+          /tmp/gitleaks detect --source . --no-banner --exit-code 1
+
+      - name: SAST (semgrep local rules, KT-SEC-003)
+        run: |
+          python3 -m venv .ci-venv
+          .ci-venv/bin/pip install -q "setuptools>=70,<82" "semgrep==1.128.1"
+          .ci-venv/bin/semgrep --config .semgrep.yml --error --quiet --metrics off
+
+      - name: License allow/deny (SC-LIC-001)
+        run: python3 scripts/verify-licenses.py

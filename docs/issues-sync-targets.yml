@@ -1,0 +1,21 @@
+# Bootstrap labels and milestones for this repository.
+# Schema: .github/scaffold/templates/issues-sync-targets.example.yml
+
+targets:
+  - repo: pirlruc/mat-aventuras
+    yaml: docs/issues.yml
+
+labels:
+  - { name: epic, color: "5319E7", description: "Decision record" }
+  - { name: task, color: "0E8A16", description: "Unit of work under an epic" }
+  - { name: ai-architect, color: "7057FF", description: "Architecture or planning" }
+  - { name: ai-implementer, color: "1D76DB", description: "Implementation" }
+  - { name: ai-reviewer, color: "ededed", description: "Review or triage" }
+
+milestones:
+  - name: Phase 1 — Foundation
+    description: Native Compose host, local persistence, isolated 2D/3D engines
+  - name: Phase 2 — Learning content
+    description: Broader exercise packs, instrumented coverage
+  - name: Phase 3 — Hardening and engines
+    description: Remaining guardrail CI gates and optional isolated engine plugin

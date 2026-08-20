@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mat Aventuras</string>
+    <string name="app_tagline">Números, formas e jogos.</string>
+    <string name="app_description">Uma aventura de matemática para os 3 e os 7 anos. Tudo fica neste aparelho.</string>
+    <string name="age_selection">Olá! Escolhe a tua idade.</string>
+    <string name="three_years">3 anos</string>
+    <string name="seven_years">7 anos</string>
+    <string name="continue_label">Continuar</string>
+    <string name="your_name">Como te chamas?</string>
+    <string name="leaderboard">Classificação</string>
+    <string name="rewards">Recompensas</string>
+    <string name="parent_dashboard">Painel dos pais</string>
+    <string name="enter_pin">Introduz o PIN dos pais</string>
+    <string name="set_pin">Escolhe um PIN de quatro números</string>
+    <string name="confirm_pin">Confirma o PIN</string>
+    <string name="back">Voltar</string>
+    <string name="well_done">Muito bem!</string>
+    <string name="try_again">Tenta outra vez.</string>
+    <string name="play_reward">Prémio</string>
+    <string name="points">Pontos</string>
+    <string name="accuracy">Precisão</string>
+    <string name="time">Tempo</string>
+    <string name="needs_work">Áreas a melhorar</string>
+    <string name="no_sessions">Ainda não há sessões neste perfil.</string>
+    <string name="badges">Distintivos</string>
+    <string name="avatars">Avatares</string>
+    <string name="privacy">Tudo fica neste aparelho. Não enviamos dados.</string>
+    <string name="switch_profile">Outra criança</string>
+</resources>

@@ -1,0 +1,456 @@
+# Authored backlog for pirlruc/mat-aventuras.
+#
+# Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.2.0/github-issue-adr
+#
+# The Epic is the decision record — there are no ADR markdown files.
+# Deviations from guardrails go in docs/guardrail-deviations.yml, not here.
+#
+# `id` values are permanent: issues are matched by the [ID] in their title.
+
+milestones:
+  - name: Phase 1 — Foundation
+    status: open
+    epics:
+      - id: MAT-001
+        status: open
+        title: Native Compose host with isolated 2D/3D reward engines
+        overview:
+          problem: >-
+            A kids' math app for ages 3 and 7 must mix Jetpack Compose learning
+            UI with 2D and 3D reward games on mid-tier Android tablets, keep
+            every profile/leaderboard/analytics record on-device, and speak
+            Portuguese from Portugal, without embedding two commercial engines
+            that fight for RAM after a Compose-to-game transition.
+          goal: >-
+            Ship a native Kotlin architecture where Compose owns menus,
+            lessons, parental PIN, and rewards; a lightweight 2D engine and a
+            process-isolated 3D engine handle reward levels; Room/DataStore are
+            the only persistence; identifiers/docs are English; UI copy is
+            pt-PT; and CI gates every included module against the pinned Kotlin
+            guardrails (95% line and branch coverage; no coverage deviation).
+        architecture:
+          target: >-
+            In the context of a native Android educational math game for ages
+            3 and 7, facing Compose-to-engine RAM spikes on mid-tier tablets
+            and a local-only privacy constraint, we decided to host all
+            learning and dashboards in Jetpack Compose and run reward
+            mini-games as dedicated Activities (Compose Canvas 2D in-process;
+            GLES 3D in android:process :engine3d), rejecting Unity/Godot AAR
+            embedding for v1, to achieve killable 3D heaps and 100% on-device
+            data, accepting lower cinematic fidelity until a later Epic
+            re-evaluates a single optional engine plugin.
+          modules:
+            - domain/
+            - data/
+            - app/
+            - docs/architecture.md
+        acceptance_criteria:
+          - Age selection UI adapts tokens for 3-year-olds versus 7-year-olds
+          - Parental dashboard is PIN-gated; PIN hash never stored in plaintext
+          - Local leaderboard and badges persist in Room with no network calls
+          - 3yo rewards launch the 2D engine; 7yo rewards launch the isolated 3D engine
+          - App declares no INTERNET permission; user data never leaves the device
+          - :domain, :data, and :app unit tests and coverage gates read kotlin/profile.thresholds.yml
+          - Source identifiers, comments, KDoc, and docs are English; UI/TTS is pt-PT
+        guardrail_refs:
+          - KT-BUILD-001
+          - KT-API-001
+          - KT-API-004
+          - KT-CONC-001
+          - KT-TEST-001
+          - KT-TEST-002
+          - KT-CPLX-001
+          - KT-SEC-001
+          - KT-PERF-001
+          - CI-001
+          - CI-008
+          - CI-022
+          - SC-DEP-001
+        tasks:
+          - id: MAT-001-T1
+            status: done
+            title: Pin guardrails, scaffold, and authored backlog
+            instructions:
+              files:
+                - docs/guardrails
+                - .github/scaffold
+                - docs/issues.yml
+                - docs/guardrail-deviations.yml
+                - .github/ISSUE_TEMPLATE
+            verification:
+              - git submodule status docs/guardrails reports a SHA
+              - python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only
+            guardrail_refs:
+              - CI-008
+
+          - id: MAT-001-T2
+            status: done
+            title: Domain models, math generators, PIN, rewards
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain
+                - domain/src/test/kotlin/pt/mataventuras/domain
+            verification:
+              - ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
+            guardrail_refs:
+              - KT-API-001
+              - KT-TEST-001
+              - KT-TEST-002
+              - KT-CPLX-001
+
+          - id: MAT-001-T3
+            status: done
+            title: Room persistence and local leaderboard
+            instructions:
+              files:
+                - data/src/main/kotlin/pt/mataventuras/data
+            verification:
+              - Room schema matches docs/architecture.md
+              - No Retrofit/Firebase/HTTP client in the graph
+            guardrail_refs:
+              - KT-API-001
+              - KT-SEC-001
+
+          - id: MAT-001-T4
+            status: done
+            title: Compose screens and isolated game Activities
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app
+                - app/src/main/AndroidManifest.xml
+            verification:
+              - AgeSelectionScreen, ParentDashboard, and LeaderboardAndRewardsScreen exist
+              - Kart3dActivity uses android:process :engine3d
+              - All user-visible strings are pt-PT; identifiers are English
+            guardrail_refs:
+              - KT-API-004
+              - KT-PERF-001
+              - KT-CONC-001
+
+          - id: MAT-001-T5
+            status: done
+            title: Gradle CI reading pinned Kotlin thresholds
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+                - scripts/verify-coverage.py
+                - gradle/libs.versions.toml
+            verification:
+              - CI quality job pins actions by SHA
+              - Coverage script fails closed when thresholds keys are missing
+            guardrail_refs:
+              - CI-001
+              - CI-022
+              - KT-BUILD-001
+              - KT-TEST-002
+
+          - id: MAT-001-T6
+            status: done
+            title: English identifiers and docs; pt-PT UI only
+            instructions:
+              files:
+                - domain/
+                - data/
+                - app/
+                - docs/architecture.md
+                - README.md
+            verification:
+              - Gradle modules are :domain, :data, :app
+              - VoiceScripts and strings.xml values remain pt-PT
+              - python3 .github/scaffold/scripts/lint-doc-links.py --root .
+            guardrail_refs:
+              - KT-API-004
+
+  - name: Phase 2 — Learning content
+    status: open
+    epics:
+      - id: MAT-002
+        status: open
+        title: Richer lesson packs and Android module coverage
+        overview:
+          problem: >-
+            Foundation CI now gates :domain on the JVM, and Robolectric unit
+            tests apply the same 95% line/branch gate to :app and :data when
+            the Android SDK is present. Lesson variety is still a first
+            playable slice rather than a full curriculum, and emulator
+            instrumented tests are not yet in CI.
+          goal: >-
+            Expand exercise packs (missing addend, smallest-number, more
+            sequences) and add emulator instrumented tests that complement
+            the Robolectric gates already on :app and :data.
+        architecture:
+          target: Android instrumented test source sets plus additional ExerciseGenerator packs
+          modules:
+            - app/
+            - data/
+            - domain/
+        acceptance_criteria:
+          - Instrumented tests run in CI on an emulator
+          - Lesson packs include missing-addend and smallest-number items
+          - :app and :data keep the org 95% coverage gate with no deviation
+        guardrail_refs:
+          - KT-TEST-002
+          - KT-DOC-001
+        tasks:
+          - id: MAT-002-T1
+            status: open
+            title: Emulator CI for Compose/Room
+            instructions:
+              files:
+                - app/src/androidTest
+                - data/src/androidTest
+                - .github/workflows/ci.yml
+            verification:
+              - Instrumented tests run on an emulator job
+            guardrail_refs:
+              - KT-TEST-002
+
+          - id: MAT-002-T2
+            status: done
+            title: Robolectric coverage for :app and :data at org defaults
+            instructions:
+              files:
+                - app/src/test
+                - data/src/test
+                - scripts/verify-coverage.py
+            verification:
+              - python3 scripts/verify-coverage.py gates :app and :data when the SDK is present
+              - docs/guardrail-deviations.yml has no KT-TEST-002 entry
+            guardrail_refs:
+              - KT-TEST-002
+
+          - id: MAT-002-T3
+            status: done
+            title: Missing-addend and smallest-number lesson items
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/math/ExerciseGenerator.kt
+            verification:
+              - ExerciseGeneratorTest covers missing addend and smallest-number prompts
+            guardrail_refs:
+              - KT-TEST-001
+
+  - name: Phase 3 — Hardening and engines
+    status: open
+    epics:
+      - id: MAT-003
+        status: open
+        title: Isolated Godot 4 reward engine
+        overview:
+          problem: >-
+            v1 GLES/Canvas rewards are playable but not cinematic. Embedding
+            Unity or Godot in the Compose process would revive the RAM spike
+            MAT-001 rejected. Unity-as-a-library is a heavier, proprietary
+            player that is harder to keep local-only.
+          goal: >-
+            Adopt Godot 4 (MIT, Maven Central AAR, gl_compatibility) as the
+            single reward engine in android:process :engine3d and :engine2d,
+            with native Canvas/GLES as the Robolectric fallback, no
+            networking, analytics, or cloud save.
+        architecture:
+          target: >-
+            In the context of isolated reward mini-games on mid-tier tablets,
+            we decided to embed Godot 4 (not Unity) via org.godotengine:godot
+            in KartPluginActivity (:engine3d) and RunnerPluginActivity
+            (:engine2d), rejecting Unity-as-a-library for heap size, MIT
+            licensing, and a strip-able INTERNET merge, accepting a
+            Robolectric native fallback because libgodot_android cannot load
+            in unit tests.
+          modules:
+            - app/src/main/kotlin/pt/mataventuras/plugin
+            - app/src/main/kotlin/pt/mataventuras/app/engine
+            - app/src/main/assets
+            - docs/architecture.md
+            - docs/engine-plugin.md
+        acceptance_criteria:
+          - Plugin Activity uses an isolated process
+          - No INTERNET permission introduced by the plugin
+          - Domain simulation APIs remain the fallback when Godot cannot embed
+          - Godot 4 is the adopted engine; Unity is not shipped
+        guardrail_refs:
+          - KT-API-004
+          - KT-PERF-001
+          - KT-SEC-001
+        tasks:
+          - id: MAT-003-T1
+            status: done
+            title: Document plugin contract and reject in-process embedding
+            instructions:
+              files:
+                - docs/architecture.md
+                - app/src/main/kotlin/pt/mataventuras/app/engine/EngineLauncher.kt
+            verification:
+              - Architecture lists the Intent contract and process name
+            guardrail_refs:
+              - KT-API-004
+
+          - id: MAT-003-T2
+            status: done
+            title: Native oval-track GLES kart in :engine3d
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine
+                - app/src/main/kotlin/pt/mataventuras/app/engine/Kart3dActivity.kt
+                - app/src/main/kotlin/pt/mataventuras/app/engine/KartRenderer.kt
+            verification:
+              - Kart3dEngine drives an oval track with steer, boost, and ring pickups
+              - Kart3dActivity uses android:process :engine3d and does not open Room
+              - HUD copy is pt-PT (Volta, Anéis, Impulso)
+            guardrail_refs:
+              - KT-PERF-001
+              - KT-API-004
+
+          - id: MAT-003-T4
+            status: done
+            title: Host resolver, isolated Activity base, optional AAR hook
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine/EnginePluginContract.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine/EnginePluginResolver.kt
+                - app/src/main/kotlin/pt/mataventuras/app/engine/IsolatedEngineActivity.kt
+                - app/src/main/kotlin/pt/mataventuras/app/engine/EngineLauncher.kt
+                - docs/engine-plugin.md
+                - samples/engine-plugin
+            verification:
+              - EnginePluginResolver prefers plugin class names when present
+              - EngineLauncher falls back to native Activities when they are absent
+              - app/build.gradle.kts compiles libs/engine-plugin.aar when the file exists
+              - IsolatedEngineActivity exposes extras and completeReward
+            guardrail_refs:
+              - KT-PERF-001
+              - KT-API-004
+              - KT-SEC-001
+
+          - id: MAT-003-T3
+            status: done
+            title: Adopt Godot 4 in isolated processes
+            instructions:
+              files:
+                - gradle/libs.versions.toml
+                - app/src/main/kotlin/pt/mataventuras/plugin
+                - app/src/main/kotlin/pt/mataventuras/app/engine
+                - app/src/main/assets
+                - app/src/main/AndroidManifest.xml
+                - docs/architecture.md
+                - docs/engine-plugin.md
+            verification:
+              - Plugin Activity uses android:process :engine3d or :engine2d
+              - Intent extras match EngineLauncher (mascot, name, finished)
+              - Merged manifest still has no INTERNET permission
+              - Domain Kart3dEngine and Platformer2dEngine remain the Robolectric fallback
+              - org.godotengine:godot is pinned; Unity is not a dependency
+            guardrail_refs:
+              - KT-PERF-001
+              - KT-SEC-001
+              - KT-API-004
+
+      - id: MAT-004
+        status: open
+        title: Remaining Kotlin and CI guardrail gates
+        overview:
+          problem: >-
+            Phase 1 CI gated :domain coverage in one quality job. Remaining
+            Kotlin/CI/supply-chain packs still required SAST, secret scanning,
+            split workflows, docs coverage measurement, maintainability-index
+            enforcement, Android lint, and a license allow-list.
+          goal: >-
+            Close the remaining KT-*, CI-*, and SC-* items that MAT-001 did
+            not implement, without inventing ADR files or recording unapproved
+            deviations.
+        architecture:
+          target: >-
+            Split or add workflows for quality, test, docs, and security;
+            keep action SHA pins; read numeric gates from
+            docs/guardrails/*/profile.thresholds.yml (CI-022 fail-closed).
+          modules:
+            - .github/workflows/
+            - scripts/verify-coverage.py
+            - docs/guardrail-deviations.yml
+            - config/detekt.yml
+        acceptance_criteria:
+          - Quality, tests, docs, and security are separate jobs or workflows
+          - Secret scan and SAST run on non-Dependabot PRs
+          - KDoc/API docs coverage is measured or a dated deviation exists
+          - Dependabot open-pull-requests-limit stays at the org default of 5
+        guardrail_refs:
+          - KT-BUILD-002
+          - KT-CPLX-002
+          - KT-DOC-001
+          - KT-SEC-002
+          - KT-SEC-003
+          - CI-004
+          - CI-006
+          - CI-009
+          - CI-010
+          - CI-011
+          - CI-012
+          - CI-023
+          - CI-029
+          - SC-LIC-001
+        tasks:
+          - id: MAT-004-T1
+            status: done
+            title: Split CI jobs and add secret/SAST scans
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+            verification:
+              - Separate jobs exist for quality, tests, docs, and security
+              - New actions are pinned by SHA
+            guardrail_refs:
+              - CI-006
+              - CI-012
+              - KT-SEC-002
+              - KT-SEC-003
+
+          - id: MAT-004-T2
+            status: done
+            title: Docs coverage, maintainability index, Android lint
+            instructions:
+              files:
+                - config/detekt.yml
+                - .github/workflows/ci.yml
+            verification:
+              - KDoc coverage or a recorded deviation
+              - detekt or equivalent enforces min_maintainability_index
+              - Android lint runs when the SDK is present
+            guardrail_refs:
+              - KT-DOC-001
+              - KT-CPLX-002
+              - KT-BUILD-002
+
+          - id: MAT-004-T3
+            status: done
+            title: Privacy hardening and finsilo-style extra CI gates
+            instructions:
+              files:
+                - app/src/main/AndroidManifest.xml
+                - app/src/main/res/xml/data_extraction_rules.xml
+                - .github/workflows/hardening.yml
+                - scripts/verify-privacy-manifest.py
+                - scripts/run-mobsfscan.sh
+            verification:
+              - android:allowBackup is false and dataExtractionRules deny Room/DataStore
+              - API 26–27 isolated processes still skip Room via /proc/self/cmdline
+              - hardening.yml runs wrapper validation, dependency-review, mobsfscan, privacy manifest
+            guardrail_refs:
+              - KT-SEC-001
+              - KT-SEC-002
+              - CI-005
+              - CI-012
+              - KT-PERF-001
+
+          - id: MAT-004-T4
+            status: open
+            title: CodeQL and OSV/SBOM gates (remaining finsilo security jobs)
+            instructions:
+              files:
+                - .github/workflows
+            verification:
+              - CodeQL java-kotlin job fails on High/Critical
+              - CycloneDX SBOM + OSV Scanner run on a built APK
+            guardrail_refs:
+              - KT-SEC-002
+              - SC-SBOM-001
+              - SC-SBOM-002
