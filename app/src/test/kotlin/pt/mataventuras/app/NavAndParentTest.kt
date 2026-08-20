@@ -2,6 +2,7 @@ package pt.mataventuras.app
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -49,7 +50,7 @@ class NavAndParentTest {
         compose.onNodeWithText("Voltar").performScrollTo().performClick()
         compose.onNodeWithText("Contar com o Ouriço Veloz").performScrollTo().performClick()
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Quantas estrelas vês?").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
         compose.waitUntil(8_000) {
