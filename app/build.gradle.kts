@@ -47,6 +47,14 @@ android {
     }
 }
 
+androidComponents {
+    beforeVariants { variant ->
+        if (variant.buildType == "release") {
+            variant.enableUnitTest = false
+        }
+    }
+}
+
 dependencies {
     implementation(project(":data"))
     implementation(libs.androidx.core.ktx)

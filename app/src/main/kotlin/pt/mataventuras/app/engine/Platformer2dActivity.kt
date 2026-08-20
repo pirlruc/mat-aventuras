@@ -1,5 +1,6 @@
 package pt.mataventuras.app.engine
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,64 +16,61 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.model.Mascot
 
 /**
  * Age-3 2D reward. Compose Canvas host; no Unity/Godot.
  */
 class Platformer2dActivity : ComponentActivity() {
+    internal val loop = Platformer2dLoop()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val mascot = Mascot.fromCode(intent.getStringExtra(EngineLauncher.EXTRA_MASCOT) ?: "")
         setContent {
-            val simulation = remember { Platformer2dEngine() }
-            var state by remember { mutableStateOf(simulation.initial(ringsTarget = 5)) }
-            var jumping by remember { mutableStateOf(false) }
+            var state by remember { mutableStateOf(loop.state) }
             LaunchedEffect(Unit) {
-                var last = 0L
-                while (!state.finished) {
-                    withFrameNanos { now ->
-                        if (last == 0L) last = now
-                        val dt = ((now - last) / 1_000_000_000f).coerceAtMost(0.05f)
-                        last = now
-                        state = simulation.step(state, dt, jumping)
-                        jumping = false
-                        val ring = (state.x / 8f).toInt() * 8f + 6f
-                        state = simulation.collect(state, ring)
+                while (!loop.state.finished) {
+                    withFrameNanos {
+                        loop.tick()
+                        state = loop.state
                     }
                 }
-                setResult(
-                    RESULT_OK,
-                    android.content.Intent().putExtra(EngineLauncher.RESULT_FINISHED, true),
-                )
-                finish()
+                completeReward(ok = true)
             }
-            BackHandler {
-                setResult(RESULT_CANCELED)
-                finish()
-            }
+            BackHandler { completeReward(ok = false) }
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
-                    .pointerInput(Unit) { detectTapGestures { jumping = true } },
+                    .pointerInput(Unit) { detectTapGestures { loop.jumping = true } },
             ) {
                 drawRect(Color(0xFF81D4FA))
+                val groundY = PlatformerScene.groundTop(size.height)
                 drawRect(
                     Color(0xFF66BB6A),
-                    topLeft = Offset(0f, size.height * 0.75f),
-                    size = size.copy(height = size.height * 0.25f),
+                    topLeft = Offset(0f, groundY),
+                    size = Size(size.width, size.height - groundY),
                 )
-                val px = (state.x * 40f) % (size.width + 80f)
-                val py = size.height * 0.75f - state.y * 12f - 40f
-                drawCircle(Color(mascot.primaryArgb), radius = 36f, center = Offset(px, py))
-                repeat(5) { i ->
-                    val ax = ((i * 180f) - (state.x * 20f) + size.width * 4) % size.width
-                    drawCircle(Color(0xFFFFD54F), radius = 18f, center = Offset(ax, size.height * 0.55f))
+                PlatformerScene.sprites(state, mascot, size.width, size.height).forEach { sprite ->
+                    drawCircle(
+                        Color(sprite.argb),
+                        radius = sprite.radius,
+                        center = Offset(sprite.x, sprite.y),
+                    )
                 }
             }
         }
+    }
+
+    /**
+     * Closes the reward Activity with a finished or cancelled result.
+     */
+    internal fun completeReward(ok: Boolean) {
+        val code = if (ok) RESULT_OK else RESULT_CANCELED
+        setResult(code, Intent().putExtra(EngineLauncher.RESULT_FINISHED, ok))
+        finish()
     }
 }

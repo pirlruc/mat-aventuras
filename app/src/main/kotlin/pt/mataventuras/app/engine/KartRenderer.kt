@@ -21,11 +21,12 @@ import javax.microedition.khronos.opengles.GL10
 internal class KartRenderer(
     private val mascot: Mascot,
     private val engine: Kart3dEngine,
-    private val onFrame: (Kart3dState, Boolean) -> Unit,
     private val nowNs: () -> Long = { System.nanoTime() },
+    lapsTarget: Int = 3,
+    private val onFrame: (Kart3dState, Boolean) -> Unit,
 ) : GLSurfaceView.Renderer {
     private val track = OvalTrack()
-    private var state = engine.initial(lapsTarget = 3)
+    private var state = engine.initial(lapsTarget = lapsTarget)
     private var lastNs = 0L
     private var lastHud: String = ""
     private lateinit var grass: FloatBuffer
@@ -44,34 +45,40 @@ internal class KartRenderer(
      */
     fun snapshot(): Kart3dState = state
 
-    override fun onSurfaceCreated(
-        gl: GL10,
-        config: EGLConfig?,
-    ) {
+    /**
+     * Allocates meshes and configures the ES1 context (unit tests pass a fake).
+     */
+    internal fun prepare(gles: KartGles) {
         grass = buffer(KartMesh.grass())
         ribbon = buffer(KartMesh.trackRibbon(track))
         start = buffer(KartMesh.startLine(track))
         box = buffer(KartMesh.box(0.5f, 0.5f, 0.5f))
-        gl.glClearColor(0.45f, 0.72f, 0.95f, 1f)
-        gl.glEnable(GL10.GL_DEPTH_TEST)
-        gl.glEnable(GL10.GL_CULL_FACE)
-        gl.glShadeModel(GL10.GL_FLAT)
+        gles.clearColor(0.45f, 0.72f, 0.95f, 1f)
+        gles.enable(GL10.GL_DEPTH_TEST)
+        gles.enable(GL10.GL_CULL_FACE)
+        gles.shadeModel(GL10.GL_FLAT)
     }
 
-    override fun onSurfaceChanged(
-        gl: GL10,
+    /**
+     * Updates the projection for a new viewport size.
+     */
+    internal fun resize(
+        gles: KartGles,
         width: Int,
         height: Int,
     ) {
-        gl.glViewport(0, 0, width, height)
-        gl.glMatrixMode(GL10.GL_PROJECTION)
-        gl.glLoadIdentity()
+        gles.viewport(0, 0, width, height)
+        gles.matrixMode(GL10.GL_PROJECTION)
+        gles.loadIdentity()
         val proj = engine.projectionMatrix(width.toFloat() / height.coerceAtLeast(1))
-        gl.glLoadMatrixf(proj, 0)
-        gl.glMatrixMode(GL10.GL_MODELVIEW)
+        gles.loadMatrixf(proj, 0)
+        gles.matrixMode(GL10.GL_MODELVIEW)
     }
 
-    override fun onDrawFrame(gl: GL10) {
+    /**
+     * Advances simulation and HUD without issuing GLES calls (unit tests).
+     */
+    internal fun tick(): Kart3dState {
         val now = nowNs()
         if (lastNs == 0L) lastNs = now
         val dt = ((now - lastNs) / 1_000_000_000f).coerceAtMost(0.05f)
@@ -80,18 +87,45 @@ internal class KartRenderer(
         boostRequested = false
         state = engine.step(state, dt, steer, boost)
         publishHud()
+        return state
+    }
+
+    /**
+     * Ticks then draws the current [KartScene] through [gles].
+     */
+    internal fun drawScene(gles: KartGles) {
+        tick()
         if (state.finished) return
-        gl.glClear(GL10.GL_COLOR_BUFFER_BIT or GL10.GL_DEPTH_BUFFER_BIT)
-        gl.glMatrixMode(GL10.GL_MODELVIEW)
-        gl.glLoadMatrixf(engine.viewMatrix(state), 0)
+        gles.clear(GL10.GL_COLOR_BUFFER_BIT or GL10.GL_DEPTH_BUFFER_BIT)
+        gles.matrixMode(GL10.GL_MODELVIEW)
+        gles.loadMatrixf(engine.viewMatrix(state), 0)
         KartScene.instances(track, state, mascot).forEach { item ->
-            gl.glPushMatrix()
-            gl.glTranslatef(item.x, item.y, item.z)
-            gl.glRotatef(item.yawDegrees, 0f, 1f, 0f)
-            gl.glScalef(item.scaleX, item.scaleY, item.scaleZ)
-            draw(gl, meshOf(item.mesh), item.red, item.green, item.blue)
-            gl.glPopMatrix()
+            gles.pushMatrix()
+            gles.translatef(item.x, item.y, item.z)
+            gles.rotatef(item.yawDegrees, 0f, 1f, 0f)
+            gles.scalef(item.scaleX, item.scaleY, item.scaleZ)
+            draw(gles, meshOf(item.mesh), item.red, item.green, item.blue)
+            gles.popMatrix()
         }
+    }
+
+    override fun onSurfaceCreated(
+        gl: GL10,
+        config: EGLConfig?,
+    ) {
+        prepare(KartGlesEs1(gl))
+    }
+
+    override fun onSurfaceChanged(
+        gl: GL10,
+        width: Int,
+        height: Int,
+    ) {
+        resize(KartGlesEs1(gl), width, height)
+    }
+
+    override fun onDrawFrame(gl: GL10) {
+        drawScene(KartGlesEs1(gl))
     }
 
     private fun publishHud() {
@@ -111,18 +145,18 @@ internal class KartRenderer(
         }
 
     private fun draw(
-        gl: GL10,
+        gles: KartGles,
         mesh: FloatBuffer,
         r: Float,
         g: Float,
         b: Float,
     ) {
         mesh.position(0)
-        gl.glColor4f(r, g, b, 1f)
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY)
-        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, mesh)
-        gl.glDrawArrays(GL10.GL_TRIANGLES, 0, mesh.capacity() / 3)
-        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY)
+        gles.color4f(r, g, b, 1f)
+        gles.enableClientState(GL10.GL_VERTEX_ARRAY)
+        gles.vertexPointer(3, GL10.GL_FLOAT, 0, mesh)
+        gles.drawArrays(GL10.GL_TRIANGLES, 0, mesh.capacity() / 3)
+        gles.disableClientState(GL10.GL_VERTEX_ARRAY)
     }
 
     private fun buffer(values: FloatArray): FloatBuffer =

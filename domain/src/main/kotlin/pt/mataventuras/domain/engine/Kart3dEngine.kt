@@ -138,11 +138,19 @@ class Kart3dEngine(
     }
 
     private fun resolveTrack(state: Kart3dState): Kart3dState {
-        val progress = track.progress(state.x, state.z)
         val off = track.isOffTrack(state.x, state.z)
+        val pulled =
+            if (off) {
+                track.pullTowardCenter(state.x, state.z, SNAP_METRES)
+            } else {
+                Vec3(state.x, 0f, state.z)
+            }
+        val progress = track.progress(pulled.x, pulled.z)
         val laps = if (track.crossedStart(state.lapProgress, progress)) state.laps + 1 else state.laps
         val finished = laps >= state.lapsTarget
         return state.copy(
+            x = pulled.x,
+            z = pulled.z,
             lapProgress = progress,
             laps = laps,
             offTrack = off,
@@ -210,5 +218,6 @@ class Kart3dEngine(
         const val ACCEL: Float = 10f
         const val STEER_RATE: Float = 1.6f
         const val BOOST_SECONDS: Float = 1.15f
+        const val SNAP_METRES: Float = 0.45f
     }
 }

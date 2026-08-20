@@ -72,5 +72,20 @@ class LocalRepositoryTest {
         pins.save(state)
         assertEquals(true, pins.isSet())
         assertEquals(state.hashHex, pins.read()!!.hashHex)
+        pins.seedPartial("aa", saltHex = null, failureCount = null, lockoutMs = null)
+        assertEquals(null, pins.read())
+        pins.seedPartial("aa", saltHex = "bb", failureCount = null, lockoutMs = null)
+        val partial = pins.read()!!
+        assertEquals(0, partial.consecutiveFailures)
+        assertEquals(0L, partial.lockedUntilEpochMs)
+        pins.seedPartial("cc", saltHex = "dd", failureCount = 2, lockoutMs = 9)
+        val filled = pins.read()!!
+        assertEquals(2, filled.consecutiveFailures)
+        assertEquals(9L, filled.lockedUntilEpochMs)
+        val defaults = PinRepository(ApplicationProvider.getApplicationContext())
+        defaults.clear()
+        assertEquals(false, defaults.isSet())
+        pins.clear()
+        assertEquals(false, pins.isSet())
     }
 }

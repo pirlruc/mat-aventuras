@@ -90,6 +90,19 @@ object KartMesh {
         }
 
     /**
+     * Inner-edge barrier posts along the oval.
+     */
+    fun innerBarrierPositions(
+        track: OvalTrack,
+        count: Int = 10,
+    ): List<Vec3> =
+        (0 until count).map { i ->
+            val t = i / count.toFloat()
+            val p = track.point(t) - track.outward(t) * (track.halfWidth + 0.45f)
+            Vec3(p.x, 0.35f, p.z)
+        }
+
+    /**
      * Uncollected ring world positions for [state].
      */
     fun remainingRings(

@@ -12,20 +12,6 @@ import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.UnlockedAvatar
 import pt.mataventuras.domain.model.UnlockedBadge
 
-package pt.mataventuras.data.mapping
-
-import pt.mataventuras.data.local.AvatarEntity
-import pt.mataventuras.data.local.BadgeEntity
-import pt.mataventuras.data.local.ProfileEntity
-import pt.mataventuras.data.local.SessionEntity
-import pt.mataventuras.domain.model.AgeGroup
-import pt.mataventuras.domain.model.ChildProfile
-import pt.mataventuras.domain.model.LearningModule
-import pt.mataventuras.domain.model.LearningSession
-import pt.mataventuras.domain.model.Mascot
-import pt.mataventuras.domain.model.UnlockedAvatar
-import pt.mataventuras.domain.model.UnlockedBadge
-
 /** Maps a stored profile row to the domain model. */
 fun ProfileEntity.toDomain(): ChildProfile = ChildProfile(
     id = id,

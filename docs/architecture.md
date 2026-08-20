@@ -41,11 +41,18 @@ GLES heap is gone. The host Compose UI is not paused under a Unity player.
 
 ### Later engine plugin (MAT-003)
 
-Godot 4 `aar` or Unity as a library can replace `Kart3dActivity` if they:
+A Godot 4 `aar` or Unity-as-a-library Activity may replace `Kart3dActivity`
+(or `Platformer2dActivity`) when it keeps this contract:
 
-1. Live in `android:process=":engine3d"` (or `:engine2d`).
-2. Speak the same `EngineLauncher` Intent contract.
-3. Do not initialise networking, analytics, or cloud save.
+1. `android:process=":engine3d"` (or `:engine2d`) so the heap dies on `finish()`.
+2. Launch extras: `EngineLauncher.EXTRA_MASCOT` (mascot code) and
+   `EngineLauncher.EXTRA_NAME` (child display name).
+3. Result extra: `EngineLauncher.RESULT_FINISHED` (`true` when the level
+   completed). The host uses `StartActivityForResult`.
+4. No `INTERNET` permission, no Room, no analytics, no cloud save.
+
+v1 ships the native GLES kart as the fallback. The Compose host must not hold
+a GL/Unity view. `EngineLauncher.PROCESS_ENGINE_3D` is `:engine3d`.
 
 ## Modules
 
@@ -65,9 +72,11 @@ There is no coverage deviation.
 
 `Kart3dEngine` simulates an oval asphalt loop in the XZ plane (`OvalTrack`):
 auto-drive along the tangent, player steer in `[-1, 1]`, a short boost,
-ring pickups, and an off-track slowdown. `KartScene` builds a GLES-friendly
-draw list; `Kart3dActivity` in `:engine3d` only issues ES1 calls and a pt-PT
-HUD (`Volta`, `Anéis`, `Impulso!`). Touch: left third steers left, right
+ring pickups, off-track slowdown, and a pull-back toward the centerline so
+the kart returns to the asphalt. `KartScene` builds a GLES-friendly draw
+list (grass, ribbon, start line, outer cones, inner barriers, kart body,
+spoiler, wheels). `Kart3dActivity` in `:engine3d` only issues ES1 calls and a
+pt-PT HUD (`Volta`, `Anéis`, `Impulso`). Touch: left third steers left, right
 third steers right, centre taps boost.
 
 A later Godot/Unity plugin (MAT-003-T1) may replace `Kart3dActivity` if it

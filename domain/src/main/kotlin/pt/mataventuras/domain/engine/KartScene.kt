@@ -90,17 +90,44 @@ object KartScene {
         state: Kart3dState,
         mascot: Mascot,
     ): List<KartDrawItem> {
-        val rgb = mascotRgb(mascot)
-        val items = ArrayList<KartDrawItem>(32)
+        val items = ArrayList<KartDrawItem>(48)
+        addWorld(items, track)
+        addPickups(items, track, state)
+        addKart(items, state, mascot)
+        return items
+    }
+
+    private fun addWorld(
+        items: MutableList<KartDrawItem>,
+        track: OvalTrack,
+    ) {
         items += KartDrawItem(KartMeshId.GRASS, 0f, 0f, 0f, 0f, 1f, 1f, 1f, 0.35f, 0.72f, 0.28f)
         items += KartDrawItem(KartMeshId.TRACK, 0f, 0f, 0f, 0f, 1f, 1f, 1f, 0.22f, 0.22f, 0.25f)
         items += KartDrawItem(KartMeshId.START, 0f, 0f, 0f, 0f, 1f, 1f, 1f, 0.95f, 0.85f, 0.2f)
         KartMesh.conePositions(track).forEach { cone ->
             items += KartDrawItem(KartMeshId.BOX, cone.x, cone.y, cone.z, 0f, 0.35f, 0.8f, 0.35f, 1f, 0.45f, 0.12f)
         }
+        KartMesh.innerBarrierPositions(track).forEach { post ->
+            items += KartDrawItem(KartMeshId.BOX, post.x, post.y, post.z, 0f, 0.22f, 0.7f, 0.22f, 0.55f, 0.55f, 0.6f)
+        }
+    }
+
+    private fun addPickups(
+        items: MutableList<KartDrawItem>,
+        track: OvalTrack,
+        state: Kart3dState,
+    ) {
         KartMesh.remainingRings(track, state).forEach { ring ->
             items += KartDrawItem(KartMeshId.BOX, ring.x, ring.y, ring.z, 0f, 0.55f, 0.2f, 0.55f, 1f, 0.84f, 0.2f)
         }
+    }
+
+    private fun addKart(
+        items: MutableList<KartDrawItem>,
+        state: Kart3dState,
+        mascot: Mascot,
+    ) {
+        val rgb = mascotRgb(mascot)
         val yaw = Math.toDegrees(state.heading.toDouble()).toFloat()
         items +=
             KartDrawItem(
@@ -115,6 +142,20 @@ object KartScene {
                 rgb[0],
                 rgb[1],
                 rgb[2],
+            )
+        items +=
+            KartDrawItem(
+                KartMeshId.BOX,
+                state.x,
+                state.y + 0.28f,
+                state.z,
+                yaw,
+                0.5f,
+                0.12f,
+                0.22f,
+                (rgb[0] * 0.7f).coerceAtLeast(0.05f),
+                (rgb[1] * 0.7f).coerceAtLeast(0.05f),
+                (rgb[2] * 0.7f).coerceAtLeast(0.05f),
             )
         wheelPositions(state).forEach { wheel ->
             items +=
@@ -132,6 +173,5 @@ object KartScene {
                     0.08f,
                 )
         }
-        return items
     }
 }

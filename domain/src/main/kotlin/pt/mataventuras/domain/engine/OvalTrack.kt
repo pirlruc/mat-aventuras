@@ -108,6 +108,24 @@ class OvalTrack(
     ): Boolean = distanceToCenter(x, z) > halfWidth
 
     /**
+     * Moves ([x], [z]) up to [distance] metres toward the centerline (off-track recovery).
+     */
+    fun pullTowardCenter(
+        x: Float,
+        z: Float,
+        distance: Float,
+    ): Vec3 {
+        val t = progress(x, z)
+        val center = point(t)
+        val dx = center.x - x
+        val dz = center.z - z
+        val len = sqrt(dx * dx + dz * dz)
+        if (len < 1e-5f) return Vec3(x, 0f, z)
+        val step = distance.coerceAtMost(len)
+        return Vec3(x + dx / len * step, 0f, z + dz / len * step)
+    }
+
+    /**
      * True when progress wrapped forward across the start line.
      */
     fun crossedStart(

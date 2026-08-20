@@ -7,9 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -49,31 +48,25 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Olá, ${profile.name}!", fontSize = tokens.titleSpSize, fontWeight = FontWeight.ExtraBold)
         Text("${profile.points} pontos", style = MaterialTheme.typography.titleMedium)
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(if (profile.ageGroup == AgeGroup.THREE_YEARS) 1 else 2),
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(modules, key = { it.name }) { module ->
-                val mascot = mascotFor(module)
-                Button(
-                    onClick = {
-                        onSpeak("Vamos com o ${mascot.displayName}!")
-                        onModule(module)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(tokens.minButtonDp.dp + 24.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(mascot.primaryArgb)),
-                ) {
-                    Text(ModuleTitles.of(module, mascot), fontWeight = FontWeight.Bold)
-                }
+        modules.forEach { module ->
+            val mascot = mascotFor(module)
+            Button(
+                onClick = {
+                    onSpeak("Vamos com o ${mascot.displayName}!")
+                    onModule(module)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(tokens.minButtonDp.dp + 24.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(mascot.primaryArgb)),
+            ) {
+                Text(ModuleTitles.of(module, mascot), fontWeight = FontWeight.Bold)
             }
         }
         if (profile.ageGroup == AgeGroup.SEVEN_YEARS) {

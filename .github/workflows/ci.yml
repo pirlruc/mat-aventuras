@@ -133,8 +133,8 @@ jobs:
       - name: Android unit tests, coverage, and lint (KT-TEST-002, KT-BUILD-002)
         run: |
           ./gradlew --no-daemon \
-            :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerify \
-            :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerify \
+            :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug \
+            :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerifyDebug \
             :app:lintDebug
 
       - name: Coverage thresholds (CI-022)

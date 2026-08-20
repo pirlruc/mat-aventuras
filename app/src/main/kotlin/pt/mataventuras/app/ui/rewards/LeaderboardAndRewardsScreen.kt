@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -63,17 +63,16 @@ fun LeaderboardAndRewardsScreen(
         container.repository.observeAvatars(activeProfile.id).collect { value = it }
     }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
-            Text(VoiceScripts.LEADERBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text("Só neste aparelho — irmãos e amigos.")
-        }
-        items(table, key = { it.profileId }) { row ->
+        Text(VoiceScripts.LEADERBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("Só neste aparelho — irmãos e amigos.")
+        table.forEach { row ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -94,21 +93,17 @@ fun LeaderboardAndRewardsScreen(
                 }
             }
         }
-        item {
-            Text(VoiceScripts.REWARDS, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Text("Distintivos")
-        }
-        items(BadgeCode.entries.toList(), key = { it.name }) { code ->
+        Text(VoiceScripts.REWARDS, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text("Distintivos")
+        BadgeCode.entries.forEach { code ->
             val owned = badges.any { it.code == code.name }
             Text(if (owned) "★ ${code.title}" else "☆ ${code.title} — ${code.description}")
         }
-        item { Text("Avatares") }
-        items(AvatarCode.entries.toList(), key = { it.name }) { code ->
+        Text("Avatares")
+        AvatarCode.entries.forEach { code ->
             val owned = avatars.any { it.avatarId == code.name }
             Text(if (owned) "★ ${code.title}" else "☆ ${code.title} (${code.minPoints} pts)")
         }
-        item {
-            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Voltar") }
-        }
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Voltar") }
     }
 }

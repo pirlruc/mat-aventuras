@@ -104,6 +104,13 @@ class Kart3dEngineTest {
         assertEquals(18, KartMesh.startLine(track).size)
         assertEquals(108, KartMesh.box(0.4f, 0.2f, 0.6f).size)
         assertEquals(12, KartMesh.conePositions(track).size)
+        assertEquals(10, KartMesh.innerBarrierPositions(track).size)
+        val pulled = track.pullTowardCenter(0f, 0f, 2f)
+        assertTrue(pulled.length() > 1f)
+        val onLine = track.point(0.1f)
+        val stayed = track.pullTowardCenter(onLine.x, onLine.z, 4f)
+        assertEquals(onLine.x, stayed.x, 1e-3f)
+        assertEquals(onLine.z, stayed.z, 1e-3f)
     }
 
     @Test
@@ -126,7 +133,7 @@ class Kart3dEngineTest {
         assertTrue(items.any { it.mesh == KartMeshId.GRASS })
         assertTrue(items.any { it.mesh == KartMeshId.TRACK })
         assertTrue(items.any { it.mesh == KartMeshId.START })
-        assertTrue(items.count { it.mesh == KartMeshId.BOX } >= 5)
+        assertTrue(items.count { it.mesh == KartMeshId.BOX } >= 15)
         assertEquals(4, KartScene.wheelPositions(state).size)
         assertTrue(KartScene.hudFingerprint(state).contains("Volta"))
         assertTrue(KartScene.ringsLine(state).contains("Anéis"))

@@ -1,7 +1,10 @@
 package pt.mataventuras.app
 
+import android.speech.tts.TextToSpeech
+import android.view.MotionEvent
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -15,6 +18,8 @@ import org.robolectric.RobolectricTestRunner
 import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.engine.Kart3dActivity
 import pt.mataventuras.app.engine.Platformer2dActivity
+import pt.mataventuras.app.engine.Platformer2dLoop
+import pt.mataventuras.app.engine.PlatformerScene
 import pt.mataventuras.app.speech.SpeechEngine
 import pt.mataventuras.app.ui.age.AgeSelectionScreen
 import pt.mataventuras.app.ui.home.HomeScreen
@@ -38,6 +43,8 @@ class AppUiTest {
         assertEquals(Platformer2dActivity::class.java.name, two.component!!.className)
         assertEquals(Kart3dActivity::class.java.name, three.component!!.className)
         assertEquals("speedy_hedgehog", two.getStringExtra(EngineLauncher.EXTRA_MASCOT))
+        assertEquals(EngineLauncher.PROCESS_ENGINE_3D, ":engine3d")
+        assertEquals("Rui", three.getStringExtra(EngineLauncher.EXTRA_NAME))
     }
 
     @Test
@@ -49,6 +56,23 @@ class AppUiTest {
         compose.onNodeWithText(VoiceScripts.THREE_YEARS).performClick()
         compose.onNodeWithText("Como te chamas?").assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.SEVEN_YEARS).performClick()
+    }
+
+    @Test
+    fun ageSelectionBlankNameBecomesAmigoAndPicksMascot() {
+        var name = ""
+        var mascot = Mascot.SPEEDY_HEDGEHOG
+        compose.setContent {
+            AgeSelectionScreen(onSpeak = {}, onConfirm = { _, chosen, friend ->
+                name = chosen
+                mascot = friend
+            })
+        }
+        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performClick()
+        compose.onNodeWithContentDescription("Cão Herói").performClick()
+        compose.onNodeWithText("Vamos começar!").performClick()
+        assertEquals("Amigo", name)
+        assertEquals(Mascot.HERO_PUP, mascot)
     }
 
     @Test
@@ -69,6 +93,11 @@ class AppUiTest {
         val engine = SpeechEngine(ApplicationProvider.getApplicationContext())
         engine.speak(" ")
         engine.speak("Olá")
+        engine.onInit(TextToSpeech.ERROR)
+        engine.speak("Olá")
+        engine.onInit(TextToSpeech.SUCCESS)
+        engine.speak("Olá")
+        engine.speak("  ")
         engine.release()
         assertTrue(true)
     }
@@ -86,6 +115,13 @@ class AppUiTest {
                 ),
             ).setup().get()
         assertTrue(two.hasWindowFocus() || two.window != null)
+        two.loop.jumping = true
+        repeat(40) { two.loop.tick() }
+        val sprites = PlatformerScene.sprites(two.loop.state, Mascot.HERO_PUP, 800f, 480f)
+        assertTrue(sprites.size >= 6)
+        assertTrue(PlatformerScene.groundTop(480f) > 300f)
+        two.completeReward(ok = false)
+
         val three =
             Robolectric.buildActivity(
                 Kart3dActivity::class.java,
@@ -97,5 +133,34 @@ class AppUiTest {
                 ),
             ).setup().get()
         assertTrue(three.window != null)
+        three.session.handleTouch(0.1f, MotionEvent.ACTION_DOWN)
+        three.session.handleTouch(0.5f, MotionEvent.ACTION_DOWN)
+        three.session.renderer.tick()
+        three.session.handleTouch(0.9f, MotionEvent.ACTION_UP)
+        three.closeFinished()
+    }
+
+    @Test
+    fun platformerLoopCollectsAndStopsWhenFinishedOrDead() {
+        var ns = 0L
+        val loop =
+            Platformer2dLoop(
+                nowNs = {
+                    ns += 50_000_000L
+                    ns
+                },
+            )
+        repeat(80) {
+            loop.jumping = true
+            loop.tick()
+        }
+        assertTrue(loop.state.x > 0f)
+        val idle = Platformer2dLoop(nowNs = {
+            ns += 50_000_000L
+            ns
+        })
+        repeat(200) { idle.tick() }
+        assertTrue(!idle.state.alive || idle.state.x > 20f)
+        idle.tick()
     }
 }

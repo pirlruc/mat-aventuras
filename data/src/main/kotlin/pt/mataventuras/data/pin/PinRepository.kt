@@ -66,4 +66,22 @@ class PinRepository(
     suspend fun clear() {
         dataStore.edit { it.clear() }
     }
+
+    /**
+     * Test helper: writes a partial PIN record to cover missing-key branches.
+     */
+    internal suspend fun seedPartial(
+        hashHex: String,
+        saltHex: String?,
+        failureCount: Int?,
+        lockoutMs: Long?,
+    ) {
+        dataStore.edit { prefs ->
+            prefs.clear()
+            prefs[hash] = hashHex
+            if (saltHex != null) prefs[salt] = saltHex
+            if (failureCount != null) prefs[failures] = failureCount
+            if (lockoutMs != null) prefs[lockout] = lockoutMs
+        }
+    }
 }

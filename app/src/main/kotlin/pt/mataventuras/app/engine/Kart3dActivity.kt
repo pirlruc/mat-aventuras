@@ -1,60 +1,55 @@
 package pt.mataventuras.app.engine
 
+import android.content.Intent
 import android.opengl.GLSurfaceView
 import android.os.Bundle
-import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import pt.mataventuras.domain.engine.Kart3dEngine
+import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
  * Age-7 3D kart reward in an isolated `:engine3d` process.
  * GLES ES1 draws meshes produced by :domain. The 3D heap dies with the process.
+ *
+ * Drop-in plugins must keep this process name and the [EngineLauncher] extras;
+ * they must not open Room or request INTERNET.
  */
 class Kart3dActivity : ComponentActivity() {
+    internal lateinit var session: KartSession
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val mascot =
-            pt.mataventuras.domain.model.Mascot.fromCode(
+            Mascot.fromCode(
                 intent.getStringExtra(EngineLauncher.EXTRA_MASCOT) ?: "",
             )
-        val engine = Kart3dEngine()
         val hudLap = hudText()
         val hudRings = hudText()
         val hudHint = hudText().apply { text = VoiceScripts.STEER_HINT }
-        val renderer =
-            KartRenderer(mascot, engine) { state, finished ->
-                runOnUiThread {
-                    val overlay = kartOverlay(state)
-                    hudLap.text = overlay.first
-                    hudRings.text = overlay.second
-                    if (finished) {
-                        setResult(
-                            RESULT_OK,
-                            android.content.Intent().putExtra(EngineLauncher.RESULT_FINISHED, true),
-                        )
-                        finish()
+        session =
+            KartSession(
+                mascot = mascot,
+                onHud = { lap, rings ->
+                    runOnUiThread {
+                        hudLap.text = lap
+                        hudRings.text = rings
                     }
-                }
-            }
+                },
+                onFinished = {
+                    runOnUiThread { closeFinished() }
+                },
+            )
         val view =
             GLSurfaceView(this).apply {
                 setEGLContextClientVersion(1)
-                setRenderer(renderer)
+                setRenderer(session.renderer)
                 renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
                 setOnTouchListener { v, event ->
                     val nx = event.x / v.width.coerceAtLeast(1)
-                    renderer.steer = Kart3dInput.steerFromTouch(nx)
-                    if (event.action == MotionEvent.ACTION_DOWN && Kart3dInput.isBoostTouch(nx)) {
-                        renderer.boostRequested = true
-                    }
-                    if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
-                        renderer.steer = 0f
-                    }
-                    true
+                    session.handleTouch(nx, event.action)
                 }
             }
         val overlay =
@@ -71,6 +66,17 @@ class Kart3dActivity : ComponentActivity() {
                 addView(overlay)
             },
         )
+    }
+
+    /**
+     * Returns [EngineLauncher.RESULT_FINISHED] and finishes (isolated process then dies).
+     */
+    internal fun closeFinished() {
+        setResult(
+            RESULT_OK,
+            Intent().putExtra(EngineLauncher.RESULT_FINISHED, true),
+        )
+        finish()
     }
 
     private fun hudText(): TextView =

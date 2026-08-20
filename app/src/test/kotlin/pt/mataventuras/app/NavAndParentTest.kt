@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Rule
@@ -44,28 +45,35 @@ class NavAndParentTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText("Contar com o Ouriço Veloz").performClick()
-        compose.onNodeWithText("Sair").assertIsDisplayed()
+        compose.onNodeWithText("★").performScrollTo().performClick()
+        compose.onNodeWithText("Voltar").performScrollTo().performClick()
+        compose.onNodeWithText("Contar com o Ouriço Veloz").performScrollTo().performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Sair").fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText("Sair").performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText("★").performClick()
-        compose.onNodeWithText("Voltar").performClick()
-        compose.onNodeWithText("· · ·").performClick()
+        compose.onNodeWithText("· · ·").performScrollTo().performClick()
         compose.onNodeWithText(VoiceScripts.PARENT_DASHBOARD).assertIsDisplayed()
     }
 
     @Test
-    fun leaderboardAndParentRender() {
+    fun leaderboardRendersPortugueseCopy() {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
-        kotlinx.coroutines.runBlocking { app.container.pinRepository.clear() }
         compose.setContent {
             MatAventurasTheme(AgeGroup.SEVEN_YEARS) {
                 LeaderboardAndRewardsScreen(app.container, null) {}
             }
         }
         compose.onNodeWithText(VoiceScripts.LEADERBOARD).assertIsDisplayed()
+    }
+
+    @Test
+    fun parentDashboardRendersPinGate() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        kotlinx.coroutines.runBlocking { app.container.pinRepository.clear() }
         compose.setContent {
             ParentDashboard(app.container, null, onSpeak = {}, onBack = {})
         }
@@ -78,7 +86,8 @@ class NavAndParentTest {
         val three = tokensFor(AgeGroup.THREE_YEARS)
         three.buttonRadius()
         assert(three.titleSpSize.value > three.bodySpSize.value)
-        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
-        activity.onDestroy()
+        val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
+        controller.get()
+        controller.destroy()
     }
 }

@@ -27,6 +27,14 @@ android {
     }
 }
 
+androidComponents {
+    beforeVariants { variant ->
+        if (variant.buildType == "release") {
+            variant.enableUnitTest = false
+        }
+    }
+}
+
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }

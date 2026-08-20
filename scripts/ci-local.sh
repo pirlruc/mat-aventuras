@@ -17,9 +17,9 @@ python3 scripts/verify-licenses.py
 if [[ -f local.properties ]] || [[ -n "${ANDROID_HOME:-}" ]]; then
   ./gradlew --no-daemon \
     :data:testDebugUnitTest \
-    :data:koverVerify \
+    :data:koverVerifyDebug \
     :app:testDebugUnitTest \
-    :app:koverVerify \
+    :app:koverVerifyDebug \
     :app:lintDebug
 fi
 

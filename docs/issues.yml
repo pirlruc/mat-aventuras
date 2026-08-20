@@ -264,7 +264,7 @@ milestones:
           - KT-SEC-001
         tasks:
           - id: MAT-003-T1
-            status: open
+            status: done
             title: Document plugin contract and reject in-process embedding
             instructions:
               files:
