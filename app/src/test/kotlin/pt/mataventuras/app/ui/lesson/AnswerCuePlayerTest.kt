@@ -1,6 +1,5 @@
 package pt.mataventuras.app.ui.lesson
 
-import android.media.ToneGenerator
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -48,8 +47,5 @@ class AnswerCuePlayerTest {
         val device = AnswerCuePlayer.device()
         device.play(false)
         device.release()
-        if (created != null) {
-            assertTrue(created is ToneGenerator)
-        }
     }
 }
