@@ -89,28 +89,9 @@ fun LessonScreen(
     val cues = remember { AnswerCuePlayer.device() }
     var flashCorrect by remember { mutableStateOf(true) }
     var flashTick by remember { mutableIntStateOf(0) }
-    val spoken = remember { mutableStateOf(exercise.spoken) }
-    spoken.value = exercise.spoken
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(cues) { onDispose { cues.release() } }
-
-    DisposableEffect(lifecycleOwner) {
-        var stopped = false
-        val observer =
-            LifecycleEventObserver { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_STOP -> stopped = true
-                    Lifecycle.Event.ON_RESUME -> {
-                        if (UiLogic.shouldRepeatSpokenPrompt(stopped)) onSpeak(spoken.value)
-                        stopped = false
-                    }
-                    else -> Unit
-                }
-            }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
+    RepeatPromptOnResume(spoken = exercise.spoken, onSpeak = onSpeak)
 
     LaunchedEffect(exercise.prompt) { onSpeak(exercise.spoken) }
     LaunchedEffect(profile.id) {
@@ -123,7 +104,6 @@ fun LessonScreen(
     }
 
     val onPick: (Int) -> Unit = handler@{ index ->
-        if (!UiLogic.shouldAcceptAnswer(pickLock.get())) return@handler
         if (!pickLock.compareAndSet(false, true)) return@handler
         val current = exercise
         val correct = current.isCorrect(index)
@@ -229,6 +209,30 @@ fun LessonScreen(
         }
         }
         AnswerFlash(correct = flashCorrect, tick = flashTick)
+    }
+}
+
+@Composable
+private fun RepeatPromptOnResume(
+    spoken: String,
+    onSpeak: (String) -> Unit,
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, spoken) {
+        var stopped = false
+        val observer =
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_STOP -> stopped = true
+                    Lifecycle.Event.ON_RESUME -> {
+                        if (UiLogic.shouldRepeatSpokenPrompt(stopped)) onSpeak(spoken)
+                        stopped = false
+                    }
+                    else -> Unit
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 }
 
