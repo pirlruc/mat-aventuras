@@ -97,29 +97,6 @@ class UiLogicTest {
         HomeNav.announceAndGo({ announced = it }, VoiceScripts.LEADERBOARD, { went = true })
         assertEquals(VoiceScripts.LEADERBOARD, announced)
         assertTrue(went)
-        val spoken = mutableListOf<String>()
-        assertFalse(
-            RewardReturn.onResult(
-                android.app.Activity.RESULT_CANCELED,
-                null,
-                spoken::add,
-            ),
-        )
-        assertEquals(listOf(VoiceScripts.REWARD_RETURN), spoken)
-        spoken.clear()
-        val finishedIntent =
-            android.content.Intent().putExtra(pt.mataventuras.app.engine.EngineLauncher.RESULT_FINISHED, true)
-        assertTrue(
-            RewardReturn.onResult(
-                android.app.Activity.RESULT_OK,
-                finishedIntent,
-                spoken::add,
-            ),
-        )
-        assertEquals(listOf(VoiceScripts.REWARD_FINISHED), spoken)
-        assertFalse(RewardReturn.finishedExtra(null))
-        assertTrue(RewardReturn.finishedExtra(finishedIntent))
-        assertFalse(RewardReturn.finishedExtra(android.content.Intent()))
         assertTrue(isRobolectricFingerprint("robolectric"))
         assertFalse(isRobolectricFingerprint("google/sdk_gphone64"))
         assertEquals(1_000, pinIterationsFor("robolectric"))

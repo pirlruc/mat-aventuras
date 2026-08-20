@@ -24,6 +24,7 @@ import pt.mataventuras.app.engine.Platformer2dLoop
 import pt.mataventuras.app.engine.PlatformerScene
 import pt.mataventuras.app.speech.SpeechEngine
 import pt.mataventuras.app.ui.age.AgeSelectionScreen
+import pt.mataventuras.app.ui.RewardReturn
 import pt.mataventuras.app.ui.home.HomeScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.domain.model.AgeGroup
@@ -50,6 +51,17 @@ class AppUiTest {
         assertTrue(EngineLauncher.isFinished(android.app.Activity.RESULT_OK, true))
         assertFalse(EngineLauncher.isFinished(android.app.Activity.RESULT_OK, false))
         assertFalse(EngineLauncher.isFinished(android.app.Activity.RESULT_CANCELED, true))
+        val spoken = mutableListOf<String>()
+        assertFalse(RewardReturn.onResult(android.app.Activity.RESULT_CANCELED, null, spoken::add))
+        assertEquals(listOf(VoiceScripts.REWARD_RETURN), spoken)
+        spoken.clear()
+        val finishedIntent =
+            android.content.Intent().putExtra(EngineLauncher.RESULT_FINISHED, true)
+        assertTrue(RewardReturn.onResult(android.app.Activity.RESULT_OK, finishedIntent, spoken::add))
+        assertEquals(listOf(VoiceScripts.REWARD_FINISHED), spoken)
+        assertFalse(RewardReturn.finishedExtra(null))
+        assertTrue(RewardReturn.finishedExtra(finishedIntent))
+        assertFalse(RewardReturn.finishedExtra(android.content.Intent()))
     }
 
     @Test
