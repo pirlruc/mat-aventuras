@@ -31,8 +31,10 @@ reliable.
 3. Intent extras `mascot` and `name`; result extra `finished`.
 4. No Room in those processes (`MatAventurasApp` skips `AppContainer`).
 5. Merged manifest has **no** `INTERNET` / network permissions (`tools:node="remove"`).
-6. `allowBackup` is false. Godot's `FileProvider` and `ProcessPhoenix` are
-   `tools:node="remove"` so the reward APK cannot grant URIs or spawn `:phoenix`.
+6. `allowBackup` is false. Godot's `FileProvider` and `ProcessPhoenix` stay
+   `tools:node="remove"`. A GLES restart is returned to the Compose host
+   (`restart` extra) so the host relaunches the plugin Activity; Phoenix
+   would reincarnate the launcher or drop `StartActivityForResult`.
 7. Native GLES fallback pauses `GLSurfaceView` with the Activity. The APK
    ships `armeabi-v7a`, `arm64-v8a`, and `x86_64` (no 32-bit x86).
 
@@ -77,19 +79,24 @@ Normalised X in `[0, 1]` (`EngineInputMap`, copied in `kart.gd`):
 ## Godot project
 
 Files live in `app/src/main/assets/` (no hidden `.godot` directory;
-`use_hidden_project_data_directory=false`). `run/main_scene` is a tiny
-inlined `boot.tscn` that calls `change_scene_to_file` with
-`MatAventuras.rewardScene()`. Command line:
+`use_hidden_project_data_directory=false`). `run/main_scene` is a full-rect
+`boot.tscn` that `call_deferred`s `change_scene_to_file` with
+`MatAventuras.rewardScene()`. The fragment command line is **empty**.
+Godot 4.6+ Android loads `project.godot` from APK assets. Do not pass
+`--path` (CWD override, blank English error) or `--scene` (races
+`boot.tscn`). GLES is set only in `project.godot`; repeating it on the
+CLI made the engine request a process restart and blink the splash.
 
-`--rendering-method gl_compatibility --rendering-driver opengl3 --scene res://kart.tscn`
-(or `res://runner.tscn`). Do not pass `--path`: Godot 4.6+ Android loads
-`project.godot` from APK assets and ignores path overrides, which otherwise
-yields a blank screen.
-
-The Godot boot splash image is disabled so the default robot icon cannot
-loop. `config/features` is `GL Compatibility` to match GLES. When the
-engine asks to restart after first-time renderer setup, the fragment
-recreates the isolated Activity once (`ProcessPhoenix` stays stripped).
+The Godot boot splash image is disabled. `config/features` is
+`GL Compatibility`. When the engine still asks to restart after first-time
+GLES setup, the fragment finishes with a `restart` result so **MainActivity**
+relaunches the same plugin Activity (preserving `StartActivityForResult`).
+The isolated process then exits so `libgodot_android` unloads. A relaunch
+intent carries `godot_relaunch` so the new process cannot bounce again.
+`ProcessPhoenix` stays stripped: its default rebirth is the launcher, and
+starting the same `singleInstance` Activity from a dying engine process
+drops the host result contract. `Activity.recreate()` cannot unload
+`libgodot_android` and left a blue splash loop.
 
 GDScript talks to Android:
 

@@ -35,34 +35,51 @@ class GodotPluginHostTest {
         assertFalse(GodotRuntime.shouldEmbed())
         assertTrue(GodotRuntime.isRobolectricFingerprint("Robolectric"))
         assertFalse(GodotRuntime.isRobolectricFingerprint("user/release-keys"))
-        assertEquals(
-            listOf(
-                "--rendering-method",
-                "gl_compatibility",
-                "--rendering-driver",
-                "opengl3",
-                "--scene",
-                GodotRuntime.SCENE_KART,
-            ),
-            GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART),
-        )
-        assertEquals(
-            listOf(
-                "--rendering-method",
-                "gl_compatibility",
-                "--rendering-driver",
-                "opengl3",
-                "--scene",
-                GodotRuntime.SCENE_RUNNER,
-            ),
-            GodotRuntime.commandLineFor(GodotRuntime.SCENE_RUNNER),
-        )
-        assertFalse(GodotRuntime.commandLineFor(GodotRuntime.SCENE_KART).contains("--path"))
+        assertTrue(GodotRuntime.commandLineFor().isEmpty())
+        assertFalse(GodotRuntime.commandLineFor().contains("--path"))
+        assertFalse(GodotRuntime.commandLineFor().contains("--scene"))
         assertEquals("command_line_params", GodotRuntime.EXTRA_COMMAND_LINE)
-        assertTrue(GodotRuntime.shouldRestartHost(false, finishing = false, destroyed = false))
-        assertFalse(GodotRuntime.shouldRestartHost(true, finishing = false, destroyed = false))
-        assertFalse(GodotRuntime.shouldRestartHost(false, finishing = true, destroyed = false))
-        assertFalse(GodotRuntime.shouldRestartHost(false, finishing = false, destroyed = true))
+        assertTrue(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = false,
+                destroyed = false,
+                fromRelaunch = false,
+            ),
+        )
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = true,
+                finishing = false,
+                destroyed = false,
+                fromRelaunch = false,
+            ),
+        )
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = true,
+                destroyed = false,
+                fromRelaunch = false,
+            ),
+        )
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = false,
+                destroyed = true,
+                fromRelaunch = false,
+            ),
+        )
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = false,
+                destroyed = false,
+                fromRelaunch = true,
+            ),
+        )
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
@@ -108,6 +125,7 @@ class GodotPluginHostTest {
         repeat(8) { runner.loop!!.tick() }
         assertEquals("hero_pup" to "Ana", runner.extrasSnapshot())
         runner.completeReward(ok = false)
+        assertFalse(runner.requestEngineRestart())
         destroy(runnerController)
 
         val sevenPlatform =
@@ -158,6 +176,49 @@ class GodotPluginHostTest {
     }
 
     @Test
+    fun pluginRestartReturnsHostRelaunchExtrasOnce() {
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val kartIntent =
+            EngineLauncher.intentFor(
+                ctx,
+                AgeGroup.SEVEN_YEARS,
+                Mascot.MISCHIEVOUS_ALIEN,
+                "Rui",
+                pt.mataventuras.domain.model.EngineKind.THREE_D,
+            )
+        val controller = Robolectric.buildActivity(KartPluginActivity::class.java, kartIntent).setup()
+        val kart = controller.get()
+        assertFalse(kart.isGodotRelaunch())
+        assertTrue(kart.requestEngineRestart())
+        assertTrue(kart.isRewardSettled())
+        assertTrue(kart.isFinishing)
+        assertFalse(kart.requestEngineRestart())
+        assertFalse(kart.completeReward(ok = true))
+        destroy(controller)
+        val relaunch =
+            EngineLauncher.relaunchIntent(
+                ctx,
+                EngineLauncher.restartResultIntent(
+                    EnginePluginContract.PLUGIN_KART_CLASS,
+                    "mischievous_alien",
+                    "Rui",
+                ),
+            )!!
+        assertTrue(relaunch.getBooleanExtra(EngineLauncher.EXTRA_GODOT_RELAUNCH, false))
+        val relaunched = Robolectric.buildActivity(KartPluginActivity::class.java, relaunch).setup()
+        assertTrue(relaunched.get().isGodotRelaunch())
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = false,
+                finishing = false,
+                destroyed = false,
+                fromRelaunch = relaunched.get().isGodotRelaunch(),
+            ),
+        )
+        destroy(relaunched)
+    }
+
+    @Test
     fun bridgeReadsExtrasAndFinishesOnUiThread() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val kartController =
@@ -188,11 +249,17 @@ class GodotPluginHostTest {
         assertTrue(project.contains("boot_splash/show_image=false"))
         assertTrue(project.contains("res://boot.tscn"))
         assertTrue(project.contains("import_etc2_astc=true"))
+        val boot = ctx.assets.open("boot.tscn").bufferedReader().readText()
+        assertTrue(boot.contains("call_deferred"))
+        assertTrue(boot.contains("change_scene_to_file"))
+        assertTrue(boot.contains("Host.finish"))
         ctx.assets.open("kart.tscn").close()
         ctx.assets.open("runner.tscn").close()
-        ctx.assets.open("boot.tscn").close()
-        ctx.assets.open("kart.gd").close()
-        ctx.assets.open("runner.gd").close()
+        val kartScript = ctx.assets.open("kart.gd").bufferedReader().readText()
+        assertTrue(kartScript.contains("minf(delta"))
+        assertTrue(kartScript.contains("_update_hud(show_boost)"))
+        val runnerScript = ctx.assets.open("runner.gd").bufferedReader().readText()
+        assertTrue(runnerScript.contains("minf(delta"))
         ctx.assets.open("host.gd").close()
         assertEquals("res://kart.tscn", GodotBridge.rewardScene(""))
         assertEquals("res://runner.tscn", GodotBridge.rewardScene(GodotRuntime.SCENE_RUNNER))
@@ -224,6 +291,14 @@ class GodotPluginHostTest {
                 }
                 .all { EnginePluginContract.isIsolatedProcessName(it.processName.orEmpty()) },
         )
+        assertFalse(activities.any { it.name.contains("ProcessPhoenix") })
+        val providers =
+            ctx.packageManager
+                .getPackageInfo(ctx.packageName, PackageManager.GET_PROVIDERS)
+                .providers
+                ?.toList()
+                .orEmpty()
+        assertFalse(providers.any { it.name.contains("FileProvider") })
     }
 
     @Test
@@ -233,6 +308,7 @@ class GodotPluginHostTest {
         assertTrue(shouldOpenContainer("pt.mataventuras.app"))
         assertFalse(shouldOpenContainer("pt.mataventuras.app:engine3d"))
         assertFalse(shouldOpenContainer("pt.mataventuras.app:engine2d"))
+        assertFalse(shouldOpenContainer("pt.mataventuras.app:phoenix"))
         assertFalse(shouldOpenContainer(""))
         assertFalse(shouldOpenContainer("   "))
         currentProcessName()

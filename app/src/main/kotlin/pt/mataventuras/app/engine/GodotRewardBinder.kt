@@ -17,9 +17,7 @@ internal object GodotRewardBinder {
     fun bindKart(
         activity: KartPluginActivity,
         embed: Boolean = GodotRuntime.shouldEmbed(),
-        onGodot: (IsolatedEngineActivity, String) -> Unit = { host, scene ->
-            GodotEmbed.attach(host, scene)
-        },
+        onGodot: (IsolatedEngineActivity, String) -> Unit = GodotEmbed::attach,
     ) {
         if (embed) {
             onGodot(activity, GodotRuntime.SCENE_KART)
@@ -34,9 +32,7 @@ internal object GodotRewardBinder {
     fun bindRunner(
         activity: RunnerPluginActivity,
         embed: Boolean = GodotRuntime.shouldEmbed(),
-        onGodot: (IsolatedEngineActivity, String) -> Unit = { host, scene ->
-            GodotEmbed.attach(host, scene)
-        },
+        onGodot: (IsolatedEngineActivity, String) -> Unit = GodotEmbed::attach,
     ) {
         if (embed) {
             onGodot(activity, GodotRuntime.SCENE_RUNNER)

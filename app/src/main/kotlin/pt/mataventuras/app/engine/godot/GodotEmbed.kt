@@ -23,12 +23,9 @@ internal object GodotEmbed {
         activity: IsolatedEngineActivity,
         scene: String,
     ) {
-        activity.intent.putExtra(
-            GodotRuntime.EXTRA_COMMAND_LINE,
-            GodotRuntime.commandLineFor(scene).toTypedArray(),
-        )
+        if (activity.isFinishing || activity.isDestroyed) return
         activity.setContentView(R.layout.godot_host)
-        val existing = activity.supportFragmentManager.findFragmentByTag(TAG)
+        val existing = activity.supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
         if (existing is RewardGodotFragment) return
         val fragment =
             RewardGodotFragment().apply {
@@ -44,16 +41,39 @@ internal object GodotEmbed {
     }
 
     /**
-     * Recreates the isolated host once. Godot asks for a process restart after
-     * first-time GLES setup; ProcessPhoenix is stripped from the manifest, so
-     * [IsolatedEngineActivity.recreate] completes init without a splash loop.
+     * Asks the Compose host to relaunch this plugin Activity, then kills only
+     * this isolated JVM so `libgodot_android` unloads.
+     *
+     * Godot's ProcessPhoenix stays stripped. Its default rebirth targets the
+     * launcher, and starting the same `singleInstance` Activity from a dying
+     * `:engine2d` / `:engine3d` process would drop `StartActivityForResult`.
      */
     fun restartHost(activity: IsolatedEngineActivity) {
-        if (!GodotRuntime.shouldRestartHost(restartedOnce, activity.isFinishing, activity.isDestroyed)) {
+        if (!GodotRuntime.shouldRestartHost(
+                alreadyRestarted = restartedOnce,
+                finishing = activity.isFinishing,
+                destroyed = activity.isDestroyed,
+                fromRelaunch = activity.isGodotRelaunch(),
+            )
+        ) {
             return
         }
+        if (!activity.requestEngineRestart()) return
         restartedOnce = true
-        activity.recreate()
+        if (!GodotRuntime.shouldEmbed()) return
+        val view = activity.window?.decorView
+        if (view != null) {
+            view.post { killIsolatedProcess() }
+        } else {
+            killIsolatedProcess()
+        }
+    }
+
+    /**
+     * Ends the current JVM. Isolated so Robolectric never calls it.
+     */
+    fun killIsolatedProcess() {
+        Runtime.getRuntime().exit(0)
     }
 
     /**

@@ -24,6 +24,12 @@ object EnginePluginContract {
     /** Result extra: true when the reward level completed. */
     const val RESULT_FINISHED: String = "finished"
 
+    /**
+     * Result extra: true when Godot asked the isolated process to restart
+     * (first-time GLES). The Compose host relaunches the same plugin Activity.
+     */
+    const val RESULT_RESTART: String = "restart"
+
     /** Isolated process for the 3D kart (Godot or native GLES). */
     const val PROCESS_ENGINE_3D: String = ":engine3d"
 
@@ -76,6 +82,12 @@ object EnginePluginContract {
      */
     fun isIsolatedProcessName(processName: String): Boolean =
         processName.endsWith(PROCESS_ENGINE_2D) || processName.endsWith(PROCESS_ENGINE_3D)
+
+    /**
+     * True when [processName] is not the default app process. Covers `:engine2d`,
+     * `:engine3d`, and Godot's unused `:phoenix` so Room never opens there.
+     */
+    fun isNonDefaultProcessName(processName: String): Boolean = ':' in processName
 
     /**
      * True when [permission] must not appear on a plugin (or host) manifest.

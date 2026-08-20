@@ -54,7 +54,8 @@ locally still needs a PAT with Contents: Read on those private repos.
 
 ## Build
 
-JDK 17+. With the Android SDK:
+JDK 17+ (Gradle Daemon Toolchain in `gradle/gradle-daemon-jvm.properties`).
+With the Android SDK:
 
 ```bash
 echo "sdk.dir=/path/to/Android/Sdk" > local.properties

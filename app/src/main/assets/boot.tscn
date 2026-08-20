@@ -1,17 +1,30 @@
 [gd_scene load_steps=2 format=3]
 
 [sub_resource type="GDScript" id="1_boot"]
-script/source = "extends Node
+script/source = "extends ColorRect
 
-## Leaves the boot splash immediately and loads the kart or runner scene.
+## Waits one idle frame so plugins are registered, then loads kart or runner.
 func _ready() -> void:
+	call_deferred(\"_load_reward\")
+
+
+func _load_reward() -> void:
 	var path := \"res://kart.tscn\"
 	if Engine.has_singleton(\"MatAventuras\"):
 		var next := str(Engine.get_singleton(\"MatAventuras\").rewardScene())
 		if not next.is_empty():
 			path = next
-	get_tree().change_scene_to_file(path)
+	var err := get_tree().change_scene_to_file(path)
+	if err != OK:
+		push_error(\"Failed to load reward scene: %s (%s)\" % [path, err])
+		Host.finish(false)
 "
 
-[node name="Boot" type="Node"]
+[node name="Boot" type="ColorRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.117647, 0.533333, 0.898039, 1)
 script = SubResource("1_boot")

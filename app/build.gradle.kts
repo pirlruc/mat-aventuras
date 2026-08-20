@@ -1,17 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kover)
 }
 
 android {
     namespace = "pt.mataventuras.app"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "pt.mataventuras.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -39,9 +38,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -120,10 +116,11 @@ kover {
                 // Godot JNI host: Robolectric cannot load libgodot_android.so.
                 classes("pt.mataventuras.app.engine.godot.*")
                 // Device-only GL/Compose surfaces; Robolectric uses session/loop without these views.
-                classes("pt.mataventuras.app.engine.NativeKartHost")
-                classes("pt.mataventuras.app.engine.NativeRunnerHost")
-                // Canvas DrawScope lambdas are not @Composable, so they slip the annotation filter.
+                classes("pt.mataventuras.app.engine.NativeKartHost*")
+                classes("pt.mataventuras.app.engine.NativeRunnerHost*")
+                // Compose file facades still emit non-@Composable restart-group branches.
                 classes("pt.mataventuras.app.ui.lesson.LessonScreenKt")
+                classes("pt.mataventuras.app.ui.navigation.NavGraphKt")
             }
         }
         verify {

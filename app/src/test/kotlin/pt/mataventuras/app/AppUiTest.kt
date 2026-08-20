@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -132,6 +133,48 @@ class AppUiTest {
         assertFalse(RewardReturn.finishedExtra(null))
         assertTrue(RewardReturn.finishedExtra(finishedIntent))
         assertFalse(RewardReturn.finishedExtra(android.content.Intent()))
+        val restart =
+            EngineLauncher.restartResultIntent(
+                pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS,
+                "hero_pup",
+                "Ana",
+            )
+        assertTrue(restart.getBooleanExtra(EngineLauncher.RESULT_RESTART, false))
+        assertFalse(EngineLauncher.isFinished(android.app.Activity.RESULT_OK, false))
+        val relaunch = EngineLauncher.relaunchIntent(ctx, restart)!!
+        assertEquals(
+            pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS,
+            relaunch.component!!.className,
+        )
+        assertEquals("hero_pup", relaunch.getStringExtra(EngineLauncher.EXTRA_MASCOT))
+        assertEquals("Ana", relaunch.getStringExtra(EngineLauncher.EXTRA_NAME))
+        assertTrue(relaunch.getBooleanExtra(EngineLauncher.EXTRA_GODOT_RELAUNCH, false))
+        assertNull(EngineLauncher.relaunchIntent(ctx, null))
+        assertNull(EngineLauncher.relaunchIntent(ctx, android.content.Intent()))
+        assertNull(
+            EngineLauncher.relaunchIntent(
+                ctx,
+                android.content.Intent().putExtra(EngineLauncher.RESULT_RESTART, true),
+            ),
+        )
+        assertNull(
+            EngineLauncher.relaunchIntent(
+                ctx,
+                android.content.Intent()
+                    .putExtra(EngineLauncher.RESULT_RESTART, true)
+                    .putExtra(EngineLauncher.EXTRA_ENGINE_CLASS, "  "),
+            ),
+        )
+        val namelessRestart =
+            android.content.Intent()
+                .putExtra(EngineLauncher.RESULT_RESTART, true)
+                .putExtra(
+                    EngineLauncher.EXTRA_ENGINE_CLASS,
+                    pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS,
+                )
+        val namelessRelaunch = EngineLauncher.relaunchIntent(ctx, namelessRestart)!!
+        assertEquals("", namelessRelaunch.getStringExtra(EngineLauncher.EXTRA_MASCOT))
+        assertEquals("", namelessRelaunch.getStringExtra(EngineLauncher.EXTRA_NAME))
     }
 
     @Test
