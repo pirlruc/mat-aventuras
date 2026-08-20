@@ -54,6 +54,29 @@ A Godot 4 `aar` or Unity-as-a-library Activity may replace `Kart3dActivity`
 v1 ships the native GLES kart as the fallback. The Compose host must not hold
 a GL/Unity view. `EngineLauncher.PROCESS_ENGINE_3D` is `:engine3d`.
 
+### What is still needed for Godot or Unity (MAT-003)
+
+v1 **does not** ship Godot or Unity. The host contract already exists
+(`EngineLauncher`). A later plugin still needs:
+
+1. A Godot 4 Android `aar` **or** a Unity-as-a-library project that provides
+   an Activity replacing `Kart3dActivity` and/or `Platformer2dActivity`.
+2. `android:process=":engine3d"` (kart) or `:engine2d` (runner) so the engine
+   heap dies on `finish()`.
+3. Intent extras `EXTRA_MASCOT` and `EXTRA_NAME`; result extra
+   `RESULT_FINISHED` via `setResult` (`RESULT_OK` when the level completed).
+4. Gradle flavor or source-set swap so the plugin Activity is selected when
+   the AAR is present, with domain simulation remaining the fallback.
+5. Asset pipeline (kart, track, rings, mascot tint) and touch mapping that
+   matches v1 (2D: tap to jump; 3D: left/right thirds steer, centre boost).
+6. Networking, analytics, and cloud-save **stripped** from the engine export.
+   Confirm the merged manifest still has **no** `INTERNET` permission.
+7. The Compose host must **not** hold a GL/Unity view.
+8. Emulator instrumented coverage of the swap remains MAT-002-T1.
+
+Until those land, the playable engines are Kotlin Canvas (age 3) and GLES
+in `:engine3d` (age 7).
+
 ## Modules
 
 ```
@@ -144,16 +167,28 @@ Colour is never the only signal: shapes have names and silhouettes.
 ### Theme and icon
 
 Primary `#1565C0`, accent `#FB8C00`, mascot colours as identity chips.
-App icon: gold star + numeral on blue adaptive background (vector,
-`mipmap-anydpi-v26`).
+App icon: gold star inside an orange reward ring, with a small hedgehog,
+on a royal-blue adaptive background (`drawable-nodpi/ic_launcher_foreground`
+plus `mipmap-anydpi-v26`). Marketing asset: `docs/branding/app-icon.png`.
+
+The entry screen (`AgeSelectionScreen`) shows that icon, the title
+**Mat Aventuras**, a short pt-PT description, age-band previews, and an
+optional “Continuar como …” shortcut for the last child on the device.
 
 ### Curriculum
 
-- **3:** counting 1–10, shapes, digits 0–9. Reward: 2D ring-collecting runner.
-- **7:** addition (including missing addend), subtraction, multiplication,
-  sequences / largest / smallest. Reward: oval-track 3D kart with steer and boost.
+Home is a module grid (not numbered campaign levels). Each module is an
+infinite generator. Reward every 3 consecutive hits (`RewardsEngine`).
+Finishing a reward Activity awards 15 bonus points on the last profile.
 
-Reward every 3 consecutive correct answers (`RewardsEngine`).
+| Age | Lessons (Compose, mascot-hosted) | Reward mini-game |
+| --- | --- | --- |
+| **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D ring-collecting side-scroller (`Platformer2dActivity`) |
+| **7** | Addition incl. missing addend (`ADDITION`); subtraction (`SUBTRACTION`); multiplication (`MULTIPLICATION`); logic even/largest/smallest (`LOGIC`) | Oval-track 3D kart with steer and boost (`Kart3dActivity` in `:engine3d`) |
+
+Age 7 confirms before leaving a lesson (`VoiceScripts.confirmExit`).
+Age 3 leaves immediately. A finished reward returns `RESULT_FINISHED`;
+the host speaks a pt-PT line and applies bonus points.
 
 ## Game engine wrapper
 

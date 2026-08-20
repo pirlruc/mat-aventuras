@@ -27,9 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pt.mataventuras.app.di.AppContainer
+import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
-import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -53,6 +53,7 @@ fun LessonScreen(
     var misses by remember { mutableIntStateOf(0) }
     var streak by remember { mutableIntStateOf(0) }
     var points by remember { mutableIntStateOf(profile.points) }
+    var confirmingExit by remember { mutableStateOf(false) }
     val startedAt = remember { System.currentTimeMillis() }
 
     LaunchedEffect(exercise.prompt) { onSpeak(exercise.spoken) }
@@ -99,11 +100,19 @@ fun LessonScreen(
         }
         Text(UiLogic.lessonScoreLine(hits, points))
         Button(onClick = {
-            scope.launch {
-                LessonRecorder.persist(container, profile, points, module, hits, misses, startedAt)
-                onExit()
+            if (LessonFlow.shouldAskExitConfirm(profile.ageGroup, confirmingExit)) {
+                confirmingExit = true
+                VoiceScripts.confirmExit(profile.ageGroup)?.let(onSpeak)
+            } else {
+                scope.launch {
+                    LessonRecorder.persist(container, profile, points, module, hits, misses, startedAt)
+                    onExit()
+                }
             }
-        }) { Text("Sair") }
+        }) { Text(LessonFlow.exitLabel(confirmingExit)) }
+        if (LessonFlow.showsStay(confirmingExit)) {
+            Button(onClick = { confirmingExit = false }) { Text(VoiceScripts.STAY) }
+        }
     }
 }
 

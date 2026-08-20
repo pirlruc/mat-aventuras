@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Mat Aventuras</string>
+    <string name="app_tagline">Números, formas e jogos.</string>
+    <string name="app_description">Uma aventura de matemática para os 3 e os 7 anos. Tudo fica neste aparelho.</string>
     <string name="age_selection">Olá! Escolhe a tua idade.</string>
     <string name="three_years">3 anos</string>
     <string name="seven_years">7 anos</string>
@@ -24,4 +26,5 @@
     <string name="badges">Distintivos</string>
     <string name="avatars">Avatares</string>
     <string name="privacy">Tudo fica neste aparelho. Não enviamos dados.</string>
+    <string name="switch_profile">Outra criança</string>
 </resources>

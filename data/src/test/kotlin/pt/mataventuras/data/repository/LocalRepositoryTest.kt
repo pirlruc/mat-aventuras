@@ -61,6 +61,15 @@ class LocalRepositoryTest {
         assertEquals(2, repository.observeAvatars(id).first().size)
         assertEquals(1, repository.observeProfiles().first().size)
         assertEquals(null, repository.getProfile(9_999))
+        assertEquals("Ana", repository.latestProfile()!!.name)
+        val emptyDb =
+            Room.inMemoryDatabaseBuilder(
+                ApplicationProvider.getApplicationContext(),
+                MatAventurasDatabase::class.java,
+            ).allowMainThreadQueries().build()
+        val emptyRepo = LocalRepository(emptyDb, now = { 1L })
+        assertEquals(null, emptyRepo.latestProfile())
+        emptyDb.close()
     }
 
     @Test
@@ -87,5 +96,23 @@ class LocalRepositoryTest {
         assertEquals(false, defaults.isSet())
         pins.clear()
         assertEquals(false, pins.isSet())
+    }
+
+    @Test
+    fun lastProfileStoreRoundTrips() = runTest {
+        val store =
+            pt.mataventuras.data.session.LastProfileStore(
+                ApplicationProvider.getApplicationContext(),
+                storeName = "last_profile_repo_test",
+            )
+        store.clear()
+        assertEquals(null, store.read())
+        store.save(7)
+        assertEquals(7L, store.read())
+        store.clear()
+        assertEquals(null, store.read())
+        val defaults = pt.mataventuras.data.session.LastProfileStore(ApplicationProvider.getApplicationContext())
+        defaults.clear()
+        assertEquals(null, defaults.read())
     }
 }

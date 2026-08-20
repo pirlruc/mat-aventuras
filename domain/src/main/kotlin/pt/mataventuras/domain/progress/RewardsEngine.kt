@@ -81,6 +81,11 @@ class RewardsEngine {
         }
 
     /**
+     * Bonus points when a reward mini-game reports that it finished.
+     */
+    fun pointsForRewardFinish(finished: Boolean): Int = if (finished) REWARD_FINISH_POINTS else 0
+
+    /**
      * Opens a reward level every [HITS_FOR_REWARD] consecutive hits.
      */
     fun shouldOpenReward(consecutiveHits: Int): Boolean {
@@ -92,6 +97,7 @@ class RewardsEngine {
     companion object {
         const val HIT_POINTS: Int = 10
         const val MISS_POINTS: Int = -2
+        const val REWARD_FINISH_POINTS: Int = 15
         const val HITS_FOR_REWARD: Int = 3
         const val THIRTY_MINUTES_MS: Long = 30L * 60L * 1000L
         const val PERFECT_MINIMUM: Int = 5

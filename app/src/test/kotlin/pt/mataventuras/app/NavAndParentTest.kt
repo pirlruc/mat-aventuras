@@ -51,6 +51,18 @@ class NavAndParentTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Quantas estrelas vês?").fetchSemanticsNodes().isNotEmpty()
         }
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(VoiceScripts.SWITCH_PROFILE).performScrollTo().performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Continuar como Ana").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Continuar como Ana").performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     @Test

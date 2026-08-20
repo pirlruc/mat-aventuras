@@ -36,6 +36,14 @@ object EngineLauncher {
     const val PROCESS_ENGINE_3D: String = ":engine3d"
 
     /**
+     * True when the reward Activity completed the level (host may award bonus points).
+     */
+    fun isFinished(
+        resultCode: Int,
+        finishedExtra: Boolean,
+    ): Boolean = resultCode == android.app.Activity.RESULT_OK && finishedExtra
+
+    /**
      * Intent for the age-appropriate reward Activity.
      */
     fun intentFor(context: Context, ageGroup: AgeGroup, mascot: Mascot, name: String): Intent {

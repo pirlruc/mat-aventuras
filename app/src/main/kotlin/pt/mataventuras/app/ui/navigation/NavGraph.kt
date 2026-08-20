@@ -1,6 +1,7 @@
 package pt.mataventuras.app.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -8,6 +9,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import pt.mataventuras.app.di.AppContainer
+import pt.mataventuras.app.ui.ProfileResume
 import pt.mataventuras.app.ui.age.AgeSelectionScreen
 import pt.mataventuras.app.ui.home.HomeScreen
 import pt.mataventuras.app.ui.lesson.LessonScreen
@@ -39,16 +41,38 @@ fun NavGraph(
     val scope = rememberCoroutineScope()
     var destination by remember { mutableStateOf<Destination>(Destination.Selection) }
     var profile by remember { mutableStateOf<ChildProfile?>(null) }
+    var continueProfile by remember { mutableStateOf<ChildProfile?>(null) }
     val ageGroup = profile?.ageGroup ?: AgeGroup.THREE_YEARS
+
+    LaunchedEffect(Unit) {
+        continueProfile = ProfileResume.continueCandidate(container.lastProfile, container.repository)
+    }
 
     MatAventurasTheme(ageGroup) {
         when (val current = destination) {
             Destination.Selection -> AgeSelectionScreen(
                 onSpeak = onSpeak,
+                lastProfile = continueProfile,
+                onContinueLast = {
+                    val resumed = continueProfile ?: return@AgeSelectionScreen
+                    scope.launch {
+                        ProfileResume.remember(container.lastProfile, resumed)
+                        profile = resumed
+                        destination = Destination.Home
+                    }
+                },
                 onConfirm = { chosen, name, mascot ->
                     scope.launch {
-                        val id = container.repository.createProfile(name, chosen, mascot)
-                        profile = container.repository.getProfile(id)
+                        val created =
+                            ProfileResume.openNew(
+                                store = container.lastProfile,
+                                repository = container.repository,
+                                name = name,
+                                ageGroup = chosen,
+                                mascot = mascot,
+                            )
+                        profile = created
+                        continueProfile = created
                         destination = Destination.Home
                     }
                 },
@@ -60,6 +84,7 @@ fun NavGraph(
                     onModule = { destination = Destination.Lesson(it) },
                     onLeaderboard = { destination = Destination.Leaderboard },
                     onParents = { destination = Destination.Parents },
+                    onSwitchProfile = { destination = Destination.Selection },
                 )
             }
             is Destination.Lesson -> profile?.let { p ->

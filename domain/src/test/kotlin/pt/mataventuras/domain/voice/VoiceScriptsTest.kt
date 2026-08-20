@@ -13,6 +13,13 @@ class VoiceScriptsTest {
     @Test
     fun copyIsEuropeanPortuguese() {
         assertTrue(VoiceScripts.AGE_SELECTION.contains("Escolhe"))
+        assertTrue(VoiceScripts.APP_TITLE.contains("Aventuras"))
+        assertTrue(VoiceScripts.APP_DESCRIPTION.contains("aparelho"))
+        assertEquals(VoiceScripts.AGE_THREE_PREVIEW, VoiceScripts.agePreview(AgeGroup.THREE_YEARS))
+        assertEquals(VoiceScripts.AGE_SEVEN_PREVIEW, VoiceScripts.agePreview(AgeGroup.SEVEN_YEARS))
+        assertEquals("Continuar como Ana", VoiceScripts.continueAs("Ana"))
+        assertEquals(VoiceScripts.REWARD_FINISHED, VoiceScripts.rewardReturn(true))
+        assertEquals(VoiceScripts.REWARD_RETURN, VoiceScripts.rewardReturn(false))
         assertTrue(VoiceScripts.greeting(Mascot.SPEEDY_HEDGEHOG, AgeGroup.THREE_YEARS).contains("brincar"))
         assertTrue(VoiceScripts.greeting(Mascot.HERO_PUP, AgeGroup.SEVEN_YEARS).contains("desafio"))
         assertEquals(null, VoiceScripts.confirmExit(AgeGroup.THREE_YEARS))

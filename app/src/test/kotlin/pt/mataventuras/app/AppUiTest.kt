@@ -45,6 +45,9 @@ class AppUiTest {
         assertEquals("speedy_hedgehog", two.getStringExtra(EngineLauncher.EXTRA_MASCOT))
         assertEquals(EngineLauncher.PROCESS_ENGINE_3D, ":engine3d")
         assertEquals("Rui", three.getStringExtra(EngineLauncher.EXTRA_NAME))
+        assertTrue(EngineLauncher.isFinished(android.app.Activity.RESULT_OK, true))
+        assertFalse(EngineLauncher.isFinished(android.app.Activity.RESULT_OK, false))
+        assertFalse(EngineLauncher.isFinished(android.app.Activity.RESULT_CANCELED, true))
     }
 
     @Test
@@ -52,11 +55,30 @@ class AppUiTest {
         compose.setContent {
             AgeSelectionScreen(onSpeak = {}, onConfirm = { _, _, _ -> })
         }
+        compose.onNodeWithText(VoiceScripts.APP_TITLE).assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.AGE_SELECTION).assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.THREE_YEARS).performClick()
+        compose.onNodeWithText(VoiceScripts.AGE_THREE_PREVIEW).assertIsDisplayed()
         compose.onNodeWithText("Como te chamas?").assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.SEVEN_YEARS).performClick()
+        compose.onNodeWithText(VoiceScripts.AGE_SEVEN_PREVIEW).assertIsDisplayed()
     }
+
+    @Test
+    fun ageSelectionContinuesLastProfile() {
+        var continued = false
+        val last =
+            ChildProfile(4, "Ana", AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, AvatarCode.STARTER.name, 0, 0)
+        compose.setContent {
+            AgeSelectionScreen(
+                onSpeak = {},
+                onConfirm = { _, _, _ -> },
+                lastProfile = last,
+                onContinueLast = { continued = true },
+            )
+        }
+        compose.onNodeWithText("Continuar como Ana").performClick()
+        assertEquals(true, continued)
 
     @Test
     fun ageSelectionBlankNameBecomesAmigoAndPicksMascot() {

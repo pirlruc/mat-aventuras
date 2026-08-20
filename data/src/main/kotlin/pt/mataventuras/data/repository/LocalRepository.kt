@@ -70,6 +70,9 @@ class LocalRepository(
     /** Loads one profile, or null. */
     suspend fun getProfile(id: Long): ChildProfile? = database.profileDao().get(id)?.toDomain()
 
+    /** Most recently created profile, or null. */
+    suspend fun latestProfile(): ChildProfile? = database.profileDao().latest()?.toDomain()
+
     /** Every stored session. */
     suspend fun allSessions(): List<LearningSession> =
         database.sessionDao().all().map { it.toDomain() }

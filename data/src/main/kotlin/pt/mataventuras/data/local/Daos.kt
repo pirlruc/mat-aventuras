@@ -20,6 +20,10 @@ interface ProfileDao {
     @Query("SELECT * FROM profiles WHERE id = :id")
     suspend fun get(id: Long): ProfileEntity?
 
+    /** Most recently created profile, or null when the table is empty. */
+    @Query("SELECT * FROM profiles ORDER BY id DESC LIMIT 1")
+    suspend fun latest(): ProfileEntity?
+
     /** Inserts a profile and returns the row id. */
     @Insert
     suspend fun insert(profile: ProfileEntity): Long

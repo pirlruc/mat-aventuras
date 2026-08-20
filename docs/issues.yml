@@ -291,6 +291,23 @@ milestones:
               - KT-PERF-001
               - KT-API-004
 
+          - id: MAT-003-T3
+            status: open
+            title: Optional Godot or Unity isolated-process plugin
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/engine
+                - docs/architecture.md
+            verification:
+              - Plugin Activity uses android:process :engine3d or :engine2d
+              - Intent extras match EngineLauncher (mascot, name, finished)
+              - Merged manifest still has no INTERNET permission
+              - Domain Kart3dEngine and Platformer2dEngine remain the fallback
+            guardrail_refs:
+              - KT-PERF-001
+              - KT-SEC-001
+              - KT-API-004
+
       - id: MAT-004
         status: open
         title: Remaining Kotlin and CI guardrail gates

@@ -18,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import pt.mataventuras.app.ui.UiLogic
@@ -39,6 +41,7 @@ fun HomeScreen(
     onModule: (LearningModule) -> Unit,
     onLeaderboard: () -> Unit,
     onParents: () -> Unit,
+    onSwitchProfile: () -> Unit = {},
 ) {
     val tokens = LocalUiTokens.current
     val modules = modulesFor(profile.ageGroup)
@@ -54,6 +57,7 @@ fun HomeScreen(
     ) {
         Text("Olá, ${profile.name}!", fontSize = tokens.titleSpSize, fontWeight = FontWeight.ExtraBold)
         Text("${profile.points} pontos", style = MaterialTheme.typography.titleMedium)
+        Text(VoiceScripts.agePreview(profile.ageGroup), style = MaterialTheme.typography.bodyLarge)
         modules.forEach { module ->
             val mascot = mascotFor(module)
             Button(
@@ -70,8 +74,20 @@ fun HomeScreen(
             }
         }
         if (UiLogic.usesIconNav(profile.ageGroup)) {
-            TextButton(onClick = onLeaderboard) { Text("★") }
-            TextButton(onClick = onParents) { Text("· · ·") }
+            TextButton(
+                onClick = {
+                    onSpeak(VoiceScripts.LEADERBOARD)
+                    onLeaderboard()
+                },
+                modifier = Modifier.semantics { contentDescription = VoiceScripts.LEADERBOARD },
+            ) { Text("★") }
+            TextButton(
+                onClick = {
+                    onSpeak(VoiceScripts.PARENT_DASHBOARD)
+                    onParents()
+                },
+                modifier = Modifier.semantics { contentDescription = VoiceScripts.PARENT_DASHBOARD },
+            ) { Text("· · ·") }
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = onLeaderboard, modifier = Modifier.weight(1f)) {
@@ -80,6 +96,6 @@ fun HomeScreen(
                 TextButton(onClick = onParents) { Text(VoiceScripts.PARENT_DASHBOARD) }
             }
         }
+        TextButton(onClick = onSwitchProfile) { Text(VoiceScripts.SWITCH_PROFILE) }
     }
 }
-

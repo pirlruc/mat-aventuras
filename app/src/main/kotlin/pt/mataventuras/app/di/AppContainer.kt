@@ -6,6 +6,7 @@ import androidx.room.Room
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.repository.LocalRepository
+import pt.mataventuras.data.session.LastProfileStore
 import pt.mataventuras.domain.math.ExerciseGenerator
 import pt.mataventuras.domain.parent.ParentAnalytics
 import pt.mataventuras.domain.parent.PinPolicy
@@ -32,6 +33,9 @@ class AppContainer(
 
     /** Profile and session repository. */
     val repository = LocalRepository(database)
+
+    /** Last opened child, for the entry-screen continue shortcut. */
+    val lastProfile = LastProfileStore(context.applicationContext)
 
     /** Parental PIN store. */
     val pinRepository = PinRepository(context.applicationContext)

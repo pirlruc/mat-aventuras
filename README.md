@@ -6,8 +6,26 @@ Source identifiers, comments, KDoc, and documentation are **English**.
 
 Everything runs on the device: no cloud accounts and no online leaderboard.
 
+![Ícone de Mat Aventuras](docs/branding/app-icon.png)
+
+**Mat Aventuras** is a mascot-hosted math adventure. The child picks an age
+band on the entry screen, then plays lesson modules that match that age.
+Every three correct answers in a row opens a reward mini-game: a 2D ring
+run at age 3, or an oval-track 3D kart at age 7.
+
+## What children play
+
+Home is a **module grid**, not a numbered campaign map. Each module is an
+infinite exercise generator. The reward engine also changes with age.
+
+| Age | Lesson modules | Reward mini-game |
+| --- | --- | --- |
+| **3 years** | Counting 1–10; shapes; digits 0–9 | 2D side-scroller: tap to jump, collect rings |
+| **7 years** | Addition (incl. missing addend); subtraction; multiplication; logic (even sequence, largest, smallest) | Isolated GLES kart: steer, boost, collect rings |
+
 ## What exists (MAT-001)
 
+- Branded entry / age-selection screen (description, icon, age preview)
 - Age-adaptive selection UI
 - Lessons (counting, shapes, numbers, arithmetic, logic)
 - Generic mascots (Ouriço Veloz, Cão Herói, Porquinho Rosa,
@@ -15,9 +33,13 @@ Everything runs on the device: no cloud accounts and no online leaderboard.
 - 2D rewards (age 3) and a process-isolated oval-track 3D kart (age 7)
 - Local leaderboard and badges (Room)
 - PIN-gated parental dashboard
+- Last-profile continue shortcut on the entry screen
 
 The architecture decision lives in Epic **MAT-001** (`docs/issues.yml`),
 not in an ADR file. See [docs/architecture.md](docs/architecture.md).
+
+Godot/Unity is **not** embedded in v1. The plugin contract for a later
+drop-in engine is documented under MAT-003 in `docs/architecture.md`.
 
 ## Methodology and guardrails
 

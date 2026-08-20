@@ -23,6 +23,7 @@ import pt.mataventuras.app.MatAventurasApp
 import pt.mataventuras.app.ui.home.HomeScreen
 import pt.mataventuras.app.ui.lesson.LessonRecorder
 import pt.mataventuras.app.ui.lesson.LessonScreen
+import pt.mataventuras.app.ui.lesson.RewardRecorder
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.rewards.LeaderboardAndRewardsScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
@@ -234,6 +235,83 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText(VoiceScripts.PARENT_DASHBOARD).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Somar com o Canalizador Valente").performScrollTo().performClick()
         assertEquals(LearningModule.ADDITION, opened)
+    }
+
+    @Test
+    fun sevenYearLessonAsksBeforeExit() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val profile =
+            kotlinx.coroutines.runBlocking {
+                val id = app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+                app.container.repository.getProfile(id)!!
+            }
+        var left = false
+        compose.setContent {
+            MatAventurasTheme(AgeGroup.SEVEN_YEARS) {
+                LessonScreen(
+                    container = app.container,
+                    profile = profile,
+                    module = LearningModule.ADDITION,
+                    onSpeak = {},
+                    onReward = {},
+                    onExit = { left = true },
+                )
+            }
+        }
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText(VoiceScripts.LEAVE).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.STAY).assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.STAY).performClick()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performClick()
+        compose.waitUntil(8_000) { left }
+    }
+
+    @Test
+    fun rewardRecorderAwardsPointsOnlyWhenFinished() = runTest {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val id = app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+        val start = app.container.repository.getProfile(id)!!
+        app.container.repository.updateProfile(start.copy(points = 40))
+        app.container.lastProfile.save(id)
+        RewardRecorder.apply(app.container, finished = false)
+        assertEquals(40, app.container.repository.getProfile(id)!!.points)
+        RewardRecorder.apply(app.container, finished = true)
+        assertEquals(55, app.container.repository.getProfile(id)!!.points)
+        assertTrue(app.container.repository.avatarIds(id).contains(AvatarCode.RUNNER.name))
+        app.container.lastProfile.clear()
+        RewardRecorder.apply(app.container, finished = true)
+        assertEquals(55, app.container.repository.getProfile(id)!!.points)
+        app.container.lastProfile.save(9_999)
+        RewardRecorder.apply(app.container, finished = true)
+        assertEquals(55, app.container.repository.getProfile(id)!!.points)
+    }
+
+    @Test
+    fun profileResumePrefersStoredThenLatest() = runTest {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        app.container.lastProfile.clear()
+        val first = ProfileResume.openNew(
+            app.container.lastProfile,
+            app.container.repository,
+            "Ana",
+            AgeGroup.THREE_YEARS,
+            Mascot.SPEEDY_HEDGEHOG,
+        )!!
+        val second =
+            app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+        app.container.lastProfile.save(first.id)
+        val stored =
+            ProfileResume.continueCandidate(app.container.lastProfile, app.container.repository)
+        assertEquals(first.id, stored!!.id)
+        app.container.lastProfile.save(9_999)
+        val fallback =
+            ProfileResume.continueCandidate(app.container.lastProfile, app.container.repository)
+        assertEquals(second, fallback!!.id)
+        ProfileResume.remember(app.container.lastProfile, first)
+        assertEquals(first.id, app.container.lastProfile.read())
     }
 
     @Test
