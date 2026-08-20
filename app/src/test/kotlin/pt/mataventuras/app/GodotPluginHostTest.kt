@@ -155,13 +155,16 @@ class GodotPluginHostTest {
         val appInfo = ctx.packageManager.getApplicationInfo(ctx.packageName, 0)
         assertEquals(0, appInfo.flags and android.content.pm.ApplicationInfo.FLAG_ALLOW_BACKUP)
         val activities =
-            ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_ACTIVITIES).activities
+            ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_ACTIVITIES)
+                .activities
+                ?.toList()
+                .orEmpty()
         assertTrue(activities.any { it.name == EnginePluginContract.PLUGIN_KART_CLASS })
         assertTrue(activities.any { it.name == EnginePluginContract.PLUGIN_RUNNER_CLASS })
         assertTrue(
             activities
                 .filter { it.name.contains("Plugin") || it.name.endsWith("Kart3dActivity") }
-                .all { EnginePluginContract.isIsolatedProcessName(it.processName) },
+                .all { EnginePluginContract.isIsolatedProcessName(it.processName.orEmpty()) },
         )
     }
 
@@ -187,6 +190,10 @@ class GodotPluginHostTest {
         assertEquals("", procCmdlineOrEmpty { throw IllegalStateException("proc") })
         assertEquals("ok", procCmdlineOrEmpty { "ok" })
         assertEquals("device", resolveProcessName(sdk = 28, api28Name = "device"))
+        assertTrue(resolveProcessName(sdk = 26).isNotBlank())
+        assertTrue(hostProcessName().isNotBlank())
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        assertFalse(app.bindHostGraph("pt.mataventuras.app:engine3d"))
         val nativeKartController =
             Robolectric.buildActivity(
                 Kart3dActivity::class.java,
@@ -202,6 +209,14 @@ class GodotPluginHostTest {
         nativeKartController.get().pauseEngineSurface()
         nativeKartController.get().resumeEngineSurface()
         destroy(nativeKartController)
+        val namelessController =
+            Robolectric.buildActivity(
+                Kart3dActivity::class.java,
+                android.content.Intent(ctx, Kart3dActivity::class.java)
+                    .putExtra(EngineLauncher.EXTRA_MASCOT, "hero_pup"),
+            ).setup()
+        assertEquals("", namelessController.get().childName())
+        destroy(namelessController)
         val nativeRunnerController =
             Robolectric.buildActivity(
                 Platformer2dActivity::class.java,

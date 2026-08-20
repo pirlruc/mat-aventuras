@@ -47,6 +47,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|screenLayout">
             <intent-filter>
@@ -58,11 +60,14 @@
         <activity
             android:name=".engine.Platformer2dActivity"
             android:exported="false"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
             android:theme="@style/Theme.MatAventuras.Game" />
 
         <activity
             android:name=".engine.Kart3dActivity"
             android:exported="false"
+            android:launchMode="singleInstance"
             android:process=":engine3d"
             android:excludeFromRecents="true"
             android:taskAffinity=""
@@ -71,6 +76,7 @@
         <activity
             android:name="pt.mataventuras.plugin.KartPluginActivity"
             android:exported="false"
+            android:launchMode="singleInstance"
             android:process=":engine3d"
             android:excludeFromRecents="true"
             android:taskAffinity=""
@@ -81,6 +87,7 @@
         <activity
             android:name="pt.mataventuras.plugin.RunnerPluginActivity"
             android:exported="false"
+            android:launchMode="singleInstance"
             android:process=":engine2d"
             android:excludeFromRecents="true"
             android:taskAffinity=""

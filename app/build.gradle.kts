@@ -57,6 +57,10 @@ android {
         unitTests.isIncludeAndroidResources = true
         unitTests.isReturnDefaultValues = true
     }
+    lint {
+        abortOnError = true
+        lintConfig = file("lint.xml")
+    }
 }
 
 androidComponents {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- GodotFragment JNI overrides must not call super (native host wiring). -->
+    <issue id="MissingSuperCall">
+        <ignore path="src/main/kotlin/pt/mataventuras/app/engine/godot/" />
+    </issue>
+    <!-- Manifest stubs exist only so merger can tools:node=remove them. -->
+    <issue id="MissingClass">
+        <ignore path="src/main/AndroidManifest.xml" />
+    </issue>
+    <!-- Compose lint false positive: produceState assigns via the setter in the lambda. -->
+    <issue id="ProduceStateDoesNotAssignValue">
+        <ignore path="src/main/kotlin/pt/mataventuras/app/ui/rewards/LeaderboardAndRewardsScreen.kt" />
+    </issue>
+</lint>

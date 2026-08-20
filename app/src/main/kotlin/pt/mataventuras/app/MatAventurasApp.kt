@@ -2,6 +2,7 @@ package pt.mataventuras.app
 
 import android.app.Application
 import android.os.Build
+import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.domain.engine.EnginePluginContract
 import java.io.File
 
@@ -16,8 +17,16 @@ class MatAventurasApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if (!shouldOpenContainer(currentProcessName())) return
+        bindHostGraph()
+    }
+
+    /**
+     * Opens Room only in the Compose process. Isolated engine processes return false.
+     */
+    internal fun bindHostGraph(processName: String = currentProcessName()): Boolean {
+        if (!shouldOpenContainer(processName)) return false
         container = AppContainer(this)
+        return true
     }
 }
 
@@ -43,17 +52,27 @@ internal fun resolveProcessName(
     procCmdline: String? = null,
 ): String {
     if (sdk >= Build.VERSION_CODES.P) {
-        return api28Name ?: Application.getProcessName()
+        return api28Name ?: hostProcessName()
     }
-        return parseProcCmdline(
-            procCmdline ?: procCmdlineOrEmpty { File("/proc/self/cmdline").readText() },
-        )
+    return parseProcCmdline(
+        procCmdline ?: procCmdlineOrEmpty { File("/proc/self/cmdline").readText() },
+    )
 }
 
 /**
  * Null-terminated cmdline from procfs, trimmed to the process name.
  */
 internal fun parseProcCmdline(raw: String): String = raw.trim('\u0000', ' ', '\n', '\t', '\r')
+
+/**
+ * API 28+ process name. Guarded so lint accepts the minSdk 26 compile.
+ */
+internal fun hostProcessName(): String =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        Application.getProcessName()
+    } else {
+        parseProcCmdline(procCmdlineOrEmpty { File("/proc/self/cmdline").readText() })
+    }
 
 /**
  * Reads [block] and returns an empty string when procfs is unreadable.
