@@ -20,11 +20,17 @@ class SpeechEngine(context: Context) : TextToSpeech.OnInitListener {
         tts.setSpeechRate(0.92f)
     }
 
+    /**
+     * Speaks [text] in pt-PT when the engine is ready.
+     */
     fun speak(text: String) {
         if (!ready || text.isBlank()) return
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "mat-aventuras")
     }
 
+    /**
+     * Releases the TTS engine.
+     */
     fun release() {
         tts.stop()
         tts.shutdown()

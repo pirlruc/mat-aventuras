@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -40,6 +41,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -57,4 +62,43 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.room.ktx)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes("pt.mataventuras.app.BuildConfig")
+                classes("*ComposableSingletons*")
+            }
+        }
+        verify {
+            rule {
+                bound {
+                    minValue.set(95)
+                    coverageUnits.set(kotlinx.kover.gradle.plugin.dsl.CoverageUnit.LINE)
+                }
+            }
+            rule {
+                bound {
+                    minValue.set(95)
+                    coverageUnits.set(kotlinx.kover.gradle.plugin.dsl.CoverageUnit.BRANCH)
+                }
+            }
+        }
+    }
+}
+
+afterEvaluate {
+    tasks.named("testDebugUnitTest").configure {
+        finalizedBy("koverXmlReportDebug")
+    }
 }

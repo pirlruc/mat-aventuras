@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/** Stored child profile. */
 @Entity(tableName = "profiles")
 data class ProfileEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -15,6 +16,7 @@ data class ProfileEntity(
     val createdAtEpochMs: Long,
 )
 
+/** Stored lesson session. */
 @Entity(
     tableName = "sessions",
     indices = [Index("profileId")],
@@ -29,6 +31,7 @@ data class SessionEntity(
     val startedAtEpochMs: Long,
 )
 
+/** Stored badge unlock. Unique per profile and code. */
 @Entity(
     tableName = "badges",
     indices = [Index(value = ["profileId", "code"], unique = true)],
@@ -40,6 +43,7 @@ data class BadgeEntity(
     val unlockedAtEpochMs: Long,
 )
 
+/** Stored avatar unlock. Unique per profile and avatar id. */
 @Entity(
     tableName = "avatars",
     indices = [Index(value = ["profileId", "avatarId"], unique = true)],

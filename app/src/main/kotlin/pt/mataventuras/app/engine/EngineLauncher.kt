@@ -11,10 +11,18 @@ import pt.mataventuras.domain.model.engineKindFor
  * Native host → reward engine. 2D stays in-process; 3D runs in `:engine3d`.
  */
 object EngineLauncher {
+    /** Intent extra: mascot code. */
     const val EXTRA_MASCOT: String = "mascot"
+
+    /** Intent extra: child display name. */
     const val EXTRA_NAME: String = "name"
+
+    /** Result extra: the reward level finished. */
     const val RESULT_FINISHED: String = "finished"
 
+    /**
+     * Intent for the age-appropriate reward Activity.
+     */
     fun intentFor(context: Context, ageGroup: AgeGroup, mascot: Mascot, name: String): Intent {
         val destination = when (engineKindFor(ageGroup)) {
             EngineKind.TWO_D -> Platformer2dActivity::class.java

@@ -101,6 +101,24 @@ class RewardsEngineTest {
         assertEquals(0.0, table.single().averageAccuracy, 0.0)
     }
 
+    @Test
+    fun lessonProgressAggregatesModules() {
+        val sessions =
+            listOf(
+                LearningSession(1, 1, LearningModule.COUNTING, 4, 0, 1_000, 0),
+                LearningSession(2, 1, LearningModule.SHAPES, 3, 1, 1_000, 0),
+                LearningSession(3, 1, LearningModule.ADDITION, 6, 0, 1_000, 0),
+            )
+        val totals = LessonProgress.totals(sessions, hitsThisRound = 6, missesThisRound = 0)
+        assertEquals(3, totals.completedSessions)
+        assertEquals(4, totals.countingHits)
+        assertEquals(3, totals.shapeHits)
+        assertEquals(6, totals.arithmeticHits)
+        assertTrue(totals.perfectSessionWithMinimum)
+        val imperfect = LessonProgress.totals(sessions, hitsThisRound = 2, missesThisRound = 1)
+        assertFalse(imperfect.perfectSessionWithMinimum)
+    }
+
     private fun profile(
         id: Long,
         name: String,

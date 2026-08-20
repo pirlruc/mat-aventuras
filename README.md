@@ -12,7 +12,7 @@ Everything runs on the device: no cloud accounts and no online leaderboard.
 - Lessons (counting, shapes, numbers, arithmetic, logic)
 - Generic mascots (Ouriço Veloz, Cão Herói, Porquinho Rosa,
   Canalizador Valente, Extraterrestre Travesso)
-- 2D rewards (age 3) and process-isolated 3D rewards (age 7)
+- 2D rewards (age 3) and a process-isolated oval-track 3D kart (age 7)
 - Local leaderboard and badges (Room)
 - PIN-gated parental dashboard
 
@@ -42,6 +42,12 @@ Without an SDK, only the domain module (tests and coverage):
 ```bash
 ./gradlew :domain:test :domain:koverVerify :domain:detekt
 python3 scripts/verify-coverage.py
+```
+
+With the SDK, the same 95% gate applies to `:data` and `:app`:
+
+```bash
+bash scripts/ci-local.sh
 ```
 
 ## Privacy

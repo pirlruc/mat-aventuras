@@ -27,6 +27,9 @@ private sealed interface Destination {
     data object Parents : Destination
 }
 
+/**
+ * In-memory navigation host for selection, home, lessons, rewards, and parents.
+ */
 @Composable
 fun NavGraph(
     container: AppContainer,

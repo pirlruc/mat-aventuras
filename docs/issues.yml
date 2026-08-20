@@ -27,7 +27,8 @@ milestones:
             lessons, parental PIN, and rewards; a lightweight 2D engine and a
             process-isolated 3D engine handle reward levels; Room/DataStore are
             the only persistence; identifiers/docs are English; UI copy is
-            pt-PT; and CI gates :domain against the pinned Kotlin guardrails.
+            pt-PT; and CI gates every included module against the pinned Kotlin
+            guardrails (95% line and branch coverage; no coverage deviation).
         architecture:
           target: >-
             In the context of a native Android educational math game for ages
@@ -50,7 +51,7 @@ milestones:
           - Local leaderboard and badges persist in Room with no network calls
           - 3yo rewards launch the 2D engine; 7yo rewards launch the isolated 3D engine
           - App declares no INTERNET permission; user data never leaves the device
-          - :domain unit tests and coverage gate read kotlin/profile.thresholds.yml
+          - :domain, :data, and :app unit tests and coverage gates read kotlin/profile.thresholds.yml
           - Source identifiers, comments, KDoc, and docs are English; UI/TTS is pt-PT
         guardrail_refs:
           - KT-BUILD-001
@@ -68,7 +69,7 @@ milestones:
           - SC-DEP-001
         tasks:
           - id: MAT-001-T1
-            status: open
+            status: done
             title: Pin guardrails, scaffold, and authored backlog
             instructions:
               files:
@@ -84,7 +85,7 @@ milestones:
               - CI-008
 
           - id: MAT-001-T2
-            status: open
+            status: done
             title: Domain models, math generators, PIN, rewards
             instructions:
               files:
@@ -99,7 +100,7 @@ milestones:
               - KT-CPLX-001
 
           - id: MAT-001-T3
-            status: open
+            status: done
             title: Room persistence and local leaderboard
             instructions:
               files:
@@ -112,7 +113,7 @@ milestones:
               - KT-SEC-001
 
           - id: MAT-001-T4
-            status: open
+            status: done
             title: Compose screens and isolated game Activities
             instructions:
               files:
@@ -128,7 +129,7 @@ milestones:
               - KT-CONC-001
 
           - id: MAT-001-T5
-            status: open
+            status: done
             title: Gradle CI reading pinned Kotlin thresholds
             instructions:
               files:
@@ -145,7 +146,7 @@ milestones:
               - KT-TEST-002
 
           - id: MAT-001-T6
-            status: open
+            status: done
             title: English identifiers and docs; pt-PT UI only
             instructions:
               files:
@@ -166,16 +167,18 @@ milestones:
     epics:
       - id: MAT-002
         status: open
-        title: Instrumented coverage and richer lesson packs
+        title: Richer lesson packs and Android module coverage
         overview:
           problem: >-
-            Foundation CI can gate :domain on the JVM, but Compose UI and Room
-            DAOs still lack emulator coverage, and lesson variety is a first
-            playable slice rather than a full curriculum.
+            Foundation CI now gates :domain on the JVM, and Robolectric unit
+            tests apply the same 95% line/branch gate to :app and :data when
+            the Android SDK is present. Lesson variety is still a first
+            playable slice rather than a full curriculum, and emulator
+            instrumented tests are not yet in CI.
           goal: >-
-            Add instrumented tests that lift :app/:data toward org coverage
-            defaults, expand exercise packs, and then retire the MAT-001
-            coverage deviation.
+            Expand exercise packs (missing addend, smallest-number, more
+            sequences) and add emulator instrumented tests that complement
+            the Robolectric gates already on :app and :data.
         architecture:
           target: Android instrumented test source sets plus additional ExerciseGenerator packs
           modules:
@@ -184,23 +187,49 @@ milestones:
             - domain/
         acceptance_criteria:
           - Instrumented tests run in CI on an emulator
-          - MAT-001 KT-TEST-002 deviation is reviewed and removed or tightened
+          - Lesson packs include missing-addend and smallest-number items
+          - :app and :data keep the org 95% coverage gate with no deviation
         guardrail_refs:
           - KT-TEST-002
           - KT-DOC-001
         tasks:
           - id: MAT-002-T1
             status: open
-            title: Emulator CI and Compose/Room coverage
+            title: Emulator CI for Compose/Room
             instructions:
               files:
                 - app/src/androidTest
                 - data/src/androidTest
                 - .github/workflows/ci.yml
             verification:
-              - Instrumented coverage reported for :app and :data
+              - Instrumented tests run on an emulator job
             guardrail_refs:
               - KT-TEST-002
+
+          - id: MAT-002-T2
+            status: done
+            title: Robolectric coverage for :app and :data at org defaults
+            instructions:
+              files:
+                - app/src/test
+                - data/src/test
+                - scripts/verify-coverage.py
+            verification:
+              - python3 scripts/verify-coverage.py gates :app and :data when the SDK is present
+              - docs/guardrail-deviations.yml has no KT-TEST-002 entry
+            guardrail_refs:
+              - KT-TEST-002
+
+          - id: MAT-002-T3
+            status: done
+            title: Missing-addend and smallest-number lesson items
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/math/ExerciseGenerator.kt
+            verification:
+              - ExerciseGeneratorTest covers missing addend and smallest-number prompts
+            guardrail_refs:
+              - KT-TEST-001
 
   - name: Phase 3 — Hardening and engines
     status: open
@@ -246,19 +275,35 @@ milestones:
             guardrail_refs:
               - KT-API-004
 
+          - id: MAT-003-T2
+            status: done
+            title: Native oval-track GLES kart in :engine3d
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine
+                - app/src/main/kotlin/pt/mataventuras/app/engine/Kart3dActivity.kt
+                - app/src/main/kotlin/pt/mataventuras/app/engine/KartRenderer.kt
+            verification:
+              - Kart3dEngine drives an oval track with steer, boost, and ring pickups
+              - Kart3dActivity uses android:process :engine3d and does not open Room
+              - HUD copy is pt-PT (Volta, Anéis, Impulso)
+            guardrail_refs:
+              - KT-PERF-001
+              - KT-API-004
+
       - id: MAT-004
         status: open
         title: Remaining Kotlin and CI guardrail gates
         overview:
           problem: >-
-            Phase 1 CI is a single quality job that gates :domain coverage and
-            YAML/docs links. Org Kotlin/CI/supply-chain packs still require
-            SAST, secret scanning, split workflows, docs coverage measurement,
-            maintainability-index enforcement, Android lint, and a license
-            allow-list before a public artifact.
+            Phase 1 CI gated :domain coverage in one quality job. Remaining
+            Kotlin/CI/supply-chain packs still required SAST, secret scanning,
+            split workflows, docs coverage measurement, maintainability-index
+            enforcement, Android lint, and a license allow-list.
           goal: >-
-            Close or explicitly deviate the remaining KT-*, CI-*, and SC-*
-            items that MAT-001 did not implement, without inventing ADR files.
+            Close the remaining KT-*, CI-*, and SC-* items that MAT-001 did
+            not implement, without inventing ADR files or recording unapproved
+            deviations.
         architecture:
           target: >-
             Split or add workflows for quality, test, docs, and security;
@@ -291,7 +336,7 @@ milestones:
           - SC-LIC-001
         tasks:
           - id: MAT-004-T1
-            status: open
+            status: done
             title: Split CI jobs and add secret/SAST scans
             instructions:
               files:
@@ -306,7 +351,7 @@ milestones:
               - KT-SEC-003
 
           - id: MAT-004-T2
-            status: open
+            status: done
             title: Docs coverage, maintainability index, Android lint
             instructions:
               files:

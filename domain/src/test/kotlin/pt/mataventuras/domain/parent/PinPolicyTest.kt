@@ -83,4 +83,24 @@ class PinPolicyTest {
         val (result, _) = policy.attempt(state, "4321")
         assertEquals(PinResult.Correct, result)
     }
+
+    @Test
+    fun pinGateSetAndUnlock() {
+        val gate = PinGate(policy)
+        val mismatch = gate.setPin("1234", "0000")
+        assertTrue(mismatch.first is PinGateResult.Stay)
+        val (ok, created) = gate.setPin("1234", "1234")
+        assertEquals(PinGateResult.Unlocked, ok)
+        val state = created!!
+        val wrong = gate.unlock(state, "0000")
+        assertTrue(wrong.first is PinGateResult.Stay)
+        val right = gate.unlock(state, "1234")
+        assertEquals(PinGateResult.Unlocked, right.first)
+        val badFormat = gate.unlock(state, "ab")
+        assertTrue(badFormat.first is PinGateResult.Stay)
+        var locked = state
+        repeat(PinPolicy.MAX_FAILURES) { locked = gate.unlock(locked, "9999").second }
+        val blocked = gate.unlock(locked, "1234")
+        assertTrue((blocked.first as PinGateResult.Stay).message.contains("Demasiadas"))
+    }
 }

@@ -33,9 +33,9 @@ import kotlinx.coroutines.launch
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.parent.ParentSummary
-import pt.mataventuras.domain.parent.PinResult
+import pt.mataventuras.domain.parent.PinGate
+import pt.mataventuras.domain.parent.PinGateResult
 import pt.mataventuras.domain.voice.VoiceScripts
-import java.util.concurrent.TimeUnit
 
 /**
  * PIN-gated parental dashboard. Data stays on-device.
@@ -48,6 +48,7 @@ fun ParentDashboard(
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val gate = remember { PinGate(container.pinPolicy) }
     var unlocked by remember { mutableStateOf(false) }
     var pin by remember { mutableStateOf("") }
     var confirmation by remember { mutableStateOf("") }
@@ -82,27 +83,24 @@ fun ParentDashboard(
                 onClick = {
                     scope.launch {
                         if (settingPin) {
-                            if (pin != confirmation || !container.pinPolicy.isValidFormat(pin)) {
-                                message = "Os PIN não coincidem ou não têm quatro números."
-                                return@launch
+                            val (result, created) = gate.setPin(pin, confirmation)
+                            when (result) {
+                                PinGateResult.Unlocked -> {
+                                    container.pinRepository.save(created!!)
+                                    unlocked = true
+                                }
+                                is PinGateResult.Stay -> message = result.message
                             }
-                            container.pinRepository.save(container.pinPolicy.create(pin))
-                            unlocked = true
                         } else {
                             val state = container.pinRepository.read() ?: return@launch
-                            val (result, next) = container.pinPolicy.attempt(state, pin)
+                            val (result, next) = gate.unlock(state, pin)
                             container.pinRepository.save(next)
                             when (result) {
-                                PinResult.Correct -> unlocked = true
-                                is PinResult.Incorrect -> {
-                                    message = "${VoiceScripts.WRONG_PIN} Restam ${result.remaining}."
-                                    onSpeak(VoiceScripts.WRONG_PIN)
+                                PinGateResult.Unlocked -> unlocked = true
+                                is PinGateResult.Stay -> {
+                                    message = result.message
+                                    result.speak?.let(onSpeak)
                                 }
-                                is PinResult.Locked -> {
-                                    message = VoiceScripts.PIN_LOCKED
-                                    onSpeak(VoiceScripts.PIN_LOCKED)
-                                }
-                                PinResult.InvalidFormat -> message = "O PIN tem quatro números."
                             }
                         }
                     }
@@ -141,12 +139,12 @@ fun ParentDashboard(
                 modifier = Modifier.fillMaxWidth(),
             )
             MetricCard("Acertos / erros", "${data.hits} / ${data.misses}")
-            MetricCard("Tempo", formatDuration(data.totalTimeMs))
+            MetricCard("Tempo", ParentLabels.formatDuration(data.totalTimeMs))
             Text("Por módulo", fontWeight = FontWeight.Bold)
             data.byModule.forEach { module ->
                 Text(
                     "${module.module.name.lowercase()} — ${(module.accuracy * 100).toInt()}% " +
-                        "(${module.hits} certos, ${formatDuration(module.timeMs)})",
+                        "(${module.hits} certos, ${ParentLabels.formatDuration(module.timeMs)})",
                 )
             }
             Text("Áreas a melhorar", fontWeight = FontWeight.Bold)
@@ -186,8 +184,3 @@ private fun MetricCard(title: String, value: String) {
     }
 }
 
-private fun formatDuration(ms: Long): String {
-    val minutes = TimeUnit.MILLISECONDS.toMinutes(ms)
-    val seconds = TimeUnit.MILLISECONDS.toSeconds(ms) % 60
-    return "${minutes}m ${seconds}s"
-}

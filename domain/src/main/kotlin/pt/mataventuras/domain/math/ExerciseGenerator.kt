@@ -65,6 +65,10 @@ class ExerciseGenerator(
     }
 
     internal fun addition(): Exercise {
+        return if (random.nextBoolean()) additionSum() else missingAddend()
+    }
+
+    internal fun additionSum(): Exercise {
         val a = random.nextInt(1, 10)
         val b = random.nextInt(1, 10)
         val sum = a + b
@@ -75,6 +79,20 @@ class ExerciseGenerator(
             spoken = "Quanto é $a mais $b?",
             options = options.map { it.toString() },
             correctIndex = options.indexOf(sum),
+        )
+    }
+
+    internal fun missingAddend(): Exercise {
+        val a = random.nextInt(1, 10)
+        val b = random.nextInt(1, 10)
+        val sum = a + b
+        val options = numericOptions(b, 1, 10)
+        return Exercise(
+            module = LearningModule.ADDITION,
+            prompt = "$a + ? = $sum",
+            spoken = "Quanto falta a $a para $sum?",
+            options = options.map { it.toString() },
+            correctIndex = options.indexOf(b),
         )
     }
 
@@ -106,9 +124,12 @@ class ExerciseGenerator(
         )
     }
 
-    internal fun logic(): Exercise {
-        return if (random.nextBoolean()) evenSequence() else largestNumber()
-    }
+    internal fun logic(): Exercise =
+        when (random.nextInt(3)) {
+            0 -> evenSequence()
+            1 -> largestNumber()
+            else -> smallestNumber()
+        }
 
     private fun evenSequence(): Exercise {
         val start = random.nextInt(1, 6)
@@ -140,6 +161,22 @@ class ExerciseGenerator(
             spoken = "Toca no maior número.",
             options = list.map { it.toString() },
             correctIndex = list.indexOf(largest),
+        )
+    }
+
+    private fun smallestNumber(): Exercise {
+        val values = mutableSetOf<Int>()
+        while (values.size < 4) {
+            values += random.nextInt(1, 50)
+        }
+        val list = values.toList()
+        val smallest = list.min()
+        return Exercise(
+            module = LearningModule.LOGIC,
+            prompt = "Qual é o menor número?",
+            spoken = "Toca no menor número.",
+            options = list.map { it.toString() },
+            correctIndex = list.indexOf(smallest),
         )
     }
 

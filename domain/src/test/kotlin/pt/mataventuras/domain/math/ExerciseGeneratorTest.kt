@@ -31,11 +31,19 @@ class ExerciseGeneratorTest {
 
     @Test
     fun additionAnswerMatchesTheSum() {
-        val exercise = generator.addition()
+        val exercise = generator.additionSum()
         val parts = exercise.prompt.replace(" = ?", "").split(" + ")
         val sum = parts[0].toInt() + parts[1].toInt()
         assertEquals(sum.toString(), exercise.options[exercise.correctIndex])
         assertTrue(exercise.spoken.contains("mais"))
+    }
+
+    @Test
+    fun missingAddendAsksHowMuchIsLeft() {
+        val exercise = generator.missingAddend()
+        assertTrue(exercise.prompt.contains("?"))
+        assertTrue(exercise.spoken.contains("falta"))
+        assertEquals(4, exercise.options.size)
     }
 
     @Test
@@ -49,12 +57,11 @@ class ExerciseGeneratorTest {
     }
 
     @Test
-    fun logicIsASequenceOrALargestValue() {
-        val a = ExerciseGenerator(Random(1)).logic()
-        val b = ExerciseGenerator(Random(2)).logic()
-        assertEquals(LearningModule.LOGIC, a.module)
-        assertEquals(LearningModule.LOGIC, b.module)
-        assertTrue(a.prompt.contains("Completa") || a.prompt.contains("maior"))
+    fun logicCoversSequenceLargestAndSmallest() {
+        val prompts = (0..12).map { ExerciseGenerator(Random(it)).logic().prompt }
+        assertTrue(prompts.any { it.contains("Completa") })
+        assertTrue(prompts.any { it.contains("maior") })
+        assertTrue(prompts.any { it.contains("menor") })
     }
 
     @Test(expected = IllegalArgumentException::class)

@@ -8,6 +8,9 @@ import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.speech.SpeechEngine
 import pt.mataventuras.app.ui.navigation.NavGraph
 
+/**
+ * Compose host. Reward engines launch as separate Activities.
+ */
 class MainActivity : ComponentActivity() {
     private lateinit var speech: SpeechEngine
 

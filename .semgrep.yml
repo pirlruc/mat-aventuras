@@ -1,0 +1,12 @@
+rules:
+  - id: mat-aventuras-no-internet-permission
+    languages: [xml]
+    severity: ERROR
+    message: INTERNET permission is forbidden (100% on-device).
+    pattern: |
+      <uses-permission android:name="android.permission.INTERNET"/>
+  - id: mat-aventuras-no-runtime-exec
+    languages: [kotlin]
+    severity: ERROR
+    message: Process execution from app code is forbidden.
+    pattern: Runtime.getRuntime().exec(...)

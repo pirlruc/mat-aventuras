@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-20
-**Last agent focus:** English identifiers and docs; pt-PT UI only
+**Last agent focus:** Oval-track 3D kart; 95% coverage on all modules; split CI
 
 ---
 
@@ -27,10 +27,13 @@ authored backlog is `docs/issues.yml`.
 
 | Epic | Status | Notes |
 | --- | --- | --- |
-| MAT-001 | open (implemented in tree; issues not yet synced) | Compose host, local Room, isolated engines |
-| MAT-002 | open | Instrumented coverage; retire KT-TEST-002 deviation |
-| MAT-003 | open | Optional Godot/Unity drop-in `EngineLauncher` plugin |
-| MAT-004 | open | Remaining guardrail/CI gaps (SAST, split jobs, docs coverage) |
+| MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
+| MAT-002 | open | Emulator instrumented tests remain; Robolectric 95% and richer packs are in tree |
+| MAT-003 | open | Native oval kart is in tree; optional Godot/Unity plugin is later |
+| MAT-004 | open in GitHub until human sync; tasks done in tree | Split CI, SAST, gitleaks binary, KDoc/MI/license scripts |
+
+`docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
+KT-DELIV-001 (500-line PR soft limit) is not a gap for this first PR.
 
 GitHub labels/milestones and issue sync need a write token:
 
@@ -49,9 +52,8 @@ python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validat
 python3 .github/scaffold/scripts/lint-doc-links.py --root .
 ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
 python3 scripts/verify-coverage.py
+bash scripts/ci-local.sh
 ```
-
-With Android SDK: `./gradlew :app:assembleDebug`
 
 ## Known pitfalls
 
@@ -59,18 +61,18 @@ With Android SDK: `./gradlew :app:assembleDebug`
   on `pirlruc/guardrails` and `pirlruc/github-scaffold`. `.gitmodules` URLs
   are token-free HTTPS.
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
-  can still gate `:domain`.
+  can still gate `:domain`. With the SDK, coverage is required for all three.
 - 3D Activity runs in `:engine3d` and must not open Room.
 - Do not add `docs/adr/`. Epic MAT-001 is the decision record.
 - Scaffold branch convention is `feature-*`; this cloud run used
   `cursor/mat-aventuras-core-ade3` per the agent environment.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
+- Run `:domain:ktlintFormat` before `:domain:ktlintCheck` (parallel format+check races).
 
 ## Suggested next work
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
-2. MAT-002: emulator CI, tighten KT-TEST-002.
-3. MAT-004: split CI jobs, SAST/secret scan, KDoc coverage measurement.
-4. MAT-003: Godot/Unity as drop-in `EngineLauncher` process plugin.
+2. MAT-002-T1: emulator instrumented tests in CI.
+3. MAT-003-T1: optional Godot/Unity drop-in still isolated in `:engine3d`.
 
 *Last updated: 2026-08-20*

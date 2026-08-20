@@ -56,8 +56,23 @@ Godot 4 `aar` or Unity as a library can replace `Kart3dActivity` if they:
 ```
 
 `settings.gradle.kts` skips `:app` / `:data` when `ANDROID_HOME` and
-`local.properties` are missing, so CI can gate `:domain` on a JDK-only
-runner (KT-TEST-002 applied to `:domain`; see `docs/guardrail-deviations.yml`).
+`local.properties` are missing, so a JDK-only runner can still gate `:domain`.
+When the Android SDK is present (local or CI), `scripts/verify-coverage.py`
+also gates `:data` and `:app` at the org 95% line and branch defaults.
+There is no coverage deviation.
+
+## 3D kart (native GLES)
+
+`Kart3dEngine` simulates an oval asphalt loop in the XZ plane (`OvalTrack`):
+auto-drive along the tangent, player steer in `[-1, 1]`, a short boost,
+ring pickups, and an off-track slowdown. `KartScene` builds a GLES-friendly
+draw list; `Kart3dActivity` in `:engine3d` only issues ES1 calls and a pt-PT
+HUD (`Volta`, `Anéis`, `Impulso!`). Touch: left third steers left, right
+third steers right, centre taps boost.
+
+A later Godot/Unity plugin (MAT-003-T1) may replace `Kart3dActivity` if it
+keeps the same Intent extras and isolated process. v1 does **not** embed
+Unity or Godot.
 
 ## State and local storage
 
@@ -124,8 +139,8 @@ App icon: gold star + numeral on blue adaptive background (vector,
 ### Curriculum
 
 - **3:** counting 1–10, shapes, digits 0–9. Reward: 2D ring-collecting runner.
-- **7:** addition, subtraction, multiplication, sequences / “which is largest”.
-  Reward: 3D kart; tap for a boost (stand-in for a correct mid-race sum).
+- **7:** addition (including missing addend), subtraction, multiplication,
+  sequences / largest / smallest. Reward: oval-track 3D kart with steer and boost.
 
 Reward every 3 consecutive correct answers (`RewardsEngine`).
 
@@ -138,7 +153,8 @@ Reward every 3 consecutive correct answers (`RewardsEngine`).
 Simulation is in `:domain` (`Platformer2dEngine`, `Kart3dEngine`) so physics
 is unit-tested without an emulator.
 
-The 3D renderer keeps a reused `FloatBuffer` for the cube mesh (KT-PERF-001).
+The 3D renderer keeps reused `FloatBuffer`s for grass, track, start line, and
+box meshes (KT-PERF-001). Scene instances come from `KartScene` in `:domain`.
 
 ## Testing policy (KT-TEST-003)
 
@@ -153,9 +169,9 @@ The 3D renderer keeps a reused `FloatBuffer` for the cube mesh (KT-PERF-001).
 
 Pinned at `docs/guardrails/`. CI reads
 `docs/guardrails/kotlin/profile.thresholds.yml` (CI-022 fail-closed).
-`:domain` kover verify is 95% line + branch. Android modules wait for
-MAT-002 instrumented coverage (deviation on KT-TEST-002). Remaining
-CI/SAST/docs gates are tracked in MAT-004.
+`:domain` kover verify is 95% line + branch. When the Android SDK is present,
+`:data` and `:app` use the same numeric gate (Robolectric unit tests).
+Remaining emulator instrumented tests are tracked in MAT-002-T1.
 
 Local parity (CI-008):
 
@@ -164,6 +180,7 @@ python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validat
 python3 .github/scaffold/scripts/lint-doc-links.py --root .
 ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
 python3 scripts/verify-coverage.py
+bash scripts/ci-local.sh
 ```
 
 Bootstrap labels/milestones (needs write token; not done by this agent):

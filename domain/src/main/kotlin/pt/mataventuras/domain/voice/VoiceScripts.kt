@@ -21,6 +21,7 @@ object VoiceScripts {
     const val WRONG_PIN: String = "PIN incorrecto."
     const val PIN_LOCKED: String = "Demasiadas tentativas. Espera um minuto."
     const val STAYS_ON_DEVICE: String = "Tudo fica neste aparelho. Não enviamos dados."
+    const val STEER_HINT: String = "Esquerda e direita para guiar. No meio: impulso!"
 
     /**
      * Host mascot greeting (pt-PT).

@@ -26,11 +26,13 @@ import pt.mataventuras.app.ui.theme.titleSpSize
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
-import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.mascotFor
 import pt.mataventuras.domain.model.modulesFor
 import pt.mataventuras.domain.voice.VoiceScripts
 
+/**
+ * Module grid for the active child. Labels are pt-PT.
+ */
 @Composable
 fun HomeScreen(
     profile: ChildProfile,
@@ -70,7 +72,7 @@ fun HomeScreen(
                         .height(tokens.minButtonDp.dp + 24.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(mascot.primaryArgb)),
                 ) {
-                    Text(moduleTitle(module, mascot), fontWeight = FontWeight.Bold)
+                    Text(ModuleTitles.of(module, mascot), fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -88,12 +90,3 @@ fun HomeScreen(
     }
 }
 
-private fun moduleTitle(module: LearningModule, mascot: Mascot): String = when (module) {
-    LearningModule.COUNTING -> "Contar com o ${mascot.displayName}"
-    LearningModule.SHAPES -> "Formas com o ${mascot.displayName}"
-    LearningModule.NUMBERS -> "Números com o ${mascot.displayName}"
-    LearningModule.ADDITION -> "Somar com o ${mascot.displayName}"
-    LearningModule.SUBTRACTION -> "Subtrair com o ${mascot.displayName}"
-    LearningModule.MULTIPLICATION -> "Multiplicar com o ${mascot.displayName}"
-    LearningModule.LOGIC -> "Lógica com o ${mascot.displayName}"
-}

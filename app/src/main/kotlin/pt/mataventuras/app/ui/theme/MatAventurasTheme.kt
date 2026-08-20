@@ -13,7 +13,10 @@ import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.UiTokens
 import pt.mataventuras.domain.model.tokensFor
 
+/** Composition local for age-adaptive spacing and type. */
 val LocalUiTokens = staticCompositionLocalOf { tokensFor(AgeGroup.THREE_YEARS) }
+
+/** Composition local for the active [AgeGroup]. */
 val LocalAgeGroup = staticCompositionLocalOf { AgeGroup.THREE_YEARS }
 
 private val Blue = Color(0xFF1565C0)
@@ -21,6 +24,9 @@ private val Orange = Color(0xFFFB8C00)
 private val Cream = Color(0xFFFFF8E1)
 private val Sky = Color(0xFFE3F2FD)
 
+/**
+ * Material 3 theme with age-adaptive tokens and background.
+ */
 @Composable
 fun MatAventurasTheme(
     ageGroup: AgeGroup,
@@ -44,7 +50,11 @@ fun MatAventurasTheme(
     }
 }
 
+/** Corner radius for primary buttons. */
 fun UiTokens.buttonRadius() = RoundedCornerShape(if (minButtonDp >= 80) 28.dp else 16.dp)
 
+/** Title size as Compose [sp]. */
 val UiTokens.titleSpSize get() = titleSp.sp
+
+/** Body size as Compose [sp]. */
 val UiTokens.bodySpSize get() = bodySp.sp

@@ -31,11 +31,11 @@ import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
-import pt.mataventuras.domain.model.LearningSession
-import pt.mataventuras.domain.progress.ProgressTotals
-import pt.mataventuras.domain.progress.RewardsEngine
 import pt.mataventuras.domain.voice.VoiceScripts
 
+/**
+ * One exercise round. Prompts and options are pt-PT.
+ */
 @Composable
 fun LessonScreen(
     container: AppContainer,
@@ -99,7 +99,7 @@ fun LessonScreen(
         Text("$hits certos · $points pts")
         Button(onClick = {
             scope.launch {
-                persistProgress(container, profile, points, module, hits, misses, startedAt)
+                LessonRecorder.persist(container, profile, points, module, hits, misses, startedAt)
                 onExit()
             }
         }) { Text("Sair") }
@@ -119,48 +119,3 @@ private fun StarGrid(count: Int) {
     }
 }
 
-private suspend fun persistProgress(
-    container: AppContainer,
-    profile: ChildProfile,
-    points: Int,
-    module: LearningModule,
-    hits: Int,
-    misses: Int,
-    startedAt: Long,
-) {
-    val current = container.repository.getProfile(profile.id) ?: return
-    container.repository.updateProfile(current.copy(points = points))
-    container.repository.saveSession(
-        LearningSession(
-            id = 0,
-            profileId = profile.id,
-            module = module,
-            hits = hits,
-            misses = misses,
-            durationMs = System.currentTimeMillis() - startedAt,
-            startedAtEpochMs = startedAt,
-        ),
-    )
-    val sessions = container.repository.allSessions().filter { it.profileId == profile.id }
-    val alreadyBadges = container.repository.badgeCodes(profile.id)
-    val alreadyAvatars = container.repository.avatarIds(profile.id)
-    val perfect = misses == 0 && hits >= RewardsEngine.PERFECT_MINIMUM
-    container.rewards.newBadges(
-        alreadyUnlocked = alreadyBadges,
-        totals = ProgressTotals(
-            completedSessions = sessions.size,
-            countingHits = sessions.filter { it.module == LearningModule.COUNTING }.sumOf { it.hits },
-            shapeHits = sessions.filter { it.module == LearningModule.SHAPES }.sumOf { it.hits },
-            arithmeticHits = sessions.filter {
-                it.module == LearningModule.ADDITION ||
-                    it.module == LearningModule.SUBTRACTION ||
-                    it.module == LearningModule.MULTIPLICATION
-            }.sumOf { it.hits },
-            perfectSessionWithMinimum = perfect,
-            totalTimeMs = sessions.sumOf { it.durationMs },
-        ),
-    ).forEach { container.repository.unlockBadge(profile.id, it.name) }
-    container.rewards.newAvatars(alreadyAvatars, points).forEach {
-        container.repository.unlockAvatar(profile.id, it.name)
-    }
-}
