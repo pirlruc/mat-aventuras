@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
 
       - name: Gradle wrapper validation
-        uses: gradle/actions/wrapper-validation@8379f6a1328ee0e06e2bb424dadb7b159856a326 # v4.4.0
+        uses: gradle/actions/wrapper-validation@0f4528296b4bc09e8ae0fc7be30185a4ab435545 # v6.0.0
 
   privacy-manifest:
     runs-on: ubuntu-latest
