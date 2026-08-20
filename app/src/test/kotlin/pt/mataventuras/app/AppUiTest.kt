@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -79,6 +80,7 @@ class AppUiTest {
         }
         compose.onNodeWithText("Continuar como Ana").performClick()
         assertEquals(true, continued)
+    }
 
     @Test
     fun ageSelectionBlankNameBecomesAmigoAndPicksMascot() {
