@@ -80,7 +80,8 @@ internal object PlatformerScene {
         addGround(out, camera, width, groundY, height, level)
         addLedges(out, camera, groundY, level)
         addCoins(out, state, camera, groundY, level)
-        addPlayer(out, mascot, width, groundY, state.y)
+        addHazards(out, state, camera, groundY, level)
+        addPlayer(out, mascot, width, groundY, state.y, state.form)
     }
 
     /**
@@ -163,14 +164,35 @@ internal object PlatformerScene {
         }
     }
 
+    private fun addHazards(
+        out: MutableList<PlatformerRect>,
+        state: Platformer2dState,
+        camera: Float,
+        groundY: Float,
+        level: PlatformerLevel,
+    ) {
+        level.powerups.forEachIndexed { i, item ->
+            if ((state.powerMask shr i) and 1 == 1) return@forEachIndexed
+            val x = worldX(item.x, camera)
+            val color = if (item.grow) 0xFFE53935 else 0xFFFFF176
+            out.add(PlatformerRect(x, groundY - 40f, 16f, 16f, color))
+        }
+        level.enemies.forEachIndexed { i, enemy ->
+            if ((state.stompedMask shr i) and 1 == 1) return@forEachIndexed
+            val x = worldX(pt.mataventuras.domain.engine.PlatformerHazards.enemyX(enemy, state.elapsed), camera)
+            out.add(PlatformerRect(x, groundY - 22f, 20f, 18f, 0xFF6D4C41))
+        }
+    }
+
     private fun addPlayer(
         out: MutableList<PlatformerRect>,
         mascot: Mascot,
         width: Float,
         groundY: Float,
         worldY: Float,
+        form: Int = 0,
     ) {
-        val fill = mascot.primaryArgb
+        val fill = if (form >= 2) 0xFFFFF176 else mascot.primaryArgb
         val shade = hatArgb(fill)
         val px = width * 0.3f
         val py = groundY - worldY * SCALE_Y - 52f

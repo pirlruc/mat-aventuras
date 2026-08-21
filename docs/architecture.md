@@ -33,8 +33,8 @@ therefore kept playable native 2D/3D engines. MAT-003 loads **one** engine
 | Layer | Technology | Process |
 | --- | --- | --- |
 | Menus, lessons, parental PIN, leaderboard | Jetpack Compose | default |
-| 2D platformer (age 3) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
-| 2.5D off-road race (age 7) | Godot 4 Node2D; native Canvas fallback | `:engine3d` |
+| 2D prizes (age 3, and sometimes age 7) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
+| 2.5D off-road race (age 7) | Godot 4 Node2D with rivals; native Canvas fallback | `:engine3d` |
 | Persistence | Room + DataStore | default only (engines return extras) |
 
 The 3D Activity does **not** open Room. It returns `RESULT_FINISHED`
@@ -78,8 +78,8 @@ but it is a worse fit for APK size, heap, and a local-only privacy policy.
 | Layer | Technology | Process |
 | --- | --- | --- |
 | Menus, lessons, parental PIN, leaderboard | Jetpack Compose | default |
-| 2D platformer (age 3) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
-| 2.5D off-road race (age 7) | Godot 4 Node2D; native Canvas fallback | `:engine3d` |
+| 2D prizes (age 3, and sometimes age 7) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
+| 2.5D off-road race (age 7) | Godot 4 Node2D with rivals; native Canvas fallback | `:engine3d` |
 | Persistence | Room + DataStore | default only (engines return extras) |
 
 ## Modules
@@ -105,8 +105,9 @@ along a randomised circuit, lateral lane position, steer in `[-1, 1]`, a
 short boost, gate pickups, and off-track slowdown when the kart leaves the
 dirt. `OffroadScene` draws a rear-view scanline road (grass, rumble, dirt,
 gates, kart body). `Kart3dActivity` in `:engine3d` hosts that Canvas view
-and a pt-PT HUD (`Volta`, `Portões`, `Impulso`). Touch: left third steers
-left, right third steers right, centre taps boost.
+and a pt-PT HUD (`Volta`, `Lugar`, `Arcos`, `Impulso`, `META`). Touch: tap
+the left or right third to steer fully; the centre band boosts. AI karts
+share the loop. The yellow META gantry is the lap line you drive under.
 
 The oval GLES kart (`Kart3dEngine` / `KartRenderer`) remains as a
 unit-testable mesh path. Production Godot and the native fallback both use
@@ -165,7 +166,7 @@ backup and device-to-device transfer cannot copy profiles or the PIN hash.
 
 Visible copy, TTS, and spoken prompts are Portuguese from Portugal
 (`tu`, *ecrã*, *aplicação*, *classificação*, *rectângulo*). Locale:
-`pt-PT` (`res/xml/locales_config.xml`). TTS uses `Locale("pt","PT")`.
+`pt-PT` (`res/xml/locales_config.xml`). TTS uses `Locale.forLanguageTag("pt-PT")`.
 Identifiers for those strings (`VoiceScripts.WELL_DONE`, resource names)
 are English.
 
@@ -210,8 +211,8 @@ Finishing a reward Activity awards 15 bonus points on the last profile.
 
 | Age | Lessons (Compose, mascot-hosted) | Reward mini-game |
 | --- | --- | --- |
-| **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D platformer (`RunnerPluginActivity` in `:engine2d`; native Canvas fallback) |
-| **7** | Addition incl. missing addend (`ADDITION`); subtraction (`SUBTRACTION`); multiplication (`MULTIPLICATION`); logic even/largest/smallest (`LOGIC`) | 2.5D off-road race (`KartPluginActivity` in `:engine3d`; native Canvas fallback) |
+| **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D runner, letter-climb, or maze (`RunnerPluginActivity` in `:engine2d`) |
+| **7** | Addition incl. missing addend (`ADDITION`); subtraction (`SUBTRACTION`); multiplication (`MULTIPLICATION`); logic even/largest/smallest (`LOGIC`) | Dirt race with rivals (`KartPluginActivity` in `:engine3d`) plus 2D invaders/maze/climb |
 
 Age 7 confirms before leaving a lesson (`VoiceScripts.confirmExit`).
 Age 3 leaves immediately. A finished reward returns `RESULT_FINISHED`;

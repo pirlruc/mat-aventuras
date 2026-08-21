@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.domain.engine.EngineInputMap
 import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.PlatformerWorld
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -85,7 +86,11 @@ internal object NativeRunnerHost {
                                 awaitEachGesture {
                                     val down = awaitFirstDown()
                                     var lastX = down.position.x
-                                    loop.moveX = 0f
+                                    var lastY = down.position.y
+                                    var flickX = 0f
+                                    var flickY = 0f
+                                    val width = size.width.coerceAtLeast(1).toFloat()
+                                    loop.moveX = EngineInputMap.runFromNormalizedX(down.position.x / width)
                                     while (true) {
                                         val event = awaitPointerEvent()
                                         val change = event.changes.firstOrNull { it.id == down.id } ?: break
@@ -94,9 +99,13 @@ internal object NativeRunnerHost {
                                             break
                                         }
                                         val dx = change.position.x - lastX
+                                        val dy = change.position.y - lastY
                                         lastX = change.position.x
-                                        loop.moveX = (dx / 12f).coerceIn(-1f, 1f)
-                                        if (dx > 14f) loop.jumping = true
+                                        lastY = change.position.y
+                                        flickX += dx
+                                        flickY += dy
+                                        loop.moveX = EngineInputMap.runFromNormalizedX(change.position.x / width)
+                                        if (EngineInputMap.isJumpFlick(flickX, flickY)) loop.jumping = true
                                         change.consume()
                                     }
                                     loop.moveX = 0f
@@ -119,7 +128,7 @@ internal object NativeRunnerHost {
                     }
                 }
                 Text(
-                    text = "Moedas ${state.rings}/${state.ringsTarget}",
+                    text = "${VoiceScripts.JUMP_HINT}\nMoedas ${state.rings}/${state.ringsTarget}",
                     color = Color.White,
                     fontSize = 22.sp,
                     modifier =

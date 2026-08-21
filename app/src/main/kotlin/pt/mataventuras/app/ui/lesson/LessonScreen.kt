@@ -3,6 +3,7 @@ package pt.mataventuras.app.ui.lesson
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -78,7 +79,6 @@ fun LessonScreen(
     onReward: (AgeGroup) -> Unit,
     onExit: () -> Unit,
 ) {
-    val tokens = LocalUiTokens.current
     val scope = rememberCoroutineScope()
     var exercise by remember { mutableStateOf(container.generator.generate(module, 0)) }
     var hits by remember { mutableIntStateOf(0) }
@@ -91,6 +91,8 @@ fun LessonScreen(
     val pointsTicket = remember { AtomicInteger(0) }
     val pickLock = remember { AtomicBoolean(false) }
     val fillViewport = UiLogic.lessonFillsViewport(profile.ageGroup)
+    val scrolls = UiLogic.lessonScrolls(profile.ageGroup, exercise.play.kind)
+    val scrollState = rememberScrollState()
     val view = LocalView.current
     val cues = remember { AnswerCuePlayer.device() }
     var flashCorrect by remember { mutableStateOf(true) }
@@ -145,20 +147,60 @@ fun LessonScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(
-                    if (fillViewport) {
-                        Modifier
-                    } else {
-                        Modifier.verticalScroll(rememberScrollState())
-                    },
-                )
-                .padding(20.dp),
-            verticalArrangement = if (fillViewport) Arrangement.Top else Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            LessonPlayColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                exercise = exercise,
+                module = module,
+                hits = hits,
+                points = points,
+                fillViewport = fillViewport,
+                scrolls = scrolls,
+                scrollState = scrollState,
+                onPick = onPick,
+                onMissKeep = { noteAttempt(false, false) },
+            )
+            LessonExitBar(
+                ageGroup = profile.ageGroup,
+                confirming = confirmingExit,
+                onSpeak = onSpeak,
+                onConfirm = { confirmingExit = true },
+                onStay = { confirmingExit = false },
+                onLeave = {
+                    scope.launch {
+                        LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
+                        onExit()
+                    }
+                },
+            )
+        }
+        AnswerFlash(correct = flashCorrect, tick = flashTick)
+    }
+}
+
+@Composable
+private fun LessonPlayColumn(
+    modifier: Modifier,
+    exercise: Exercise,
+    module: LearningModule,
+    hits: Int,
+    points: Int,
+    fillViewport: Boolean,
+    scrolls: Boolean,
+    scrollState: ScrollState,
+    onPick: (Int) -> Unit,
+    onMissKeep: () -> Unit,
+) {
+    val tokens = LocalUiTokens.current
+    Column(
+        modifier = modifier
+            .then(if (scrolls) Modifier.verticalScroll(scrollState) else Modifier)
+            .padding(20.dp),
+        verticalArrangement = if (scrolls) Arrangement.spacedBy(12.dp) else Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         if (UiLogic.showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {
             StarGrid(exercise.visualCount)
@@ -168,14 +210,17 @@ fun LessonScreen(
         }
         UiLogic.targetShapeToDraw(module, exercise.targetShape, exercise.play.kind)?.let { ShapeGlyph(it) }
         if (UiLogic.showsSudokuGrid(exercise.play.kind)) {
-            PlayGrid(exercise)
+            Text(
+                UiLogic.sudokuBanner(exercise.play.kind) ?: "Sudoku",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF0D47A1),
+                modifier = Modifier.testTag("sudoku-banner"),
+            )
+            SudokuBoard(exercise)
         }
         if (UiLogic.showsSoupBoard(exercise.play.kind)) {
-            SoupBoard(
-                exercise = exercise,
-                onPick = onPick,
-                onMissKeep = { noteAttempt(false, false) },
-            )
+            SoupBoard(exercise = exercise, onPick = onPick, onMissKeep = onMissKeep)
         }
         if (UiLogic.showsCipherLegend(exercise.play.kind)) {
             CipherPanel(exercise)
@@ -186,8 +231,8 @@ fun LessonScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (fillViewport) Modifier.weight(1f) else Modifier),
-            verticalArrangement = if (fillViewport) {
+                .then(if (fillViewport && !scrolls) Modifier.weight(1f) else Modifier),
+            verticalArrangement = if (fillViewport && !scrolls) {
                 Arrangement.SpaceEvenly
             } else {
                 Arrangement.spacedBy(12.dp)
@@ -209,22 +254,37 @@ fun LessonScreen(
             }
         }
         Text(UiLogic.lessonScoreLine(hits, points))
-        Button(onClick = {
-            if (LessonFlow.shouldAskExitConfirm(profile.ageGroup, confirmingExit)) {
-                confirmingExit = true
-                VoiceScripts.confirmExit(profile.ageGroup)?.let(onSpeak)
-            } else {
-                scope.launch {
-                    LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
-                    onExit()
+    }
+}
+
+@Composable
+private fun LessonExitBar(
+    ageGroup: AgeGroup,
+    confirming: Boolean,
+    onSpeak: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onStay: () -> Unit,
+    onLeave: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Button(
+            onClick = {
+                if (LessonFlow.shouldAskExitConfirm(ageGroup, confirming)) {
+                    onConfirm()
+                    VoiceScripts.confirmExit(ageGroup)?.let(onSpeak)
+                } else {
+                    onLeave()
                 }
-            }
-        }) { Text(LessonFlow.exitLabel(confirmingExit)) }
-        if (LessonFlow.showsStay(confirmingExit)) {
-            Button(onClick = { confirmingExit = false }) { Text(VoiceScripts.STAY) }
+            },
+        ) { Text(LessonFlow.exitLabel(confirming)) }
+        if (LessonFlow.showsStay(confirming)) {
+            Button(onClick = onStay) { Text(VoiceScripts.STAY) }
         }
-        }
-        AnswerFlash(correct = flashCorrect, tick = flashTick)
     }
 }
 
@@ -299,29 +359,34 @@ private fun AnswerFlash(
 }
 
 @Composable
-private fun PlayGrid(exercise: Exercise) {
+private fun SudokuBoard(exercise: Exercise) {
     val columns = exercise.play.columns.coerceAtLeast(1)
     val cells = exercise.play.cells.ifEmpty { exercise.options }
-    val cellDp = UiLogic.playCellHeightDp(columns)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val cellDp = UiLogic.playCellHeightDp(columns) + 8
+    val boxW = UiLogic.sudokuBoxWidth(columns)
+    val boxH = UiLogic.sudokuBoxHeight(columns)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF0D47A1))
+            .padding(6.dp),
+    ) {
         cells.chunked(columns).forEachIndexed { row, rowCells ->
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = UiLogic.sudokuGapDp(row, boxH).dp),
             ) {
                 rowCells.forEachIndexed { col, cell ->
                     val index = row * columns + col
                     val hole = UiLogic.isBoardHole(cell)
-                    Button(
-                        onClick = {},
-                        enabled = false,
-                        colors = ButtonDefaults.buttonColors(
-                            disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
-                            disabledContentColor = Color(0xFF0D47A1),
-                        ),
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .weight(1f)
                             .height(cellDp.dp)
+                            .padding(start = UiLogic.sudokuGapDp(col, boxW).dp)
+                            .background(if (hole) Color(0xFFFFF59D) else Color(0xFFE3F2FD))
                             .testTag("board-cell-$index"),
                     ) {
                         GridCellFace(module = exercise.module, cell = cell)

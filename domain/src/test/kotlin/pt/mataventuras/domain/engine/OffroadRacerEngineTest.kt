@@ -33,7 +33,8 @@ class OffroadRacerEngineTest {
         assertTrue(boosted.boostTimer > 0f)
         assertEquals("Impulso!", KartHud.boostLabel(boosted))
         assertTrue(KartHud.lapLabel(boosted).startsWith("Volta"))
-        assertTrue(KartHud.gatesLabel(boosted).contains("Portões"))
+        assertTrue(KartHud.gatesLabel(boosted).contains("Arcos"))
+        assertTrue(KartHud.placeLabel(1, 4).startsWith("Lugar"))
         repeat(20) {
             val next = engine.step(boosted, 0.05f, 0f, false)
             if (next.speed > idle.speed) {
@@ -57,8 +58,8 @@ class OffroadRacerEngineTest {
 
     @Test
     fun touchBandsSteerAndBoost() {
-        assertEquals(-1f, engine.steerFromTouch(0.1f), 0f)
-        assertEquals(1f, engine.steerFromTouch(0.9f), 0f)
+        assertTrue(engine.steerFromTouch(0.1f) < -0.5f)
+        assertTrue(engine.steerFromTouch(0.9f) > 0.5f)
         assertEquals(0f, engine.steerFromTouch(0.5f), 0f)
         assertTrue(engine.isBoostTouch(0.5f))
         assertFalse(engine.isBoostTouch(0.1f))
@@ -71,7 +72,7 @@ class OffroadRacerEngineTest {
         val a = OffroadCircuit(0)
         val b = OffroadCircuit(3)
         assertTrue(a.palette != b.palette || a.curveAt(40f) != b.curveAt(40f))
-        assertEquals(8, a.gateCount)
+        assertEquals(4, a.gateCount)
         assertTrue(a.widthAt(0f) > 0.5f)
     }
 

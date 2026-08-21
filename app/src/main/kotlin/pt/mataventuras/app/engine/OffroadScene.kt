@@ -32,6 +32,12 @@ internal object OffroadScene {
     const val BANNER_ARGB: Long = 0xFFFFD54F
 
     /**
+     * Metres ahead that arches, rivals, and META still draw. Must clear the
+     * first gate (`length / (gateCount + 1)` = 96 m on the 480 m loop).
+     */
+    const val DRAW_AHEAD: Float = 140f
+
+    /**
      * Sky colour for [circuit.palette].
      */
     fun skyArgb(circuit: OffroadCircuit): Long = SKY[circuit.palette]
@@ -55,7 +61,10 @@ internal object OffroadScene {
             addStrip(out, state, circuit, width, horizon, ground, i)
         }
         addGates(out, state, circuit, width, horizon, ground)
+        addMeta(out, state, circuit, width, horizon, ground)
+        addRivals(out, state, circuit, width, horizon, ground)
         addKart(out, mascot, width, ground, state)
+        addBands(out, width, height)
     }
 
     private fun addHorizon(
@@ -114,18 +123,80 @@ internal object OffroadScene {
             if ((state.collectedMask shr i) and 1 == 1) continue
             val ahead = circuit.gateDistance(i) - state.distance
             val wrapped = if (ahead < 0f) ahead + circuit.length else ahead
-            if (wrapped > 90f) continue
-            val t = (wrapped / 90f).coerceIn(0f, 1f)
-            val y = ground - (ground - horizon) * t - 20f
+            if (wrapped > DRAW_AHEAD) continue
+            val t = (wrapped / DRAW_AHEAD).coerceIn(0f, 1f)
+            val y = ground - (ground - horizon) * t - 8f
             val scale = 1.4f / (0.4f + t * 2f)
-            val x = width * 0.5f - 18f * scale
-            val barW = 36f * scale
+            val dist = state.distance + wrapped
+            val curve = circuit.curveAt(dist)
+            val center = width * 0.5f - state.lateral * 95f * scale + curve * 40f * (1f - t)
+            val roadW = 360f * scale * circuit.widthAt(dist)
+            val postW = 8f * scale
+            val postH = 36f * scale
             val barH = 10f * scale
-            val postW = 6f * scale
-            val postH = 26f * scale
-            out.add(OffroadSpan(x, y - postH, postW, postH, POST_ARGB))
-            out.add(OffroadSpan(x + barW - postW, y - postH, postW, postH, POST_ARGB))
-            out.add(OffroadSpan(x, y, barW, barH, BANNER_ARGB))
+            out.add(OffroadSpan(center - roadW * 0.5f, y - postH, postW, postH, POST_ARGB))
+            out.add(OffroadSpan(center + roadW * 0.5f - postW, y - postH, postW, postH, POST_ARGB))
+            out.add(OffroadSpan(center - roadW * 0.5f, y - postH, roadW, barH, 0xFF43A047))
+        }
+    }
+
+    private fun addMeta(
+        out: MutableList<OffroadSpan>,
+        state: OffroadState,
+        circuit: OffroadCircuit,
+        width: Float,
+        horizon: Float,
+        ground: Float,
+    ) {
+        var ahead = circuit.length - state.distance
+        if (ahead < 0f) ahead += circuit.length
+        if (ahead > DRAW_AHEAD || ahead < 2f) return
+        val t = (ahead / DRAW_AHEAD).coerceIn(0f, 1f)
+        val y = ground - (ground - horizon) * t - 8f
+        val scale = 1.4f / (0.4f + t * 2f)
+        val dist = state.distance + ahead
+        val curve = circuit.curveAt(dist)
+        val center = width * 0.5f - state.lateral * 95f * scale + curve * 40f * (1f - t)
+        val roadW = 360f * scale * circuit.widthAt(dist)
+        val postW = 10f * scale
+        val postH = 48f * scale
+        out.add(OffroadSpan(center - roadW * 0.5f, y - postH, postW, postH, 0xFF212121))
+        out.add(OffroadSpan(center + roadW * 0.5f - postW, y - postH, postW, postH, 0xFF212121))
+        out.add(OffroadSpan(center - roadW * 0.5f, y - postH, roadW, 16f * scale, BANNER_ARGB))
+    }
+
+    private fun addBands(
+        out: MutableList<OffroadSpan>,
+        width: Float,
+        height: Float,
+    ) {
+        val y = height * 0.82f
+        val h = height * 0.18f
+        out.add(OffroadSpan(0f, y, width * 0.36f, h, 0x382156D9))
+        out.add(OffroadSpan(width * 0.64f, y, width * 0.36f, h, 0x38D93829))
+        out.add(OffroadSpan(width * 0.36f, y, width * 0.28f, h, 0x38FFD633))
+    }
+
+    private fun addRivals(
+        out: MutableList<OffroadSpan>,
+        state: OffroadState,
+        circuit: OffroadCircuit,
+        width: Float,
+        horizon: Float,
+        ground: Float,
+    ) {
+        state.rivals.forEach { rival ->
+            var ahead = rival.distance - state.distance
+            if (ahead < 0f) ahead += circuit.length
+            if (ahead > DRAW_AHEAD || ahead < 4f) return@forEach
+            val t = (ahead / DRAW_AHEAD).coerceIn(0f, 1f)
+            val y = ground - (ground - horizon) * t - 40f
+            val scale = 1.2f / (0.45f + t * 2f)
+            val x = width * 0.5f + (rival.lateral - state.lateral) * 90f * scale
+            out.add(OffroadSpan(x - 16f * scale, y + 18f * scale, 10f * scale, 10f * scale, 0xFF212121))
+            out.add(OffroadSpan(x + 6f * scale, y + 18f * scale, 10f * scale, 10f * scale, 0xFF212121))
+            out.add(OffroadSpan(x - 14f * scale, y + 6f * scale, 28f * scale, 14f * scale, rival.argb))
+            out.add(OffroadSpan(x - 8f * scale, y, 16f * scale, 10f * scale, 0xFFECEFF1))
         }
     }
 

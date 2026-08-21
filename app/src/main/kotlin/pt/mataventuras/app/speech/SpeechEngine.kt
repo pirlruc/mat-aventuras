@@ -15,7 +15,7 @@ class SpeechEngine(context: Context) : TextToSpeech.OnInitListener {
 
     override fun onInit(status: Int) {
         if (released || status != TextToSpeech.SUCCESS) return
-        val pt = Locale("pt", "PT")
+        val pt = Locale.forLanguageTag("pt-PT")
         val result = tts.setLanguage(pt)
         ready = UiLogic.languageSupported(result)
         tts.setSpeechRate(0.92f)

@@ -31,9 +31,27 @@ object KartHud {
     fun ringsLabel(state: Kart3dState): String = "Anéis ${state.rings}/${state.ringsTarget}"
 
     /**
-     * Gates collected on the dirt circuit.
+     * Side-tap legend so left/right/boost bands stay visible.
      */
-    fun gatesLabel(state: OffroadState): String = "Portões ${state.gates}/${state.gatesTarget}"
+    const val CONTROL_HINT: String = "Esquerda · Impulso · Direita"
+
+    /**
+     * Overhead lap banner the kart drives under — not an obstacle.
+     */
+    const val META_HINT: String = "Passa por baixo da META"
+
+    /**
+     * Checkpoints the child drove through (auto-collected on the dirt).
+     */
+    fun gatesLabel(state: OffroadState): String = "Arcos ${state.gates}/${state.gatesTarget}"
+
+    /**
+     * Race position against AI karts.
+     */
+    fun placeLabel(
+        place: Int,
+        field: Int,
+    ): String = "Lugar $place de $field"
 
     /**
      * Boost call-out when a burst is active.

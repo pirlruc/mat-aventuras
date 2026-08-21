@@ -37,6 +37,7 @@ KNOWN: dict[str, str] = {
     "androidx.compose.material3:material3": "Apache-2.0",
     "com.google.android.material:material": "Apache-2.0",
     "junit:junit": "EPL-1.0",
+    "dev.detekt:detekt-gradle-plugin": "Apache-2.0",
     "io.gitlab.arturbosch.detekt:detekt-gradle-plugin": "Apache-2.0",
     "org.jlleitschuh.gradle:ktlint-gradle": "MIT",
     "org.jetbrains.kotlinx:kover-gradle-plugin": "Apache-2.0",

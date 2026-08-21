@@ -68,6 +68,19 @@ internal object UiLogic {
     fun lessonFillsViewport(age: AgeGroup): Boolean = age == AgeGroup.SEVEN_YEARS
 
     /**
+     * Sudoku, soup, cipher, and puzzle boards are taller than a choice row, so
+     * they scroll even when [lessonFillsViewport] is true. Keeps Sair on screen.
+     */
+    fun lessonScrolls(
+        age: AgeGroup,
+        kind: PlayKind,
+    ): Boolean =
+        !lessonFillsViewport(age) ||
+            showsPlayGrid(kind) ||
+            showsCipherLegend(kind) ||
+            showsPuzzleFrame(kind)
+
+    /**
      * Shape for an option label, or null when the label is not a shape name.
      */
     fun shapeKind(option: String): GeometricShape? =
@@ -97,7 +110,39 @@ internal object UiLogic {
     fun showsSoupBoard(kind: PlayKind): Boolean = kind == PlayKind.SOUP
 
     /**
-     * Sudoku uses the disabled cell grid.
+     * Sudoku shows a titled board so it is not mistaken for a button row.
+     */
+    fun sudokuBanner(kind: PlayKind): String? = if (kind == PlayKind.SUDOKU) "Sudoku" else null
+
+    /**
+     * Box width in cells for mini-sudoku grid lines.
+     */
+    fun sudokuBoxWidth(columns: Int): Int =
+        when (columns) {
+            4 -> 2
+            6 -> 3
+            else -> maxOf(columns, 1)
+        }
+
+    /**
+     * Box height in cells for mini-sudoku grid lines.
+     */
+    fun sudokuBoxHeight(columns: Int): Int =
+        when (columns) {
+            4, 6 -> 2
+            else -> maxOf(columns, 1)
+        }
+
+    /**
+     * Gutter in dp. Box edges are thicker so the 2×2 / 2×3 regions read as sudoku.
+     */
+    fun sudokuGapDp(
+        indexInAxis: Int,
+        box: Int,
+    ): Int = if (indexInAxis > 0 && indexInAxis % box == 0) 4 else 1
+
+    /**
+     * Sudoku uses the titled cell grid.
      */
     fun showsSudokuGrid(kind: PlayKind): Boolean = kind == PlayKind.SUDOKU
 

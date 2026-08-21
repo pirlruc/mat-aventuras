@@ -20,6 +20,7 @@ import pt.mataventuras.app.engine.Kart3dActivity
 import pt.mataventuras.app.engine.NativeKartHost
 import pt.mataventuras.app.engine.Platformer2dActivity
 import pt.mataventuras.domain.engine.EnginePluginContract
+import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.plugin.KartPluginActivity
@@ -83,6 +84,9 @@ class GodotPluginHostTest {
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
+        assertEquals("res://invaders.tscn", GodotRuntime.SCENE_INVADERS)
+        assertEquals("res://chomp.tscn", GodotRuntime.SCENE_CHOMP)
+        assertEquals("res://climb.tscn", GodotRuntime.SCENE_CLIMB)
         assertTrue(NativeKartHost.hudLines(pt.mataventuras.app.engine.OffroadRacerLoop()).first.startsWith("Volta"))
     }
 
@@ -108,7 +112,7 @@ class GodotPluginHostTest {
         destroy(kartController)
 
         val runnerIntent =
-            EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.HERO_PUP, "Ana")
+            EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.HERO_PUP, "Ana", game = RewardGame.RUNNER)
         assertEquals(EnginePluginContract.PLUGIN_RUNNER_CLASS, runnerIntent.component!!.className)
         val runnerController =
             Robolectric.buildActivity(RunnerPluginActivity::class.java, runnerIntent).setup()
@@ -157,7 +161,7 @@ class GodotPluginHostTest {
         val runnerController =
             Robolectric.buildActivity(
                 RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, "Ana"),
+                EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, "Ana", game = RewardGame.RUNNER),
             ).setup()
         val runner = runnerController.get()
         var runnerScene = ""
@@ -166,6 +170,51 @@ class GodotPluginHostTest {
         GodotRewardBinder.bindRunner(runner, embed = false)
         assertNotNull(runner.loop)
         destroy(runnerController)
+
+        val climbController =
+            Robolectric.buildActivity(
+                RunnerPluginActivity::class.java,
+                EngineLauncher.intentFor(
+                    ctx,
+                    AgeGroup.THREE_YEARS,
+                    Mascot.HERO_PUP,
+                    "Ana",
+                    game = RewardGame.CLIMB,
+                ),
+            ).setup()
+        assertNotNull(climbController.get().climb)
+        var climbScene = ""
+        GodotRewardBinder.bindRunner(climbController.get(), embed = true) { _, scene -> climbScene = scene }
+        assertEquals(GodotRuntime.SCENE_CLIMB, climbScene)
+        destroy(climbController)
+        val invadersController =
+            Robolectric.buildActivity(
+                RunnerPluginActivity::class.java,
+                EngineLauncher.intentFor(
+                    ctx,
+                    AgeGroup.SEVEN_YEARS,
+                    Mascot.MISCHIEVOUS_ALIEN,
+                    "Rui",
+                    pt.mataventuras.domain.model.EngineKind.TWO_D,
+                    RewardGame.INVADERS,
+                ),
+            ).setup()
+        assertNotNull(invadersController.get().invaders)
+        assertEquals(RewardGame.INVADERS.name, invadersController.get().sceneCode())
+        destroy(invadersController)
+        val chompController =
+            Robolectric.buildActivity(
+                RunnerPluginActivity::class.java,
+                EngineLauncher.intentFor(
+                    ctx,
+                    AgeGroup.THREE_YEARS,
+                    Mascot.PINK_PIGLET,
+                    "Eva",
+                    game = RewardGame.CHOMP,
+                ),
+            ).setup()
+        assertNotNull(chompController.get().chomp)
+        destroy(chompController)
     }
 
     @Test
@@ -245,7 +294,9 @@ class GodotPluginHostTest {
         assertTrue(project.contains("default_clear_color"))
         assertTrue(project.contains("aspect=\"expand\""))
         val boot = ctx.assets.open("boot.tscn").bufferedReader().readText()
-        assertTrue(boot.contains("call_deferred"))
+        assertTrue(boot.contains("get_visible_rect"))
+        assertTrue(boot.contains("DisplayServer"))
+        assertTrue(boot.contains("force_draw"))
         assertTrue(boot.contains("change_scene_to_file"))
         assertTrue(boot.contains("Host.finish"))
         assertTrue(boot.contains("ResourceLoader.exists"))
@@ -255,17 +306,35 @@ class GodotPluginHostTest {
         val kartScript = ctx.assets.open("kart.gd").bufferedReader().readText()
         assertTrue(kartScript.contains("minf(delta"))
         assertTrue(kartScript.contains("_update_hud(boost_timer > 0.0)"))
-        assertTrue(kartScript.contains("Portões"))
+        assertTrue(kartScript.contains("Arcos"))
+        assertTrue(kartScript.contains("_draw_meta"))
+        assertTrue(kartScript.contains("DRAW_AHEAD"))
+        assertTrue(kartScript.contains("META"))
+        assertTrue(kartScript.contains("_draw_bands"))
         assertTrue(kartScript.contains("_draw_strip"))
         assertTrue(kartScript.contains("_draw_hills"))
         assertTrue(kartScript.contains("_cache_palette"))
         assertTrue(kartScript.contains("_steer_at"))
+        assertTrue(kartScript.contains("_draw_rivals"))
+        assertTrue(kartScript.contains("DEADZONE"))
         assertTrue(kartScript.contains("outline_size"))
         val runnerScript = ctx.assets.open("runner.gd").bufferedReader().readText()
         assertTrue(runnerScript.contains("minf(delta"))
         assertTrue(runnerScript.contains("in_pit_fall"))
         assertTrue(runnerScript.contains("_add_part"))
-        assertTrue(runnerScript.contains("clampf(x, 80.0, 2000.0)"))
+        assertTrue(runnerScript.contains("JUMP_FLICK"))
+        assertTrue(runnerScript.contains("flick_y"))
+        assertTrue(runnerScript.contains("_run_from"))
+        assertTrue(runnerScript.contains("_bump_enemies"))
+        ctx.assets.open("invaders.tscn").close()
+        ctx.assets.open("chomp.tscn").close()
+        ctx.assets.open("climb.tscn").close()
+        val invadersScript = ctx.assets.open("invaders.gd").bufferedReader().readText()
+        assertTrue(invadersScript.contains("Letras"))
+        val chompScript = ctx.assets.open("chomp.gd").bufferedReader().readText()
+        assertTrue(chompScript.contains("bolinhas"))
+        val climbScript = ctx.assets.open("climb.gd").bufferedReader().readText()
+        assertTrue(climbScript.contains("barris") || climbScript.contains("Letras"))
         ctx.assets.open("host.gd").close()
         assertEquals("res://kart.tscn", GodotBridge.rewardScene(""))
         assertEquals("res://runner.tscn", GodotBridge.rewardScene(GodotRuntime.SCENE_RUNNER))

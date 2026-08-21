@@ -108,8 +108,19 @@ internal object NativeKartHost {
                     }
                 }
                 val extra = KartHud.offTrackLabel(state) ?: KartHud.boostLabel(state)
+                val place = KartHud.placeLabel(
+                    pt.mataventuras.domain.engine.RivalPack.place(state, circuit.length),
+                    pt.mataventuras.domain.engine.RivalPack.fieldSize(state),
+                )
                 Text(
-                    text = listOfNotNull(KartHud.lapLabel(state), KartHud.gatesLabel(state), extra).joinToString("\n"),
+                    text = listOfNotNull(
+                        KartHud.CONTROL_HINT,
+                        KartHud.META_HINT,
+                        KartHud.lapLabel(state),
+                        place,
+                        KartHud.gatesLabel(state),
+                        extra,
+                    ).joinToString("\n"),
                     color = Color.White,
                     fontSize = 22.sp,
                     modifier =
@@ -128,7 +139,12 @@ internal object NativeKartHost {
      */
     fun hudLines(loop: OffroadRacerLoop): Pair<String, String> {
         val extra = KartHud.offTrackLabel(loop.state) ?: KartHud.boostLabel(loop.state)
-        val second = listOfNotNull(KartHud.gatesLabel(loop.state), extra).joinToString(" · ")
+        val place =
+            KartHud.placeLabel(
+                pt.mataventuras.domain.engine.RivalPack.place(loop.state, loop.circuit.length),
+                pt.mataventuras.domain.engine.RivalPack.fieldSize(loop.state),
+            )
+        val second = listOfNotNull(place, KartHud.gatesLabel(loop.state), extra).joinToString(" · ")
         return KartHud.lapLabel(loop.state) to second
     }
 }

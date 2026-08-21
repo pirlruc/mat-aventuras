@@ -25,8 +25,14 @@ object VoiceScripts {
     const val WRONG_PIN: String = "PIN incorrecto."
     const val PIN_LOCKED: String = "Demasiadas tentativas. Espera um minuto."
     const val STAYS_ON_DEVICE: String = "Tudo fica neste aparelho. Não enviamos dados."
-    const val STEER_HINT: String = "Esquerda e direita para guiar. No meio: impulso!"
-    const val JUMP_HINT: String = "Desliza para a frente para correr e saltar. Para trás para recuar. Apanha as moedas!"
+    const val STEER_HINT: String =
+        "Toca à esquerda ou à direita para virar. No meio: impulso. " +
+            "Passa por baixo da META. Ultrapassa os outros karts!"
+    const val JUMP_HINT: String =
+        "Segura à direita para avançar e à esquerda para recuar. Desliza bem para cima para saltar. Apanha as moedas!"
+    const val INVADERS_HINT: String = "Desliza para mover a nave. Toca para disparar nas letras."
+    const val CHOMP_HINT: String = "Desliza para comer as bolinhas. A pílula dourada transforma-te!"
+    const val CLIMB_HINT: String = "Anda e salta para subir as letras. Evita os barris. O cogumelo faz-te crescer!"
     const val LEAVE: String = "Sair"
     const val CONFIRM_LEAVE: String = "Sim, sair"
     const val STAY: String = "Ficar"
@@ -35,9 +41,9 @@ object VoiceScripts {
     const val YOUR_NAME: String = "Como te chamas?"
     const val CHOOSE_FRIEND: String = "Escolhe o teu amigo:"
     const val AGE_THREE_PREVIEW: String =
-        "Contar, formas e números. Sopa, puzzle e códigos. Prémio: salta e apanha as moedas!"
+        "Contar, formas e números. Sudoku, sopa, puzzle e códigos. Prémio: plataforma, labirinto ou a subir letras!"
     const val AGE_SEVEN_PREVIEW: String =
-        "Somar, subtrair, multiplicar e lógica. Sudoku, sopa e códigos. Prémio: corrida de todo-o-terreno!"
+        "Somar, subtrair, multiplicar e lógica. Sudoku, sopa e códigos. Prémio: corrida, invasores ou labirinto!"
     const val REWARD_FINISHED: String = "Boa! Ganhaste um prémio. Vamos continuar."
     const val REWARD_RETURN: String = "Boa! Vamos continuar."
 

@@ -199,7 +199,7 @@ class ParentAndLessonLogicTest {
             attempts += 1
         }
         assertTrue(rewards >= 1)
-        compose.onNodeWithText("Sair").performScrollTo().performClick()
+        compose.onNodeWithText("Sair").performClick()
     }
 
     @Test
@@ -227,7 +227,7 @@ class ParentAndLessonLogicTest {
         }
         clickCorrect()
         clickCorrect()
-        compose.onNodeWithText("Sair").performScrollTo().performClick()
+        compose.onNodeWithText("Sair").performClick()
         assertTrue(true)
     }
 
@@ -279,9 +279,15 @@ class ParentAndLessonLogicTest {
             compose.onAllNodesWithText(VoiceScripts.LEAVE).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText(VoiceScripts.STAY).fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText(VoiceScripts.STAY).assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.STAY).performClick()
         compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText(VoiceScripts.CONFIRM_LEAVE).fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performClick()
         compose.waitUntil(8_000) { left }
     }

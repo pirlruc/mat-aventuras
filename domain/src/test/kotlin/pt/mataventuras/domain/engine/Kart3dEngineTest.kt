@@ -67,8 +67,8 @@ class Kart3dEngineTest {
 
     @Test
     fun touchBandsSteerAndBoost() {
-        assertEquals(-1f, engine.steerFromTouch(0.1f), 0f)
-        assertEquals(1f, engine.steerFromTouch(0.9f), 0f)
+        assertTrue(engine.steerFromTouch(0.1f) < -0.5f)
+        assertTrue(engine.steerFromTouch(0.9f) > 0.5f)
         assertEquals(0f, engine.steerFromTouch(0.5f), 0f)
         assertTrue(engine.isBoostTouch(0.5f))
         assertFalse(engine.isBoostTouch(0.1f))
@@ -79,6 +79,8 @@ class Kart3dEngineTest {
         val state = engine.initial()
         assertTrue(KartHud.lapLabel(state).startsWith("Volta"))
         assertTrue(KartHud.ringsLabel(state).contains("Anéis"))
+        assertEquals("Esquerda · Impulso · Direita", KartHud.CONTROL_HINT)
+        assertTrue(KartHud.META_HINT.contains("META"))
         assertEquals(null, KartHud.boostLabel(state))
         assertEquals(null, KartHud.offTrackLabel(state))
     }

@@ -47,6 +47,8 @@ class EnginePluginContractTest {
         val extras = EnginePluginContract.launchExtras("hero_pup", "Ana")
         assertEquals("hero_pup", extras[EnginePluginContract.EXTRA_MASCOT])
         assertEquals("Ana", extras[EnginePluginContract.EXTRA_NAME])
+        val withScene = EnginePluginContract.launchExtras("hero_pup", "Ana", RewardGame.CLIMB)
+        assertEquals("CLIMB", withScene[EnginePluginContract.EXTRA_SCENE])
         assertEquals("finished", EnginePluginContract.RESULT_FINISHED)
         assertEquals("restart", EnginePluginContract.RESULT_RESTART)
         assertEquals("godot", EnginePluginContract.ADOPTED_ENGINE)
@@ -86,11 +88,11 @@ class EnginePluginContractTest {
 
     @Test
     fun inputMapMatchesNativeKartBands() {
-        assertEquals(-1f, EngineInputMap.steerFromNormalizedX(0.1f), 0.001f)
+        assertTrue(EngineInputMap.steerFromNormalizedX(0.1f) < -0.5f)
         assertEquals(0f, EngineInputMap.steerFromNormalizedX(0.5f), 0.001f)
-        assertEquals(1f, EngineInputMap.steerFromNormalizedX(0.9f), 0.001f)
-        assertTrue(EngineInputMap.isBoostBand(0.34f))
-        assertTrue(EngineInputMap.isBoostBand(0.66f))
-        assertFalse(EngineInputMap.isBoostBand(0.33f))
+        assertTrue(EngineInputMap.steerFromNormalizedX(0.9f) > 0.5f)
+        assertTrue(EngineInputMap.isBoostBand(0.5f))
+        assertTrue(EngineInputMap.isBoostBand(0.4f))
+        assertFalse(EngineInputMap.isBoostBand(0.1f))
     }
 }

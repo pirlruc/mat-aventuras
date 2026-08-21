@@ -12,6 +12,11 @@ import pt.mataventuras.app.engine.IsolatedEngineActivity
  * [GodotFragment] forwards host APIs to a parent [org.godotengine.godot.GodotHost].
  * The plugin Activity is not a GodotHost (Robolectric must not load JNI types),
  * so this subclass supplies command line, plugins, and isolated-process restart.
+ *
+ * Do not call `renderView.onPause()` here. Pausing the GL surface on the UI
+ * thread while the engine thread is swapping is what produced
+ * `EGL_BAD_SURFACE` / `BufferQueue has no connected producer` and a black view.
+ * [GodotFragment] already pauses and resumes the renderer in order.
  */
 class RewardGodotFragment : GodotFragment() {
     override fun getCommandLine(): List<String> = GodotRuntime.commandLineFor()

@@ -1,6 +1,7 @@
 package pt.mataventuras.app.engine.godot
 
 import android.os.Bundle
+import android.view.View
 import pt.mataventuras.app.R
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.app.engine.IsolatedEngineActivity
@@ -24,8 +25,12 @@ internal object GodotEmbed {
         scene: String,
     ) {
         if (activity.isFinishing || activity.isDestroyed) return
-        activity.setContentView(R.layout.godot_host)
-        val existing = activity.supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
+        if (activity.findViewById<View>(R.id.godot_fragment_container) == null) {
+            activity.setContentView(R.layout.godot_host)
+        }
+        val existing =
+            activity.supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
+                ?: activity.supportFragmentManager.findFragmentByTag(TAG)
         if (existing is RewardGodotFragment) return
         val fragment =
             RewardGodotFragment().apply {

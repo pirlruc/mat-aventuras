@@ -18,10 +18,22 @@ data class OffroadState(
     val offTrack: Boolean,
     val finished: Boolean,
     val seed: Int,
+    val rivals: List<RivalRacer> = emptyList(),
 )
 
 /**
- * Rear-view dirt circuit: steer against the berms, boost, collect gates.
+ * AI kart the player races against.
+ */
+data class RivalRacer(
+    val distance: Float,
+    val lateral: Float,
+    val speed: Float,
+    val laps: Int,
+    val argb: Long,
+)
+
+/**
+ * Rear-view dirt circuit: analog steer, boost, checkpoints, rival karts.
  */
 class OffroadRacerEngine(
     private val circuit: OffroadCircuit = OffroadCircuit(1),
@@ -45,6 +57,7 @@ class OffroadRacerEngine(
             offTrack = false,
             finished = false,
             seed = circuit.seed,
+            rivals = RivalPack.starting(circuit.seed),
         )
 
     /**
@@ -81,9 +94,16 @@ class OffroadRacerEngine(
         val wrapped = if (lapped) distance - circuit.length else distance
         val laps = if (lapped) state.laps + 1 else state.laps
         val mask = if (lapped) 0 else state.collectedMask
+        val rivals = RivalPack.step(state.rivals, circuit, clamped)
         val collected =
             collectGates(
-                state.copy(distance = wrapped, lateral = lateral, laps = laps, collectedMask = mask),
+                state.copy(
+                    distance = wrapped,
+                    lateral = lateral,
+                    laps = laps,
+                    collectedMask = mask,
+                    rivals = rivals,
+                ),
             )
         return collected.copy(
             speed = speed,
@@ -112,13 +132,15 @@ class OffroadRacerEngine(
             val bit = 1 shl i
             if (mask and bit != 0) continue
             val gap = kotlin.math.abs(state.distance - circuit.gateDistance(i))
-            if (gap <= GATE_WINDOW && kotlin.math.abs(state.lateral) < GATE_LATERAL) {
+            if (gap <= GATE_WINDOW && !state.offTrack && kotlin.math.abs(state.lateral) < halfWidth(state)) {
                 mask = mask or bit
                 gates = (gates + 1).coerceAtMost(state.gatesTarget)
             }
         }
         return state.copy(collectedMask = mask, gates = gates)
     }
+
+    private fun halfWidth(state: OffroadState): Float = circuit.widthAt(state.distance)
 
     private fun moveToward(
         current: Float,
@@ -137,10 +159,10 @@ class OffroadRacerEngine(
         const val BOOST: Float = 46f
         const val OFF_ROAD: Float = 12f
         const val ACCEL: Float = 22f
-        const val STEER: Float = 1.8f
-        const val DRIFT: Float = 0.012f
+        const val STEER: Float = 5.6f
+        const val DRIFT: Float = 0.006f
         const val BOOST_SECONDS: Float = 1.15f
-        const val GATE_WINDOW: Float = 6f
-        const val GATE_LATERAL: Float = 0.48f
+        const val GATE_WINDOW: Float = 8f
+        const val GATE_LATERAL: Float = 0.9f
     }
 }

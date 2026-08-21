@@ -1,6 +1,9 @@
 package pt.mataventuras.app.engine
 
 import pt.mataventuras.app.engine.godot.GodotEmbed
+import pt.mataventuras.domain.engine.EnginePluginContract
+import pt.mataventuras.domain.engine.RewardCatalog
+import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.plugin.KartPluginActivity
 import pt.mataventuras.plugin.RunnerPluginActivity
 
@@ -27,17 +30,23 @@ internal object GodotRewardBinder {
     }
 
     /**
-     * Hosts the age-3 runner inside [activity].
+     * Hosts a 2D prize (runner, invaders, chomp, or climb) inside [activity].
      */
     fun bindRunner(
         activity: RunnerPluginActivity,
         embed: Boolean = GodotRuntime.shouldEmbed(),
         onGodot: (IsolatedEngineActivity, String) -> Unit = GodotEmbed::attach,
     ) {
+        val game =
+            RewardCatalog.fromName(
+                activity.intent.getStringExtra(EnginePluginContract.EXTRA_SCENE),
+                EngineKind.TWO_D,
+            )
+        val scene = RewardCatalog.scenePath(game)
         if (embed) {
-            onGodot(activity, GodotRuntime.SCENE_RUNNER)
+            onGodot(activity, scene)
         } else {
-            activity.loop = NativeRunnerHost.attach(activity)
+            NativeRewardHost.attach(activity, game)
         }
     }
 }

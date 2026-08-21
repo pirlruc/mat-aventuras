@@ -15,10 +15,15 @@ data class Platformer2dState(
     val finished: Boolean,
     val collectedMask: Int = 0,
     val inPitFall: Boolean = false,
+    val elapsed: Float = 0f,
+    val form: Int = 0,
+    val starTimer: Float = 0f,
+    val stompedMask: Int = 0,
+    val powerMask: Int = 0,
 )
 
 /**
- * Side-scroller physics. Finger drag sets [moveX]; a forward flick jumps.
+ * Side-scroller physics. Hold left/right to run; an upward flick jumps.
  */
 class Platformer2dEngine(
     private val groundY: Float = 0f,
@@ -45,7 +50,7 @@ class Platformer2dEngine(
 
     /**
      * Advances one simulation step in seconds.
-     * [moveX] is -1..1 from a horizontal drag. Jump only applies with forward motion.
+     * [moveX] is -1..1 from a hold on the left/right of the screen. Jump is independent.
      */
     fun step(
         state: Platformer2dState,
@@ -59,17 +64,20 @@ class Platformer2dEngine(
         val landed = settle(motion.x, motion.y, motion.vy, motion.falling)
         if (landed.first < -2f) return respawn(state)
         val onGround = landed.second
-        val finished = state.rings >= state.ringsTarget
-        return state.copy(
-            x = motion.x,
-            y = landed.first,
-            vx = motion.vx,
-            vy = if (onGround) 0f else motion.vy,
-            onGround = onGround,
-            alive = true,
-            finished = finished,
-            inPitFall = motion.falling && !onGround,
-        )
+        val next =
+            state.copy(
+                x = motion.x,
+                y = landed.first,
+                vx = motion.vx,
+                vy = if (onGround) 0f else motion.vy,
+                onGround = onGround,
+                alive = true,
+                finished = state.rings >= state.ringsTarget,
+                inPitFall = motion.falling && !onGround,
+                elapsed = state.elapsed + dt,
+                starTimer = (state.starTimer - dt).coerceAtLeast(0f),
+            )
+        return PlatformerHazards.apply(next, level, dt)
     }
 
     private fun integrate(
@@ -78,7 +86,7 @@ class Platformer2dEngine(
         jumping: Boolean,
         run: Float,
     ): PitMotion {
-        val leaped = jumping && state.onGround && run > 0.2f
+        val leaped = jumping && state.onGround
         val vy = if (leaped) jumpSpeed else state.vy + gravity * dt
         val vx = if (state.inPitFall) 0f else run * speedX
         val x = (state.x + vx * dt).coerceIn(0f, level.length)

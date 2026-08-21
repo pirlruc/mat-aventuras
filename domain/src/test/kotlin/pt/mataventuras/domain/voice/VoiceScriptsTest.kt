@@ -28,8 +28,11 @@ class VoiceScriptsTest {
         assertTrue(VoiceScripts.TRY_AGAIN.contains("Tenta"))
         assertTrue(VoiceScripts.LETS_PLAY.contains("prémio"))
         assertTrue(VoiceScripts.STAYS_ON_DEVICE.contains("aparelho"))
-        assertTrue(VoiceScripts.STEER_HINT.contains("guiar"))
-        assertTrue(VoiceScripts.JUMP_HINT.contains("moedas"))
+        assertTrue(VoiceScripts.STEER_HINT.contains("META"))
+        assertTrue(VoiceScripts.JUMP_HINT.contains("saltar"))
+        assertTrue(VoiceScripts.INVADERS_HINT.contains("nave"))
+        assertTrue(VoiceScripts.CHOMP_HINT.contains("bolinhas"))
+        assertTrue(VoiceScripts.CLIMB_HINT.contains("barris"))
     }
 
     @Test

@@ -10,8 +10,8 @@ no account, no advert, and no internet permission.
 
 | Age | What they practise | Prize game |
 | --- | --- | --- |
-| **3 years** | Counting 1–10, shapes, digits 0–9 | Side-scroller: run, jump, collect coins |
-| **7 years** | Addition, subtraction, multiplication, logic | 2.5D dirt race: steer, boost, pass gates |
+| **3 years** | Counting 1–10, shapes, digits 0–9 | Platformer, letter-climb, or maze |
+| **7 years** | Addition, subtraction, multiplication, logic | Dirt race with rivals, invaders, maze, or climb |
 
 A parent or teacher picks the age band once. Each child gets a name, a mascot
 friend, and a local score.
@@ -34,13 +34,17 @@ friend, and a local score.
 5. A green tick or red cross stays on screen for about a second so the child
    can see it. After **three correct answers in a row**, a prize game opens
    in landscape.
-6. **Age 3 prize:** drag a finger forward to run and leap, drag back to
-   reverse (useful if you missed a coin). Collect every coin. Falling in a
-   hole puts the runner back on the last safe ground.
-7. **Age 7 prize:** tap the **left** or **right** third of the screen to
-   steer, and **tap the middle** for a short boost (holding the middle does
-   not keep boosting). Finish three laps. Yellow gates along the dirt add
-   to the HUD; you do not have to hit every gate.
+6. **Age 3 prize:** hold the **right** of the screen to run forward, the **left**
+   to reverse, and **swipe well up** to jump (a tap no longer jumps). Collect
+   every coin. Enemies patrol the ground — stomp them or grab a mushroom/star
+   to transform. Falling in a hole puts the runner back on the last safe
+   ground. Other prizes: climb letter floors while dodging barrels, or eat
+   dots in a small maze.
+7. **Age 7 prize:** tap the **left or right** of the screen to steer fully;
+   **tap the middle** for a short boost. Race three laps against other karts.
+   Green arches are checkpoints you drive through. The yellow **META** banner
+   overhead is the start/finish line you pass under — it is not a wall.
+   Other prizes: letter invaders, maze, or letter-climb.
 
 Leave a lesson from the on-screen exit control. Age 7 asks for confirmation.
 
