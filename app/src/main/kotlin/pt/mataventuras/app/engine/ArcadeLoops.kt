@@ -13,10 +13,11 @@ import pt.mataventuras.domain.engine.InvadersState
 internal class InvadersLoop(
     private val engine: InvadersEngine = InvadersEngine(),
     private val nowNs: () -> Long = { System.nanoTime() },
+    start: InvadersState = engine.initial(),
 ) {
     var moveX: Float = 0f
     var fire: Boolean = false
-    var state: InvadersState = engine.initial()
+    var state: InvadersState = start
         private set
     private var lastNs: Long = 0L
 
@@ -44,10 +45,11 @@ internal class InvadersLoop(
 internal class ChompLoop(
     private val engine: ChompEngine = ChompEngine(),
     private val nowNs: () -> Long = { System.nanoTime() },
+    start: ChompState = engine.initial(),
 ) {
     var dirX: Int = 0
     var dirY: Int = 0
-    var state: ChompState = engine.initial()
+    var state: ChompState = start
         private set
     private var lastNs: Long = 0L
 
@@ -68,10 +70,11 @@ internal class ChompLoop(
 internal class ClimbLoop(
     private val engine: ClimbEngine = ClimbEngine(),
     private val nowNs: () -> Long = { System.nanoTime() },
+    start: ClimbState = engine.initial(),
 ) {
     var moveX: Float = 0f
     var jumping: Boolean = false
-    var state: ClimbState = engine.initial()
+    var state: ClimbState = start
         private set
     private var lastNs: Long = 0L
 

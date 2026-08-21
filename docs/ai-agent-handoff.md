@@ -93,6 +93,8 @@ bash scripts/ci-local.sh
   Tests click those footer buttons without `performScrollTo` (they are not
   inside the scrollable play column). `LessonPlayColumn` / `LessonExitBar`
   keep `LessonScreen` above the KT-CPLX-002 MI floor of 40.
+- `:app` kover is 95% line and branch. New arcade/scene branches need tests
+  (`EngineCoverageTest`); do not exclude them to make the gate pass.
 - `OffroadScene.fill` clears the span list each call. Four gates put the first
   arch at 96 m, so `DRAW_AHEAD` must be greater than that (140 m) or spawn
   paints no posts. Near META, assert `BANNER_ARGB`, not `POST_ARGB`. Kart TTS

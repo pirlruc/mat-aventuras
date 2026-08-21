@@ -200,6 +200,7 @@ class GodotPluginHostTest {
                 ),
             ).setup()
         assertNotNull(invadersController.get().invaders)
+        assertEquals(RewardGame.INVADERS.name, invadersController.get().sceneCode())
         destroy(invadersController)
         val chompController =
             Robolectric.buildActivity(
