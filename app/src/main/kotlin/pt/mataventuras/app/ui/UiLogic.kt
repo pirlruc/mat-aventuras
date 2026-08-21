@@ -68,6 +68,19 @@ internal object UiLogic {
     fun lessonFillsViewport(age: AgeGroup): Boolean = age == AgeGroup.SEVEN_YEARS
 
     /**
+     * Sudoku, soup, cipher, and puzzle boards are taller than a choice row, so
+     * they scroll even when [lessonFillsViewport] is true. Keeps Sair on screen.
+     */
+    fun lessonScrolls(
+        age: AgeGroup,
+        kind: PlayKind,
+    ): Boolean =
+        !lessonFillsViewport(age) ||
+            showsPlayGrid(kind) ||
+            showsCipherLegend(kind) ||
+            showsPuzzleFrame(kind)
+
+    /**
      * Shape for an option label, or null when the label is not a shape name.
      */
     fun shapeKind(option: String): GeometricShape? =

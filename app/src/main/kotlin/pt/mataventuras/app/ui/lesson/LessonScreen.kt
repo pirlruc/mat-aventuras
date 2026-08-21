@@ -91,6 +91,8 @@ fun LessonScreen(
     val pointsTicket = remember { AtomicInteger(0) }
     val pickLock = remember { AtomicBoolean(false) }
     val fillViewport = UiLogic.lessonFillsViewport(profile.ageGroup)
+    val scrolls = UiLogic.lessonScrolls(profile.ageGroup, exercise.play.kind)
+    val scrollState = rememberScrollState()
     val view = LocalView.current
     val cues = remember { AnswerCuePlayer.device() }
     var flashCorrect by remember { mutableStateOf(true) }
@@ -145,18 +147,14 @@ fun LessonScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .then(
-                    if (fillViewport) {
-                        Modifier
-                    } else {
-                        Modifier.verticalScroll(rememberScrollState())
-                    },
-                )
+                .weight(1f)
+                .fillMaxWidth()
+                .then(if (scrolls) Modifier.verticalScroll(scrollState) else Modifier)
                 .padding(20.dp),
-            verticalArrangement = if (fillViewport) Arrangement.Top else Arrangement.spacedBy(12.dp),
+            verticalArrangement = if (scrolls) Arrangement.spacedBy(12.dp) else Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
@@ -193,8 +191,8 @@ fun LessonScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (fillViewport) Modifier.weight(1f) else Modifier),
-            verticalArrangement = if (fillViewport) {
+                .then(if (fillViewport && !scrolls) Modifier.weight(1f) else Modifier),
+            verticalArrangement = if (fillViewport && !scrolls) {
                 Arrangement.SpaceEvenly
             } else {
                 Arrangement.spacedBy(12.dp)
@@ -216,19 +214,27 @@ fun LessonScreen(
             }
         }
         Text(UiLogic.lessonScoreLine(hits, points))
-        Button(onClick = {
-            if (LessonFlow.shouldAskExitConfirm(profile.ageGroup, confirmingExit)) {
-                confirmingExit = true
-                VoiceScripts.confirmExit(profile.ageGroup)?.let(onSpeak)
-            } else {
-                scope.launch {
-                    LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
-                    onExit()
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Button(onClick = {
+                if (LessonFlow.shouldAskExitConfirm(profile.ageGroup, confirmingExit)) {
+                    confirmingExit = true
+                    VoiceScripts.confirmExit(profile.ageGroup)?.let(onSpeak)
+                } else {
+                    scope.launch {
+                        LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
+                        onExit()
+                    }
                 }
+            }) { Text(LessonFlow.exitLabel(confirmingExit)) }
+            if (LessonFlow.showsStay(confirmingExit)) {
+                Button(onClick = { confirmingExit = false }) { Text(VoiceScripts.STAY) }
             }
-        }) { Text(LessonFlow.exitLabel(confirmingExit)) }
-        if (LessonFlow.showsStay(confirmingExit)) {
-            Button(onClick = { confirmingExit = false }) { Text(VoiceScripts.STAY) }
         }
         }
         AnswerFlash(correct = flashCorrect, tick = flashTick)

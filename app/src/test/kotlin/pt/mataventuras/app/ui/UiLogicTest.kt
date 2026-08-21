@@ -146,6 +146,13 @@ class UiLogicTest {
         assertEquals(android.view.HapticFeedbackConstants.LONG_PRESS, UiLogic.answerHaptic(false, 29))
         UiLogic.answerHaptic(true)
         assertFalse(UiLogic.lessonFillsViewport(AgeGroup.THREE_YEARS))
+        assertTrue(UiLogic.lessonFillsViewport(AgeGroup.SEVEN_YEARS))
+        assertTrue(UiLogic.lessonScrolls(AgeGroup.THREE_YEARS, PlayKind.CHOICE))
+        assertFalse(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.CHOICE))
+        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.SUDOKU))
+        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.SOUP))
+        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.CIPHER))
+        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.PUZZLE))
     }
 
     @Test

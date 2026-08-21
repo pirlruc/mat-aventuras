@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-21
-**Last agent focus:** CI test job: kart DRAW_AHEAD, sudoku gutters, STEER_HINT
+**Last agent focus:** Pin lesson Sair/Ficar footer so age-7 sudoku can confirm leave
 
 ---
 
@@ -88,6 +88,8 @@ bash scripts/ci-local.sh
 - Compose `pointerInput` `size` is `IntSize` (`width: Int`). Use
   `size.width.coerceAtLeast(1).toFloat()`, not `coerceAtLeast(1f)`.
   `:app` is not compiled on this VM (`ANDROID_HOME` unset); CI catches it.
+- Age-7 choice lessons fill the viewport; sudoku/soup/cipher/puzzle scroll, and
+  Sair/Ficar sit in a footer so the confirm-leave buttons stay on screen.
 - `OffroadScene.fill` clears the span list each call. Four gates put the first
   arch at 96 m, so `DRAW_AHEAD` must be greater than that (140 m) or spawn
   paints no posts. Near META, assert `BANNER_ARGB`, not `POST_ARGB`. Kart TTS
@@ -114,6 +116,6 @@ runner jump is a long upward swipe, not a tap; kart uses full left/right
 steer, rivals, META gantry, and side-tap bands; 4×4/6×6 sudoku with box
 gutters; invaders/chomp/climb prizes; Godot boot waits for a real window.
 Kart arches/rivals/META draw 140 m ahead so the first 96 m gate is visible
-from the start line.
+from the start line. Age-7 board lessons scroll; Sair/Ficar stay in a footer.
 
 *Last updated: 2026-08-21*
