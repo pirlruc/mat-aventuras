@@ -81,18 +81,25 @@ HUD copy is pt-PT (`Volta`, `Lugar`, `Arcos`, `Impulso`, `META`).
 ## Godot project
 
 Files live in `app/src/main/assets/` (no hidden `.godot` directory;
-`use_hidden_project_data_directory=false`). `run/main_scene` is a full-rect
-`boot.tscn` that `call_deferred`s `change_scene_to_file` with
-`MatAventuras.rewardScene()`. The fragment command line is **empty**.
+`use_hidden_project_data_directory=false`). `run/main_scene` is `boot.tscn`
+(`boot.gd`). That boot node waits until `DisplayServer.window_get_size()`
+and the visible viewport both exceed 32 px, disables content scaling so
+drawing uses the SurfaceView's real pixels, then `change_scene_to_file`
+with `MatAventuras.rewardScene()`. The fragment command line is **empty**.
 Godot 4.6+ Android loads `project.godot` from APK assets. Do not pass
 `--path` (CWD override, blank English error) or `--scene` (races
 `boot.tscn`). GLES is set only in `project.godot`; repeating it on the
 CLI made the engine request a process restart and blink the splash.
+Do not call `RenderingServer.force_draw()` before the window has a size.
+A Godot force-quit during first GLES setup must restart the isolated
+process, not `completeReward(false)`.
 
 The Godot boot splash image is disabled. `config/features` is
-`GL Compatibility`. When the engine still asks to restart after first-time
-GLES setup, the fragment finishes with a `restart` result so **MainActivity**
-relaunches the same plugin Activity (preserving `StartActivityForResult`).
+`GL Compatibility`. Stretch mode is **disabled** so prize games paint in
+the tablet's real pixels (`Host.screen_size`). When the engine still asks
+to restart after first-time GLES setup, the fragment finishes with a
+`restart` result so **MainActivity** relaunches the same plugin Activity
+(preserving `StartActivityForResult`).
 The isolated process then exits so `libgodot_android` unloads. A relaunch
 intent carries `godot_relaunch` so the new process cannot bounce again.
 `ProcessPhoenix` stays stripped: its default rebirth is the launcher, and

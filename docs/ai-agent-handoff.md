@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-21
-**Last agent focus:** Pin lesson Sair/Ficar footer so age-7 sudoku can confirm leave
+**Last agent focus:** Godot black-screen boot, invaders 5 lives, pixel-scaled prizes
 
 ---
 
@@ -103,8 +103,16 @@ bash scripts/ci-local.sh
 - Do not call `Godot` `renderView.onPause()` from `RewardGodotFragment`.
   That disconnects the BufferQueue while the GL thread is swapping and
   yields `EGL_BAD_SURFACE` / a black SurfaceView. Let `GodotFragment` order
-  pause/resume. `boot.tscn` waits for `DisplayServer.window_get_size()` and
-  a real viewport before `change_scene_to_file`.
+  pause/resume. Attach the fragment only after the host FrameLayout is
+  larger than 32 px. `boot.gd` waits for `DisplayServer.window_get_size()`
+  and a real viewport, sets content scale to disabled (real pixels), and
+  must not `force_draw` a 0-size window. Stretch mode in `project.godot`
+  is `disabled`. `onGodotForceQuit` must restart or no-op — never
+  `completeReward(false)`, which closed invaders on first paint.
+- Invaders ends only when **all 15 ships are gone** or **5 lives** are
+  lost. Do not restore the old `hits >= 8` / single-bomb `Host.finish(false)`.
+  GDScript bitwise tests need parentheses: `(aliens & (1 << i)) == 0`.
+  `Host.finish` waits ~1.8 s so the win/lose banner is visible.
 - Detekt is `dev.detekt` `2.0.0-alpha.6`. Config keys use `allowedComplexity` /
   `allowedLines` / `allowedFunctionsPerClass` (not the 1.x `threshold` names).
   Do not revert to `io.gitlab.arturbosch.detekt` 1.23.8: that plugin still calls
@@ -116,11 +124,9 @@ bash scripts/ci-local.sh
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 
-This pass: soup words unique in every direction (no 2-letter fillers);
-runner jump is a long upward swipe, not a tap; kart uses full left/right
-steer, rivals, META gantry, and side-tap bands; 4×4/6×6 sudoku with box
-gutters; invaders/chomp/climb prizes; Godot boot waits for a real window.
-Kart arches/rivals/META draw 140 m ahead so the first 96 m gate is visible
-from the start line. Age-7 board lessons scroll; Sair/Ficar stay in a footer.
+This pass: Godot boot waits for a real pixel-sized SurfaceView and does not
+fail the prize on engine force-quit; invaders uses 5 lives and ends only
+when every ship is destroyed; chomp/climb have lives and a delayed banner;
+prize drawing uses the tablet's pixels (`Host.screen_size`).
 
 *Last updated: 2026-08-21*

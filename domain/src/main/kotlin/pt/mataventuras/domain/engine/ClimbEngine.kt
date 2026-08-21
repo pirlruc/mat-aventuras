@@ -13,6 +13,8 @@ data class ClimbState(
     val barrelX: Float,
     val barrelFloor: Int,
     val form: Int,
+    val lives: Int,
+    val invuln: Float,
     val alive: Boolean,
     val finished: Boolean,
 ) {
@@ -38,6 +40,8 @@ class ClimbEngine {
             barrelX = 0.9f,
             barrelFloor = FLOORS.lastIndex,
             form = 0,
+            lives = 3,
+            invuln = 0.6f,
             alive = true,
             finished = false,
         )
@@ -53,11 +57,11 @@ class ClimbEngine {
     ): ClimbState {
         if (!state.alive || state.finished) return state
         val clamped = dt.coerceIn(0.001f, 0.05f)
-        val motion = move(state, clamped, moveX, jumping)
+        val cooled = state.copy(invuln = (state.invuln - clamped).coerceAtLeast(0f))
+        val motion = move(cooled, clamped, moveX, jumping)
         val letters = collect(motion)
         val grown = if (near(letters, MUSHROOM_X, FLOORS[1])) letters.copy(form = 1) else letters
-        val rolled = rollBarrel(grown, clamped)
-        return strike(rolled)
+        return strike(rollBarrel(grown, clamped))
     }
 
     private fun move(
@@ -108,13 +112,22 @@ class ClimbEngine {
     }
 
     private fun strike(state: ClimbState): ClimbState {
+        if (state.finished || !barrelHits(state)) return state
+        if (state.form == 1) return state.copy(form = 0, invuln = 0.8f)
+        val lives = state.lives - 1
+        return if (lives <= 0) {
+            state.copy(alive = false, lives = 0, finished = true)
+        } else {
+            state.copy(lives = lives, x = 0.12f, y = FLOORS[0], vy = 0f, onFloor = true, invuln = 1.4f)
+        }
+    }
+
+    private fun barrelHits(state: ClimbState): Boolean {
         val floorY = FLOORS[state.barrelFloor.coerceIn(0, FLOORS.lastIndex)]
-        val nearBarrel =
+        val near =
             kotlin.math.abs(state.y - floorY) < 0.05f &&
                 kotlin.math.abs(state.x - state.barrelX) < 0.07f
-        if (!nearBarrel) return state
-        if (state.form == 1) return state.copy(form = 0)
-        return state.copy(alive = false)
+        return near && state.invuln <= 0f
     }
 
     private fun near(

@@ -32,6 +32,9 @@ object GodotRuntime {
     /** Intent extra GodotActivity reads for launch arguments. Unused by GodotFragment. */
     const val EXTRA_COMMAND_LINE: String = "command_line_params"
 
+    /** Smallest SurfaceView that may host a Godot swap. Below this the first frame is black. */
+    const val SURFACE_MIN_PX: Int = 32
+
     /**
      * True when this process should create a GodotFragment.
      */
@@ -63,6 +66,14 @@ object GodotRuntime {
         destroyed: Boolean,
         fromRelaunch: Boolean,
     ): Boolean = !alreadyRestarted && !finishing && !destroyed && !fromRelaunch
+
+    /**
+     * True when the host FrameLayout has a real pixel size for a GLES SurfaceView.
+     */
+    fun isSurfaceReady(
+        widthPx: Int,
+        heightPx: Int,
+    ): Boolean = widthPx > SURFACE_MIN_PX && heightPx > SURFACE_MIN_PX
 
     /**
      * True when [fingerprint] is a Robolectric VM.

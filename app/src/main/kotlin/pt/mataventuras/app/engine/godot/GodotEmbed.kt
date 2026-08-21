@@ -28,21 +28,13 @@ internal object GodotEmbed {
         if (activity.findViewById<View>(R.id.godot_fragment_container) == null) {
             activity.setContentView(R.layout.godot_host)
         }
-        val existing =
-            activity.supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
-                ?: activity.supportFragmentManager.findFragmentByTag(TAG)
-        if (existing is RewardGodotFragment) return
-        val fragment =
-            RewardGodotFragment().apply {
-                arguments =
-                    Bundle().apply {
-                        putString(RewardGodotFragment.ARG_SCENE, scene)
-                    }
-            }
-        activity.supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.godot_fragment_container, fragment, TAG)
-            .commitNowAllowingStateLoss()
+        val container = activity.findViewById<View>(R.id.godot_fragment_container) ?: return
+        if (alreadyAttached(activity)) return
+        if (GodotRuntime.isSurfaceReady(container.width, container.height)) {
+            commitFragment(activity, scene)
+            return
+        }
+        container.post { waitForSurface(activity, container, scene) }
     }
 
     /**
@@ -85,4 +77,61 @@ internal object GodotEmbed {
      * Command line used by [RewardGodotFragment] when arguments are missing.
      */
     fun fallbackScene(): String = GodotRuntime.SCENE_KART
+
+    private fun waitForSurface(
+        activity: IsolatedEngineActivity,
+        container: View,
+        scene: String,
+    ) {
+        if (activity.isFinishing || activity.isDestroyed || alreadyAttached(activity)) return
+        if (GodotRuntime.isSurfaceReady(container.width, container.height)) {
+            commitFragment(activity, scene)
+            return
+        }
+        container.addOnLayoutChangeListener(
+            object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int,
+                ) {
+                    if (!GodotRuntime.isSurfaceReady(v.width, v.height)) return
+                    v.removeOnLayoutChangeListener(this)
+                    if (activity.isFinishing || activity.isDestroyed || alreadyAttached(activity)) return
+                    commitFragment(activity, scene)
+                }
+            },
+        )
+    }
+
+    private fun alreadyAttached(activity: IsolatedEngineActivity): Boolean {
+        val existing =
+            activity.supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
+                ?: activity.supportFragmentManager.findFragmentByTag(TAG)
+        return existing is RewardGodotFragment
+    }
+
+    private fun commitFragment(
+        activity: IsolatedEngineActivity,
+        scene: String,
+    ) {
+        if (alreadyAttached(activity)) return
+        val fragment =
+            RewardGodotFragment().apply {
+                arguments =
+                    Bundle().apply {
+                        putString(RewardGodotFragment.ARG_SCENE, scene)
+                    }
+            }
+        activity.supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.godot_fragment_container, fragment, TAG)
+            .commitNowAllowingStateLoss()
+    }
 }

@@ -52,12 +52,8 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
-	hud.position = Vector2(24, 24)
-	hud.add_theme_font_size_override("font_size", 28)
-	hud.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	hud.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	hud.add_theme_constant_override("outline_size", 10)
 	layer.add_child(hud)
+	Host.style_hud(hud, self)
 	_update_hud(false)
 	RenderingServer.set_default_clear_color(pal_sky)
 	queue_redraw()
@@ -117,7 +113,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _steer_at(pos: Vector2, arm_boost: bool) -> void:
-	var width: float = maxf(get_viewport().get_visible_rect().size.x, 1.0)
+	var width: float = maxf(Host.screen_size(self).x, 1.0)
 	var nx: float = pos.x / width
 	var delta := nx - 0.5
 	if absf(delta) <= DEADZONE:
@@ -129,28 +125,28 @@ func _steer_at(pos: Vector2, arm_boost: bool) -> void:
 
 
 func _process(delta: float) -> void:
-	if finished:
-		return
 	delta = minf(delta, 0.05)
-	if boosting:
-		boost_timer = 1.15
-	boosting = false
-	boost_timer = maxf(boost_timer - delta, 0.0)
-	var off := absf(lateral) > _sample(widths, distance)
-	var target := BOOST_SPD if boost_timer > 0.0 else (12.0 if off else CRUISE)
-	speed = move_toward(speed, target, 22.0 * delta)
-	var curve := _sample(curves, distance)
-	lateral = clampf(lateral + steer * STEER_RATE * delta + curve * speed * 0.006 * delta, -1.35, 1.35)
-	distance += speed * delta
-	if distance >= LENGTH:
-		distance -= LENGTH
-		lap += 1
-		gate_mask = 0
-		if lap >= LAPS_TARGET:
-			_finish()
-			return
-	_step_rivals(delta)
-	_collect_gates(off)
+	if not finished:
+		if boosting:
+			boost_timer = 1.15
+		boosting = false
+		boost_timer = maxf(boost_timer - delta, 0.0)
+		var off := absf(lateral) > _sample(widths, distance)
+		var target := BOOST_SPD if boost_timer > 0.0 else (12.0 if off else CRUISE)
+		speed = move_toward(speed, target, 22.0 * delta)
+		var curve := _sample(curves, distance)
+		lateral = clampf(lateral + steer * STEER_RATE * delta + curve * speed * 0.006 * delta, -1.35, 1.35)
+		distance += speed * delta
+		if distance >= LENGTH:
+			distance -= LENGTH
+			lap += 1
+			gate_mask = 0
+			if lap >= LAPS_TARGET:
+				_finish()
+		if not finished:
+			_step_rivals(delta)
+			_collect_gates(off)
+	Host.style_hud(hud, self)
 	_update_hud(boost_timer > 0.0)
 	queue_redraw()
 
@@ -188,7 +184,7 @@ func _place() -> int:
 
 
 func _draw() -> void:
-	var size := get_viewport_rect().size
+	var size := Host.screen_size(self)
 	if size.x < 32.0 or size.y < 32.0:
 		return
 	draw_rect(Rect2(Vector2.ZERO, size), pal_sky)
@@ -202,6 +198,8 @@ func _draw() -> void:
 	_draw_rivals(size, horizon, ground)
 	_draw_kart(size, ground)
 	_draw_bands(size)
+	if finished:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.38))
 
 
 func _draw_hills(size: Vector2, horizon: float) -> void:
@@ -222,7 +220,7 @@ func _draw_strip(size: Vector2, horizon: float, ground: float, index: int) -> vo
 	var curve := _sample(curves, dist)
 	var hill := _sample(hills, dist) * (1.0 - t) * 36.0
 	var center := size.x * 0.5 - lateral * 95.0 * scale + curve * 62.0 * (1.0 - t)
-	var road_w := 360.0 * scale * _sample(widths, dist)
+	var road_w := size.x * 0.42 * scale * _sample(widths, dist)
 	draw_rect(Rect2(0, y - hill, size.x, h + 1.0), pal_grass)
 	draw_rect(Rect2(center - road_w * 0.5 - 10.0, y - hill, road_w + 20.0, h + 1.0), Color("E53935"))
 	draw_rect(Rect2(center - road_w * 0.5, y - hill, road_w, h + 1.0), pal_dirt)
@@ -246,7 +244,7 @@ func _draw_arches(size: Vector2, horizon: float, ground: float) -> void:
 		var dist := distance + ahead
 		var curve := _sample(curves, dist)
 		var center := size.x * 0.5 - lateral * 95.0 * scale + curve * 40.0 * (1.0 - t)
-		var road_w := 360.0 * scale * _sample(widths, dist)
+		var road_w := size.x * 0.42 * scale * _sample(widths, dist)
 		var post_w := 8.0 * scale
 		var post_h := 36.0 * scale
 		var bar_h := 10.0 * scale
@@ -277,23 +275,24 @@ func _draw_rivals(size: Vector2, horizon: float, ground: float) -> void:
 
 
 func _draw_kart(size: Vector2, ground: float) -> void:
-	var cx := size.x * 0.5 + steer * 22.0
-	var y := ground - 78.0
+	var u := minf(size.x, size.y)
+	var cx := size.x * 0.5 + steer * u * 0.03
+	var y := ground - u * 0.12
 	var fill := kart_fill
-	draw_rect(Rect2(cx - 36.0, y + 40.0, 20.0, 18.0), Color("212121"))
-	draw_rect(Rect2(cx + 16.0, y + 40.0, 20.0, 18.0), Color("212121"))
-	draw_rect(Rect2(cx - 30.0, y + 16.0, 60.0, 30.0), fill)
-	draw_rect(Rect2(cx - 8.0, y + 20.0, 16.0, 22.0), Color("FFF59D"))
-	draw_rect(Rect2(cx - 18.0, y - 2.0, 36.0, 24.0), Color("ECEFF1"))
-	draw_rect(Rect2(cx - 24.0, y - 12.0, 48.0, 12.0), fill)
-	draw_rect(Rect2(cx - 20.0, y - 20.0, 8.0, 16.0), fill)
-	draw_rect(Rect2(cx + 12.0, y - 20.0, 8.0, 16.0), fill)
-	draw_rect(Rect2(cx - 26.0, y + 12.0, 10.0, 8.0), Color("FFF176"))
-	draw_rect(Rect2(cx + 16.0, y + 12.0, 10.0, 8.0), Color("FFF176"))
+	draw_rect(Rect2(cx - u * 0.055, y + u * 0.06, u * 0.03, u * 0.028), Color("212121"))
+	draw_rect(Rect2(cx + u * 0.025, y + u * 0.06, u * 0.03, u * 0.028), Color("212121"))
+	draw_rect(Rect2(cx - u * 0.046, y + u * 0.024, u * 0.092, u * 0.046), fill)
+	draw_rect(Rect2(cx - u * 0.012, y + u * 0.03, u * 0.024, u * 0.034), Color("FFF59D"))
+	draw_rect(Rect2(cx - u * 0.028, y - u * 0.003, u * 0.056, u * 0.036), Color("ECEFF1"))
+	draw_rect(Rect2(cx - u * 0.036, y - u * 0.018, u * 0.072, u * 0.018), fill)
+	draw_rect(Rect2(cx - u * 0.03, y - u * 0.03, u * 0.012, u * 0.024), fill)
+	draw_rect(Rect2(cx + u * 0.018, y - u * 0.03, u * 0.012, u * 0.024), fill)
+	draw_rect(Rect2(cx - u * 0.04, y + u * 0.018, u * 0.015, u * 0.012), Color("FFF176"))
+	draw_rect(Rect2(cx + u * 0.024, y + u * 0.018, u * 0.015, u * 0.012), Color("FFF176"))
 	if boost_timer > 0.0:
-		draw_rect(Rect2(cx - 10.0, y + 52.0, 20.0, 16.0), Color("FF6F00"))
-		draw_rect(Rect2(cx - 28.0, y + 58.0, 12.0, 10.0), Color("FFCC80"))
-		draw_rect(Rect2(cx + 16.0, y + 58.0, 12.0, 10.0), Color("FFCC80"))
+		draw_rect(Rect2(cx - u * 0.015, y + u * 0.08, u * 0.03, u * 0.024), Color("FF6F00"))
+		draw_rect(Rect2(cx - u * 0.042, y + u * 0.09, u * 0.018, u * 0.015), Color("FFCC80"))
+		draw_rect(Rect2(cx + u * 0.024, y + u * 0.09, u * 0.018, u * 0.015), Color("FFCC80"))
 
 
 func _draw_meta(size: Vector2, horizon: float, ground: float) -> void:
@@ -306,7 +305,7 @@ func _draw_meta(size: Vector2, horizon: float, ground: float) -> void:
 	var dist := distance + ahead
 	var curve := _sample(curves, dist)
 	var center := size.x * 0.5 - lateral * 95.0 * scale + curve * 40.0 * (1.0 - t)
-	var road_w := 360.0 * scale * _sample(widths, dist)
+	var road_w := size.x * 0.42 * scale * _sample(widths, dist)
 	var post_w := 10.0 * scale
 	var post_h := 48.0 * scale
 	draw_rect(Rect2(center - road_w * 0.5, y - post_h, post_w, post_h), Color("212121"))
@@ -322,6 +321,9 @@ func _draw_bands(size: Vector2) -> void:
 
 
 func _update_hud(show_boost: bool) -> void:
+	if finished:
+		hud.text = "META! Ganhaste!\nVolta %d de %d" % [LAPS_TARGET, LAPS_TARGET]
+		return
 	var shown := mini(lap + 1, LAPS_TARGET)
 	var extra := "\nImpulso!" if show_boost else ""
 	if absf(lateral) > _sample(widths, distance):

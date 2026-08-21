@@ -120,11 +120,14 @@ the 2D perspective racer.
 (age 7, `:engine3d`). `MainActivity` uses `StartActivityForResult` so Compose
 is not hosting a Godot view.
 
-On device those Activities attach `GodotFragment`. `boot.tscn` switches to
-`res://kart.tscn` or `res://runner.tscn` through the `MatAventuras` plugin.
-A first-time GLES restart is returned to `MainActivity`, which relaunches
-the plugin Activity in a fresh isolated process. Under Robolectric they
-attach `NativeKartHost` / `NativeRunnerHost` instead.
+On device those Activities attach `GodotFragment`. `boot.tscn` waits for a
+real window, then switches to `res://kart.tscn`, `res://runner.tscn`, or
+another prize scene through the `MatAventuras` plugin. Drawing uses the
+SurfaceView pixel size (stretch disabled). A first-time GLES restart is
+returned to `MainActivity`, which relaunches the plugin Activity in a fresh
+isolated process. A Godot force-quit during that boot must not mark the
+prize as lost. Under Robolectric they attach `NativeKartHost` /
+`NativeRunnerHost` instead.
 
 Simulation is in `:domain` (`Platformer2dEngine`, `OffroadRacerEngine`,
 `Kart3dEngine`) so physics is unit-tested without an emulator.

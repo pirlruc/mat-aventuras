@@ -13,6 +13,8 @@ data class ChompState(
     val pellets: Int,
     val powerTimer: Float,
     val form: Int,
+    val lives: Int,
+    val invuln: Float,
     val alive: Boolean,
     val finished: Boolean,
 )
@@ -35,6 +37,8 @@ class ChompEngine {
             pellets = ChompMaze.ALL_PELLETS,
             powerTimer = 0f,
             form = 0,
+            lives = 3,
+            invuln = 0.8f,
             alive = true,
             finished = false,
         )
@@ -50,15 +54,17 @@ class ChompEngine {
     ): ChompState {
         if (!state.alive || state.finished) return state
         val clamped = dt.coerceIn(0.001f, 0.08f)
-        val eaten = eat(walk(state, dirX, dirY))
+        val cooled = state.copy(invuln = (state.invuln - clamped).coerceAtLeast(0f))
+        val eaten = eat(walk(cooled, dirX, dirY))
         val timer = (eaten.powerTimer - clamped).coerceAtLeast(0f)
         val form = if (timer > 0f) 1 else 0
         val tagged = eaten.copy(powerTimer = timer, form = form)
-        if (form == 0 && touched(tagged)) return tagged.copy(alive = false)
-        val ghosts = chase(tagged, form == 1)
-        val dead = form == 0 && touched(ghosts)
-        val won = ghosts.pellets == 0
-        return ghosts.copy(alive = !dead, finished = won && !dead)
+        val afterTouch = if (form == 0) hitIfTouched(tagged) else tagged
+        if (!afterTouch.alive) return afterTouch.copy(finished = true)
+        val ghosts = chase(afterTouch, form == 1)
+        val resolved = if (form == 0) hitIfTouched(ghosts) else ghosts
+        val won = resolved.pellets == 0 && resolved.alive
+        return resolved.copy(finished = won || !resolved.alive)
     }
 
     private fun walk(
@@ -103,6 +109,13 @@ class ChompEngine {
         if (ChompMaze.isOpen(sx, y) && sx != x) return sx to y
         if (ChompMaze.isOpen(x, sy) && sy != y) return x to sy
         return x to y
+    }
+
+    private fun hitIfTouched(state: ChompState): ChompState {
+        if (state.invuln > 0f || !touched(state)) return state
+        val lives = state.lives - 1
+        if (lives <= 0) return state.copy(alive = false, lives = 0)
+        return state.copy(lives = lives, invuln = 1.6f, px = 1, py = 3)
     }
 
     private fun touched(state: ChompState): Boolean {

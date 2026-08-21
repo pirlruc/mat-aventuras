@@ -160,4 +160,15 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
         if (isDestroyed) return
         runOnUiThread { completeReward(ok) }
     }
+
+    /**
+     * GLES force-quit during boot. Restarts once; never marks the prize as lost
+     * because that is what made invaders (and other scenes) close on first paint.
+     */
+    internal fun onEngineForceQuit(): Boolean {
+        if (isRewardSettled()) return false
+        if (isFinishing || isDestroyed) return false
+        if (isGodotRelaunch()) return false
+        return requestEngineRestart()
+    }
 }

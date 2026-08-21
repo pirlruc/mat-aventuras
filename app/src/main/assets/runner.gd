@@ -58,12 +58,8 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
-	hud.position = Vector2(24, 24)
-	hud.add_theme_font_size_override("font_size", 28)
-	hud.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	hud.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	hud.add_theme_constant_override("outline_size", 10)
 	layer.add_child(hud)
+	Host.style_hud(hud, self)
 	_update_hud()
 	RenderingServer.set_default_clear_color(pal_sky)
 
@@ -224,7 +220,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _nx(pos: Vector2) -> float:
-	return pos.x / maxf(get_viewport().get_visible_rect().size.x, 1.0)
+	return pos.x / maxf(Host.screen_size(self).x, 1.0)
 
 
 func _run_from(nx: float) -> float:
@@ -235,55 +231,65 @@ func _run_from(nx: float) -> float:
 
 
 func _process(delta: float) -> void:
-	if finished:
-		return
 	delta = minf(delta, 0.05)
-	elapsed += delta
-	star_timer = maxf(star_timer - delta, 0.0)
-	if star_timer <= 0.0 and form == 2:
-		form = 1
-	if jumping and on_ground:
-		vy = JUMP_V
-		on_ground = false
-	jumping = false
-	vy += GRAVITY * delta
-	y += vy * delta
-	if not in_pit_fall:
-		x += move_x * SPEED * delta
-	x = clampf(x, 80.0, 2000.0)
-	_land()
-	if y > 780.0:
-		x = _safe_x()
-		y = GROUND_Y
-		vy = 0.0
-		on_ground = true
-		in_pit_fall = false
+	_fit_screen()
+	if not finished:
+		elapsed += delta
+		star_timer = maxf(star_timer - delta, 0.0)
+		if star_timer <= 0.0 and form == 2:
+			form = 1
+		if jumping and on_ground:
+			vy = JUMP_V
+			on_ground = false
+		jumping = false
+		vy += GRAVITY * delta
+		y += vy * delta
+		if not in_pit_fall:
+			x += move_x * SPEED * delta
+		x = clampf(x, 80.0, 2000.0)
+		_land()
+		if y > 780.0:
+			x = _safe_x()
+			y = GROUND_Y
+			vy = 0.0
+			on_ground = true
+			in_pit_fall = false
+		_place_player()
+		_place_enemies()
+		_collect_coins()
+		_collect_powers()
+		_bump_enemies()
+	Host.style_hud(hud, self)
+	_update_hud()
+
+
+func _fit_screen() -> void:
+	var sz := Host.screen_size(self)
+	if sz.y < 32.0:
+		return
+	var s := sz.y / 720.0
+	scale = Vector2(s, s)
 	camera_x = x - 240.0
-	position = Vector2(-camera_x, 0)
-	_place_player()
-	_place_enemies()
-	_collect_coins()
-	_collect_powers()
-	_bump_enemies()
+	position = Vector2(-camera_x * s, 0.0)
 
 
 func _place_player() -> void:
-	var scale := 1.25 if form >= 1 else 1.0
+	var grow := 1.25 if form >= 1 else 1.0
 	if form == 2:
 		player_parts[0].color = Color("FFF176")
 	else:
 		player_parts[0].color = Host.mascot_color()
 	var px := x
-	var py := y - 52.0 * scale
-	player_parts[0].position = Vector2(px + 10.0, py + 20.0 * scale)
-	player_parts[1].position = Vector2(px + 8.0, py + 4.0 * scale)
+	var py := y - 52.0 * grow
+	player_parts[0].position = Vector2(px + 10.0, py + 20.0 * grow)
+	player_parts[1].position = Vector2(px + 8.0, py + 4.0 * grow)
 	player_parts[2].position = Vector2(px + 6.0, py)
-	player_parts[3].position = Vector2(px + 12.0, py + 10.0 * scale)
-	player_parts[4].position = Vector2(px + 20.0, py + 10.0 * scale)
-	player_parts[5].position = Vector2(px + 10.0, py + 40.0 * scale)
-	player_parts[6].position = Vector2(px + 20.0, py + 40.0 * scale)
-	player_parts[7].position = Vector2(px + 8.0, py + 52.0 * scale)
-	player_parts[8].position = Vector2(px + 20.0, py + 52.0 * scale)
+	player_parts[3].position = Vector2(px + 12.0, py + 10.0 * grow)
+	player_parts[4].position = Vector2(px + 20.0, py + 10.0 * grow)
+	player_parts[5].position = Vector2(px + 10.0, py + 40.0 * grow)
+	player_parts[6].position = Vector2(px + 20.0, py + 40.0 * grow)
+	player_parts[7].position = Vector2(px + 8.0, py + 52.0 * grow)
+	player_parts[8].position = Vector2(px + 20.0, py + 52.0 * grow)
 
 
 func _enemy_x(enemy: Vector3) -> float:
@@ -389,6 +395,9 @@ func _bump_enemies() -> void:
 
 
 func _update_hud() -> void:
+	if finished:
+		hud.text = "Ganhaste!\nMoedas %d/%d" % [coins, COINS_TARGET]
+		return
 	var extra := ""
 	if form == 2:
 		extra = "\nEstrela!"

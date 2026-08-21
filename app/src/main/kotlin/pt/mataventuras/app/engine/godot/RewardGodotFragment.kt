@@ -17,6 +17,10 @@ import pt.mataventuras.app.engine.IsolatedEngineActivity
  * thread while the engine thread is swapping is what produced
  * `EGL_BAD_SURFACE` / `BufferQueue has no connected producer` and a black view.
  * [GodotFragment] already pauses and resumes the renderer in order.
+ *
+ * Do not treat [onGodotForceQuit] as a lost prize. Godot can request quit
+ * during first-time GLES setup; finishing with `false` closed the game on
+ * the first frame.
  */
 class RewardGodotFragment : GodotFragment() {
     override fun getCommandLine(): List<String> = GodotRuntime.commandLineFor()
@@ -34,7 +38,13 @@ class RewardGodotFragment : GodotFragment() {
 
     override fun onGodotForceQuit(instance: Godot) {
         val host = activity as? IsolatedEngineActivity ?: return
-        host.completeRewardOnUi(false)
+        host.runOnUiThread { host.onEngineForceQuit() }
+    }
+
+    override fun onGodotForceQuit(godotInstanceId: Int): Boolean {
+        val host = activity as? IsolatedEngineActivity ?: return false
+        host.runOnUiThread { host.onEngineForceQuit() }
+        return true
     }
 
     companion object {
