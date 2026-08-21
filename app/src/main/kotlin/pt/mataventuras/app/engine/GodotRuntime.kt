@@ -17,6 +17,15 @@ object GodotRuntime {
     /** Ring-runner scene path inside `assets/`. */
     const val SCENE_RUNNER: String = "res://runner.tscn"
 
+    /** Letter-invaders scene. */
+    const val SCENE_INVADERS: String = "res://invaders.tscn"
+
+    /** Maze-chomp scene. */
+    const val SCENE_CHOMP: String = "res://chomp.tscn"
+
+    /** Letter-climb scene. */
+    const val SCENE_CLIMB: String = "res://climb.tscn"
+
     /** Runtime plugin name exposed to GDScript as `Engine.get_singleton`. */
     const val PLUGIN_NAME: String = "MatAventuras"
 

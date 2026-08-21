@@ -2,6 +2,8 @@ package pt.mataventuras.app.engine
 
 import android.content.Intent
 import android.opengl.GLSurfaceView
+import android.os.Bundle
+import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.model.Mascot
@@ -25,6 +27,11 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
 
     @Volatile
     private var rewardSettled: Boolean = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
 
     override fun onPause() {
         pauseEngineSurface()
@@ -81,8 +88,8 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     /**
      * Child display name extra, or empty.
      */
-    internal fun childName(): String =
-        intent.getStringExtra(EnginePluginContract.EXTRA_NAME).orEmpty()
+    internal fun sceneCode(): String =
+        intent.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty()
 
     /**
      * Resolves the mascot for tinting; unknown codes fall back to the hedgehog.
@@ -118,7 +125,7 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     internal fun requestEngineRestart(): Boolean =
         settleResult(
             RESULT_OK,
-            EngineLauncher.restartResultIntent(javaClass.name, mascotCode(), childName()),
+            EngineLauncher.restartResultIntent(javaClass.name, mascotCode(), childName(), sceneCode()),
         )
 
     /**

@@ -99,17 +99,12 @@ class Kart3dEngine(
     /**
      * Left / right from a normalised touch X in 0..1. Centre is no steer (boost tap).
      */
-    fun steerFromTouch(normalizedX: Float): Float =
-        when {
-            normalizedX < 0.34f -> -1f
-            normalizedX > 0.66f -> 1f
-            else -> 0f
-        }
+    fun steerFromTouch(normalizedX: Float): Float = EngineInputMap.steerFromNormalizedX(normalizedX)
 
     /**
      * True when the touch is in the centre band (boost).
      */
-    fun isBoostTouch(normalizedX: Float): Boolean = normalizedX in 0.34f..0.66f
+    fun isBoostTouch(normalizedX: Float): Boolean = EngineInputMap.isBoostBand(normalizedX)
 
     private fun applyBoost(
         state: Kart3dState,
@@ -216,7 +211,7 @@ class Kart3dEngine(
         const val BOOST_SPEED: Float = 14f
         const val OFF_TRACK_SPEED: Float = 3f
         const val ACCEL: Float = 10f
-        const val STEER_RATE: Float = 1.6f
+        const val STEER_RATE: Float = 2.6f
         const val BOOST_SECONDS: Float = 1.15f
         const val SNAP_METRES: Float = 0.45f
     }

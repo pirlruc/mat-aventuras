@@ -82,8 +82,8 @@ class PlayBoardFactory(
         }
 
     private fun shapeSudoku(level: Int): Exercise {
-        val n = 2 + minOf(level, 1)
-        val glyphs = GeometricShape.entries.take(n).map { it.displayName }
+        val glyphs = GeometricShape.entries.drop(level % 2).take(4).map { it.displayName }
+        val n = glyphs.size
         val full = SudokuGrids.filled(n, random).map { glyphs[it - 1] }
         val hole = random.nextInt(full.size)
         val answer = full[hole]
@@ -92,8 +92,8 @@ class PlayBoardFactory(
         val options = (others + answer).shuffled(random)
         return Exercise(
             module = LearningModule.SHAPES,
-            prompt = "Que forma falta?",
-            spoken = "Olha o quadrado mágico. Que forma falta?",
+            prompt = "Sudoku: que forma falta?",
+            spoken = "Isto é um sudoku. Olha o quadrado mágico. Que forma falta na casa vazia?",
             options = options,
             correctIndex = options.indexOf(answer),
             targetShape = GeometricShape.entries.first { it.displayName == answer },
@@ -105,12 +105,7 @@ class PlayBoardFactory(
         module: LearningModule,
         level: Int,
     ): Exercise {
-        val n =
-            if (module == LearningModule.NUMBERS || module == LearningModule.COUNTING) {
-                2 + minOf(level, 1)
-            } else {
-                4 + minOf(level, 2)
-            }
+        val n = if (level >= 2 && module != LearningModule.NUMBERS && module != LearningModule.COUNTING) 6 else 4
         val full = SudokuGrids.filled(n, random)
         val hole = random.nextInt(full.size)
         val answer = full[hole]
@@ -118,8 +113,8 @@ class PlayBoardFactory(
         val options = numericOptions(answer, 1, n).map { it.toString() }
         return Exercise(
             module = module,
-            prompt = "Que número falta?",
-            spoken = "Olha o quadrado. Que número falta na casa vazia?",
+            prompt = "Sudoku: que número falta?",
+            spoken = "Isto é um sudoku. Que número falta na casa vazia?",
             options = options,
             correctIndex = options.indexOf(answer.toString()),
             visualCount = answer,

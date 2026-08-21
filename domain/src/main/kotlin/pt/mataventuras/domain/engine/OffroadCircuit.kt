@@ -57,6 +57,6 @@ class OffroadCircuit(
     private companion object {
         const val LENGTH: Float = 480f
         const val SEGMENT_COUNT: Int = 24
-        const val GATE_COUNT: Int = 8
+        const val GATE_COUNT: Int = 4
     }
 }

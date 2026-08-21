@@ -32,16 +32,19 @@ class PlayBoardFactoryTest {
     fun eachBoardKindBuildsASolvableExercise() {
         val shapeSudoku = factory.sudoku(LearningModule.SHAPES)
         assertEquals(PlayKind.SUDOKU, shapeSudoku.play.kind)
-        assertEquals(2, shapeSudoku.play.columns)
+        assertTrue(shapeSudoku.prompt.contains("Sudoku"))
+        assertEquals(4, shapeSudoku.play.columns)
+        assertEquals(16, shapeSudoku.play.cells.size)
         assertTrue(shapeSudoku.play.cells.contains(""))
         assertTrue(shapeSudoku.isCorrect(shapeSudoku.correctIndex))
 
         val numberSudoku = factory.sudoku(LearningModule.LOGIC)
+        assertTrue(numberSudoku.prompt.contains("Sudoku"))
         assertEquals(4, numberSudoku.play.columns)
         assertEquals(16, numberSudoku.play.cells.size)
         val miniSudoku = factory.sudoku(LearningModule.NUMBERS)
-        assertEquals(2, miniSudoku.play.columns)
-        assertEquals(4, miniSudoku.play.cells.size)
+        assertEquals(4, miniSudoku.play.columns)
+        assertEquals(16, miniSudoku.play.cells.size)
 
         val shapeSoup = factory.soup(LearningModule.SHAPES)
         assertEquals(PlayKind.SOUP, shapeSoup.play.kind)
@@ -117,6 +120,14 @@ class PlayBoardFactoryTest {
             (0..40).map { ExerciseGenerator(Random(it)).generate(LearningModule.SHAPES).play.kind }.toSet()
         assertTrue(kinds.size > 1)
         assertTrue(PlayKind.CHOICE in kinds)
+        assertTrue(PlayKind.SUDOKU in kinds)
+        LearningModule.entries.forEach { module ->
+            val mixed =
+                (0..24).map { ExerciseGenerator(Random(it * 13 + module.ordinal)).generate(module, 0) }
+            assertTrue(mixed.isNotEmpty())
+            assertTrue(mixed.any { it.play.kind == PlayKind.CHOICE } || mixed.any { it.options.size >= 2 })
+        }
+        assertEquals(6, PlayBoardFactory(Random(3), generator::numericOptions).sudoku(LearningModule.ADDITION, 2).play.columns)
     }
 
     @Test
@@ -140,10 +151,10 @@ class PlayBoardFactoryTest {
     @Test
     fun harderLevelsGrowBoardsAndCipherAlphabets() {
         val shapeSudoku = factory.sudoku(LearningModule.SHAPES, 2)
-        assertEquals(3, shapeSudoku.play.columns)
-        assertEquals(9, shapeSudoku.play.cells.size)
+        assertEquals(4, shapeSudoku.play.columns)
+        assertEquals(16, shapeSudoku.play.cells.size)
         val mini = factory.sudoku(LearningModule.NUMBERS, 3)
-        assertEquals(3, mini.play.columns)
+        assertEquals(4, mini.play.columns)
         val logic = factory.sudoku(LearningModule.LOGIC, 2)
         assertEquals(6, logic.play.columns)
         assertEquals(36, logic.play.cells.size)
@@ -170,7 +181,7 @@ class PlayBoardFactoryTest {
         assertEquals(1, countCode.play.cells.size)
         val mixed = factory.cipher(LearningModule.NUMBERS, 2)
         assertEquals(3, mixed.play.cells.size)
-        assertTrue(mixed.play.cipherCode.contains("■"))
+        assertTrue(mixed.play.cells.any { it.startsWith("■") })
         val mid = factory.cipher(LearningModule.COUNTING, 1)
         assertEquals(2, mid.play.cells.size)
         val wordCode = factory.cipher(LearningModule.LOGIC, 2)

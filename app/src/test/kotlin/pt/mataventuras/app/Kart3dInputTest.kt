@@ -13,7 +13,8 @@ import pt.mataventuras.domain.model.Mascot
 class Kart3dInputTest {
     @Test
     fun leftThirdSteersNegative() {
-        assertEquals(-1f, Kart3dInput.steerFromTouch(0.1f), 0.001f)
+        assertEquals(-1f, Kart3dInput.steerFromTouch(0f), 0.001f)
+        assertTrue(Kart3dInput.steerFromTouch(0.1f) < -0.5f)
         assertFalse(Kart3dInput.isBoostTouch(0.1f))
     }
 
@@ -25,16 +26,18 @@ class Kart3dInputTest {
 
     @Test
     fun rightThirdSteersPositive() {
-        assertEquals(1f, Kart3dInput.steerFromTouch(0.9f), 0.001f)
+        assertEquals(1f, Kart3dInput.steerFromTouch(1f), 0.001f)
+        assertTrue(Kart3dInput.steerFromTouch(0.9f) > 0.5f)
         assertFalse(Kart3dInput.isBoostTouch(0.9f))
     }
 
     @Test
     fun boundariesAreInclusiveForBoost() {
-        assertTrue(Kart3dInput.isBoostTouch(0.34f))
-        assertTrue(Kart3dInput.isBoostTouch(0.66f))
-        assertEquals(-1f, Kart3dInput.steerFromTouch(0.33f), 0.001f)
-        assertEquals(1f, Kart3dInput.steerFromTouch(0.67f), 0.001f)
+        assertTrue(Kart3dInput.isBoostTouch(0.5f))
+        assertTrue(Kart3dInput.isBoostTouch(0.4f))
+        assertFalse(Kart3dInput.isBoostTouch(0.1f))
+        assertTrue(Kart3dInput.steerFromTouch(0.33f) < 0f)
+        assertTrue(Kart3dInput.steerFromTouch(0.67f) > 0f)
         assertTrue(Kart3dInput.boostOnAction(0, 0.5f))
         assertFalse(Kart3dInput.boostOnAction(0, 0.1f))
         assertFalse(Kart3dInput.boostOnAction(1, 0.5f))

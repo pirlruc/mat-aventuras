@@ -168,7 +168,14 @@ fun LessonScreen(
         }
         UiLogic.targetShapeToDraw(module, exercise.targetShape, exercise.play.kind)?.let { ShapeGlyph(it) }
         if (UiLogic.showsSudokuGrid(exercise.play.kind)) {
-            PlayGrid(exercise)
+            Text(
+                UiLogic.sudokuBanner(exercise.play.kind) ?: "Sudoku",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF0D47A1),
+                modifier = Modifier.testTag("sudoku-banner"),
+            )
+            SudokuBoard(exercise)
         }
         if (UiLogic.showsSoupBoard(exercise.play.kind)) {
             SoupBoard(
@@ -299,29 +306,34 @@ private fun AnswerFlash(
 }
 
 @Composable
-private fun PlayGrid(exercise: Exercise) {
+private fun SudokuBoard(exercise: Exercise) {
     val columns = exercise.play.columns.coerceAtLeast(1)
     val cells = exercise.play.cells.ifEmpty { exercise.options }
-    val cellDp = UiLogic.playCellHeightDp(columns)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val cellDp = UiLogic.playCellHeightDp(columns) + 8
+    val boxW = UiLogic.sudokuBoxWidth(columns)
+    val boxH = UiLogic.sudokuBoxHeight(columns)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF0D47A1))
+            .padding(6.dp),
+    ) {
         cells.chunked(columns).forEachIndexed { row, rowCells ->
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = UiLogic.sudokuGapDp(row, boxH).dp),
             ) {
                 rowCells.forEachIndexed { col, cell ->
                     val index = row * columns + col
                     val hole = UiLogic.isBoardHole(cell)
-                    Button(
-                        onClick = {},
-                        enabled = false,
-                        colors = ButtonDefaults.buttonColors(
-                            disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
-                            disabledContentColor = Color(0xFF0D47A1),
-                        ),
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .weight(1f)
                             .height(cellDp.dp)
+                            .padding(start = UiLogic.sudokuGapDp(col, boxW).dp)
+                            .background(if (hole) Color(0xFFFFF59D) else Color(0xFFE3F2FD))
                             .testTag("board-cell-$index"),
                     ) {
                         GridCellFace(module = exercise.module, cell = cell)

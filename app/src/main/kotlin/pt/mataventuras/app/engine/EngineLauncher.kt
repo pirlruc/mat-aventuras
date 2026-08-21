@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.engine.EnginePluginResolver
+import pt.mataventuras.domain.engine.RewardCatalog
+import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.domain.model.Mascot
@@ -73,12 +75,14 @@ object EngineLauncher {
         activityClassName: String,
         mascotCode: String,
         childName: String,
+        scene: String = "",
     ): Intent =
         Intent()
             .putExtra(RESULT_RESTART, true)
             .putExtra(EXTRA_ENGINE_CLASS, activityClassName)
             .putExtra(EXTRA_MASCOT, mascotCode)
             .putExtra(EXTRA_NAME, childName)
+            .putExtra(EnginePluginContract.EXTRA_SCENE, scene)
 
     /**
      * Intent that relaunches the plugin Activity after a Godot GLES restart.
@@ -94,6 +98,7 @@ object EngineLauncher {
         return Intent().setClassName(context.packageName, className).apply {
             putExtra(EXTRA_MASCOT, data.getStringExtra(EXTRA_MASCOT).orEmpty())
             putExtra(EXTRA_NAME, data.getStringExtra(EXTRA_NAME).orEmpty())
+            putExtra(EnginePluginContract.EXTRA_SCENE, data.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty())
             putExtra(EXTRA_GODOT_RELAUNCH, true)
         }
     }
@@ -119,6 +124,7 @@ object EngineLauncher {
         mascot: Mascot,
         name: String,
         kind: EngineKind = pickRewardKind(ageGroup),
+        game: RewardGame = RewardCatalog.pick(ageGroup, kind),
         pluginPresent: (String) -> Boolean = { isClassPresent(it) },
     ): Intent {
         val className =
@@ -129,7 +135,7 @@ object EngineLauncher {
                 nativeThreeD = Kart3dActivity::class.java.name,
             )
         return Intent().setClassName(context.packageName, className).apply {
-            EnginePluginContract.launchExtras(mascot.code, name).forEach { (key, value) ->
+            EnginePluginContract.launchExtras(mascot.code, name, game).forEach { (key, value) ->
                 putExtra(key, value)
             }
         }

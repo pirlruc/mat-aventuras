@@ -18,6 +18,23 @@ data class PlatformerLedge(
 )
 
 /**
+ * Patrol enemy the runner can stomp or get hurt by.
+ */
+data class PlatformerEnemy(
+    val minX: Float,
+    val maxX: Float,
+    val speed: Float,
+)
+
+/**
+ * Pickup that grows ([grow] true) or stars the runner.
+ */
+data class PlatformerPowerup(
+    val x: Float,
+    val grow: Boolean,
+)
+
+/**
  * Palette + layout for one age-3 reward run.
  */
 data class PlatformerLevel(
@@ -30,6 +47,8 @@ data class PlatformerLevel(
     val grassArgb: Long,
     val brickArgb: Long,
     val pitArgb: Long,
+    val enemies: List<PlatformerEnemy> = emptyList(),
+    val powerups: List<PlatformerPowerup> = emptyList(),
 ) {
     /**
      * True when [x] is over a floor gap.
@@ -108,6 +127,17 @@ object PlatformerWorld {
                 PlatformerLedge(86f, 3.4f, 8f),
             )
         val coins = listOf(6f, 14f, 28f, 34f, 50f, 56f, 70f, 88f, 96f)
+        val enemies =
+            listOf(
+                PlatformerEnemy(20f, 32f, 3.2f),
+                PlatformerEnemy(48f, 60f, 2.6f),
+                PlatformerEnemy(84f, 96f, 3.0f),
+            )
+        val powerups =
+            listOf(
+                PlatformerPowerup(12f, grow = true),
+                PlatformerPowerup(64f, grow = false),
+            )
         return PlatformerLevel(
             pits = pits,
             ledges = ledges,
@@ -118,6 +148,8 @@ object PlatformerWorld {
             grassArgb = GRASS[theme],
             brickArgb = BRICK[theme],
             pitArgb = 0xFF1A0A08,
+            enemies = enemies,
+            powerups = powerups,
         )
     }
 }

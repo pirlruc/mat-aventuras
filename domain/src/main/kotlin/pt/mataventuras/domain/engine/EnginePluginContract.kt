@@ -21,6 +21,9 @@ object EnginePluginContract {
     /** Intent extra: child display name. */
     const val EXTRA_NAME: String = "name"
 
+    /** Intent extra: reward mini-game name (`RUNNER`, `KART`, …). */
+    const val EXTRA_SCENE: String = "scene"
+
     /** Result extra: true when the reward level completed. */
     const val RESULT_FINISHED: String = "finished"
 
@@ -113,6 +116,15 @@ object EnginePluginContract {
             EXTRA_MASCOT to mascotCode,
             EXTRA_NAME to childName,
         )
+
+    /**
+     * Launch extras including the packed Godot scene name.
+     */
+    fun launchExtras(
+        mascotCode: String,
+        childName: String,
+        game: RewardGame,
+    ): Map<String, String> = launchExtras(mascotCode, childName) + (EXTRA_SCENE to game.name)
 
     private val FORBIDDEN_PERMISSIONS =
         setOf(

@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-21
-**Last agent focus:** Soup keep-board; tap boost; HUD contrast; course clamps
+**Last agent focus:** Unique soup; kid-friendly kart/jump; arcade prizes; sudoku 4×4; Godot surface
 
 ---
 
@@ -15,8 +15,9 @@ Native Kotlin/Compose educational math game for ages 3 and 7.
 Privacy: on-device only. Decision log: GitHub Epics via github-issue-adr;
 authored backlog is `docs/issues.yml`.
 
-Reward engines: **Godot 4** in `:engine2d` (age 3 platformer) and `:engine3d`
-(age 7 2.5D off-road race). Unity is not used. Native Canvas is the
+Reward engines: **Godot 4** in `:engine2d` (age 3 platformer, letter-climb,
+maze) and `:engine3d` (age 7 2.5D off-road race with rivals). Age 7 can also
+open 2D invaders/maze/climb. Unity is not used. Native Canvas is the
 Robolectric fallback. `Kart3dEngine` GLES remains unit-tested.
 
 ## Pins
@@ -27,6 +28,7 @@ Robolectric fallback. `Kart3dEngine` GLES remains unit-tested.
 | guardrails | submodule SHA `docs/guardrails/` | `0354a747` (tag `1.3.0`) |
 | github-scaffold | submodule SHA `.github/scaffold/` | `aac408cc` (tag `1.2.0`) |
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
+| Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 
 ## Delivery status
 
@@ -71,7 +73,7 @@ bash scripts/ci-local.sh
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`; this cloud run used
-  `cursor/mat-aventuras-core-ade3` per the agent environment.
+  `cursor/games-usability-f702` per the agent environment.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
 - Run `:domain:ktlintFormat` before `:domain:ktlintCheck` (parallel format+check races).
 - Never construct `GodotFragment` under Robolectric (`GodotRuntime.shouldEmbed`
@@ -86,6 +88,15 @@ bash scripts/ci-local.sh
 - Compose `pointerInput` `size` is `IntSize` (`width: Int`). Use
   `size.width.coerceAtLeast(1).toFloat()`, not `coerceAtLeast(1f)`.
   `:app` is not compiled on this VM (`ANDROID_HOME` unset); CI catches it.
+- Do not call `Godot` `renderView.onPause()` from `RewardGodotFragment`.
+  That disconnects the BufferQueue while the GL thread is swapping and
+  yields `EGL_BAD_SURFACE` / a black SurfaceView. Let `GodotFragment` order
+  pause/resume. `boot.tscn` waits for `DisplayServer.window_get_size()` and
+  a real viewport before `change_scene_to_file`.
+- Detekt is `dev.detekt` `2.0.0-alpha.6`. Config keys use `allowedComplexity` /
+  `allowedLines` / `allowedFunctionsPerClass` (not the 1.x `threshold` names).
+  Do not revert to `io.gitlab.arturbosch.detekt` 1.23.8: that plugin still calls
+  deprecated `ReportingExtension.file` (removed in Gradle 10).
 
 ## Suggested next work
 
@@ -93,7 +104,9 @@ bash scripts/ci-local.sh
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 
-This pass: sopa miss keeps found words; Godot boost is tap-only; runner
-stays on the course; HUD contrast; gate posts; consonant soup filler.
+This pass: soup words unique in every direction (no 2-letter fillers);
+runner jump is a long upward swipe, not a tap; kart uses full left/right
+steer, rivals, META gantry, and side-tap bands; 4×4/6×6 sudoku with box
+gutters; invaders/chomp/climb prizes; Godot boot waits for a real window.
 
 *Last updated: 2026-08-21*

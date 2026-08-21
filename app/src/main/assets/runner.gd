@@ -1,11 +1,13 @@
 extends Node2D
 
-## Age-3 side-scroller. Drag forward to run and leap; drag back to reverse. HUD is pt-PT.
+## Age-3 side-scroller. Hold right/left to run; swipe up to jump. HUD is pt-PT.
 const COINS_TARGET := 9
 const GROUND_Y := 520.0
 const SPEED := 220.0
 const GRAVITY := 980.0
 const JUMP_V := -520.0
+const DEADZONE := 0.14
+const JUMP_FLICK := 56.0
 
 var x := 80.0
 var y := GROUND_Y
@@ -28,6 +30,20 @@ var camera_x := 0.0
 var pal_sky: Color = Color("7EC0ED")
 var pal_grass: Color = Color("3D9E2F")
 var pal_brick: Color = Color("C75A1A")
+var enemies: Array[Vector3] = [] # min_x, max_x, speed
+var enemy_nodes: Array[ColorRect] = []
+var stomped: Array[bool] = []
+var power_xs: Array[float] = []
+var power_grow: Array[bool] = []
+var power_nodes: Array[ColorRect] = []
+var power_taken: Array[bool] = []
+var form := 0
+var star_timer := 0.0
+var elapsed := 0.0
+var finger_down := false
+var finger_x := 0.5
+var flick_x := 0.0
+var flick_y := 0.0
 
 
 func _ready() -> void:
@@ -37,6 +53,8 @@ func _ready() -> void:
 	_draw_world()
 	_make_player()
 	_make_coins()
+	_make_enemies()
+	_make_powers()
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
@@ -47,6 +65,7 @@ func _ready() -> void:
 	hud.add_theme_constant_override("outline_size", 10)
 	layer.add_child(hud)
 	_update_hud()
+	RenderingServer.set_default_clear_color(pal_sky)
 
 
 func _cache_palette() -> void:
@@ -76,6 +95,13 @@ func _layout() -> void:
 	coin_xs = [200.0, 320.0, 540.0, 680.0, 920.0, 1040.0, 1280.0, 1680.0, 1840.0]
 	taken.resize(coin_xs.size())
 	taken.fill(false)
+	enemies = [Vector3(480.0, 640.0, 70.0), Vector3(900.0, 1100.0, 55.0), Vector3(1600.0, 1780.0, 65.0)]
+	stomped.resize(enemies.size())
+	stomped.fill(false)
+	power_xs = [250.0, 1320.0]
+	power_grow = [true, false]
+	power_taken.resize(2)
+	power_taken.fill(false)
 
 
 func _draw_world() -> void:
@@ -88,12 +114,19 @@ func _draw_world() -> void:
 	band.position = Vector2(0, 300)
 	band.size = Vector2(2200, 220)
 	add_child(band)
+	for i in 6:
+		var cloud := ColorRect.new()
+		cloud.color = Color(1, 1, 1, 0.55)
+		cloud.position = Vector2(80.0 + i * 320.0, 40.0 + float(i % 3) * 18.0)
+		cloud.size = Vector2(110, 36)
+		add_child(cloud)
 	_add_brick(0, GROUND_Y, 2200, 24, pal_grass)
 	_add_brick(0, GROUND_Y + 24.0, 2200, 176, pal_brick)
 	for pit in pits:
 		_add_brick(pit.x, GROUND_Y, pit.y - pit.x, 200, Color("1A0A08"))
 	for ledge in ledges:
 		_add_brick(ledge.position.x, ledge.position.y, ledge.size.x, ledge.size.y, pal_brick)
+		_add_brick(ledge.position.x, ledge.position.y - 8.0, ledge.size.x, 8.0, pal_grass)
 
 
 func _make_player() -> void:
@@ -122,10 +155,29 @@ func _make_coins() -> void:
 	for cx in coin_xs:
 		var coin := ColorRect.new()
 		coin.color = Color("FFD54F")
-		coin.size = Vector2(16, 16)
-		coin.position = Vector2(cx, GROUND_Y - 52.0)
+		coin.size = Vector2(18, 18)
+		coin.position = Vector2(cx, GROUND_Y - 56.0)
 		add_child(coin)
 		coin_nodes.append(coin)
+
+
+func _make_enemies() -> void:
+	for _e in enemies:
+		var body := ColorRect.new()
+		body.color = Color("6D4C41")
+		body.size = Vector2(28, 22)
+		add_child(body)
+		enemy_nodes.append(body)
+
+
+func _make_powers() -> void:
+	for i in power_xs.size():
+		var node := ColorRect.new()
+		node.color = Color("E53935") if power_grow[i] else Color("FFF176")
+		node.size = Vector2(20, 20)
+		node.position = Vector2(power_xs[i], GROUND_Y - 58.0)
+		add_child(node)
+		power_nodes.append(node)
 
 
 func _add_brick(px: float, py: float, w: float, h: float, color: Color) -> void:
@@ -137,33 +189,66 @@ func _add_brick(px: float, py: float, w: float, h: float, color: Color) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventScreenDrag:
-		move_x = clampf(event.relative.x / 12.0, -1.0, 1.0)
-		if event.relative.x > 14.0:
+	if event is InputEventScreenTouch:
+		finger_down = event.pressed
+		if event.pressed:
+			finger_x = _nx(event.position)
+			move_x = _run_from(finger_x)
+			flick_x = 0.0
+			flick_y = 0.0
+		else:
+			move_x = 0.0
+	elif event is InputEventMouseButton:
+		finger_down = event.pressed
+		if event.pressed:
+			finger_x = _nx(event.position)
+			move_x = _run_from(finger_x)
+			flick_x = 0.0
+			flick_y = 0.0
+		else:
+			move_x = 0.0
+	elif event is InputEventScreenDrag:
+		finger_x = _nx(event.position)
+		move_x = _run_from(finger_x)
+		flick_x += event.relative.x
+		flick_y += event.relative.y
+		if flick_y < -JUMP_FLICK and absf(flick_y) >= absf(flick_x) * 1.2:
 			jumping = true
 	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		move_x = clampf(event.relative.x / 12.0, -1.0, 1.0)
-		if event.relative.x > 14.0:
+		finger_x = _nx(event.position)
+		move_x = _run_from(finger_x)
+		flick_x += event.relative.x
+		flick_y += event.relative.y
+		if flick_y < -JUMP_FLICK and absf(flick_y) >= absf(flick_x) * 1.2:
 			jumping = true
-	elif event is InputEventScreenTouch and not event.pressed:
-		move_x = 0.0
-	elif event is InputEventMouseButton and not event.pressed:
-		move_x = 0.0
+
+
+func _nx(pos: Vector2) -> float:
+	return pos.x / maxf(get_viewport().get_visible_rect().size.x, 1.0)
+
+
+func _run_from(nx: float) -> float:
+	var delta := nx - 0.5
+	if absf(delta) <= DEADZONE:
+		return 0.0
+	return -1.0 if delta < 0.0 else 1.0
 
 
 func _process(delta: float) -> void:
 	if finished:
 		return
 	delta = minf(delta, 0.05)
-	if jumping and on_ground and move_x > 0.2:
+	elapsed += delta
+	star_timer = maxf(star_timer - delta, 0.0)
+	if star_timer <= 0.0 and form == 2:
+		form = 1
+	if jumping and on_ground:
 		vy = JUMP_V
 		on_ground = false
 	jumping = false
 	vy += GRAVITY * delta
 	y += vy * delta
-	if in_pit_fall:
-		x += 0.0
-	else:
+	if not in_pit_fall:
 		x += move_x * SPEED * delta
 	x = clampf(x, 80.0, 2000.0)
 	_land()
@@ -176,21 +261,47 @@ func _process(delta: float) -> void:
 	camera_x = x - 240.0
 	position = Vector2(-camera_x, 0)
 	_place_player()
+	_place_enemies()
 	_collect_coins()
+	_collect_powers()
+	_bump_enemies()
 
 
 func _place_player() -> void:
+	var scale := 1.25 if form >= 1 else 1.0
+	if form == 2:
+		player_parts[0].color = Color("FFF176")
+	else:
+		player_parts[0].color = Host.mascot_color()
 	var px := x
-	var py := y - 52.0
-	player_parts[0].position = Vector2(px + 10.0, py + 20.0)
-	player_parts[1].position = Vector2(px + 8.0, py + 4.0)
+	var py := y - 52.0 * scale
+	player_parts[0].position = Vector2(px + 10.0, py + 20.0 * scale)
+	player_parts[1].position = Vector2(px + 8.0, py + 4.0 * scale)
 	player_parts[2].position = Vector2(px + 6.0, py)
-	player_parts[3].position = Vector2(px + 12.0, py + 10.0)
-	player_parts[4].position = Vector2(px + 20.0, py + 10.0)
-	player_parts[5].position = Vector2(px + 10.0, py + 40.0)
-	player_parts[6].position = Vector2(px + 20.0, py + 40.0)
-	player_parts[7].position = Vector2(px + 8.0, py + 52.0)
-	player_parts[8].position = Vector2(px + 20.0, py + 52.0)
+	player_parts[3].position = Vector2(px + 12.0, py + 10.0 * scale)
+	player_parts[4].position = Vector2(px + 20.0, py + 10.0 * scale)
+	player_parts[5].position = Vector2(px + 10.0, py + 40.0 * scale)
+	player_parts[6].position = Vector2(px + 20.0, py + 40.0 * scale)
+	player_parts[7].position = Vector2(px + 8.0, py + 52.0 * scale)
+	player_parts[8].position = Vector2(px + 20.0, py + 52.0 * scale)
+
+
+func _enemy_x(enemy: Vector3) -> float:
+	var span := enemy.y - enemy.x
+	var cycle := span * 2.0
+	var phase := fposmod(elapsed * enemy.z, cycle)
+	if phase <= span:
+		return enemy.x + phase
+	return enemy.y - (phase - span)
+
+
+func _place_enemies() -> void:
+	for i in enemies.size():
+		if stomped[i]:
+			enemy_nodes[i].visible = false
+			continue
+		var ex := _enemy_x(enemies[i])
+		enemy_nodes[i].position = Vector2(ex, GROUND_Y - 24.0)
 
 
 func _land() -> void:
@@ -243,5 +354,44 @@ func _collect_coins() -> void:
 				Host.finish(true)
 
 
+func _collect_powers() -> void:
+	for i in power_xs.size():
+		if power_taken[i]:
+			continue
+		if absf(x - power_xs[i]) < 28.0 and absf(y - GROUND_Y) < 90.0:
+			power_taken[i] = true
+			power_nodes[i].visible = false
+			if power_grow[i]:
+				form = maxi(form, 1)
+			else:
+				form = 2
+				star_timer = 3.2
+			_update_hud()
+
+
+func _bump_enemies() -> void:
+	for i in enemies.size():
+		if stomped[i]:
+			continue
+		var ex := _enemy_x(enemies[i])
+		if absf(x - ex) > 26.0:
+			continue
+		if not on_ground or form == 2:
+			stomped[i] = true
+			enemy_nodes[i].visible = false
+		elif form >= 1:
+			form = 0
+		else:
+			x = _safe_x()
+			y = GROUND_Y
+			vy = 0.0
+			on_ground = true
+
+
 func _update_hud() -> void:
-	hud.text = "Moedas %d/%d" % [coins, COINS_TARGET]
+	var extra := ""
+	if form == 2:
+		extra = "\nEstrela!"
+	elif form == 1:
+		extra = "\nCresceste!"
+	hud.text = "Segura à direita para avançar\nDesliza para cima: saltar\nMoedas %d/%d%s" % [coins, COINS_TARGET, extra]

@@ -18,9 +18,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import pt.mataventuras.app.engine.ChompLoop
+import pt.mataventuras.app.engine.ClimbLoop
 import pt.mataventuras.app.engine.EngineLauncher
+import pt.mataventuras.app.engine.InvadersLoop
 import pt.mataventuras.app.engine.Kart3dActivity
 import pt.mataventuras.app.engine.NativeKartHost
+import pt.mataventuras.app.engine.NativeRewardHost
 import pt.mataventuras.app.engine.OffroadRacerLoop
 import pt.mataventuras.app.engine.OffroadScene
 import pt.mataventuras.app.engine.OffroadSpan
@@ -35,6 +39,7 @@ import pt.mataventuras.app.ui.home.HomeScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.engine.PlatformerWorld
+import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.Mascot
@@ -427,5 +432,25 @@ class AppUiTest {
         loop.tick()
         val hud = NativeKartHost.hudLines(loop)
         assertTrue(hud.first.startsWith("Volta"))
+        assertTrue(hud.second.contains("Arcos") || hud.second.contains("Lugar"))
+        val invaders = InvadersLoop(nowNs = { ns += 40_000_000L; ns })
+        invaders.moveX = -1f
+        invaders.fire = true
+        repeat(20) { invaders.tick() }
+        assertTrue(invaders.state.shipX <= 0.5f)
+        val chomp = ChompLoop(nowNs = { ns += 80_000_000L; ns })
+        chomp.dirX = 1
+        repeat(8) { chomp.tick() }
+        assertTrue(chomp.state.px >= 1)
+        val climb = ClimbLoop(nowNs = { ns += 40_000_000L; ns })
+        climb.moveX = 1f
+        climb.jumping = true
+        repeat(12) { climb.tick() }
+        assertTrue(climb.state.x > 0.12f || !climb.state.onFloor)
+        assertTrue(NativeRewardHost.hint(RewardGame.INVADERS).contains("nave"))
+        assertTrue(NativeRewardHost.hint(RewardGame.CHOMP).contains("bolinhas"))
+        assertTrue(NativeRewardHost.hint(RewardGame.CLIMB).contains("barris"))
+        assertTrue(NativeRewardHost.hint(RewardGame.RUNNER).contains("saltar"))
+        assertTrue(NativeRewardHost.hint(RewardGame.KART).contains("guiar"))
     }
 }

@@ -53,15 +53,52 @@ object PlayKinds {
     fun forModule(module: LearningModule): List<PlayKind> =
         when (module) {
             LearningModule.COUNTING ->
-                listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.SOUP, PlayKind.PUZZLE, PlayKind.CIPHER)
+                listOf(
+                    PlayKind.CHOICE,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SOUP,
+                    PlayKind.PUZZLE,
+                    PlayKind.CIPHER,
+                )
             LearningModule.SHAPES ->
-                listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.SOUP, PlayKind.PUZZLE)
+                listOf(
+                    PlayKind.CHOICE,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SOUP,
+                    PlayKind.PUZZLE,
+                )
             LearningModule.NUMBERS ->
-                listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.SOUP, PlayKind.CIPHER, PlayKind.PUZZLE)
+                listOf(
+                    PlayKind.CHOICE,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SOUP,
+                    PlayKind.CIPHER,
+                    PlayKind.PUZZLE,
+                )
             LearningModule.ADDITION, LearningModule.SUBTRACTION, LearningModule.MULTIPLICATION ->
-                listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.CIPHER, PlayKind.PUZZLE)
+                listOf(
+                    PlayKind.CHOICE,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.CIPHER,
+                    PlayKind.PUZZLE,
+                )
             LearningModule.LOGIC ->
-                listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.SOUP, PlayKind.CIPHER)
+                listOf(
+                    PlayKind.CHOICE,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SUDOKU,
+                    PlayKind.SOUP,
+                    PlayKind.CIPHER,
+                )
         }
 
     /**
