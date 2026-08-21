@@ -32,6 +32,12 @@ internal object OffroadScene {
     const val BANNER_ARGB: Long = 0xFFFFD54F
 
     /**
+     * Metres ahead that arches, rivals, and META still draw. Must clear the
+     * first gate (`length / (gateCount + 1)` = 96 m on the 480 m loop).
+     */
+    const val DRAW_AHEAD: Float = 140f
+
+    /**
      * Sky colour for [circuit.palette].
      */
     fun skyArgb(circuit: OffroadCircuit): Long = SKY[circuit.palette]
@@ -54,7 +60,7 @@ internal object OffroadScene {
         for (i in STRIP_COUNT - 1 downTo 0) {
             addStrip(out, state, circuit, width, horizon, ground, i)
         }
-		addGates(out, state, circuit, width, horizon, ground)
+        addGates(out, state, circuit, width, horizon, ground)
         addMeta(out, state, circuit, width, horizon, ground)
         addRivals(out, state, circuit, width, horizon, ground)
         addKart(out, mascot, width, ground, state)
@@ -117,8 +123,8 @@ internal object OffroadScene {
             if ((state.collectedMask shr i) and 1 == 1) continue
             val ahead = circuit.gateDistance(i) - state.distance
             val wrapped = if (ahead < 0f) ahead + circuit.length else ahead
-            if (wrapped > 90f) continue
-            val t = (wrapped / 90f).coerceIn(0f, 1f)
+            if (wrapped > DRAW_AHEAD) continue
+            val t = (wrapped / DRAW_AHEAD).coerceIn(0f, 1f)
             val y = ground - (ground - horizon) * t - 8f
             val scale = 1.4f / (0.4f + t * 2f)
             val dist = state.distance + wrapped
@@ -144,8 +150,8 @@ internal object OffroadScene {
     ) {
         var ahead = circuit.length - state.distance
         if (ahead < 0f) ahead += circuit.length
-        if (ahead > 90f || ahead < 2f) return
-        val t = (ahead / 90f).coerceIn(0f, 1f)
+        if (ahead > DRAW_AHEAD || ahead < 2f) return
+        val t = (ahead / DRAW_AHEAD).coerceIn(0f, 1f)
         val y = ground - (ground - horizon) * t - 8f
         val scale = 1.4f / (0.4f + t * 2f)
         val dist = state.distance + ahead
@@ -182,8 +188,8 @@ internal object OffroadScene {
         state.rivals.forEach { rival ->
             var ahead = rival.distance - state.distance
             if (ahead < 0f) ahead += circuit.length
-            if (ahead > 90f || ahead < 4f) return@forEach
-            val t = (ahead / 90f).coerceIn(0f, 1f)
+            if (ahead > DRAW_AHEAD || ahead < 4f) return@forEach
+            val t = (ahead / DRAW_AHEAD).coerceIn(0f, 1f)
             val y = ground - (ground - horizon) * t - 40f
             val scale = 1.2f / (0.45f + t * 2f)
             val x = width * 0.5f + (rival.lateral - state.lateral) * 90f * scale

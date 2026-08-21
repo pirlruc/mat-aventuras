@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-21
-**Last agent focus:** Unique soup; kid-friendly kart/jump; arcade prizes; sudoku 4×4; Godot surface
+**Last agent focus:** CI test job: kart DRAW_AHEAD, sudoku gutters, STEER_HINT
 
 ---
 
@@ -88,6 +88,11 @@ bash scripts/ci-local.sh
 - Compose `pointerInput` `size` is `IntSize` (`width: Int`). Use
   `size.width.coerceAtLeast(1).toFloat()`, not `coerceAtLeast(1f)`.
   `:app` is not compiled on this VM (`ANDROID_HOME` unset); CI catches it.
+- `OffroadScene.fill` clears the span list each call. Four gates put the first
+  arch at 96 m, so `DRAW_AHEAD` must be greater than that (140 m) or spawn
+  paints no posts. Near META, assert `BANNER_ARGB`, not `POST_ARGB`. Kart TTS
+  is `virar` / `META`, not `guiar`. `sudokuGapDp(0, box)` is 1 dp; box
+  boundaries (`index % box == 0` and `index > 0`) are 4 dp.
 - Do not call `Godot` `renderView.onPause()` from `RewardGodotFragment`.
   That disconnects the BufferQueue while the GL thread is swapping and
   yields `EGL_BAD_SURFACE` / a black SurfaceView. Let `GodotFragment` order
@@ -108,5 +113,7 @@ This pass: soup words unique in every direction (no 2-letter fillers);
 runner jump is a long upward swipe, not a tap; kart uses full left/right
 steer, rivals, META gantry, and side-tap bands; 4×4/6×6 sudoku with box
 gutters; invaders/chomp/climb prizes; Godot boot waits for a real window.
+Kart arches/rivals/META draw 140 m ahead so the first 96 m gate is visible
+from the start line.
 
 *Last updated: 2026-08-21*

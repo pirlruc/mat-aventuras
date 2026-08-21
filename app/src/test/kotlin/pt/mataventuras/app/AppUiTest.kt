@@ -347,15 +347,17 @@ class AppUiTest {
             480f,
         )
         assertTrue(spans.size > 10)
+        assertTrue(spans.any { it.argb == OffroadScene.POST_ARGB })
         val clearedGates =
             three.session.state.copy(collectedMask = (1 shl three.session.state.gatesTarget) - 1)
         OffroadScene.fill(spans, clearedGates, three.session.circuit, Mascot.HERO_PUP, 400f, 300f)
+        assertFalse(spans.any { it.argb == OffroadScene.POST_ARGB })
         val boosted =
             three.session.state.copy(boostTimer = 0.5f, steer = -0.4f, distance = 400f)
         OffroadScene.fill(spans, boosted, three.session.circuit, Mascot.SPEEDY_HEDGEHOG, 320f, 200f)
         assertTrue(spans.any { it.argb == 0xFFFF6F00 })
         assertTrue(spans.any { it.argb == OffroadScene.HEADLAMP_ARGB })
-        assertTrue(spans.any { it.argb == OffroadScene.POST_ARGB })
+        assertTrue(spans.any { it.argb == OffroadScene.BANNER_ARGB })
         assertTrue(OffroadScene.skyArgb(three.session.circuit) != 0L)
         three.closeFinished()
         threeController.pause().stop().destroy()
@@ -451,6 +453,7 @@ class AppUiTest {
         assertTrue(NativeRewardHost.hint(RewardGame.CHOMP).contains("bolinhas"))
         assertTrue(NativeRewardHost.hint(RewardGame.CLIMB).contains("barris"))
         assertTrue(NativeRewardHost.hint(RewardGame.RUNNER).contains("saltar"))
-        assertTrue(NativeRewardHost.hint(RewardGame.KART).contains("guiar"))
+        assertTrue(NativeRewardHost.hint(RewardGame.KART).contains("virar"))
+        assertTrue(NativeRewardHost.hint(RewardGame.KART).contains("META"))
     }
 }

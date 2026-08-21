@@ -307,6 +307,7 @@ class GodotPluginHostTest {
         assertTrue(kartScript.contains("_update_hud(boost_timer > 0.0)"))
         assertTrue(kartScript.contains("Arcos"))
         assertTrue(kartScript.contains("_draw_meta"))
+        assertTrue(kartScript.contains("DRAW_AHEAD"))
         assertTrue(kartScript.contains("META"))
         assertTrue(kartScript.contains("_draw_bands"))
         assertTrue(kartScript.contains("_draw_strip"))

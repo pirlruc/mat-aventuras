@@ -9,6 +9,7 @@ const CRUISE := 28.0
 const BOOST_SPD := 46.0
 const STRIPS := 28
 const STEER_RATE := 5.6
+const DRAW_AHEAD := 140.0
 
 var distance := 2.0
 var lateral := 0.0
@@ -237,9 +238,9 @@ func _draw_arches(size: Vector2, horizon: float, ground: float) -> void:
 		var ahead := gate_at - distance
 		if ahead < 0.0:
 			ahead += LENGTH
-		if ahead > 90.0:
+		if ahead > DRAW_AHEAD:
 			continue
-		var t := clampf(ahead / 90.0, 0.0, 1.0)
+		var t := clampf(ahead / DRAW_AHEAD, 0.0, 1.0)
 		var y := ground - (ground - horizon) * t - 8.0
 		var scale := 1.4 / (0.4 + t * 2.0)
 		var dist := distance + ahead
@@ -260,9 +261,9 @@ func _draw_rivals(size: Vector2, horizon: float, ground: float) -> void:
 		var ahead := r.x - distance
 		if ahead < 0.0:
 			ahead += LENGTH
-		if ahead > 90.0 or ahead < 4.0:
+		if ahead > DRAW_AHEAD or ahead < 4.0:
 			continue
-		var t := clampf(ahead / 90.0, 0.0, 1.0)
+		var t := clampf(ahead / DRAW_AHEAD, 0.0, 1.0)
 		var y := ground - (ground - horizon) * t - 40.0
 		var scale := 1.2 / (0.45 + t * 2.0)
 		var x := size.x * 0.5 + (r.y - lateral) * 90.0 * scale
@@ -297,9 +298,9 @@ func _draw_kart(size: Vector2, ground: float) -> void:
 
 func _draw_meta(size: Vector2, horizon: float, ground: float) -> void:
 	var ahead := fposmod(LENGTH - distance, LENGTH)
-	if ahead > 90.0 or ahead < 2.0:
+	if ahead > DRAW_AHEAD or ahead < 2.0:
 		return
-	var t := clampf(ahead / 90.0, 0.0, 1.0)
+	var t := clampf(ahead / DRAW_AHEAD, 0.0, 1.0)
 	var y := ground - (ground - horizon) * t - 8.0
 	var scale := 1.4 / (0.4 + t * 2.0)
 	var dist := distance + ahead
