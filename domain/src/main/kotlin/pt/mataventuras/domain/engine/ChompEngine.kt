@@ -110,10 +110,14 @@ class ChompEngine {
     }
 
     private fun hurt(state: ChompState): ChompState {
-        if (state.form == 1 || state.invuln > 0f || !touched(state)) return state
+        if (state.form == 1 || state.invuln > 0f) return state
+        if (!touched(state)) return state
         val lives = state.lives - 1
-        if (lives <= 0) return state.copy(lives = 0, alive = false)
-        return state.copy(lives = lives, invuln = GRACE, px = 1, py = 3)
+        return if (lives <= 0) {
+            state.copy(lives = 0, alive = false)
+        } else {
+            state.copy(lives = lives, invuln = GRACE, px = 1, py = 3)
+        }
     }
 
     private fun touched(state: ChompState): Boolean {

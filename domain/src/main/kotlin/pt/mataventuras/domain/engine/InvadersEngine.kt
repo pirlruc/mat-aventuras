@@ -129,7 +129,8 @@ class InvadersEngine {
         dt: Float,
         ship: Float,
     ): InvadersState {
-        if (state.grace > 0f || state.aliens == 0) return state
+        if (state.grace > 0f) return state
+        if (state.aliens == 0) return state
         var bombX = state.bombX
         var bombY = state.bombY
         if (bombY < 0f) {
@@ -159,13 +160,10 @@ class InvadersEngine {
     }
 
     private fun bomber(state: InvadersState): Pair<Float, Float> {
-        for (i in 0 until FLEET) {
-            if (state.aliens and (1 shl i) == 0) continue
-            val col = i % 5
-            val row = i / 5
-            return (state.alienOrigin + col * 0.12f) to (0.12f + row * 0.12f)
-        }
-        return -1f to -1f
+        val i = Integer.numberOfTrailingZeros(state.aliens)
+        val col = i % 5
+        val row = i / 5
+        return (state.alienOrigin + col * 0.12f) to (0.12f + row * 0.12f)
     }
 
     private fun hitAlien(

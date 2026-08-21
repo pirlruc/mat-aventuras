@@ -117,7 +117,7 @@ class ClimbEngine {
         val nearBarrel =
             kotlin.math.abs(state.y - floorY) < 0.05f &&
                 kotlin.math.abs(state.x - state.barrelX) < 0.07f
-        if (state.finished || state.invuln > 0f || !nearBarrel) return state
+        if (state.invuln > 0f || !nearBarrel) return state
         if (state.form == 1) return state.copy(form = 0, invuln = HIT_INVULN)
         val lives = state.lives - 1
         return state.copy(lives = lives, invuln = HIT_INVULN, alive = lives > 0)
