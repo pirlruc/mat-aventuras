@@ -3,6 +3,7 @@ package pt.mataventuras.app.ui.lesson
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -78,7 +79,6 @@ fun LessonScreen(
     onReward: (AgeGroup) -> Unit,
     onExit: () -> Unit,
 ) {
-    val tokens = LocalUiTokens.current
     val scope = rememberCoroutineScope()
     var exercise by remember { mutableStateOf(container.generator.generate(module, 0)) }
     var hits by remember { mutableIntStateOf(0) }
@@ -148,15 +148,59 @@ fun LessonScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .then(if (scrolls) Modifier.verticalScroll(scrollState) else Modifier)
-                .padding(20.dp),
-            verticalArrangement = if (scrolls) Arrangement.spacedBy(12.dp) else Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+            LessonPlayColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                exercise = exercise,
+                module = module,
+                hits = hits,
+                points = points,
+                fillViewport = fillViewport,
+                scrolls = scrolls,
+                scrollState = scrollState,
+                onPick = onPick,
+                onMissKeep = { noteAttempt(false, false) },
+            )
+            LessonExitBar(
+                ageGroup = profile.ageGroup,
+                confirming = confirmingExit,
+                onSpeak = onSpeak,
+                onConfirm = { confirmingExit = true },
+                onStay = { confirmingExit = false },
+                onLeave = {
+                    scope.launch {
+                        LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
+                        onExit()
+                    }
+                },
+            )
+        }
+        AnswerFlash(correct = flashCorrect, tick = flashTick)
+    }
+}
+
+@Composable
+private fun LessonPlayColumn(
+    modifier: Modifier,
+    exercise: Exercise,
+    module: LearningModule,
+    hits: Int,
+    points: Int,
+    fillViewport: Boolean,
+    scrolls: Boolean,
+    scrollState: ScrollState,
+    onPick: (Int) -> Unit,
+    onMissKeep: () -> Unit,
+) {
+    val tokens = LocalUiTokens.current
+    Column(
+        modifier = modifier
+            .then(if (scrolls) Modifier.verticalScroll(scrollState) else Modifier)
+            .padding(20.dp),
+        verticalArrangement = if (scrolls) Arrangement.spacedBy(12.dp) else Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         if (UiLogic.showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {
             StarGrid(exercise.visualCount)
@@ -176,11 +220,7 @@ fun LessonScreen(
             SudokuBoard(exercise)
         }
         if (UiLogic.showsSoupBoard(exercise.play.kind)) {
-            SoupBoard(
-                exercise = exercise,
-                onPick = onPick,
-                onMissKeep = { noteAttempt(false, false) },
-            )
+            SoupBoard(exercise = exercise, onPick = onPick, onMissKeep = onMissKeep)
         }
         if (UiLogic.showsCipherLegend(exercise.play.kind)) {
             CipherPanel(exercise)
@@ -214,30 +254,37 @@ fun LessonScreen(
             }
         }
         Text(UiLogic.lessonScoreLine(hits, points))
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = {
-                if (LessonFlow.shouldAskExitConfirm(profile.ageGroup, confirmingExit)) {
-                    confirmingExit = true
-                    VoiceScripts.confirmExit(profile.ageGroup)?.let(onSpeak)
+    }
+}
+
+@Composable
+private fun LessonExitBar(
+    ageGroup: AgeGroup,
+    confirming: Boolean,
+    onSpeak: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onStay: () -> Unit,
+    onLeave: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Button(
+            onClick = {
+                if (LessonFlow.shouldAskExitConfirm(ageGroup, confirming)) {
+                    onConfirm()
+                    VoiceScripts.confirmExit(ageGroup)?.let(onSpeak)
                 } else {
-                    scope.launch {
-                        LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
-                        onExit()
-                    }
+                    onLeave()
                 }
-            }) { Text(LessonFlow.exitLabel(confirmingExit)) }
-            if (LessonFlow.showsStay(confirmingExit)) {
-                Button(onClick = { confirmingExit = false }) { Text(VoiceScripts.STAY) }
-            }
+            },
+        ) { Text(LessonFlow.exitLabel(confirming)) }
+        if (LessonFlow.showsStay(confirming)) {
+            Button(onClick = onStay) { Text(VoiceScripts.STAY) }
         }
-        }
-        AnswerFlash(correct = flashCorrect, tick = flashTick)
     }
 }
 

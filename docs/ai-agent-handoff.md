@@ -90,6 +90,9 @@ bash scripts/ci-local.sh
   `:app` is not compiled on this VM (`ANDROID_HOME` unset); CI catches it.
 - Age-7 choice lessons fill the viewport; sudoku/soup/cipher/puzzle scroll, and
   Sair/Ficar sit in a footer so the confirm-leave buttons stay on screen.
+  Tests click those footer buttons without `performScrollTo` (they are not
+  inside the scrollable play column). `LessonPlayColumn` / `LessonExitBar`
+  keep `LessonScreen` above the KT-CPLX-002 MI floor of 40.
 - `OffroadScene.fill` clears the span list each call. Four gates put the first
   arch at 96 m, so `DRAW_AHEAD` must be greater than that (140 m) or spawn
   paints no posts. Near META, assert `BANNER_ARGB`, not `POST_ARGB`. Kart TTS

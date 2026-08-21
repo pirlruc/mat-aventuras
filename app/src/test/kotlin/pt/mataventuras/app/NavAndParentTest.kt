@@ -52,7 +52,7 @@ class NavAndParentTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText(VoiceScripts.LEAVE).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }
