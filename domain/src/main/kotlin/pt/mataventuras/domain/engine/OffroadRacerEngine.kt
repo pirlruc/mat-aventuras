@@ -77,9 +77,14 @@ class OffroadRacerEngine(
                 .coerceIn(-1.35f, 1.35f)
         val off = kotlin.math.abs(lateral) > half
         val distance = state.distance + speed * clamped
-        val wrapped = if (distance >= circuit.length) distance - circuit.length else distance
-        val laps = if (distance >= circuit.length) state.laps + 1 else state.laps
-        val collected = collectGates(state.copy(distance = wrapped, lateral = lateral, laps = laps))
+        val lapped = distance >= circuit.length
+        val wrapped = if (lapped) distance - circuit.length else distance
+        val laps = if (lapped) state.laps + 1 else state.laps
+        val mask = if (lapped) 0 else state.collectedMask
+        val collected =
+            collectGates(
+                state.copy(distance = wrapped, lateral = lateral, laps = laps, collectedMask = mask),
+            )
         return collected.copy(
             speed = speed,
             steer = wheel,
@@ -109,7 +114,7 @@ class OffroadRacerEngine(
             val gap = kotlin.math.abs(state.distance - circuit.gateDistance(i))
             if (gap <= GATE_WINDOW && kotlin.math.abs(state.lateral) < GATE_LATERAL) {
                 mask = mask or bit
-                gates += 1
+                gates = (gates + 1).coerceAtMost(state.gatesTarget)
             }
         }
         return state.copy(collectedMask = mask, gates = gates)

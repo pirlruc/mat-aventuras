@@ -74,4 +74,15 @@ class OffroadRacerEngineTest {
         assertEquals(8, a.gateCount)
         assertTrue(a.widthAt(0f) > 0.5f)
     }
+
+    @Test
+    fun lapWrapClearsGateMaskSoPostsReturn() {
+        var lap = engine.initial(lapsTarget = 3)
+        repeat(2_000) {
+            if (lap.laps < 1) lap = engine.step(lap, 0.05f, steer = 0f, boost = true)
+        }
+        assertTrue(lap.laps >= 1)
+        assertEquals(0, lap.collectedMask)
+        assertTrue(lap.gates <= lap.gatesTarget)
+    }
 }

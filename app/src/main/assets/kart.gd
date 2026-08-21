@@ -10,7 +10,6 @@ const CRUISE := 28.0
 const BOOST_SPD := 46.0
 const STRIPS := 28
 
-var seed := 1
 var distance := 2.0
 var lateral := 0.0
 var speed := CRUISE
@@ -26,12 +25,19 @@ var curves: Array[float] = []
 var hills: Array[float] = []
 var widths: Array[float] = []
 var palette := 0
+var track_seed := 1
+var pal_sky: Color = Color("81D4FA")
+var pal_haze: Color = Color("4FC3F7")
+var pal_mtn: Color = Color("2E7D32")
+var pal_grass: Color = Color("43A047")
+var pal_dirt: Color = Color("8D6E63")
 
 
 func _ready() -> void:
-	seed = Time.get_ticks_msec()
-	palette = seed % 4
+	track_seed = Time.get_ticks_msec()
+	palette = track_seed % 4
 	_roll_track()
+	_cache_palette()
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
@@ -44,7 +50,7 @@ func _ready() -> void:
 
 func _roll_track() -> void:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.seed = track_seed
 	curves.clear()
 	hills.clear()
 	widths.clear()
@@ -52,6 +58,19 @@ func _roll_track() -> void:
 		curves.append(rng.randf() * 1.7 - 0.85)
 		hills.append(rng.randf() * 1.1 - 0.35)
 		widths.append(0.82 + rng.randf() * 0.28)
+
+
+func _cache_palette() -> void:
+	var skies := [Color("81D4FA"), Color("FFCC80"), Color("FF8A65"), Color("1A237E")]
+	var hazes := [Color("4FC3F7"), Color("FFB74D"), Color("E64A19"), Color("0D47A1")]
+	var mtns := [Color("2E7D32"), Color("6D4C41"), Color("4E342E"), Color("263238")]
+	var grass := [Color("43A047"), Color("D4E157"), Color("6D4C41"), Color("263238")]
+	var dirt := [Color("8D6E63"), Color("BCAAA4"), Color("5D4037"), Color("4E342E")]
+	pal_sky = skies[palette]
+	pal_haze = hazes[palette]
+	pal_mtn = mtns[palette]
+	pal_grass = grass[palette]
+	pal_dirt = dirt[palette]
 
 
 func _sample(values: Array[float], dist: float) -> float:
@@ -135,13 +154,23 @@ func _collect_gates() -> void:
 
 func _draw() -> void:
 	var size := get_viewport_rect().size
-	draw_rect(Rect2(Vector2.ZERO, size), _sky())
+	draw_rect(Rect2(Vector2.ZERO, size), pal_sky)
 	var horizon := size.y * 0.34
 	var ground := size.y * 0.94
+	_draw_hills(size, horizon)
 	for i in range(STRIPS - 1, -1, -1):
 		_draw_strip(size, horizon, ground, i)
 	_draw_gates(size, horizon, ground)
 	_draw_kart(size, ground)
+
+
+func _draw_hills(size: Vector2, horizon: float) -> void:
+	draw_rect(Rect2(0, horizon - 48.0, size.x, 52.0), pal_haze)
+	for i in 4:
+		var dist := distance + float(i) * 55.0
+		var x := size.x * (0.08 + float(i) * 0.24) + _sample(curves, dist) * 28.0
+		var peak := 26.0 + absf(_sample(hills, dist)) * 34.0
+		draw_rect(Rect2(x, horizon - peak, 88.0, peak), pal_mtn)
 
 
 func _draw_strip(size: Vector2, horizon: float, ground: float, index: int) -> void:
@@ -154,9 +183,9 @@ func _draw_strip(size: Vector2, horizon: float, ground: float, index: int) -> vo
 	var hill := _sample(hills, dist) * (1.0 - t) * 36.0
 	var center := size.x * 0.5 - lateral * 95.0 * scale + curve * 62.0 * (1.0 - t)
 	var road_w := 360.0 * scale * _sample(widths, dist)
-	draw_rect(Rect2(0, y - hill, size.x, h + 1.0), _grass())
+	draw_rect(Rect2(0, y - hill, size.x, h + 1.0), pal_grass)
 	draw_rect(Rect2(center - road_w * 0.5 - 10.0, y - hill, road_w + 20.0, h + 1.0), Color("E53935"))
-	draw_rect(Rect2(center - road_w * 0.5, y - hill, road_w, h + 1.0), _dirt())
+	draw_rect(Rect2(center - road_w * 0.5, y - hill, road_w, h + 1.0), pal_dirt)
 	if index % 2 == 0:
 		draw_rect(Rect2(center - 4.0, y - hill, 8.0, h), Color("FFF59D"))
 
@@ -182,28 +211,32 @@ func _draw_kart(size: Vector2, ground: float) -> void:
 	var cx := size.x * 0.5 + steer * 18.0
 	var y := ground - 78.0
 	var fill := Host.mascot_color()
-	draw_rect(Rect2(cx - 34.0, y + 40.0, 18.0, 16.0), Color("212121"))
-	draw_rect(Rect2(cx + 16.0, y + 40.0, 18.0, 16.0), Color("212121"))
-	draw_rect(Rect2(cx - 28.0, y + 18.0, 56.0, 28.0), fill)
-	draw_rect(Rect2(cx - 16.0, y, 32.0, 22.0), Color("ECEFF1"))
-	draw_rect(Rect2(cx - 22.0, y - 8.0, 44.0, 10.0), fill)
+	draw_rect(Rect2(cx - 36.0, y + 40.0, 20.0, 18.0), Color("212121"))
+	draw_rect(Rect2(cx + 16.0, y + 40.0, 20.0, 18.0), Color("212121"))
+	draw_rect(Rect2(cx - 30.0, y + 16.0, 60.0, 30.0), fill)
+	draw_rect(Rect2(cx - 8.0, y + 20.0, 16.0, 22.0), Color("FFF59D"))
+	draw_rect(Rect2(cx - 18.0, y - 2.0, 36.0, 24.0), Color("ECEFF1"))
+	draw_rect(Rect2(cx - 24.0, y - 12.0, 48.0, 12.0), fill)
+	draw_rect(Rect2(cx - 20.0, y - 20.0, 8.0, 16.0), fill)
+	draw_rect(Rect2(cx + 12.0, y - 20.0, 8.0, 16.0), fill)
+	draw_rect(Rect2(cx - 26.0, y + 12.0, 10.0, 8.0), Color("FFF176"))
+	draw_rect(Rect2(cx + 16.0, y + 12.0, 10.0, 8.0), Color("FFF176"))
 	if boost_timer > 0.0:
-		draw_rect(Rect2(cx - 8.0, y + 48.0, 16.0, 18.0), Color("FF6F00"))
+		draw_rect(Rect2(cx - 10.0, y + 52.0, 20.0, 16.0), Color("FF6F00"))
+		draw_rect(Rect2(cx - 28.0, y + 58.0, 12.0, 10.0), Color("FFCC80"))
+		draw_rect(Rect2(cx + 16.0, y + 58.0, 12.0, 10.0), Color("FFCC80"))
 
 
 func _sky() -> Color:
-	var skies := [Color("81D4FA"), Color("FFCC80"), Color("FF8A65"), Color("1A237E")]
-	return skies[palette]
+	return pal_sky
 
 
 func _grass() -> Color:
-	var grass := [Color("43A047"), Color("D4E157"), Color("6D4C41"), Color("263238")]
-	return grass[palette]
+	return pal_grass
 
 
 func _dirt() -> Color:
-	var dirt := [Color("8D6E63"), Color("BCAAA4"), Color("5D4037"), Color("4E342E")]
-	return dirt[palette]
+	return pal_dirt
 
 
 func _update_hud(show_boost: bool) -> void:

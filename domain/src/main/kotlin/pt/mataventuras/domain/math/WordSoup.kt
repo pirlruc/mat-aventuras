@@ -24,11 +24,12 @@ class WordSoupBuilder(
         size: Int,
         wordCount: Int,
     ): WordSoup {
-        repeat(16) {
-            val soup = attempt(size, wordCount)
-            if (soup.words.size >= minOf(wordCount, 2)) return soup
+        val want = wordCount.coerceAtLeast(2)
+        repeat(24) {
+            val soup = attempt(size, want)
+            if (soup.words.size >= 2) return soup
         }
-        return attempt(size, 1)
+        return attempt(size, want)
     }
 
     private fun attempt(

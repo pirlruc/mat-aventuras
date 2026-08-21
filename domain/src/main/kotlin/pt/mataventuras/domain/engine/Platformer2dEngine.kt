@@ -57,6 +57,7 @@ class Platformer2dEngine(
         val run = moveX.coerceIn(-1f, 1f)
         val motion = integrate(state, dt, jumping, run)
         val landed = settle(motion.x, motion.y, motion.vy, motion.falling)
+        if (landed.first < -2f) return respawn(state)
         val onGround = landed.second
         val finished = state.rings >= state.ringsTarget
         return state.copy(
@@ -65,7 +66,7 @@ class Platformer2dEngine(
             vx = motion.vx,
             vy = if (onGround) 0f else motion.vy,
             onGround = onGround,
-            alive = landed.first >= -2f,
+            alive = true,
             finished = finished,
             inPitFall = motion.falling && !onGround,
         )
@@ -129,6 +130,17 @@ class Platformer2dEngine(
         }
         return null
     }
+
+    private fun respawn(state: Platformer2dState): Platformer2dState =
+        state.copy(
+            x = level.lastSafeX(state.x),
+            y = groundY,
+            vx = 0f,
+            vy = 0f,
+            onGround = true,
+            alive = true,
+            inPitFall = false,
+        )
 
     /** World X where the first floor gap begins (fall). */
     companion object {

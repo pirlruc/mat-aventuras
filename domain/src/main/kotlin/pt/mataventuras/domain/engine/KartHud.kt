@@ -1,7 +1,7 @@
 package pt.mataventuras.domain.engine
 
 /**
- * On-screen HUD copy for the 3D kart (pt-PT).
+ * On-screen HUD copy for reward races (pt-PT).
  */
 object KartHud {
     /**

@@ -98,31 +98,23 @@ func _draw_world() -> void:
 func _make_player() -> void:
 	var fill := Host.mascot_color()
 	var shade := fill.darkened(0.35)
-	var body := ColorRect.new()
-	body.color = fill
-	body.size = Vector2(16, 22)
-	add_child(body)
-	player_parts.append(body)
-	var head := ColorRect.new()
-	head.color = fill
-	head.size = Vector2(20, 18)
-	add_child(head)
-	player_parts.append(head)
-	var hat := ColorRect.new()
-	hat.color = shade
-	hat.size = Vector2(24, 10)
-	add_child(hat)
-	player_parts.append(hat)
-	var leg_l := ColorRect.new()
-	leg_l.color = shade
-	leg_l.size = Vector2(6, 14)
-	add_child(leg_l)
-	player_parts.append(leg_l)
-	var leg_r := ColorRect.new()
-	leg_r.color = shade
-	leg_r.size = Vector2(6, 14)
-	add_child(leg_r)
-	player_parts.append(leg_r)
+	_add_part(fill, Vector2(16, 22))
+	_add_part(fill, Vector2(20, 18))
+	_add_part(shade, Vector2(24, 10))
+	_add_part(Color("212121"), Vector2(4, 4))
+	_add_part(Color("212121"), Vector2(4, 4))
+	_add_part(shade, Vector2(6, 14))
+	_add_part(shade, Vector2(6, 14))
+	_add_part(Color("4E342E"), Vector2(10, 6))
+	_add_part(Color("4E342E"), Vector2(10, 6))
+
+
+func _add_part(color: Color, size: Vector2) -> void:
+	var part := ColorRect.new()
+	part.color = color
+	part.size = size
+	add_child(part)
+	player_parts.append(part)
 
 
 func _make_coins() -> void:
@@ -191,14 +183,18 @@ func _place_player() -> void:
 	player_parts[0].position = Vector2(px + 10.0, py + 20.0)
 	player_parts[1].position = Vector2(px + 8.0, py + 4.0)
 	player_parts[2].position = Vector2(px + 6.0, py)
-	player_parts[3].position = Vector2(px + 10.0, py + 40.0)
-	player_parts[4].position = Vector2(px + 20.0, py + 40.0)
+	player_parts[3].position = Vector2(px + 12.0, py + 10.0)
+	player_parts[4].position = Vector2(px + 20.0, py + 10.0)
+	player_parts[5].position = Vector2(px + 10.0, py + 40.0)
+	player_parts[6].position = Vector2(px + 20.0, py + 40.0)
+	player_parts[7].position = Vector2(px + 8.0, py + 52.0)
+	player_parts[8].position = Vector2(px + 20.0, py + 52.0)
 
 
 func _land() -> void:
 	on_ground = false
 	var over_pit := _in_pit(x)
-	if over_pit and y > GROUND_Y + 2.0:
+	if over_pit and y >= GROUND_Y:
 		in_pit_fall = true
 	if in_pit_fall:
 		return

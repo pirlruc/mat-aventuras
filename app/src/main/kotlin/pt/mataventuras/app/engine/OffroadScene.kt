@@ -16,14 +16,18 @@ internal data class OffroadSpan(
 )
 
 /**
- * Scanline-style rear view: grass, rumble, dirt, gates, and a kart sprite.
+ * Scanline-style rear view: hills, grass, rumble, dirt, gates, and a kart sprite.
  */
 internal object OffroadScene {
     private val SKY: LongArray = longArrayOf(0xFF81D4FA, 0xFFFFCC80, 0xFFFF8A65, 0xFF1A237E)
+    private val HAZE: LongArray = longArrayOf(0xFF4FC3F7, 0xFFFFB74D, 0xFFE64A19, 0xFF0D47A1)
+    private val MOUNTAIN: LongArray = longArrayOf(0xFF2E7D32, 0xFF6D4C41, 0xFF4E342E, 0xFF263238)
     private val GRASS: LongArray = longArrayOf(0xFF43A047, 0xFFD4E157, 0xFF6D4C41, 0xFF263238)
     private val DIRT: LongArray = longArrayOf(0xFF8D6E63, 0xFFBCAAA4, 0xFF5D4037, 0xFF4E342E)
     private val LINE: LongArray = longArrayOf(0xFFFFF59D, 0xFFFFFDE7, 0xFFFFE082, 0xFFEEEEEE)
     const val STRIP_COUNT: Int = 28
+    const val FLAME_ARGB: Long = 0xFFFF6F00
+    const val HEADLAMP_ARGB: Long = 0xFFFFF176
 
     /**
      * Sky colour for [circuit.palette].
@@ -44,11 +48,29 @@ internal object OffroadScene {
         out.clear()
         val horizon = height * 0.34f
         val ground = height * 0.94f
+        addHorizon(out, state, circuit, width, horizon)
         for (i in STRIP_COUNT - 1 downTo 0) {
             addStrip(out, state, circuit, width, horizon, ground, i)
         }
         addGates(out, state, circuit, width, horizon, ground)
         addKart(out, mascot, width, ground, state)
+    }
+
+    private fun addHorizon(
+        out: MutableList<OffroadSpan>,
+        state: OffroadState,
+        circuit: OffroadCircuit,
+        width: Float,
+        horizon: Float,
+    ) {
+        val pal = circuit.palette
+        out.add(OffroadSpan(0f, horizon - 48f, width, 52f, HAZE[pal]))
+        for (i in 0 until 4) {
+            val dist = state.distance + i * 55f
+            val x = width * (0.08f + i * 0.24f) + circuit.curveAt(dist) * 28f
+            val peak = 26f + kotlin.math.abs(circuit.hillAt(dist)) * 34f
+            out.add(OffroadSpan(x, horizon - peak, 88f, peak, MOUNTAIN[pal]))
+        }
     }
 
     private fun addStrip(
@@ -109,13 +131,20 @@ internal object OffroadScene {
         val cx = width * 0.5f + state.steer * 18f
         val y = ground - 78f
         val fill = mascot.primaryArgb
-        out.add(OffroadSpan(cx - 34f, y + 40f, 18f, 16f, 0xFF212121))
-        out.add(OffroadSpan(cx + 16f, y + 40f, 18f, 16f, 0xFF212121))
-        out.add(OffroadSpan(cx - 28f, y + 18f, 56f, 28f, fill))
-        out.add(OffroadSpan(cx - 16f, y, 32f, 22f, 0xFFECEFF1))
-        out.add(OffroadSpan(cx - 22f, y - 8f, 44f, 10f, fill))
+        out.add(OffroadSpan(cx - 36f, y + 40f, 20f, 18f, 0xFF212121))
+        out.add(OffroadSpan(cx + 16f, y + 40f, 20f, 18f, 0xFF212121))
+        out.add(OffroadSpan(cx - 30f, y + 16f, 60f, 30f, fill))
+        out.add(OffroadSpan(cx - 8f, y + 20f, 16f, 22f, 0xFFFFF59D))
+        out.add(OffroadSpan(cx - 18f, y - 2f, 36f, 24f, 0xFFECEFF1))
+        out.add(OffroadSpan(cx - 24f, y - 12f, 48f, 12f, fill))
+        out.add(OffroadSpan(cx - 20f, y - 20f, 8f, 16f, fill))
+        out.add(OffroadSpan(cx + 12f, y - 20f, 8f, 16f, fill))
+        out.add(OffroadSpan(cx - 26f, y + 12f, 10f, 8f, HEADLAMP_ARGB))
+        out.add(OffroadSpan(cx + 16f, y + 12f, 10f, 8f, HEADLAMP_ARGB))
         if (state.boostTimer > 0f) {
-            out.add(OffroadSpan(cx - 8f, y + 48f, 16f, 18f, 0xFFFF6F00))
+            out.add(OffroadSpan(cx - 10f, y + 52f, 20f, 16f, FLAME_ARGB))
+            out.add(OffroadSpan(cx - 28f, y + 58f, 12f, 10f, 0xFFFFCC80))
+            out.add(OffroadSpan(cx + 16f, y + 58f, 12f, 10f, 0xFFFFCC80))
         }
     }
 }

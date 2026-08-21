@@ -57,7 +57,7 @@ class PlayBoardFactoryTest {
 
         val words = factory.soup(LearningModule.LOGIC)
         assertEquals(16, words.options.size)
-        assertTrue(words.play.wordPaths.isNotEmpty())
+        assertTrue(words.play.wordPaths.size >= 2)
         assertTrue(words.play.targetIndices.isNotEmpty())
         assertTrue(words.spoken.contains("Desliza"))
         words.play.soupHits().forEach { assertTrue(words.isCorrect(it)) }

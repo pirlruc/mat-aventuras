@@ -6,7 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +21,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.PlatformerWorld
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -69,46 +74,54 @@ internal object NativeRunnerHost {
                 done = true
                 activity.completeReward(ok = false)
             }
-            Canvas(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) {
-                            awaitEachGesture {
-                                val down = awaitFirstDown()
-                                var lastX = down.position.x
-                                loop.moveX = 0f
-                                while (true) {
-                                    val event = awaitPointerEvent()
-                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                    if (!change.pressed) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Canvas(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                awaitEachGesture {
+                                    val down = awaitFirstDown()
+                                    var lastX = down.position.x
+                                    loop.moveX = 0f
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                        if (!change.pressed) {
+                                            change.consume()
+                                            break
+                                        }
+                                        val dx = change.position.x - lastX
+                                        lastX = change.position.x
+                                        loop.moveX = (dx / 12f).coerceIn(-1f, 1f)
+                                        if (dx > 14f) loop.jumping = true
                                         change.consume()
-                                        break
                                     }
-                                    val dx = change.position.x - lastX
-                                    lastX = change.position.x
-                                    loop.moveX = (dx / 12f).coerceIn(-1f, 1f)
-                                    if (dx > 14f) loop.jumping = true
-                                    change.consume()
+                                    loop.moveX = 0f
                                 }
-                                loop.moveX = 0f
-                            }
-                        },
-            ) {
-                drawRect(Color(level.skyArgb))
-                drawRect(
-                    Color(level.skyBandArgb),
-                    topLeft = Offset(0f, size.height * 0.45f),
-                    size = Size(size.width, size.height * 0.3f),
-                )
-                PlatformerScene.fillTiles(tiles, state, mascot, size.width, size.height, level)
-                tiles.forEach { tile ->
+                            },
+                ) {
+                    drawRect(Color(level.skyArgb))
                     drawRect(
-                        Color(tile.argb),
-                        topLeft = Offset(tile.x, tile.y),
-                        size = Size(tile.w, tile.h),
+                        Color(level.skyBandArgb),
+                        topLeft = Offset(0f, size.height * 0.45f),
+                        size = Size(size.width, size.height * 0.3f),
                     )
+                    PlatformerScene.fillTiles(tiles, state, mascot, size.width, size.height, level)
+                    tiles.forEach { tile ->
+                        drawRect(
+                            Color(tile.argb),
+                            topLeft = Offset(tile.x, tile.y),
+                            size = Size(tile.w, tile.h),
+                        )
+                    }
                 }
+                Text(
+                    text = "Moedas ${state.rings}/${state.ringsTarget}",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    modifier = Modifier.padding(20.dp),
+                )
             }
         }
         return loop

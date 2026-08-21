@@ -7,7 +7,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +22,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import pt.mataventuras.domain.engine.KartHud
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -65,39 +70,48 @@ internal object NativeKartHost {
                 done = true
                 activity.completeReward(ok = false)
             }
-            Canvas(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) {
-                            awaitEachGesture {
-                                val down = awaitFirstDown()
-                                val nx = down.position.x / size.width.coerceAtLeast(1).toFloat()
-                                loop.handleTouch(nx, MotionEvent.ACTION_DOWN)
-                                while (true) {
-                                    val event = awaitPointerEvent()
-                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                    if (!change.pressed) {
-                                        loop.handleTouch(nx, MotionEvent.ACTION_UP)
+            Box(modifier = Modifier.fillMaxSize()) {
+                Canvas(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                awaitEachGesture {
+                                    val down = awaitFirstDown()
+                                    val nx = down.position.x / size.width.coerceAtLeast(1).toFloat()
+                                    loop.handleTouch(nx, MotionEvent.ACTION_DOWN)
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                        if (!change.pressed) {
+                                            loop.handleTouch(nx, MotionEvent.ACTION_UP)
+                                            change.consume()
+                                            break
+                                        }
+                                        val next = change.position.x / size.width.coerceAtLeast(1).toFloat()
+                                        loop.handleTouch(next, MotionEvent.ACTION_MOVE)
                                         change.consume()
-                                        break
                                     }
-                                    val next = change.position.x / size.width.coerceAtLeast(1).toFloat()
-                                    loop.handleTouch(next, MotionEvent.ACTION_MOVE)
-                                    change.consume()
                                 }
-                            }
-                        },
-            ) {
-                drawRect(Color(OffroadScene.skyArgb(circuit)))
-                OffroadScene.fill(spans, state, circuit, mascot, size.width, size.height)
-                spans.forEach { span ->
-                    drawRect(
-                        Color(span.argb),
-                        topLeft = Offset(span.x, span.y),
-                        size = Size(span.w, span.h),
-                    )
+                            },
+                ) {
+                    drawRect(Color(OffroadScene.skyArgb(circuit)))
+                    OffroadScene.fill(spans, state, circuit, mascot, size.width, size.height)
+                    spans.forEach { span ->
+                        drawRect(
+                            Color(span.argb),
+                            topLeft = Offset(span.x, span.y),
+                            size = Size(span.w, span.h),
+                        )
+                    }
                 }
+                val extra = KartHud.offTrackLabel(state) ?: KartHud.boostLabel(state)
+                Text(
+                    text = listOfNotNull(KartHud.lapLabel(state), KartHud.gatesLabel(state), extra).joinToString("\n"),
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    modifier = Modifier.padding(20.dp),
+                )
             }
         }
         return loop
@@ -107,7 +121,7 @@ internal object NativeKartHost {
      * Overlay lines for tests that still call the GLES helper.
      */
     fun hudLines(loop: OffroadRacerLoop): Pair<String, String> {
-        val extra = KartHud.boostLabel(loop.state) ?: KartHud.offTrackLabel(loop.state)
+        val extra = KartHud.offTrackLabel(loop.state) ?: KartHud.boostLabel(loop.state)
         val second = listOfNotNull(KartHud.gatesLabel(loop.state), extra).joinToString(" · ")
         return KartHud.lapLabel(loop.state) to second
     }

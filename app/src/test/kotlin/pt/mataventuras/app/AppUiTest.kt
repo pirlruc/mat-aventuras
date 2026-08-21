@@ -349,6 +349,7 @@ class AppUiTest {
             three.session.state.copy(boostTimer = 0.5f, steer = -0.4f, distance = 400f)
         OffroadScene.fill(spans, boosted, three.session.circuit, Mascot.SPEEDY_HEDGEHOG, 320f, 200f)
         assertTrue(spans.any { it.argb == 0xFFFF6F00 })
+        assertTrue(spans.any { it.argb == OffroadScene.HEADLAMP_ARGB })
         assertTrue(OffroadScene.skyArgb(three.session.circuit) != 0L)
         three.closeFinished()
         threeController.pause().stop().destroy()

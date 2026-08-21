@@ -48,9 +48,14 @@ class Platformer2dEngineTest {
         assertTrue(closed.finished)
         assertEquals(closed, engine.collect(closed, 0f))
         var falling = engine.initial().copy(x = Platformer2dEngine.PIT_X + 1f, onGround = true)
-        repeat(30) { falling = engine.step(falling, 0.05f, jumping = false, moveX = 1f) }
-        assertTrue(falling.inPitFall || !falling.alive)
-        assertTrue(falling.x < PlatformerWorld.PIT_RIGHT + 1f || falling.inPitFall || !falling.alive)
+        repeat(4) { falling = engine.step(falling, 0.05f, jumping = false, moveX = 1f) }
+        assertTrue(falling.inPitFall)
+        assertTrue(falling.x < PlatformerWorld.PIT_RIGHT + 1f)
+        repeat(40) { falling = engine.step(falling, 0.05f, jumping = false, moveX = 0f) }
+        assertTrue(falling.alive)
+        assertFalse(falling.inPitFall)
+        assertTrue(falling.onGround)
+        assertTrue(falling.x < PlatformerWorld.PIT_LEFT)
         val short = engine.collect(engine.initial(), ringX = 0.5f, radius = 0.1f)
         assertEquals(0, short.rings)
         var tagged = engine.collect(engine.initial(), ringX = 0f, coinIndex = 0)
