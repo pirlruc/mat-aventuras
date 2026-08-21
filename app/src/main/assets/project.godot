@@ -17,9 +17,9 @@ boot_splash/bg_color=Color(0.117647, 0.533333, 0.898039, 1)
 Host="*res://host.gd"
 
 [display]
-window/size/viewport_width=1280
-window/size/viewport_height=720
-window/stretch/mode="canvas_items"
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="disabled"
 window/stretch/aspect="expand"
 window/handheld/orientation=0
 

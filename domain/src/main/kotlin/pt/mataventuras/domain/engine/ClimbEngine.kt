@@ -13,6 +13,8 @@ data class ClimbState(
     val barrelX: Float,
     val barrelFloor: Int,
     val form: Int,
+    val lives: Int,
+    val invuln: Float,
     val alive: Boolean,
     val finished: Boolean,
 ) {
@@ -38,6 +40,8 @@ class ClimbEngine {
             barrelX = 0.9f,
             barrelFloor = FLOORS.lastIndex,
             form = 0,
+            lives = LIVES_MAX,
+            invuln = 0f,
             alive = true,
             finished = false,
         )
@@ -53,11 +57,12 @@ class ClimbEngine {
     ): ClimbState {
         if (!state.alive || state.finished) return state
         val clamped = dt.coerceIn(0.001f, 0.05f)
-        val motion = move(state, clamped, moveX, jumping)
+        val ticking = state.copy(invuln = (state.invuln - clamped).coerceAtLeast(0f))
+        val motion = move(ticking, clamped, moveX, jumping)
         val letters = collect(motion)
+        if (letters.finished) return letters
         val grown = if (near(letters, MUSHROOM_X, FLOORS[1])) letters.copy(form = 1) else letters
-        val rolled = rollBarrel(grown, clamped)
-        return strike(rolled)
+        return strike(rollBarrel(grown, clamped))
     }
 
     private fun move(
@@ -112,9 +117,10 @@ class ClimbEngine {
         val nearBarrel =
             kotlin.math.abs(state.y - floorY) < 0.05f &&
                 kotlin.math.abs(state.x - state.barrelX) < 0.07f
-        if (!nearBarrel) return state
-        if (state.form == 1) return state.copy(form = 0)
-        return state.copy(alive = false)
+        if (state.finished || state.invuln > 0f || !nearBarrel) return state
+        if (state.form == 1) return state.copy(form = 0, invuln = HIT_INVULN)
+        val lives = state.lives - 1
+        return state.copy(lives = lives, invuln = HIT_INVULN, alive = lives > 0)
     }
 
     private fun near(
@@ -137,5 +143,7 @@ class ClimbEngine {
         const val JUMP: Float = 0.85f
         const val GRAVITY: Float = -2.4f
         const val BARREL_SPEED: Float = 0.35f
+        const val LIVES_MAX: Int = 3
+        const val HIT_INVULN: Float = 1.2f
     }
 }

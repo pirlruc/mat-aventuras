@@ -1,5 +1,7 @@
 package pt.mataventuras.app.engine.godot
 
+import android.os.Bundle
+import android.view.View
 import org.godotengine.godot.Godot
 import org.godotengine.godot.GodotFragment
 import org.godotengine.godot.plugin.GodotPlugin
@@ -21,6 +23,15 @@ import pt.mataventuras.app.engine.IsolatedEngineActivity
 class RewardGodotFragment : GodotFragment() {
     override fun getCommandLine(): List<String> = GodotRuntime.commandLineFor()
 
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
+        super.onViewCreated(view, savedInstanceState)
+        view.keepScreenOn = true
+        view.setBackgroundColor(HOST_BLUE)
+    }
+
     override fun getHostPlugins(engine: Godot): Set<GodotPlugin> {
         val host = activity as? IsolatedEngineActivity ?: return emptySet()
         val scene = arguments?.getString(ARG_SCENE) ?: GodotRuntime.SCENE_KART
@@ -34,11 +45,17 @@ class RewardGodotFragment : GodotFragment() {
 
     override fun onGodotForceQuit(instance: Godot) {
         val host = activity as? IsolatedEngineActivity ?: return
-        host.completeRewardOnUi(false)
+        host.runOnUiThread {
+            if (!GodotEmbed.restartHost(host)) {
+                host.completeRewardOnUi(false)
+            }
+        }
     }
 
     companion object {
         /** Bundle key for `res://….tscn`. */
         const val ARG_SCENE: String = "scene"
+
+        private const val HOST_BLUE: Int = 0xFF1E88E5.toInt()
     }
 }

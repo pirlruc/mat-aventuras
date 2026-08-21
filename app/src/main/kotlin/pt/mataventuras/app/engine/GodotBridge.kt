@@ -26,7 +26,7 @@ internal object GodotBridge {
     }
 
     /**
-     * Scene path GDScript should `change_scene_to_file` after the boot node.
+     * Scene path GDScript should instantiate after the boot node is on screen.
      */
     fun rewardScene(requested: String): String = requested.ifBlank { GodotRuntime.SCENE_KART }
 }

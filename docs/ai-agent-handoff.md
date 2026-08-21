@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-21
-**Last agent focus:** Pin lesson Sair/Ficar footer so age-7 sudoku can confirm leave
+**Last agent focus:** Godot black screen, invaders 5-life ending, screen-pixel drawing
 
 ---
 
@@ -73,7 +73,7 @@ bash scripts/ci-local.sh
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`; this cloud run used
-  `cursor/games-usability-f702` per the agent environment.
+  `cursor/godot-black-screen-lives-80ab` per the agent environment.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
 - Run `:domain:ktlintFormat` before `:domain:ktlintCheck` (parallel format+check races).
 - Never construct `GodotFragment` under Robolectric (`GodotRuntime.shouldEmbed`
@@ -103,8 +103,12 @@ bash scripts/ci-local.sh
 - Do not call `Godot` `renderView.onPause()` from `RewardGodotFragment`.
   That disconnects the BufferQueue while the GL thread is swapping and
   yields `EGL_BAD_SURFACE` / a black SurfaceView. Let `GodotFragment` order
-  pause/resume. `boot.tscn` waits for `DisplayServer.window_get_size()` and
-  a real viewport before `change_scene_to_file`.
+  pause/resume. Do not attach the fragment until the host FrameLayout is at
+  least `GodotRuntime.MIN_SURFACE_PX`. `boot.tscn` waits for
+  `DisplayServer.window_get_size()` then instantiates the reward as a sibling
+  (do not `change_scene_to_file` onto an empty root). Stretch is disabled;
+  games fill native pixels via `Host.view_size()`. Invaders ends only at
+  0 of 5 lives or an empty fleet.
 - Detekt is `dev.detekt` `2.0.0-alpha.6`. Config keys use `allowedComplexity` /
   `allowedLines` / `allowedFunctionsPerClass` (not the 1.x `threshold` names).
   Do not revert to `io.gitlab.arturbosch.detekt` 1.23.8: that plugin still calls
@@ -116,11 +120,8 @@ bash scripts/ci-local.sh
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 
-This pass: soup words unique in every direction (no 2-letter fillers);
-runner jump is a long upward swipe, not a tap; kart uses full left/right
-steer, rivals, META gantry, and side-tap bands; 4×4/6×6 sudoku with box
-gutters; invaders/chomp/climb prizes; Godot boot waits for a real window.
-Kart arches/rivals/META draw 140 m ahead so the first 96 m gate is visible
-from the start line. Age-7 board lessons scroll; Sair/Ficar stay in a footer.
+This pass: Godot attach waits for a laid-out SurfaceView; boot instantiates
+the reward beside the blue rect; stretch disabled so games use screen pixels.
+Invaders ends only after 5 lives or the full fleet; chomp/climb have 3 lives.
 
 *Last updated: 2026-08-21*

@@ -82,12 +82,16 @@ HUD copy is pt-PT (`Volta`, `Lugar`, `Arcos`, `Impulso`, `META`).
 
 Files live in `app/src/main/assets/` (no hidden `.godot` directory;
 `use_hidden_project_data_directory=false`). `run/main_scene` is a full-rect
-`boot.tscn` that `call_deferred`s `change_scene_to_file` with
-`MatAventuras.rewardScene()`. The fragment command line is **empty**.
-Godot 4.6+ Android loads `project.godot` from APK assets. Do not pass
-`--path` (CWD override, blank English error) or `--scene` (races
-`boot.tscn`). GLES is set only in `project.godot`; repeating it on the
-CLI made the engine request a process restart and blink the splash.
+`boot.tscn` that waits for `DisplayServer.window_get_size()` and a real
+viewport, then instantiates the reward as a sibling (`MatAventuras.rewardScene()`)
+so the blue boot rect is never swapped for an empty root. The fragment is
+attached only after the host `FrameLayout` is at least 32×32 px. The fragment
+command line is **empty**. Stretch is **disabled** so games draw in native
+screen pixels via `Host.view_size()`. Godot 4.6+ Android loads `project.godot`
+from APK assets. Do not pass `--path` (CWD override, blank English error)
+or `--scene` (races `boot.tscn`). GLES is set only in `project.godot`;
+repeating it on the CLI made the engine request a process restart and blink
+the splash.
 
 The Godot boot splash image is disabled. `config/features` is
 `GL Compatibility`. When the engine still asks to restart after first-time

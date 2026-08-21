@@ -120,9 +120,10 @@ the 2D perspective racer.
 (age 7, `:engine3d`). `MainActivity` uses `StartActivityForResult` so Compose
 is not hosting a Godot view.
 
-On device those Activities attach `GodotFragment`. `boot.tscn` switches to
-`res://kart.tscn` or `res://runner.tscn` through the `MatAventuras` plugin.
-A first-time GLES restart is returned to `MainActivity`, which relaunches
+On device those Activities attach `GodotFragment` after the host view has a
+real size. `boot.tscn` instantiates `res://kart.tscn` or `res://runner.tscn`
+(and the arcade scenes) through the `MatAventuras` plugin once the window is
+ready. A first-time GLES restart is returned to `MainActivity`, which relaunches
 the plugin Activity in a fresh isolated process. Under Robolectric they
 attach `NativeKartHost` / `NativeRunnerHost` instead.
 

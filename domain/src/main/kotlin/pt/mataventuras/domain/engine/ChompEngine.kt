@@ -13,6 +13,8 @@ data class ChompState(
     val pellets: Int,
     val powerTimer: Float,
     val form: Int,
+    val lives: Int,
+    val invuln: Float,
     val alive: Boolean,
     val finished: Boolean,
 )
@@ -35,6 +37,8 @@ class ChompEngine {
             pellets = ChompMaze.ALL_PELLETS,
             powerTimer = 0f,
             form = 0,
+            lives = LIVES_MAX,
+            invuln = GRACE,
             alive = true,
             finished = false,
         )
@@ -50,15 +54,15 @@ class ChompEngine {
     ): ChompState {
         if (!state.alive || state.finished) return state
         val clamped = dt.coerceIn(0.001f, 0.08f)
-        val eaten = eat(walk(state, dirX, dirY))
+        val ticking = state.copy(invuln = (state.invuln - clamped).coerceAtLeast(0f))
+        val eaten = eat(walk(ticking, dirX, dirY))
         val timer = (eaten.powerTimer - clamped).coerceAtLeast(0f)
         val form = if (timer > 0f) 1 else 0
         val tagged = eaten.copy(powerTimer = timer, form = form)
-        if (form == 0 && touched(tagged)) return tagged.copy(alive = false)
-        val ghosts = chase(tagged, form == 1)
-        val dead = form == 0 && touched(ghosts)
-        val won = ghosts.pellets == 0
-        return ghosts.copy(alive = !dead, finished = won && !dead)
+        val ghosts = if (tagged.invuln > 0f) tagged else chase(tagged, form == 1)
+        val hurt = hurt(ghosts)
+        val won = hurt.pellets == 0
+        return hurt.copy(finished = won && hurt.alive)
     }
 
     private fun walk(
@@ -105,6 +109,13 @@ class ChompEngine {
         return x to y
     }
 
+    private fun hurt(state: ChompState): ChompState {
+        if (state.form == 1 || state.invuln > 0f || !touched(state)) return state
+        val lives = state.lives - 1
+        if (lives <= 0) return state.copy(lives = 0, alive = false)
+        return state.copy(lives = lives, invuln = GRACE, px = 1, py = 3)
+    }
+
     private fun touched(state: ChompState): Boolean {
         val a = state.px == state.ghostX && state.py == state.ghostY
         val b = state.px == state.ghost2X && state.py == state.ghost2Y
@@ -117,6 +128,11 @@ class ChompEngine {
             v < 0 -> -1
             else -> 0
         }
+
+    private companion object {
+        const val LIVES_MAX: Int = 3
+        const val GRACE: Float = 1.6f
+    }
 }
 
 /**

@@ -31,8 +31,11 @@ class VoiceScriptsTest {
         assertTrue(VoiceScripts.STEER_HINT.contains("META"))
         assertTrue(VoiceScripts.JUMP_HINT.contains("saltar"))
         assertTrue(VoiceScripts.INVADERS_HINT.contains("nave"))
+        assertTrue(VoiceScripts.INVADERS_HINT.contains("vidas"))
         assertTrue(VoiceScripts.CHOMP_HINT.contains("bolinhas"))
+        assertTrue(VoiceScripts.CHOMP_HINT.contains("vidas"))
         assertTrue(VoiceScripts.CLIMB_HINT.contains("barris"))
+        assertTrue(VoiceScripts.CLIMB_HINT.contains("vidas"))
     }
 
     @Test

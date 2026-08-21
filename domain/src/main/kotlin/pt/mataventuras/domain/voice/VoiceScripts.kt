@@ -30,9 +30,13 @@ object VoiceScripts {
             "Passa por baixo da META. Ultrapassa os outros karts!"
     const val JUMP_HINT: String =
         "Segura à direita para avançar e à esquerda para recuar. Desliza bem para cima para saltar. Apanha as moedas!"
-    const val INVADERS_HINT: String = "Desliza para mover a nave. Toca para disparar nas letras."
-    const val CHOMP_HINT: String = "Desliza para comer as bolinhas. A pílula dourada transforma-te!"
-    const val CLIMB_HINT: String = "Anda e salta para subir as letras. Evita os barris. O cogumelo faz-te crescer!"
+    const val INVADERS_HINT: String =
+        "Desliza para mover a nave. Toca para disparar. Tens 5 vidas. " +
+            "O jogo só acaba quando perderes as vidas ou destruíres todas as naves."
+    const val CHOMP_HINT: String =
+        "Desliza para comer as bolinhas. A pílula dourada transforma-te. Tens 3 vidas."
+    const val CLIMB_HINT: String =
+        "Anda e salta para subir as letras. Evita os barris. O cogumelo faz-te crescer. Tens 3 vidas."
     const val LEAVE: String = "Sair"
     const val CONFIRM_LEAVE: String = "Sim, sair"
     const val STAY: String = "Ficar"

@@ -3,29 +3,46 @@
 [sub_resource type="GDScript" id="1_boot"]
 script/source = "extends ColorRect
 
-## Waits until the Android SurfaceView has a real size, then loads the reward.
+## Waits until the Android SurfaceView has a real size, then loads the reward
+## as a sibling so the blue boot rect is never replaced by an empty root.
 func _ready() -> void:
 	color = Color(0.117647, 0.533333, 0.898039, 1)
 	RenderingServer.set_default_clear_color(color)
+	set_anchors_preset(Control.PRESET_FULL_RECT)
 	call_deferred(\"_load_reward\")
 
 
 func _process(_delta: float) -> void:
 	queue_redraw()
+	Host.fit_viewport(self)
 
 
 func _load_reward() -> void:
 	var tries := 0
-	while tries < 48:
+	while tries < 180:
 		await get_tree().process_frame
-		var sz := get_viewport().get_visible_rect().size
-		var win := DisplayServer.window_get_size()
-		if sz.x > 32.0 and sz.y > 32.0 and win.x > 32 and win.y > 32:
+		Host.fit_viewport(self)
+		if _surface_ready():
 			break
 		tries += 1
-	for _i in 8:
+	for _i in 10:
 		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
 	RenderingServer.force_draw()
+	var path := _reward_path()
+	if path.is_empty():
+		Host.finish(false)
+		return
+	_swap_to(path)
+
+
+func _surface_ready() -> bool:
+	var sz := get_viewport().get_visible_rect().size
+	var win := DisplayServer.window_get_size()
+	return sz.x > 32.0 and sz.y > 32.0 and win.x > 32 and win.y > 32
+
+
+func _reward_path() -> String:
 	var path := \"res://kart.tscn\"
 	if Engine.has_singleton(\"MatAventuras\"):
 		var next := str(Engine.get_singleton(\"MatAventuras\").rewardScene())
@@ -33,12 +50,23 @@ func _load_reward() -> void:
 			path = next
 	if not ResourceLoader.exists(path):
 		push_error(\"Reward scene missing: %s\" % path)
+		return \"\"
+	return path
+
+
+func _swap_to(path: String) -> void:
+	var packed = load(path)
+	if packed == null:
 		Host.finish(false)
 		return
-	var err := get_tree().change_scene_to_file(path)
-	if err != OK:
-		push_error(\"Failed to load reward scene: %s (%s)\" % [path, err])
-		Host.finish(false)
+	var next: Node = packed.instantiate()
+	var tree := get_tree()
+	tree.root.add_child(next)
+	tree.current_scene = next
+	for _i in 6:
+		await tree.process_frame
+	RenderingServer.force_draw()
+	queue_free()
 "
 
 

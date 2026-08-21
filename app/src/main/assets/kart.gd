@@ -52,14 +52,11 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
-	hud.position = Vector2(24, 24)
-	hud.add_theme_font_size_override("font_size", 28)
-	hud.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	hud.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	hud.add_theme_constant_override("outline_size", 10)
+	Host.skin_hud(hud, self)
 	layer.add_child(hud)
 	_update_hud(false)
 	RenderingServer.set_default_clear_color(pal_sky)
+	Host.fit_viewport(self)
 	queue_redraw()
 
 
@@ -117,7 +114,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _steer_at(pos: Vector2, arm_boost: bool) -> void:
-	var width: float = maxf(get_viewport().get_visible_rect().size.x, 1.0)
+	var width: float = maxf(Host.view_size(self).x, 1.0)
 	var nx: float = pos.x / width
 	var delta := nx - 0.5
 	if absf(delta) <= DEADZONE:
@@ -131,6 +128,7 @@ func _steer_at(pos: Vector2, arm_boost: bool) -> void:
 func _process(delta: float) -> void:
 	if finished:
 		return
+	Host.fit_viewport(self)
 	delta = minf(delta, 0.05)
 	if boosting:
 		boost_timer = 1.15
@@ -188,9 +186,7 @@ func _place() -> int:
 
 
 func _draw() -> void:
-	var size := get_viewport_rect().size
-	if size.x < 32.0 or size.y < 32.0:
-		return
+	var size := Host.view_size(self)
 	draw_rect(Rect2(Vector2.ZERO, size), pal_sky)
 	var horizon := size.y * 0.34
 	var ground := size.y * 0.94
@@ -264,8 +260,8 @@ func _draw_rivals(size: Vector2, horizon: float, ground: float) -> void:
 		if ahead > DRAW_AHEAD or ahead < 4.0:
 			continue
 		var t := clampf(ahead / DRAW_AHEAD, 0.0, 1.0)
-		var y := ground - (ground - horizon) * t - 40.0
-		var scale := 1.2 / (0.45 + t * 2.0)
+		var y := ground - (ground - horizon) * t - 40.0 * (size.y / 720.0)
+		var scale := 1.2 / (0.45 + t * 2.0) * (size.y / 720.0)
 		var x := size.x * 0.5 + (r.y - lateral) * 90.0 * scale
 		var fill := rival_colors[i]
 		draw_rect(Rect2(x - 22.0 * scale, y + 22.0 * scale, 14.0 * scale, 14.0 * scale), Color("212121"))
@@ -277,23 +273,24 @@ func _draw_rivals(size: Vector2, horizon: float, ground: float) -> void:
 
 
 func _draw_kart(size: Vector2, ground: float) -> void:
-	var cx := size.x * 0.5 + steer * 22.0
-	var y := ground - 78.0
+	var s := size.y / 720.0
+	var cx := size.x * 0.5 + steer * 22.0 * s
+	var y := ground - 78.0 * s
 	var fill := kart_fill
-	draw_rect(Rect2(cx - 36.0, y + 40.0, 20.0, 18.0), Color("212121"))
-	draw_rect(Rect2(cx + 16.0, y + 40.0, 20.0, 18.0), Color("212121"))
-	draw_rect(Rect2(cx - 30.0, y + 16.0, 60.0, 30.0), fill)
-	draw_rect(Rect2(cx - 8.0, y + 20.0, 16.0, 22.0), Color("FFF59D"))
-	draw_rect(Rect2(cx - 18.0, y - 2.0, 36.0, 24.0), Color("ECEFF1"))
-	draw_rect(Rect2(cx - 24.0, y - 12.0, 48.0, 12.0), fill)
-	draw_rect(Rect2(cx - 20.0, y - 20.0, 8.0, 16.0), fill)
-	draw_rect(Rect2(cx + 12.0, y - 20.0, 8.0, 16.0), fill)
-	draw_rect(Rect2(cx - 26.0, y + 12.0, 10.0, 8.0), Color("FFF176"))
-	draw_rect(Rect2(cx + 16.0, y + 12.0, 10.0, 8.0), Color("FFF176"))
+	draw_rect(Rect2(cx - 36.0 * s, y + 40.0 * s, 20.0 * s, 18.0 * s), Color("212121"))
+	draw_rect(Rect2(cx + 16.0 * s, y + 40.0 * s, 20.0 * s, 18.0 * s), Color("212121"))
+	draw_rect(Rect2(cx - 30.0 * s, y + 16.0 * s, 60.0 * s, 30.0 * s), fill)
+	draw_rect(Rect2(cx - 8.0 * s, y + 20.0 * s, 16.0 * s, 22.0 * s), Color("FFF59D"))
+	draw_rect(Rect2(cx - 18.0 * s, y - 2.0 * s, 36.0 * s, 24.0 * s), Color("ECEFF1"))
+	draw_rect(Rect2(cx - 24.0 * s, y - 12.0 * s, 48.0 * s, 12.0 * s), fill)
+	draw_rect(Rect2(cx - 20.0 * s, y - 20.0 * s, 8.0 * s, 16.0 * s), fill)
+	draw_rect(Rect2(cx + 12.0 * s, y - 20.0 * s, 8.0 * s, 16.0 * s), fill)
+	draw_rect(Rect2(cx - 26.0 * s, y + 12.0 * s, 10.0 * s, 8.0 * s), Color("FFF176"))
+	draw_rect(Rect2(cx + 16.0 * s, y + 12.0 * s, 10.0 * s, 8.0 * s), Color("FFF176"))
 	if boost_timer > 0.0:
-		draw_rect(Rect2(cx - 10.0, y + 52.0, 20.0, 16.0), Color("FF6F00"))
-		draw_rect(Rect2(cx - 28.0, y + 58.0, 12.0, 10.0), Color("FFCC80"))
-		draw_rect(Rect2(cx + 16.0, y + 58.0, 12.0, 10.0), Color("FFCC80"))
+		draw_rect(Rect2(cx - 10.0 * s, y + 52.0 * s, 20.0 * s, 16.0 * s), Color("FF6F00"))
+		draw_rect(Rect2(cx - 28.0 * s, y + 58.0 * s, 12.0 * s, 10.0 * s), Color("FFCC80"))
+		draw_rect(Rect2(cx + 16.0 * s, y + 58.0 * s, 12.0 * s, 10.0 * s), Color("FFCC80"))
 
 
 func _draw_meta(size: Vector2, horizon: float, ground: float) -> void:
@@ -322,6 +319,7 @@ func _draw_bands(size: Vector2) -> void:
 
 
 func _update_hud(show_boost: bool) -> void:
+	Host.skin_hud(hud, self)
 	var shown := mini(lap + 1, LAPS_TARGET)
 	var extra := "\nImpulso!" if show_boost else ""
 	if absf(lateral) > _sample(widths, distance):

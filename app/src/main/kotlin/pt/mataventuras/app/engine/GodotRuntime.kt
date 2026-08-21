@@ -29,6 +29,13 @@ object GodotRuntime {
     /** Runtime plugin name exposed to GDScript as `Engine.get_singleton`. */
     const val PLUGIN_NAME: String = "MatAventuras"
 
+    /**
+     * Smallest SurfaceView that may host `libgodot_android`. A 0×0 GLES
+     * context is what left a black view after the fragment attached in
+     * `onCreate` before layout.
+     */
+    const val MIN_SURFACE_PX: Int = 32
+
     /** Intent extra GodotActivity reads for launch arguments. Unused by GodotFragment. */
     const val EXTRA_COMMAND_LINE: String = "command_line_params"
 
@@ -48,6 +55,14 @@ object GodotRuntime {
      * restart, which then blinked the splash.
      */
     fun commandLineFor(): List<String> = emptyList()
+
+    /**
+     * True when [width]×[height] is large enough to create a GLES surface.
+     */
+    fun isSurfaceReady(
+        width: Int,
+        height: Int,
+    ): Boolean = width >= MIN_SURFACE_PX && height >= MIN_SURFACE_PX
 
     /**
      * True when this isolated plugin Activity should ask the Compose host to
