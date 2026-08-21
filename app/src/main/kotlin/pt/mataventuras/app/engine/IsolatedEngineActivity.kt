@@ -88,6 +88,12 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     /**
      * Child display name extra, or empty.
      */
+    internal fun childName(): String =
+        intent.getStringExtra(EnginePluginContract.EXTRA_NAME).orEmpty()
+
+    /**
+     * Reward scene extra, or empty when the host omitted it.
+     */
     internal fun sceneCode(): String =
         intent.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty()
 
