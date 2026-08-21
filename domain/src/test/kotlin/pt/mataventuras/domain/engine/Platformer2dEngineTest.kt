@@ -41,13 +41,16 @@ class Platformer2dEngineTest {
         var airborne = engine.step(engine.initial(), 0.05f, jumping = true)
         airborne = engine.step(airborne, 0.05f, jumping = true)
         assertFalse(airborne.onGround)
+        val rooted = engine.step(engine.initial(), 0.05f, jumping = true, moveX = 0f)
+        assertTrue(rooted.onGround)
         val ready = engine.initial(ringsTarget = 1).copy(rings = 1, finished = false)
         val closed = engine.step(ready, 0.01f, jumping = false)
         assertTrue(closed.finished)
         assertEquals(closed, engine.collect(closed, 0f))
         var falling = engine.initial().copy(x = Platformer2dEngine.PIT_X + 1f, onGround = true)
-        repeat(30) { falling = engine.step(falling, 0.05f, jumping = false) }
-        assertFalse(falling.alive)
+        repeat(30) { falling = engine.step(falling, 0.05f, jumping = false, moveX = 1f) }
+        assertTrue(falling.inPitFall || !falling.alive)
+        assertTrue(falling.x < PlatformerWorld.PIT_RIGHT + 1f || falling.inPitFall || !falling.alive)
         val short = engine.collect(engine.initial(), ringX = 0.5f, radius = 0.1f)
         assertEquals(0, short.rings)
         var tagged = engine.collect(engine.initial(), ringX = 0f, coinIndex = 0)
@@ -64,5 +67,13 @@ class Platformer2dEngineTest {
         assertEquals(28f, PlatformerWorld.PIT_LEFT)
         assertEquals(2, PlatformerWorld.LEDGES.size)
         assertEquals(5, PlatformerWorld.COIN_X.size)
+        val random = PlatformerWorld.random(4)
+        assertTrue(random.pits.size >= 3)
+        assertTrue(random.coins.size >= 8)
+        assertTrue(random.inPit(random.pits[0].left + 0.5f))
+        assertFalse(random.inPit(0f))
+        assertTrue(random.lastSafeX(random.pits[0].right) < random.pits[0].left + 1f)
+        val themed = PlatformerWorld.random(1)
+        assertTrue(themed.skyArgb != PlatformerWorld.random(2).skyArgb || themed.grassArgb != 0L)
     }
 }

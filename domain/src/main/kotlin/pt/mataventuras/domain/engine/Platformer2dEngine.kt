@@ -1,29 +1,6 @@
 package pt.mataventuras.domain.engine
 
 /**
- * Game Boy-like brick layout for the age-3 runner, in world units.
- */
-object PlatformerWorld {
-    /** Left edge of the floor gap. */
-    const val PIT_LEFT: Float = 28f
-
-    /** Right edge of the floor gap. */
-    const val PIT_RIGHT: Float = 36f
-
-    /** Horizontal coin centres. */
-    val COIN_X: FloatArray = floatArrayOf(8f, 16f, 24f, 42f, 54f)
-
-    /**
-     * Ledge tops the player can land on: x, y, width.
-     */
-    val LEDGES: Array<FloatArray> =
-        arrayOf(
-            floatArrayOf(14f, 3.5f, 8f),
-            floatArrayOf(40f, 4.2f, 8f),
-        )
-}
-
-/**
  * Simulatable 2D side-scroller state (age-3 reward).
  */
 data class Platformer2dState(
@@ -37,16 +14,18 @@ data class Platformer2dState(
     val alive: Boolean,
     val finished: Boolean,
     val collectedMask: Int = 0,
+    val inPitFall: Boolean = false,
 )
 
 /**
- * Simple side-scroller physics. Testable without Android.
+ * Side-scroller physics. Finger drag sets [moveX]; a forward flick jumps.
  */
 class Platformer2dEngine(
     private val groundY: Float = 0f,
     private val gravity: Float = -48f,
     private val jumpSpeed: Float = 22f,
     private val speedX: Float = 8f,
+    private val level: PlatformerLevel = PlatformerWorld.DEFAULT,
 ) {
     /**
      * Standing still on the ground.
@@ -55,7 +34,7 @@ class Platformer2dEngine(
         Platformer2dState(
             x = 0f,
             y = groundY,
-            vx = speedX,
+            vx = 0f,
             vy = 0f,
             onGround = true,
             rings = 0,
@@ -66,23 +45,45 @@ class Platformer2dEngine(
 
     /**
      * Advances one simulation step in seconds.
+     * [moveX] is -1..1 from a horizontal drag. Jump only applies with forward motion.
      */
     fun step(
         state: Platformer2dState,
         dt: Float,
         jumping: Boolean,
+        moveX: Float = 1f,
     ): Platformer2dState {
         if (!state.alive || state.finished) return state
-        val vyJump = if (jumping && state.onGround) jumpSpeed else state.vy + gravity * dt
-        val x = state.x + state.vx * dt
-        val rawY = state.y + vyJump * dt
-        val landed = settle(x, rawY, vyJump)
-        val y = landed.first
+        val run = moveX.coerceIn(-1f, 1f)
+        val motion = integrate(state, dt, jumping, run)
+        val landed = settle(motion.x, motion.y, motion.vy, motion.falling)
         val onGround = landed.second
-        val vy = if (onGround) 0f else vyJump
-        val alive = y >= -2f
         val finished = state.rings >= state.ringsTarget
-        return state.copy(x = x, y = y, vy = vy, onGround = onGround, alive = alive, finished = finished)
+        return state.copy(
+            x = motion.x,
+            y = landed.first,
+            vx = motion.vx,
+            vy = if (onGround) 0f else motion.vy,
+            onGround = onGround,
+            alive = landed.first >= -2f,
+            finished = finished,
+            inPitFall = motion.falling && !onGround,
+        )
+    }
+
+    private fun integrate(
+        state: Platformer2dState,
+        dt: Float,
+        jumping: Boolean,
+        run: Float,
+    ): PitMotion {
+        val leaped = jumping && state.onGround && run > 0.2f
+        val vy = if (leaped) jumpSpeed else state.vy + gravity * dt
+        val vx = if (state.inPitFall) 0f else run * speedX
+        val x = state.x + vx * dt
+        val y = state.y + vy * dt
+        val falling = state.inPitFall || (level.inPit(x) && y <= groundY)
+        return PitMotion(x, y, vx, vy, falling)
     }
 
     /**
@@ -108,12 +109,12 @@ class Platformer2dEngine(
         x: Float,
         y: Float,
         vy: Float,
+        falling: Boolean,
     ): Pair<Float, Boolean> {
-        val inPit = x > PlatformerWorld.PIT_LEFT && x < PlatformerWorld.PIT_RIGHT
-        if (y <= groundY && !inPit) return groundY to true
+        if (falling) return y to false
+        if (y <= groundY && !level.inPit(x)) return groundY to true
         val ledgeY = ledgeTop(x, y, vy)
-        if (ledgeY != null) return ledgeY to true
-        return y to false
+        return if (ledgeY != null) ledgeY to true else y to false
     }
 
     private fun ledgeTop(
@@ -121,17 +122,24 @@ class Platformer2dEngine(
         y: Float,
         vy: Float,
     ): Float? {
-        PlatformerWorld.LEDGES.forEach { ledge ->
-            val top = ledge[1]
-            val onX = x >= ledge[0] && x <= ledge[0] + ledge[2]
-            val hitting = vy <= 0f && y in (top - 1.5f)..top
-            if (onX && hitting) return top
+        level.ledges.forEach { ledge ->
+            val onX = x >= ledge.x && x <= ledge.x + ledge.width
+            val hitting = vy <= 0f && y in (ledge.y - 1.5f)..ledge.y
+            if (onX && hitting) return ledge.y
         }
         return null
     }
 
-    /** World X where the floor gap begins (fall). */
+    /** World X where the first floor gap begins (fall). */
     companion object {
         const val PIT_X: Float = PlatformerWorld.PIT_LEFT
     }
 }
+
+private data class PitMotion(
+    val x: Float,
+    val y: Float,
+    val vx: Float,
+    val vy: Float,
+    val falling: Boolean,
+)

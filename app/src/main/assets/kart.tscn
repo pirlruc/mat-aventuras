@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://kart.gd" id="1_kart"]
 
-[node name="KartWorld" type="Node3D"]
+[node name="KartWorld" type="Node2D"]
 script = ExtResource("1_kart")

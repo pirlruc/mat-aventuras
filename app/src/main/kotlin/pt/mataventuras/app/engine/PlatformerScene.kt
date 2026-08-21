@@ -1,6 +1,7 @@
 package pt.mataventuras.app.engine
 
 import pt.mataventuras.domain.engine.Platformer2dState
+import pt.mataventuras.domain.engine.PlatformerLevel
 import pt.mataventuras.domain.engine.PlatformerWorld
 import pt.mataventuras.domain.model.Mascot
 
@@ -47,9 +48,10 @@ internal object PlatformerScene {
         mascot: Mascot,
         width: Float,
         height: Float,
+        level: PlatformerLevel = PlatformerWorld.DEFAULT,
     ): List<PlatformerSprite> {
         val tiles = ArrayList<PlatformerRect>(24)
-        fillTiles(tiles, state, mascot, width, height)
+        fillTiles(tiles, state, mascot, width, height, level)
         return tiles.map { tile ->
             PlatformerSprite(
                 tile.x + tile.w / 2f,
@@ -70,13 +72,14 @@ internal object PlatformerScene {
         mascot: Mascot,
         width: Float,
         height: Float,
+        level: PlatformerLevel = PlatformerWorld.DEFAULT,
     ) {
         out.clear()
         val groundY = groundTop(height)
         val camera = state.x * SCALE_X - width * 0.3f
-        addGround(out, camera, width, groundY, height)
-        addLedges(out, camera, groundY)
-        addCoins(out, state, camera, groundY)
+        addGround(out, camera, width, groundY, height, level)
+        addLedges(out, camera, groundY, level)
+        addCoins(out, state, camera, groundY, level)
         addPlayer(out, mascot, width, groundY, state.y)
     }
 
@@ -101,16 +104,15 @@ internal object PlatformerScene {
         width: Float,
         groundY: Float,
         height: Float,
+        level: PlatformerLevel,
     ) {
-        val pitLeft = worldX(PlatformerWorld.PIT_LEFT, camera)
-        val pitRight = worldX(PlatformerWorld.PIT_RIGHT, camera)
-        out.add(PlatformerRect(0f, groundY, pitLeft.coerceAtLeast(0f), 16f, GRASS_ARGB))
-        val rightStart = pitRight.coerceAtLeast(0f)
-        if (rightStart < width) {
-            out.add(PlatformerRect(rightStart, groundY, width - rightStart, 16f, GRASS_ARGB))
+        out.add(PlatformerRect(0f, groundY, width, 16f, level.grassArgb))
+        level.pits.forEach { pit ->
+            val left = worldX(pit.left, camera)
+            val span = ((pit.right - pit.left) * SCALE_X).coerceAtLeast(8f)
+            out.add(PlatformerRect(left, groundY, span, height - groundY, level.pitArgb))
         }
-        out.add(PlatformerRect(pitLeft, groundY, pitRight - pitLeft, height - groundY, PIT_ARGB))
-        addBrickRow(out, camera, width, groundY + 16f, height - groundY - 16f, pitLeft, pitRight)
+        addBrickRow(out, camera, width, groundY + 16f, height - groundY - 16f, level)
     }
 
     private fun addBrickRow(
@@ -119,15 +121,15 @@ internal object PlatformerScene {
         width: Float,
         top: Float,
         brickH: Float,
-        pitLeft: Float,
-        pitRight: Float,
+        level: PlatformerLevel,
     ) {
         var x = -((camera % 24f) + 24f)
+        val h = brickH.coerceAtLeast(8f)
         while (x < width) {
-            val skip = x + 24f > pitLeft && x < pitRight
-            if (!skip) {
-                out.add(PlatformerRect(x, top, 22f, brickH.coerceAtLeast(8f), BRICK_ARGB))
-                out.add(PlatformerRect(x + 22f, top, 2f, brickH.coerceAtLeast(8f), MORTAR_ARGB))
+            val world = (x + camera) / SCALE_X
+            if (!level.inPit(world + 0.3f)) {
+                out.add(PlatformerRect(x, top, 22f, h, level.brickArgb))
+                out.add(PlatformerRect(x + 22f, top, 2f, h, MORTAR_ARGB))
             }
             x += 24f
         }
@@ -137,11 +139,12 @@ internal object PlatformerScene {
         out: MutableList<PlatformerRect>,
         camera: Float,
         groundY: Float,
+        level: PlatformerLevel,
     ) {
-        PlatformerWorld.LEDGES.forEach { ledge ->
-            val x = worldX(ledge[0], camera)
-            val y = groundY - ledge[1] * SCALE_Y - 12f
-            out.add(PlatformerRect(x, y, ledge[2] * SCALE_X, 14f, BRICK_ARGB))
+        level.ledges.forEach { ledge ->
+            val x = worldX(ledge.x, camera)
+            val y = groundY - ledge.y * SCALE_Y - 12f
+            out.add(PlatformerRect(x, y, ledge.width * SCALE_X, 14f, level.brickArgb))
         }
     }
 
@@ -150,11 +153,13 @@ internal object PlatformerScene {
         state: Platformer2dState,
         camera: Float,
         groundY: Float,
+        level: PlatformerLevel,
     ) {
-        PlatformerWorld.COIN_X.forEachIndexed { i, coinX ->
+        level.coins.forEachIndexed { i, coinX ->
             if ((state.collectedMask shr i) and 1 == 1) return@forEachIndexed
             val x = worldX(coinX, camera)
-            out.add(PlatformerRect(x, groundY - 28f, 16f, 16f, COIN_ARGB))
+            out.add(PlatformerRect(x, groundY - 36f, 14f, 14f, COIN_ARGB))
+            out.add(PlatformerRect(x + 4f, groundY - 32f, 6f, 6f, 0xFFFFF59D))
         }
     }
 
@@ -165,10 +170,19 @@ internal object PlatformerScene {
         groundY: Float,
         worldY: Float,
     ) {
+        val fill = mascot.primaryArgb
+        val shade = hatArgb(fill)
         val px = width * 0.3f
-        val py = groundY - worldY * SCALE_Y - 40f
-        out.add(PlatformerRect(px, py + 10f, 28f, 30f, mascot.primaryArgb))
-        out.add(PlatformerRect(px + 4f, py, 20f, 12f, hatArgb(mascot.primaryArgb)))
+        val py = groundY - worldY * SCALE_Y - 52f
+        out.add(PlatformerRect(px + 10f, py + 20f, 16f, 22f, fill))
+        out.add(PlatformerRect(px + 8f, py + 4f, 20f, 18f, fill))
+        out.add(PlatformerRect(px + 6f, py, 24f, 10f, shade))
+        out.add(PlatformerRect(px + 12f, py + 10f, 4f, 4f, 0xFF212121))
+        out.add(PlatformerRect(px + 20f, py + 10f, 4f, 4f, 0xFF212121))
+        out.add(PlatformerRect(px + 10f, py + 40f, 6f, 14f, shade))
+        out.add(PlatformerRect(px + 20f, py + 40f, 6f, 14f, shade))
+        out.add(PlatformerRect(px + 8f, py + 52f, 10f, 6f, 0xFF4E342E))
+        out.add(PlatformerRect(px + 20f, py + 52f, 10f, 6f, 0xFF4E342E))
     }
 
     private fun worldX(

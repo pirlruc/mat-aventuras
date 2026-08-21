@@ -1,55 +1,66 @@
-extends Node3D
+extends Node2D
 
-## Age-7 oval kart. Touch bands match EngineInputMap (0.34 / 0.66). HUD is pt-PT.
+## Age-7 Super Off Road-style 2.5D dirt circuit. HUD is pt-PT.
 const STEER_LEFT_MAX := 0.34
 const STEER_RIGHT_MIN := 0.66
 const LAPS_TARGET := 3
-const RINGS_TARGET := 8
+const GATES_TARGET := 8
+const LENGTH := 480.0
+const CRUISE := 28.0
+const BOOST_SPD := 46.0
+const STRIPS := 28
 
-var lap := 0
-var rings := 0
-var angle := 0.0
+var seed := 1
+var distance := 2.0
+var lateral := 0.0
+var speed := CRUISE
 var steer := 0.0
 var boosting := false
-var kart: MeshInstance3D
-var cam: Camera3D
-var hud: Label
+var boost_timer := 0.0
+var lap := 0
+var gates := 0
+var gate_mask := 0
 var finished := false
+var hud: Label
+var curves: Array[float] = []
+var hills: Array[float] = []
+var widths: Array[float] = []
+var palette := 0
 
 
 func _ready() -> void:
-	_build_world()
-	_update_hud(false)
-
-
-func _build_world() -> void:
-	var light := DirectionalLight3D.new()
-	light.rotation_degrees = Vector3(-50, 35, 0)
-	add_child(light)
-
-	cam = Camera3D.new()
-	add_child(cam)
-
-	var track := MeshInstance3D.new()
-	var torus := TorusMesh.new()
-	torus.inner_radius = 6.0
-	torus.outer_radius = 8.0
-	track.mesh = torus
-	track.rotation_degrees = Vector3(90, 0, 0)
-	add_child(track)
-
-	kart = MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(0.8, 0.4, 1.2)
-	kart.mesh = box
-	add_child(kart)
-
+	seed = Time.get_ticks_msec()
+	palette = seed % 4
+	_roll_track()
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
 	hud.position = Vector2(24, 24)
 	hud.add_theme_font_size_override("font_size", 28)
 	layer.add_child(hud)
+	_update_hud(false)
+	queue_redraw()
+
+
+func _roll_track() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed
+	curves.clear()
+	hills.clear()
+	widths.clear()
+	for i in 24:
+		curves.append(rng.randf() * 1.7 - 0.85)
+		hills.append(rng.randf() * 1.1 - 0.35)
+		widths.append(0.82 + rng.randf() * 0.28)
+
+
+func _sample(values: Array[float], dist: float) -> float:
+	var wrapped := fposmod(dist, LENGTH)
+	var t := wrapped / LENGTH * values.size()
+	var i := int(t) % values.size()
+	var j := (i + 1) % values.size()
+	var f := t - int(t)
+	return values[i] + (values[j] - values[i]) * f
 
 
 func _input(event: InputEvent) -> void:
@@ -67,6 +78,9 @@ func _input(event: InputEvent) -> void:
 		if not pressed:
 			steer = 0.0
 			return
+	elif event is InputEventScreenDrag:
+		pos = event.position
+		pressed = true
 	else:
 		return
 	if not pressed:
@@ -79,35 +93,125 @@ func _input(event: InputEvent) -> void:
 		steer = 1.0
 	else:
 		boosting = true
+		steer = 0.0
 
 
 func _process(delta: float) -> void:
 	if finished:
 		return
 	delta = minf(delta, 0.05)
-	var speed := 1.1 + (1.4 if boosting else 0.0)
-	var show_boost := boosting
+	if boosting:
+		boost_timer = 1.15
 	boosting = false
-	angle += speed * delta * (1.0 + steer * 0.15)
-	var radius := 7.0
-	kart.position = Vector3(cos(angle) * radius, 0.4, sin(angle) * radius)
-	kart.rotation.y = -angle + PI * 0.5
-	cam.position = kart.position + Vector3(0, 5, 8)
-	cam.look_at(kart.position)
-	if angle >= TAU:
-		angle -= TAU
+	boost_timer = maxf(boost_timer - delta, 0.0)
+	var off := absf(lateral) > _sample(widths, distance)
+	var target := BOOST_SPD if boost_timer > 0.0 else (12.0 if off else CRUISE)
+	speed = move_toward(speed, target, 22.0 * delta)
+	var curve := _sample(curves, distance)
+	lateral = clampf(lateral + steer * 1.8 * delta + curve * speed * 0.012 * delta, -1.35, 1.35)
+	distance += speed * delta
+	if distance >= LENGTH:
+		distance -= LENGTH
 		lap += 1
-		rings = mini(rings + 3, RINGS_TARGET)
+		gate_mask = 0
 		if lap >= LAPS_TARGET:
 			_finish()
 			return
-	_update_hud(show_boost)
+	_collect_gates()
+	_update_hud(boost_timer > 0.0)
+	queue_redraw()
 
 
-func _update_hud(show_boost: bool = false) -> void:
+func _collect_gates() -> void:
+	for i in GATES_TARGET:
+		var bit := 1 << i
+		if gate_mask & bit:
+			continue
+		var gate_at := LENGTH * float(i + 1) / float(GATES_TARGET + 1)
+		if absf(distance - gate_at) <= 6.0 and absf(lateral) < 0.48:
+			gate_mask |= bit
+			gates = mini(gates + 1, GATES_TARGET)
+
+
+func _draw() -> void:
+	var size := get_viewport_rect().size
+	draw_rect(Rect2(Vector2.ZERO, size), _sky())
+	var horizon := size.y * 0.34
+	var ground := size.y * 0.94
+	for i in range(STRIPS - 1, -1, -1):
+		_draw_strip(size, horizon, ground, i)
+	_draw_gates(size, horizon, ground)
+	_draw_kart(size, ground)
+
+
+func _draw_strip(size: Vector2, horizon: float, ground: float, index: int) -> void:
+	var t := float(index) / float(STRIPS)
+	var y := ground - (ground - horizon) * t
+	var h := maxf((ground - horizon) / float(STRIPS), 2.0)
+	var scale := 1.55 / (0.35 + t * 2.4)
+	var dist := distance + 6.0 + t * 110.0
+	var curve := _sample(curves, dist)
+	var hill := _sample(hills, dist) * (1.0 - t) * 36.0
+	var center := size.x * 0.5 - lateral * 95.0 * scale + curve * 62.0 * (1.0 - t)
+	var road_w := 360.0 * scale * _sample(widths, dist)
+	draw_rect(Rect2(0, y - hill, size.x, h + 1.0), _grass())
+	draw_rect(Rect2(center - road_w * 0.5 - 10.0, y - hill, road_w + 20.0, h + 1.0), Color("E53935"))
+	draw_rect(Rect2(center - road_w * 0.5, y - hill, road_w, h + 1.0), _dirt())
+	if index % 2 == 0:
+		draw_rect(Rect2(center - 4.0, y - hill, 8.0, h), Color("FFF59D"))
+
+
+func _draw_gates(size: Vector2, horizon: float, ground: float) -> void:
+	for i in GATES_TARGET:
+		if gate_mask & (1 << i):
+			continue
+		var gate_at := LENGTH * float(i + 1) / float(GATES_TARGET + 1)
+		var ahead := gate_at - distance
+		if ahead < 0.0:
+			ahead += LENGTH
+		if ahead > 90.0:
+			continue
+		var t := clampf(ahead / 90.0, 0.0, 1.0)
+		var y := ground - (ground - horizon) * t - 20.0
+		var scale := 1.4 / (0.4 + t * 2.0)
+		var x := size.x * 0.5 - 18.0 * scale
+		draw_rect(Rect2(x, y, 36.0 * scale, 10.0 * scale), Color("FFD54F"))
+
+
+func _draw_kart(size: Vector2, ground: float) -> void:
+	var cx := size.x * 0.5 + steer * 18.0
+	var y := ground - 78.0
+	var fill := Host.mascot_color()
+	draw_rect(Rect2(cx - 34.0, y + 40.0, 18.0, 16.0), Color("212121"))
+	draw_rect(Rect2(cx + 16.0, y + 40.0, 18.0, 16.0), Color("212121"))
+	draw_rect(Rect2(cx - 28.0, y + 18.0, 56.0, 28.0), fill)
+	draw_rect(Rect2(cx - 16.0, y, 32.0, 22.0), Color("ECEFF1"))
+	draw_rect(Rect2(cx - 22.0, y - 8.0, 44.0, 10.0), fill)
+	if boost_timer > 0.0:
+		draw_rect(Rect2(cx - 8.0, y + 48.0, 16.0, 18.0), Color("FF6F00"))
+
+
+func _sky() -> Color:
+	var skies := [Color("81D4FA"), Color("FFCC80"), Color("FF8A65"), Color("1A237E")]
+	return skies[palette]
+
+
+func _grass() -> Color:
+	var grass := [Color("43A047"), Color("D4E157"), Color("6D4C41"), Color("263238")]
+	return grass[palette]
+
+
+func _dirt() -> Color:
+	var dirt := [Color("8D6E63"), Color("BCAAA4"), Color("5D4037"), Color("4E342E")]
+	return dirt[palette]
+
+
+func _update_hud(show_boost: bool) -> void:
 	var shown := mini(lap + 1, LAPS_TARGET)
-	var boost_txt := "\nImpulso!" if show_boost else ""
-	hud.text = "Volta %d de %d\nAnéis %d/%d%s" % [shown, LAPS_TARGET, rings, RINGS_TARGET, boost_txt]
+	var extra := "\nImpulso!" if show_boost else ""
+	if absf(lateral) > _sample(widths, distance):
+		extra = "\nVolta à pista!"
+	hud.text = "Volta %d de %d\nPortões %d/%d%s" % [shown, LAPS_TARGET, gates, GATES_TARGET, extra]
 
 
 func _finish() -> void:

@@ -20,15 +20,18 @@ data class Exercise(
         require(options.isNotEmpty()) { "An exercise needs options." }
         require(correctIndex in options.indices) { "Correct index is out of range." }
         require(play.targetIndices.all { it in options.indices }) { "Target index is out of range." }
+        require(play.wordPaths.flatten().all { it in options.indices }) { "Word path is out of range." }
     }
 
     /** True when the tapped option or board cell is the answer. */
-    fun isCorrect(chosenIndex: Int): Boolean =
-        if (play.targetIndices.isEmpty()) {
+    fun isCorrect(chosenIndex: Int): Boolean {
+        val hits = play.soupHits()
+        return if (hits.isEmpty()) {
             chosenIndex == correctIndex
         } else {
-            chosenIndex in play.targetIndices
+            chosenIndex in hits
         }
+    }
 }
 
 /**

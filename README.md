@@ -10,8 +10,8 @@ Everything runs on the device: no cloud accounts and no online leaderboard.
 
 **Mat Aventuras** is a mascot-hosted math adventure. The child picks an age
 band on the entry screen, then plays lesson modules that match that age.
-Every three correct answers in a row opens a reward mini-game: a 2D ring
-run at age 3, or an oval-track 3D kart at age 7.
+Every three correct answers in a row opens a reward mini-game: a 2D
+platform run at age 3, or a 2.5D off-road race at age 7.
 
 ## What children play
 
@@ -20,8 +20,8 @@ infinite exercise generator. The reward engine also changes with age.
 
 | Age | Lesson modules | Reward mini-game |
 | --- | --- | --- |
-| **3 years** | Counting 1–10; shapes; digits 0–9 | 2D ring runner (Godot in `:engine2d`) |
-| **7 years** | Addition (incl. missing addend); subtraction; multiplication; logic (even sequence, largest, smallest) | Isolated Godot kart in `:engine3d` |
+| **3 years** | Counting 1–10; shapes; digits 0–9 | 2D platformer (Godot in `:engine2d`) |
+| **7 years** | Addition (incl. missing addend); subtraction; multiplication; logic (even sequence, largest, smallest) | Isolated Godot 2.5D off-road race in `:engine3d` |
 
 ## What exists (MAT-001)
 
@@ -30,7 +30,7 @@ infinite exercise generator. The reward engine also changes with age.
 - Lessons (counting, shapes, numbers, arithmetic, logic)
 - Generic mascots (Ouriço Veloz, Cão Herói, Porquinho Rosa,
   Canalizador Valente, Extraterrestre Travesso)
-- 2D rewards (age 3) and a process-isolated oval-track 3D kart (age 7)
+- 2D rewards (age 3) and a process-isolated 2.5D off-road race (age 7)
 - Local leaderboard and badges (Room)
 - PIN-gated parental dashboard
 - Last-profile continue shortcut on the entry screen

@@ -83,14 +83,7 @@ class GodotPluginHostTest {
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
-        assertEquals(
-            android.opengl.GLSurfaceView.RENDERMODE_WHEN_DIRTY,
-            NativeKartHost.renderMode(embed = false),
-        )
-        assertEquals(
-            android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY,
-            NativeKartHost.renderMode(embed = true),
-        )
+        assertTrue(NativeKartHost.hudLines(pt.mataventuras.app.engine.OffroadRacerLoop()).first.startsWith("Volta"))
     }
 
     @Test

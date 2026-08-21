@@ -20,6 +20,8 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.engine.Kart3dActivity
+import pt.mataventuras.app.engine.OffroadScene
+import pt.mataventuras.app.engine.OffroadSpan
 import pt.mataventuras.app.engine.Platformer2dActivity
 import pt.mataventuras.app.engine.Platformer2dLoop
 import pt.mataventuras.app.engine.PlatformerRect
@@ -270,6 +272,7 @@ class AppUiTest {
             ).setup()
         val two = twoController.get()
         assertTrue(two.hasWindowFocus() || two.window != null)
+        two.loop.moveX = 1f
         two.loop.jumping = true
         repeat(40) { two.loop.tick() }
         val sprites = PlatformerScene.sprites(two.loop.state, Mascot.HERO_PUP, 800f, 480f)
@@ -309,8 +312,22 @@ class AppUiTest {
         assertTrue(three.window != null)
         three.session.handleTouch(0.1f, MotionEvent.ACTION_DOWN)
         three.session.handleTouch(0.5f, MotionEvent.ACTION_DOWN)
-        three.session.renderer.tick()
+        three.session.tick()
         three.session.handleTouch(0.9f, MotionEvent.ACTION_UP)
+        val spans = ArrayList<OffroadSpan>(96)
+        OffroadScene.fill(
+            spans,
+            three.session.state,
+            three.session.circuit,
+            Mascot.MISCHIEVOUS_ALIEN,
+            800f,
+            480f,
+        )
+        assertTrue(spans.size > 10)
+        val collected =
+            three.session.state.copy(collectedMask = (1 shl three.session.state.gatesTarget) - 1)
+        OffroadScene.fill(spans, collected, three.session.circuit, Mascot.HERO_PUP, 400f, 300f)
+        assertTrue(OffroadScene.skyArgb(three.session.circuit) != 0L)
         three.closeFinished()
         threeController.pause().stop().destroy()
 
@@ -336,6 +353,7 @@ class AppUiTest {
                 },
             )
         repeat(80) {
+            loop.moveX = 1f
             loop.jumping = true
             loop.tick()
         }
@@ -348,6 +366,7 @@ class AppUiTest {
                     ns
                 },
             )
+        idle.moveX = 1f
         repeat(200) { idle.tick() }
         assertTrue(idle.state.x > 20f || !idle.state.alive)
         idle.tick()

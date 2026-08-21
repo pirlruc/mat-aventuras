@@ -23,7 +23,25 @@ data class PlayBoard(
     val columns: Int = 0,
     val targetIndices: List<Int> = emptyList(),
     val cipherCode: String = "",
-)
+    val wordPaths: List<List<Int>> = emptyList(),
+) {
+    /**
+     * Hidden soup words. Falls back to a single [targetIndices] path.
+     */
+    fun soupPaths(): List<List<Int>> =
+        if (wordPaths.isNotEmpty()) {
+            wordPaths
+        } else if (targetIndices.isEmpty()) {
+            emptyList()
+        } else {
+            listOf(targetIndices)
+        }
+
+    /**
+     * Every cell that belongs to a hidden soup word or hunt target.
+     */
+    fun soupHits(): List<Int> = soupPaths().flatten()
+}
 
 /**
  * Play kinds that fit each curriculum module. Age-3 modules stay visual.
@@ -35,13 +53,13 @@ object PlayKinds {
     fun forModule(module: LearningModule): List<PlayKind> =
         when (module) {
             LearningModule.COUNTING ->
-                listOf(PlayKind.CHOICE, PlayKind.SOUP, PlayKind.PUZZLE, PlayKind.CIPHER)
+                listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.SOUP, PlayKind.PUZZLE, PlayKind.CIPHER)
             LearningModule.SHAPES ->
                 listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.SOUP, PlayKind.PUZZLE)
             LearningModule.NUMBERS ->
                 listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.SOUP, PlayKind.CIPHER, PlayKind.PUZZLE)
             LearningModule.ADDITION, LearningModule.SUBTRACTION, LearningModule.MULTIPLICATION ->
-                listOf(PlayKind.CHOICE, PlayKind.CIPHER, PlayKind.PUZZLE)
+                listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.CIPHER, PlayKind.PUZZLE)
             LearningModule.LOGIC ->
                 listOf(PlayKind.CHOICE, PlayKind.SUDOKU, PlayKind.SOUP, PlayKind.CIPHER)
         }

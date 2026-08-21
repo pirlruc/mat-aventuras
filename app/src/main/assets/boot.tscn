@@ -3,22 +3,30 @@
 [sub_resource type="GDScript" id="1_boot"]
 script/source = "extends ColorRect
 
-## Waits one idle frame so plugins are registered, then loads kart or runner.
+## Waits idle frames so plugins are registered, then loads kart or runner.
 func _ready() -> void:
+	color = Color(0.117647, 0.533333, 0.898039, 1)
 	call_deferred(\"_load_reward\")
 
 
 func _load_reward() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
 	var path := \"res://kart.tscn\"
 	if Engine.has_singleton(\"MatAventuras\"):
 		var next := str(Engine.get_singleton(\"MatAventuras\").rewardScene())
 		if not next.is_empty():
 			path = next
+	if not ResourceLoader.exists(path):
+		push_error(\"Reward scene missing: %s\" % path)
+		Host.finish(false)
+		return
 	var err := get_tree().change_scene_to_file(path)
 	if err != OK:
 		push_error(\"Failed to load reward scene: %s (%s)\" % [path, err])
 		Host.finish(false)
 "
+
 
 [node name="Boot" type="ColorRect"]
 anchors_preset = 15

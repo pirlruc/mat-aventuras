@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-08-20
-**Last agent focus:** Godot GLES host relaunch, isolated Room skip, AGP 9 / Daemon Toolchain
+**Last updated:** 2026-08-21
+**Last agent focus:** Lesson boards, platformer, 2.5D off-road racer, Gradle 9.7.1
 
 ---
 
@@ -15,8 +15,9 @@ Native Kotlin/Compose educational math game for ages 3 and 7.
 Privacy: on-device only. Decision log: GitHub Epics via github-issue-adr;
 authored backlog is `docs/issues.yml`.
 
-Reward engines: **Godot 4** in `:engine2d` (age 3) and `:engine3d` (age 7).
-Unity is not used. Native Canvas/GLES is the Robolectric fallback.
+Reward engines: **Godot 4** in `:engine2d` (age 3 platformer) and `:engine3d`
+(age 7 2.5D off-road race). Unity is not used. Native Canvas is the
+Robolectric fallback. `Kart3dEngine` GLES remains unit-tested.
 
 ## Pins
 
@@ -89,6 +90,9 @@ bash scripts/ci-local.sh
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 
-Known follow-ups not in this pass: encrypted PIN DataStore, release R8 with Godot JNI keep rules, per-frame KartScene allocations.
+This pass: Gradle wrapper 9.7.1 (AGP stays 9.3.1, latest stable); sudoku on
+more modules; multi-word 8-way sopa de letras; cipher TTS names every symbol;
+answer flash 960 ms; Godot boot/clear-color; drag-to-run platformer; 2.5D
+off-road racer.
 
-*Last updated: 2026-08-20*
+*Last updated: 2026-08-21*

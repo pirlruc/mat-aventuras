@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
 
 class PlayBoardFactoryTest {
@@ -17,7 +18,7 @@ class PlayBoardFactoryTest {
         assertTrue(PlayKind.SOUP in three)
         assertTrue(PlayKind.PUZZLE in three)
         assertTrue(PlayKind.CIPHER in three)
-        assertFalse(PlayKind.SUDOKU in three)
+        assertTrue(PlayKind.SUDOKU in three)
         assertTrue(PlayKind.SUDOKU in PlayKinds.forModule(LearningModule.SHAPES))
         assertTrue(PlayKind.SOUP in PlayKinds.forModule(LearningModule.LOGIC))
         assertTrue(PlayKind.SOUP in PlayKinds.forModule(LearningModule.NUMBERS))
@@ -56,16 +57,26 @@ class PlayBoardFactoryTest {
 
         val words = factory.soup(LearningModule.LOGIC)
         assertEquals(16, words.options.size)
-        assertTrue(words.play.targetIndices.size >= 4)
+        assertTrue(words.play.wordPaths.isNotEmpty())
+        assertTrue(words.play.targetIndices.isNotEmpty())
         assertTrue(words.spoken.contains("Desliza"))
-        words.play.targetIndices.forEach { assertTrue(words.isCorrect(it)) }
+        words.play.soupHits().forEach { assertTrue(words.isCorrect(it)) }
+        assertTrue(SudokuGrids.isConsistent(SudokuGrids.filled(4, Random(1)), 4))
+        assertTrue(SudokuGrids.isConsistent(SudokuGrids.filled(6, Random(2)), 6))
+        assertTrue(SudokuGrids.isLatin(SudokuGrids.filled(3, Random(3)), 3))
 
         val puzzle = factory.puzzle(LearningModule.SHAPES)
         assertEquals(PlayKind.PUZZLE, puzzle.play.kind)
         assertEquals("Qual é a peça que falta?", puzzle.prompt)
+        assertTrue(puzzle.play.cells.contains("?"))
+        assertTrue(puzzle.options[puzzle.correctIndex] in GeometricShape.entries.map { it.displayName })
 
         val numberPuzzle = factory.puzzle(LearningModule.ADDITION)
-        assertTrue(numberPuzzle.options[numberPuzzle.correctIndex].toInt() in 1..9)
+        val hole = numberPuzzle.play.cells.indexOf("?")
+        val answer = numberPuzzle.options[numberPuzzle.correctIndex]
+        val filled = numberPuzzle.play.cells.mapIndexed { i, cell -> if (i == hole) answer else cell }.map { it.toInt() }
+        val step = filled[1] - filled[0]
+        assertTrue(filled.indices.all { filled[it] == filled[0] + it * step })
 
         val cipher = factory.cipher(LearningModule.COUNTING)
         assertEquals(PlayKind.CIPHER, cipher.play.kind)
@@ -173,10 +184,26 @@ class PlayBoardFactoryTest {
         assertEquals(2, mul.play.cells.size)
         val sub = factory.cipher(LearningModule.SUBTRACTION, 2)
         assertTrue(sub.play.cells.size >= 2)
+        assertTrue(add.spoken.contains("Triângulo"))
+        assertTrue(add.spoken.contains("Círculo"))
+        assertTrue(add.spoken.contains("Quadrado"))
+        assertTrue(mixed.spoken.contains("Quadrado"))
         assertEquals(5, factory.make(PlayKind.SOUP, LearningModule.SHAPES, 2).play.columns)
         val wide =
             (0..80).map { ExerciseGenerator(Random(it)).generate(LearningModule.LOGIC, 3) }
                 .filter { it.play.kind == PlayKind.SUDOKU }
         assertTrue(wide.any { it.play.columns == 6 })
+        assertTrue(PlayKind.SUDOKU in PlayKinds.forModule(LearningModule.ADDITION))
+        assertEquals(PlayKind.SUDOKU, factory.make(PlayKind.SUDOKU, LearningModule.COUNTING).play.kind)
+        assertFalse(SudokuGrids.isConsistent(List(16) { i -> (i / 4 + i % 4) % 4 + 1 }, 4))
+        assertFalse(SudokuGrids.isConsistent(List(36) { i -> (i / 6 + i % 6) % 6 + 1 }, 6))
+        val soup = WordSoupBuilder(Random(3)).build(6, 3)
+        assertTrue(soup.words.size >= 2)
+        assertTrue(soup.paths.size >= 2)
+        assertEquals("Cada estrela vale um. Quantas são?", CipherSpeech.counting(1))
+        assertTrue(CipherSpeech.counting(3).contains("Quadrado"))
+        assertTrue(CipherSpeech.fromLegend(listOf("▲=4", "●=2", "■=1"), "Quanto é?").contains("Quadrado vale 1"))
+        val seq = PuzzlePatterns.cells(LearningModule.COUNTING, 2, Random(1))
+        assertEquals(4, seq.size)
     }
 }

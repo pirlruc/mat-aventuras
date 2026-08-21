@@ -59,14 +59,14 @@ fallback still kills the engine heap. Robolectric ignores `android:process`.
 | `KartPluginActivity` / `RunnerPluginActivity` | Contract Activities |
 | `assets/project.godot` + kart/runner scenes | Packaged Godot project |
 | `MatAventuras` singleton | GDScript ↔ extras / `completeReward` |
-| `Kart3dEngine` / `Platformer2dEngine` | Domain simulation + native fallback |
+| `Kart3dEngine` / `Platformer2dEngine` / `OffroadRacerEngine` | Domain simulation + native fallback |
 
 Default APK: age 3 → `RunnerPluginActivity` in `:engine2d`, age 7 →
 `KartPluginActivity` in `:engine3d`. On a real device that is Godot. Under
-Robolectric the same Activities attach native Canvas/GLES instead of
+Robolectric the same Activities attach native Canvas instead of
 `GodotFragment`.
 
-## Input map (kart)
+## Input map (kart / off-road)
 
 Normalised X in `[0, 1]` (`EngineInputMap`, copied in `kart.gd`):
 
@@ -74,7 +74,10 @@ Normalised X in `[0, 1]` (`EngineInputMap`, copied in `kart.gd`):
 - `0.34 … 0.66` boost (centre tap)
 - `> 0.66` steer right
 
-2D runner: any tap jumps.
+2D runner: drag forward to run and leap; drag back to reverse. A tap with
+no movement does not jump.
+
+HUD copy is pt-PT (`Volta`, `Portões`, `Impulso`).
 
 ## Godot project
 
@@ -104,6 +107,6 @@ GDScript talks to Android:
 Engine.get_singleton("MatAventuras").completeReward(true)
 ```
 
-HUD copy is pt-PT (`Volta`, `Anéis`, `Impulso`).
+The dirt-racer HUD is pt-PT (`Volta`, `Portões`, `Impulso`).
 
 Emulator instrumented coverage of Godot init remains MAT-002-T1.
