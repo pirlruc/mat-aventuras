@@ -31,6 +31,8 @@ var pal_haze: Color = Color("4FC3F7")
 var pal_mtn: Color = Color("2E7D32")
 var pal_grass: Color = Color("43A047")
 var pal_dirt: Color = Color("8D6E63")
+var pal_line: Color = Color("FFF59D")
+var kart_fill: Color = Color("FB8C00")
 
 
 func _ready() -> void:
@@ -38,11 +40,15 @@ func _ready() -> void:
 	palette = track_seed % 4
 	_roll_track()
 	_cache_palette()
+	kart_fill = Host.mascot_color()
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
 	hud.position = Vector2(24, 24)
 	hud.add_theme_font_size_override("font_size", 28)
+	hud.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	hud.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	hud.add_theme_constant_override("outline_size", 10)
 	layer.add_child(hud)
 	_update_hud(false)
 	queue_redraw()
@@ -66,11 +72,13 @@ func _cache_palette() -> void:
 	var mtns := [Color("2E7D32"), Color("6D4C41"), Color("4E342E"), Color("263238")]
 	var grass := [Color("43A047"), Color("D4E157"), Color("6D4C41"), Color("263238")]
 	var dirt := [Color("8D6E63"), Color("BCAAA4"), Color("5D4037"), Color("4E342E")]
+	var lines := [Color("FFF59D"), Color("FFFDE7"), Color("FFE082"), Color("EEEEEE")]
 	pal_sky = skies[palette]
 	pal_haze = hazes[palette]
 	pal_mtn = mtns[palette]
 	pal_grass = grass[palette]
 	pal_dirt = dirt[palette]
+	pal_line = lines[palette]
 
 
 func _sample(values: Array[float], dist: float) -> float:
@@ -83,27 +91,23 @@ func _sample(values: Array[float], dist: float) -> float:
 
 
 func _input(event: InputEvent) -> void:
-	var pos := Vector2.ZERO
-	var pressed := false
 	if event is InputEventScreenTouch:
-		pos = event.position
-		pressed = event.pressed
-		if not pressed:
+		if event.pressed:
+			_steer_at(event.position, true)
+		else:
 			steer = 0.0
-			return
 	elif event is InputEventMouseButton:
-		pos = event.position
-		pressed = event.pressed
-		if not pressed:
+		if event.pressed:
+			_steer_at(event.position, true)
+		else:
 			steer = 0.0
-			return
 	elif event is InputEventScreenDrag:
-		pos = event.position
-		pressed = true
-	else:
-		return
-	if not pressed:
-		return
+		_steer_at(event.position, false)
+	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		_steer_at(event.position, false)
+
+
+func _steer_at(pos: Vector2, arm_boost: bool) -> void:
 	var width: float = maxf(get_viewport().get_visible_rect().size.x, 1.0)
 	var nx: float = pos.x / width
 	if nx < STEER_LEFT_MAX:
@@ -111,8 +115,9 @@ func _input(event: InputEvent) -> void:
 	elif nx > STEER_RIGHT_MIN:
 		steer = 1.0
 	else:
-		boosting = true
 		steer = 0.0
+		if arm_boost:
+			boosting = true
 
 
 func _process(delta: float) -> void:
@@ -187,7 +192,7 @@ func _draw_strip(size: Vector2, horizon: float, ground: float, index: int) -> vo
 	draw_rect(Rect2(center - road_w * 0.5 - 10.0, y - hill, road_w + 20.0, h + 1.0), Color("E53935"))
 	draw_rect(Rect2(center - road_w * 0.5, y - hill, road_w, h + 1.0), pal_dirt)
 	if index % 2 == 0:
-		draw_rect(Rect2(center - 4.0, y - hill, 8.0, h), Color("FFF59D"))
+		draw_rect(Rect2(center - 4.0, y - hill, 8.0, h), pal_line)
 
 
 func _draw_gates(size: Vector2, horizon: float, ground: float) -> void:
@@ -204,13 +209,19 @@ func _draw_gates(size: Vector2, horizon: float, ground: float) -> void:
 		var y := ground - (ground - horizon) * t - 20.0
 		var scale := 1.4 / (0.4 + t * 2.0)
 		var x := size.x * 0.5 - 18.0 * scale
-		draw_rect(Rect2(x, y, 36.0 * scale, 10.0 * scale), Color("FFD54F"))
+		var bar_w := 36.0 * scale
+		var bar_h := 10.0 * scale
+		var post_w := 6.0 * scale
+		var post_h := 26.0 * scale
+		draw_rect(Rect2(x, y - post_h, post_w, post_h), Color("5D4037"))
+		draw_rect(Rect2(x + bar_w - post_w, y - post_h, post_w, post_h), Color("5D4037"))
+		draw_rect(Rect2(x, y, bar_w, bar_h), Color("FFD54F"))
 
 
 func _draw_kart(size: Vector2, ground: float) -> void:
 	var cx := size.x * 0.5 + steer * 18.0
 	var y := ground - 78.0
-	var fill := Host.mascot_color()
+	var fill := kart_fill
 	draw_rect(Rect2(cx - 36.0, y + 40.0, 20.0, 18.0), Color("212121"))
 	draw_rect(Rect2(cx + 16.0, y + 40.0, 20.0, 18.0), Color("212121"))
 	draw_rect(Rect2(cx - 30.0, y + 16.0, 60.0, 30.0), fill)
@@ -225,18 +236,6 @@ func _draw_kart(size: Vector2, ground: float) -> void:
 		draw_rect(Rect2(cx - 10.0, y + 52.0, 20.0, 16.0), Color("FF6F00"))
 		draw_rect(Rect2(cx - 28.0, y + 58.0, 12.0, 10.0), Color("FFCC80"))
 		draw_rect(Rect2(cx + 16.0, y + 58.0, 12.0, 10.0), Color("FFCC80"))
-
-
-func _sky() -> Color:
-	return pal_sky
-
-
-func _grass() -> Color:
-	return pal_grass
-
-
-func _dirt() -> Color:
-	return pal_dirt
 
 
 func _update_hud(show_boost: bool) -> void:

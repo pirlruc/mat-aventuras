@@ -109,10 +109,8 @@ fun LessonScreen(
         }
     }
 
-    val onPick: (Int) -> Unit = handler@{ index ->
+    val noteAttempt: (Boolean, Boolean) -> Unit = handler@{ correct, advance ->
         if (!pickLock.compareAndSet(false, true)) return@handler
-        val current = exercise
-        val correct = current.isCorrect(index)
         flashCorrect = correct
         flashTick += 1
         cues.play(correct) { code -> view.performHapticFeedback(code) }
@@ -133,12 +131,17 @@ fun LessonScreen(
                 if (ticket == pointsTicket.get()) points = stored.points
             }
         }
-        if (container.rewards.shouldOpenReward(streak)) {
-            onSpeak(VoiceScripts.LETS_PLAY)
-            onReward(profile.ageGroup)
+        if (advance) {
+            if (container.rewards.shouldOpenReward(streak)) {
+                onSpeak(VoiceScripts.LETS_PLAY)
+                onReward(profile.ageGroup)
+            }
+            exercise = container.generator.generate(module, UiLogic.lessonLevel(hits))
         }
-        exercise = container.generator.generate(module, UiLogic.lessonLevel(hits))
         pickLock.set(false)
+    }
+    val onPick: (Int) -> Unit = handler@{ index ->
+        noteAttempt(exercise.isCorrect(index), true)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -168,7 +171,11 @@ fun LessonScreen(
             PlayGrid(exercise)
         }
         if (UiLogic.showsSoupBoard(exercise.play.kind)) {
-            SoupBoard(exercise = exercise, onPick = onPick)
+            SoupBoard(
+                exercise = exercise,
+                onPick = onPick,
+                onMissKeep = { noteAttempt(false, false) },
+            )
         }
         if (UiLogic.showsCipherLegend(exercise.play.kind)) {
             CipherPanel(exercise)
@@ -329,6 +336,7 @@ private fun PlayGrid(exercise: Exercise) {
 private fun SoupBoard(
     exercise: Exercise,
     onPick: (Int) -> Unit,
+    onMissKeep: () -> Unit,
 ) {
     val columns = exercise.play.columns.coerceAtLeast(1)
     val cells = exercise.play.cells.ifEmpty { exercise.options }
@@ -344,7 +352,12 @@ private fun SoupBoard(
             found = next
             if (next.size >= paths.size) onPick(paths[match].first())
         } else {
-            UiLogic.soupPickIndex(path, paths, found, cells.size)?.let(onPick)
+            val kind = UiLogic.soupReleaseKind(path, paths, found)
+            if (UiLogic.soupKeepsBoard(kind, paths.size)) {
+                onMissKeep()
+            } else {
+                UiLogic.soupPickIndex(path, paths, found, cells.size)?.let(onPick)
+            }
         }
     }
     Column(

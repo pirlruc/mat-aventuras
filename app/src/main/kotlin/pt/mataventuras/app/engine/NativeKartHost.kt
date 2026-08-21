@@ -5,11 +5,13 @@ import android.widget.TextView
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -110,7 +112,11 @@ internal object NativeKartHost {
                     text = listOfNotNull(KartHud.lapLabel(state), KartHud.gatesLabel(state), extra).joinToString("\n"),
                     color = Color.White,
                     fontSize = 22.sp,
-                    modifier = Modifier.padding(20.dp),
+                    modifier =
+                        Modifier
+                            .padding(16.dp)
+                            .background(Color(0x99000000), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
         }

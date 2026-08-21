@@ -81,7 +81,7 @@ class Platformer2dEngine(
         val leaped = jumping && state.onGround && run > 0.2f
         val vy = if (leaped) jumpSpeed else state.vy + gravity * dt
         val vx = if (state.inPitFall) 0f else run * speedX
-        val x = state.x + vx * dt
+        val x = (state.x + vx * dt).coerceIn(0f, level.length)
         val y = state.y + vy * dt
         val falling = state.inPitFall || (level.inPit(x) && y <= groundY)
         return PitMotion(x, y, vx, vy, falling)

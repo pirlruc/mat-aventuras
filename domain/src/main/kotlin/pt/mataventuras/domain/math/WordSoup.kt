@@ -98,7 +98,7 @@ class WordSoupBuilder(
 
     private companion object {
         const val NUL: Char = '\u0000'
-        const val LETTERS: String = "abcdefghijklmnopqrstuvwxyz"
+        const val LETTERS: String = "bcdfghjklmnpqrstvwxyz"
         val WORDS: List<String> =
             listOf(
                 "um",

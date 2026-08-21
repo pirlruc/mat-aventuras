@@ -25,10 +25,14 @@ var ledges: Array[Rect2] = []
 var coin_xs: Array[float] = []
 var player_parts: Array[ColorRect] = []
 var camera_x := 0.0
+var pal_sky: Color = Color("7EC0ED")
+var pal_grass: Color = Color("3D9E2F")
+var pal_brick: Color = Color("C75A1A")
 
 
 func _ready() -> void:
 	theme = Time.get_ticks_msec() % 4
+	_cache_palette()
 	_layout()
 	_draw_world()
 	_make_player()
@@ -38,8 +42,20 @@ func _ready() -> void:
 	hud = Label.new()
 	hud.position = Vector2(24, 24)
 	hud.add_theme_font_size_override("font_size", 28)
+	hud.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	hud.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	hud.add_theme_constant_override("outline_size", 10)
 	layer.add_child(hud)
 	_update_hud()
+
+
+func _cache_palette() -> void:
+	var skies := [Color("7EC0ED"), Color("FFB74D"), Color("4FC3F7"), Color("5C6BC0")]
+	var grass := [Color("3D9E2F"), Color("C0CA33"), Color("2E7D32"), Color("8D6E63")]
+	var bricks := [Color("C75A1A"), Color("6D4C41"), Color("EF6C00"), Color("5D4037")]
+	pal_sky = skies[theme]
+	pal_grass = grass[theme]
+	pal_brick = bricks[theme]
 
 
 func _layout() -> void:
@@ -62,37 +78,22 @@ func _layout() -> void:
 	taken.fill(false)
 
 
-func _sky() -> Color:
-	var skies := [Color("7EC0ED"), Color("FFB74D"), Color("4FC3F7"), Color("5C6BC0")]
-	return skies[theme]
-
-
-func _grass() -> Color:
-	var grass := [Color("3D9E2F"), Color("C0CA33"), Color("2E7D32"), Color("8D6E63")]
-	return grass[theme]
-
-
-func _brick() -> Color:
-	var bricks := [Color("C75A1A"), Color("6D4C41"), Color("EF6C00"), Color("5D4037")]
-	return bricks[theme]
-
-
 func _draw_world() -> void:
 	var sky := ColorRect.new()
-	sky.color = _sky()
+	sky.color = pal_sky
 	sky.size = Vector2(2200, 720)
 	add_child(sky)
 	var band := ColorRect.new()
-	band.color = _sky().darkened(0.18)
+	band.color = pal_sky.darkened(0.18)
 	band.position = Vector2(0, 300)
 	band.size = Vector2(2200, 220)
 	add_child(band)
-	_add_brick(0, GROUND_Y, 2200, 24, _grass())
-	_add_brick(0, GROUND_Y + 24.0, 2200, 176, _brick())
+	_add_brick(0, GROUND_Y, 2200, 24, pal_grass)
+	_add_brick(0, GROUND_Y + 24.0, 2200, 176, pal_brick)
 	for pit in pits:
 		_add_brick(pit.x, GROUND_Y, pit.y - pit.x, 200, Color("1A0A08"))
 	for ledge in ledges:
-		_add_brick(ledge.position.x, ledge.position.y, ledge.size.x, ledge.size.y, _brick())
+		_add_brick(ledge.position.x, ledge.position.y, ledge.size.x, ledge.size.y, pal_brick)
 
 
 func _make_player() -> void:
@@ -164,6 +165,7 @@ func _process(delta: float) -> void:
 		x += 0.0
 	else:
 		x += move_x * SPEED * delta
+	x = clampf(x, 80.0, 2000.0)
 	_land()
 	if y > 780.0:
 		x = _safe_x()

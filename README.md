@@ -27,18 +27,20 @@ friend, and a local score.
    - four answer buttons
    - a mini-sudoku with one empty cell
    - sopa de letras — slide a finger along **every** hidden word (across,
-     down, or diagonal, either way)
+     down, or diagonal, either way). A wrong slide keeps the words you
+     already found
    - a missing puzzle piece
    - a symbol code (the voice names every symbol)
 5. A green tick or red cross stays on screen for about a second so the child
    can see it. After **three correct answers in a row**, a prize game opens
    in landscape.
 6. **Age 3 prize:** drag a finger forward to run and leap, drag back to
-   reverse. Collect the coins. Falling in a hole puts the runner back on the
-   last safe ground.
-7. **Age 7 prize:** touch the **left** or **right** third of the screen to
-   steer, and the **middle** for a short boost. Finish three laps. Gates
-   along the dirt add to the HUD; missing one does not end the race.
+   reverse (useful if you missed a coin). Collect every coin. Falling in a
+   hole puts the runner back on the last safe ground.
+7. **Age 7 prize:** tap the **left** or **right** third of the screen to
+   steer, and **tap the middle** for a short boost (holding the middle does
+   not keep boosting). Finish three laps. Yellow gates along the dirt add
+   to the HUD; you do not have to hit every gate.
 
 Leave a lesson from the on-screen exit control. Age 7 asks for confirmation.
 

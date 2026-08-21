@@ -28,6 +28,8 @@ internal object OffroadScene {
     const val STRIP_COUNT: Int = 28
     const val FLAME_ARGB: Long = 0xFFFF6F00
     const val HEADLAMP_ARGB: Long = 0xFFFFF176
+    const val POST_ARGB: Long = 0xFF5D4037
+    const val BANNER_ARGB: Long = 0xFFFFD54F
 
     /**
      * Sky colour for [circuit.palette].
@@ -117,7 +119,13 @@ internal object OffroadScene {
             val y = ground - (ground - horizon) * t - 20f
             val scale = 1.4f / (0.4f + t * 2f)
             val x = width * 0.5f - 18f * scale
-            out.add(OffroadSpan(x, y, 36f * scale, 10f * scale, 0xFFFFD54F))
+            val barW = 36f * scale
+            val barH = 10f * scale
+            val postW = 6f * scale
+            val postH = 26f * scale
+            out.add(OffroadSpan(x, y - postH, postW, postH, POST_ARGB))
+            out.add(OffroadSpan(x + barW - postW, y - postH, postW, postH, POST_ARGB))
+            out.add(OffroadSpan(x, y, barW, barH, BANNER_ARGB))
         }
     }
 

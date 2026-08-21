@@ -539,6 +539,14 @@ internal object UiLogic {
     }
 
     /**
+     * True when a wrong full-length slide should keep the current multi-word soup.
+     */
+    fun soupKeepsBoard(
+        kind: SoupRelease,
+        pathCount: Int,
+    ): Boolean = kind == SoupRelease.MISS && pathCount > 1
+
+    /**
      * A cell that is not part of the hidden word, used to record a miss.
      */
     fun soupMissIndex(

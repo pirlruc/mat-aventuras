@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-08-21
-**Last agent focus:** Playable README; pit respawn; race HUD/gates; racer graphics
+**Last agent focus:** Soup keep-board; tap boost; HUD contrast; course clamps
 
 ---
 
@@ -93,8 +93,7 @@ bash scripts/ci-local.sh
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 
-This pass: user-facing README; pit fall respawns instead of failing the
-reward; dirt-race gates return each lap; native Canvas HUD; hills/headlamps
-on the racer; Godot palette colours cached per frame.
+This pass: sopa miss keeps found words; Godot boost is tap-only; runner
+stays on the course; HUD contrast; gate posts; consonant soup filler.
 
 *Last updated: 2026-08-21*
