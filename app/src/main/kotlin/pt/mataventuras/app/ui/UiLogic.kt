@@ -189,7 +189,7 @@ internal object UiLogic {
     /**
      * Flash length in milliseconds.
      */
-    fun answerFlashMs(): Int = 480
+    fun answerFlashMs(): Int = 960
 
     /**
      * Scale of the flash glyph for [alpha] 0..1.
@@ -483,10 +483,35 @@ internal object UiLogic {
     fun soupReleaseKind(
         selected: List<Int>,
         targets: List<Int>,
+    ): SoupRelease = soupReleaseKind(selected, listOf(targets), emptySet())
+
+    /**
+     * Outcome against every hidden word, skipping [found] path indices.
+     */
+    fun soupReleaseKind(
+        selected: List<Int>,
+        paths: List<List<Int>>,
+        found: Set<Int>,
     ): SoupRelease {
-        if (selected.isEmpty() || targets.isEmpty()) return SoupRelease.IGNORE
-        if (selected == targets || selected == targets.asReversed()) return SoupRelease.HIT
-        return if (selected.size < targets.size) SoupRelease.IGNORE else SoupRelease.MISS
+        if (selected.isEmpty() || paths.isEmpty()) return SoupRelease.IGNORE
+        if (soupMatchedPath(selected, paths, found) != null) return SoupRelease.HIT
+        val minLen = paths.filterIndexed { i, _ -> i !in found }.minOfOrNull { it.size } ?: 1
+        return if (selected.size < minLen) SoupRelease.IGNORE else SoupRelease.MISS
+    }
+
+    /**
+     * Index of the hidden word that matches [selected], or null.
+     */
+    fun soupMatchedPath(
+        selected: List<Int>,
+        paths: List<List<Int>>,
+        found: Set<Int>,
+    ): Int? {
+        paths.forEachIndexed { i, path ->
+            val hit = selected == path || selected == path.asReversed()
+            if (i !in found && hit) return i
+        }
+        return null
     }
 
     /**
@@ -496,11 +521,30 @@ internal object UiLogic {
         selected: List<Int>,
         targets: List<Int>,
         cellCount: Int,
+    ): Int? = soupPickIndex(selected, listOf(targets), emptySet(), cellCount)
+
+    /**
+     * Board index to score for a multi-word soup.
+     */
+    fun soupPickIndex(
+        selected: List<Int>,
+        paths: List<List<Int>>,
+        found: Set<Int>,
+        cellCount: Int,
     ): Int? {
-        val kind = soupReleaseKind(selected, targets)
+        val kind = soupReleaseKind(selected, paths, found)
         if (kind == SoupRelease.IGNORE) return null
-        return if (kind == SoupRelease.HIT) targets.first() else soupMissIndex(targets, cellCount)
+        val hit = soupMatchedPath(selected, paths, found)
+        return if (kind == SoupRelease.HIT && hit != null) paths[hit].first() else soupMissIndex(paths.flatten(), cellCount)
     }
+
+    /**
+     * True when a wrong full-length slide should keep the current multi-word soup.
+     */
+    fun soupKeepsBoard(
+        kind: SoupRelease,
+        pathCount: Int,
+    ): Boolean = kind == SoupRelease.MISS && pathCount > 1
 
     /**
      * A cell that is not part of the hidden word, used to record a miss.
@@ -511,9 +555,17 @@ internal object UiLogic {
     ): Int = (0 until cellCount).firstOrNull { it !in targets } ?: 0
 
     /**
-     * Highlight colour while a soup path is held.
+     * Highlight colour while a soup path is held or already found.
      */
-    fun soupSelectedArgb(selected: Boolean): Long = if (selected) 0xFFFFCC80 else 0xFF90CAF9
+    fun soupSelectedArgb(
+        selected: Boolean,
+        found: Boolean = false,
+    ): Long =
+        when {
+            found -> 0xFF81C784
+            selected -> 0xFFFFCC80
+            else -> 0xFF90CAF9
+        }
 }
 
 /**

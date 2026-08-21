@@ -3,14 +3,14 @@ package pt.mataventuras.app.engine
 import android.os.Bundle
 
 /**
- * Age-7 3D kart reward in an isolated `:engine3d` process.
- * GLES ES1 draws meshes produced by :domain. The 3D heap dies with the process.
+ * Age-7 2.5D off-road reward in an isolated `:engine3d` process.
+ * Canvas draws a rear-view dirt circuit. The heap dies with the process.
  *
  * Production launches [pt.mataventuras.plugin.KartPluginActivity] (Godot, with
  * this Activity as the native fallback). Direct use remains for tests.
  */
 class Kart3dActivity : IsolatedEngineActivity() {
-    internal lateinit var session: KartSession
+    internal lateinit var session: OffroadRacerLoop
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

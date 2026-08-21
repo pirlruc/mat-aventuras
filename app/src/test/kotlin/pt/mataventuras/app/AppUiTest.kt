@@ -20,6 +20,10 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.engine.Kart3dActivity
+import pt.mataventuras.app.engine.NativeKartHost
+import pt.mataventuras.app.engine.OffroadRacerLoop
+import pt.mataventuras.app.engine.OffroadScene
+import pt.mataventuras.app.engine.OffroadSpan
 import pt.mataventuras.app.engine.Platformer2dActivity
 import pt.mataventuras.app.engine.Platformer2dLoop
 import pt.mataventuras.app.engine.PlatformerRect
@@ -29,6 +33,8 @@ import pt.mataventuras.app.ui.age.AgeSelectionScreen
 import pt.mataventuras.app.ui.RewardReturn
 import pt.mataventuras.app.ui.home.HomeScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
+import pt.mataventuras.domain.engine.OffroadCircuit
+import pt.mataventuras.domain.engine.PlatformerWorld
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.Mascot
@@ -270,18 +276,33 @@ class AppUiTest {
             ).setup()
         val two = twoController.get()
         assertTrue(two.hasWindowFocus() || two.window != null)
+        two.loop.moveX = 1f
         two.loop.jumping = true
         repeat(40) { two.loop.tick() }
         val sprites = PlatformerScene.sprites(two.loop.state, Mascot.HERO_PUP, 800f, 480f)
         assertTrue(sprites.size >= 6)
         assertEquals(Mascot.HERO_PUP.primaryArgb, sprites.last { it.argb == Mascot.HERO_PUP.primaryArgb }.argb)
         assertTrue(PlatformerScene.hatArgb(Mascot.HERO_PUP.primaryArgb) != Mascot.HERO_PUP.primaryArgb)
-        val collected = two.loop.state.copy(x = 32f, collectedMask = 31)
+        val pickedCoins = two.loop.state.copy(x = 32f, collectedMask = 31)
         val tiles = ArrayList<PlatformerRect>(48)
-        PlatformerScene.fillTiles(tiles, collected, Mascot.PINK_PIGLET, 400f, 300f)
+        PlatformerScene.fillTiles(tiles, pickedCoins, Mascot.PINK_PIGLET, 400f, 300f)
         assertTrue(tiles.isNotEmpty())
-        PlatformerScene.fillTiles(tiles, collected.copy(x = 0f), Mascot.BRAVE_PLUMBER, 200f, 200f)
+        PlatformerScene.fillTiles(tiles, pickedCoins.copy(x = 0f), Mascot.BRAVE_PLUMBER, 200f, 200f)
         assertTrue(tiles.any { it.argb == PlatformerScene.BRICK_ARGB })
+        val randomLevel = PlatformerWorld.random(11)
+        PlatformerScene.fillTiles(
+            tiles,
+            two.loop.state.copy(x = 20f, y = 4f),
+            Mascot.SPEEDY_HEDGEHOG,
+            640f,
+            360f,
+            randomLevel,
+        )
+        assertTrue(tiles.any { it.argb == randomLevel.brickArgb })
+        assertTrue(tiles.any { it.argb == randomLevel.pitArgb })
+        assertTrue(
+            PlatformerScene.sprites(two.loop.state, Mascot.HERO_PUP, 800f, 480f, randomLevel).isNotEmpty(),
+        )
         assertTrue(PlatformerScene.groundTop(480f) > 300f)
         assertEquals("hero_pup" to "Ana", two.extrasSnapshot())
         two.completeReward(ok = true)
@@ -309,8 +330,28 @@ class AppUiTest {
         assertTrue(three.window != null)
         three.session.handleTouch(0.1f, MotionEvent.ACTION_DOWN)
         three.session.handleTouch(0.5f, MotionEvent.ACTION_DOWN)
-        three.session.renderer.tick()
+        three.session.tick()
         three.session.handleTouch(0.9f, MotionEvent.ACTION_UP)
+        val spans = ArrayList<OffroadSpan>(96)
+        OffroadScene.fill(
+            spans,
+            three.session.state,
+            three.session.circuit,
+            Mascot.MISCHIEVOUS_ALIEN,
+            800f,
+            480f,
+        )
+        assertTrue(spans.size > 10)
+        val clearedGates =
+            three.session.state.copy(collectedMask = (1 shl three.session.state.gatesTarget) - 1)
+        OffroadScene.fill(spans, clearedGates, three.session.circuit, Mascot.HERO_PUP, 400f, 300f)
+        val boosted =
+            three.session.state.copy(boostTimer = 0.5f, steer = -0.4f, distance = 400f)
+        OffroadScene.fill(spans, boosted, three.session.circuit, Mascot.SPEEDY_HEDGEHOG, 320f, 200f)
+        assertTrue(spans.any { it.argb == 0xFFFF6F00 })
+        assertTrue(spans.any { it.argb == OffroadScene.HEADLAMP_ARGB })
+        assertTrue(spans.any { it.argb == OffroadScene.POST_ARGB })
+        assertTrue(OffroadScene.skyArgb(three.session.circuit) != 0L)
         three.closeFinished()
         threeController.pause().stop().destroy()
 
@@ -336,6 +377,7 @@ class AppUiTest {
                 },
             )
         repeat(80) {
+            loop.moveX = 1f
             loop.jumping = true
             loop.tick()
         }
@@ -348,8 +390,42 @@ class AppUiTest {
                     ns
                 },
             )
+        idle.moveX = 1f
         repeat(200) { idle.tick() }
         assertTrue(idle.state.x > 20f || !idle.state.alive)
         idle.tick()
+    }
+
+    @Test
+    fun offroadLoopSteersBoostsAndStopsWhenFinished() {
+        var ns = 0L
+        val loop =
+            OffroadRacerLoop(
+                circuit = OffroadCircuit(3),
+                lapsTarget = 1,
+                nowNs = {
+                    ns += 40_000_000L
+                    ns
+                },
+            )
+        loop.handleTouch(0.1f, MotionEvent.ACTION_DOWN)
+        loop.tick()
+        loop.handleTouch(0.5f, MotionEvent.ACTION_DOWN)
+        loop.tick()
+        ns += 200_000_000L
+        loop.tick()
+        loop.handleTouch(0.9f, MotionEvent.ACTION_MOVE)
+        loop.tick()
+        loop.handleTouch(0.9f, MotionEvent.ACTION_UP)
+        loop.tick()
+        loop.handleTouch(0.4f, MotionEvent.ACTION_CANCEL)
+        repeat(500) {
+            loop.handleTouch(0.5f, MotionEvent.ACTION_DOWN)
+            loop.tick()
+        }
+        assertTrue(loop.state.finished || loop.state.distance > 2f)
+        loop.tick()
+        val hud = NativeKartHost.hudLines(loop)
+        assertTrue(hud.first.startsWith("Volta"))
     }
 }

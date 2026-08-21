@@ -41,13 +41,31 @@ class Platformer2dEngineTest {
         var airborne = engine.step(engine.initial(), 0.05f, jumping = true)
         airborne = engine.step(airborne, 0.05f, jumping = true)
         assertFalse(airborne.onGround)
+        val rooted = engine.step(engine.initial(), 0.05f, jumping = true, moveX = 0f)
+        assertTrue(rooted.onGround)
         val ready = engine.initial(ringsTarget = 1).copy(rings = 1, finished = false)
         val closed = engine.step(ready, 0.01f, jumping = false)
         assertTrue(closed.finished)
         assertEquals(closed, engine.collect(closed, 0f))
         var falling = engine.initial().copy(x = Platformer2dEngine.PIT_X + 1f, onGround = true)
-        repeat(30) { falling = engine.step(falling, 0.05f, jumping = false) }
-        assertFalse(falling.alive)
+        repeat(4) { falling = engine.step(falling, 0.05f, jumping = false, moveX = 1f) }
+        assertTrue(falling.inPitFall)
+        assertTrue(falling.x < PlatformerWorld.PIT_RIGHT + 1f)
+        repeat(40) { falling = engine.step(falling, 0.05f, jumping = false, moveX = 0f) }
+        assertTrue(falling.alive)
+        assertFalse(falling.inPitFall)
+        assertTrue(falling.onGround)
+        assertTrue(falling.x < PlatformerWorld.PIT_LEFT)
+        val back = engine.step(engine.initial(), 0.2f, jumping = false, moveX = -1f)
+        assertEquals(0f, back.x, 0.001f)
+        val end =
+            engine.step(
+                engine.initial().copy(x = PlatformerWorld.DEFAULT.length),
+                0.2f,
+                jumping = false,
+                moveX = 1f,
+            )
+        assertEquals(PlatformerWorld.DEFAULT.length, end.x, 0.001f)
         val short = engine.collect(engine.initial(), ringX = 0.5f, radius = 0.1f)
         assertEquals(0, short.rings)
         var tagged = engine.collect(engine.initial(), ringX = 0f, coinIndex = 0)
@@ -64,5 +82,13 @@ class Platformer2dEngineTest {
         assertEquals(28f, PlatformerWorld.PIT_LEFT)
         assertEquals(2, PlatformerWorld.LEDGES.size)
         assertEquals(5, PlatformerWorld.COIN_X.size)
+        val random = PlatformerWorld.random(4)
+        assertTrue(random.pits.size >= 3)
+        assertTrue(random.coins.size >= 8)
+        assertTrue(random.inPit(random.pits[0].left + 0.5f))
+        assertFalse(random.inPit(0f))
+        assertTrue(random.lastSafeX(random.pits[0].right) < random.pits[0].left + 1f)
+        val themed = PlatformerWorld.random(1)
+        assertTrue(themed.skyArgb != PlatformerWorld.random(2).skyArgb || themed.grassArgb != 0L)
     }
 }

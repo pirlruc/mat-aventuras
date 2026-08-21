@@ -3,17 +3,17 @@ package pt.mataventuras.plugin
 import android.os.Bundle
 import pt.mataventuras.app.engine.GodotRewardBinder
 import pt.mataventuras.app.engine.IsolatedEngineActivity
-import pt.mataventuras.app.engine.KartSession
+import pt.mataventuras.app.engine.OffroadRacerLoop
 
 /**
- * Age-7 Godot kart host. Runs in `android:process=":engine3d"`.
+ * Age-7 Godot off-road host. Runs in `android:process=":engine3d"`.
  *
  * On device this attaches a GodotFragment. Under Robolectric it falls back
- * to the native GLES kart so unit tests never load `libgodot_android`.
+ * to the native Canvas racer so unit tests never load `libgodot_android`.
  */
 class KartPluginActivity : IsolatedEngineActivity() {
-    /** Native GLES session when Godot is not embedded. */
-    internal var nativeSession: KartSession? = null
+    /** Native Canvas loop when Godot is not embedded. */
+    internal var nativeSession: OffroadRacerLoop? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

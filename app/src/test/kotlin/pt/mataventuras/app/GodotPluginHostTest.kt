@@ -83,14 +83,7 @@ class GodotPluginHostTest {
         assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
         assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
-        assertEquals(
-            android.opengl.GLSurfaceView.RENDERMODE_WHEN_DIRTY,
-            NativeKartHost.renderMode(embed = false),
-        )
-        assertEquals(
-            android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY,
-            NativeKartHost.renderMode(embed = true),
-        )
+        assertTrue(NativeKartHost.hudLines(pt.mataventuras.app.engine.OffroadRacerLoop()).first.startsWith("Volta"))
     }
 
     @Test
@@ -249,17 +242,30 @@ class GodotPluginHostTest {
         assertTrue(project.contains("boot_splash/show_image=false"))
         assertTrue(project.contains("res://boot.tscn"))
         assertTrue(project.contains("import_etc2_astc=true"))
+        assertTrue(project.contains("default_clear_color"))
+        assertTrue(project.contains("aspect=\"expand\""))
         val boot = ctx.assets.open("boot.tscn").bufferedReader().readText()
         assertTrue(boot.contains("call_deferred"))
         assertTrue(boot.contains("change_scene_to_file"))
         assertTrue(boot.contains("Host.finish"))
-        ctx.assets.open("kart.tscn").close()
+        assertTrue(boot.contains("ResourceLoader.exists"))
+        val kartScene = ctx.assets.open("kart.tscn").bufferedReader().readText()
+        assertTrue(kartScene.contains("type=\"Node2D\""))
         ctx.assets.open("runner.tscn").close()
         val kartScript = ctx.assets.open("kart.gd").bufferedReader().readText()
         assertTrue(kartScript.contains("minf(delta"))
-        assertTrue(kartScript.contains("_update_hud(show_boost)"))
+        assertTrue(kartScript.contains("_update_hud(boost_timer > 0.0)"))
+        assertTrue(kartScript.contains("Portões"))
+        assertTrue(kartScript.contains("_draw_strip"))
+        assertTrue(kartScript.contains("_draw_hills"))
+        assertTrue(kartScript.contains("_cache_palette"))
+        assertTrue(kartScript.contains("_steer_at"))
+        assertTrue(kartScript.contains("outline_size"))
         val runnerScript = ctx.assets.open("runner.gd").bufferedReader().readText()
         assertTrue(runnerScript.contains("minf(delta"))
+        assertTrue(runnerScript.contains("in_pit_fall"))
+        assertTrue(runnerScript.contains("_add_part"))
+        assertTrue(runnerScript.contains("clampf(x, 80.0, 2000.0)"))
         ctx.assets.open("host.gd").close()
         assertEquals("res://kart.tscn", GodotBridge.rewardScene(""))
         assertEquals("res://runner.tscn", GodotBridge.rewardScene(GodotRuntime.SCENE_RUNNER))

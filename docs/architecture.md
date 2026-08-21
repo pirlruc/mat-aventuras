@@ -33,8 +33,8 @@ therefore kept playable native 2D/3D engines. MAT-003 loads **one** engine
 | Layer | Technology | Process |
 | --- | --- | --- |
 | Menus, lessons, parental PIN, leaderboard | Jetpack Compose | default |
-| 2D ring runner (age 3) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
-| 3D kart (age 7) | Godot 4; native GLES fallback | `:engine3d` |
+| 2D platformer (age 3) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
+| 2.5D off-road race (age 7) | Godot 4 Node2D; native Canvas fallback | `:engine3d` |
 | Persistence | Room + DataStore | default only (engines return extras) |
 
 The 3D Activity does **not** open Room. It returns `RESULT_FINISHED`
@@ -78,8 +78,8 @@ but it is a worse fit for APK size, heap, and a local-only privacy policy.
 | Layer | Technology | Process |
 | --- | --- | --- |
 | Menus, lessons, parental PIN, leaderboard | Jetpack Compose | default |
-| 2D ring runner (age 3) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
-| 3D kart (age 7) | Godot 4; native GLES fallback | `:engine3d` |
+| 2D platformer (age 3) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
+| 2.5D off-road race (age 7) | Godot 4 Node2D; native Canvas fallback | `:engine3d` |
 | Persistence | Room + DataStore | default only (engines return extras) |
 
 ## Modules
@@ -98,19 +98,19 @@ also gates `:data` and `:app` at the org 95% line and branch defaults.
 lambdas (compiler restart-group branches). Screen rules live in `UiLogic`
 and stay inside the 95% gate. There is no coverage deviation.
 
-## 3D kart (native GLES)
+## 2.5D off-road race (native Canvas)
 
-`Kart3dEngine` simulates an oval asphalt loop in the XZ plane (`OvalTrack`):
-auto-drive along the tangent, player steer in `[-1, 1]`, a short boost,
-ring pickups, off-track slowdown, and a pull-back toward the centerline so
-the kart returns to the asphalt. `KartScene` builds a GLES-friendly draw
-list (grass, ribbon, start line, outer cones, inner barriers, kart body,
-spoiler, wheels). `Kart3dActivity` in `:engine3d` only issues ES1 calls and a
-pt-PT HUD (`Volta`, `Anéis`, `Impulso`). Touch: left third steers left, right
-third steers right, centre taps boost.
+`OffroadRacerEngine` simulates a Super Off Road-style dirt loop: distance
+along a randomised circuit, lateral lane position, steer in `[-1, 1]`, a
+short boost, gate pickups, and off-track slowdown when the kart leaves the
+dirt. `OffroadScene` draws a rear-view scanline road (grass, rumble, dirt,
+gates, kart body). `Kart3dActivity` in `:engine3d` hosts that Canvas view
+and a pt-PT HUD (`Volta`, `Portões`, `Impulso`). Touch: left third steers
+left, right third steers right, centre taps boost.
 
-A later Godot scene pack may replace the procedural kart/runner meshes if it
-keeps the same Intent extras and isolated process. Unity is not embedded.
+The oval GLES kart (`Kart3dEngine` / `KartRenderer`) remains as a
+unit-testable mesh path. Production Godot and the native fallback both use
+the 2D perspective racer.
 
 ## Game engine wrapper
 
@@ -125,11 +125,12 @@ A first-time GLES restart is returned to `MainActivity`, which relaunches
 the plugin Activity in a fresh isolated process. Under Robolectric they
 attach `NativeKartHost` / `NativeRunnerHost` instead.
 
-Simulation is in `:domain` (`Platformer2dEngine`, `Kart3dEngine`) so physics
-is unit-tested without an emulator.
+Simulation is in `:domain` (`Platformer2dEngine`, `OffroadRacerEngine`,
+`Kart3dEngine`) so physics is unit-tested without an emulator.
 
-The 3D renderer keeps reused `FloatBuffer`s for grass, track, start line, and
-box meshes (KT-PERF-001). Scene instances come from `KartScene` in `:domain`.
+The oval GLES kart (`Kart3dEngine` / `KartRenderer`) remains as a
+unit-testable mesh path. Production Godot and the native fallback both use
+the 2D perspective racer.
 
 ## State and local storage
 
@@ -209,8 +210,8 @@ Finishing a reward Activity awards 15 bonus points on the last profile.
 
 | Age | Lessons (Compose, mascot-hosted) | Reward mini-game |
 | --- | --- | --- |
-| **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D ring runner (`RunnerPluginActivity` in `:engine2d`; native Canvas fallback) |
-| **7** | Addition incl. missing addend (`ADDITION`); subtraction (`SUBTRACTION`); multiplication (`MULTIPLICATION`); logic even/largest/smallest (`LOGIC`) | Oval-track 3D kart (`KartPluginActivity` in `:engine3d`; native GLES fallback) |
+| **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D platformer (`RunnerPluginActivity` in `:engine2d`; native Canvas fallback) |
+| **7** | Addition incl. missing addend (`ADDITION`); subtraction (`SUBTRACTION`); multiplication (`MULTIPLICATION`); logic even/largest/smallest (`LOGIC`) | 2.5D off-road race (`KartPluginActivity` in `:engine3d`; native Canvas fallback) |
 
 Age 7 confirms before leaving a lesson (`VoiceScripts.confirmExit`).
 Age 3 leaves immediately. A finished reward returns `RESULT_FINISHED`;

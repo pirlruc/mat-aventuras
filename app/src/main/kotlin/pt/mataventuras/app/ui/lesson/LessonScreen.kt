@@ -109,10 +109,8 @@ fun LessonScreen(
         }
     }
 
-    val onPick: (Int) -> Unit = handler@{ index ->
+    val noteAttempt: (Boolean, Boolean) -> Unit = handler@{ correct, advance ->
         if (!pickLock.compareAndSet(false, true)) return@handler
-        val current = exercise
-        val correct = current.isCorrect(index)
         flashCorrect = correct
         flashTick += 1
         cues.play(correct) { code -> view.performHapticFeedback(code) }
@@ -133,12 +131,17 @@ fun LessonScreen(
                 if (ticket == pointsTicket.get()) points = stored.points
             }
         }
-        if (container.rewards.shouldOpenReward(streak)) {
-            onSpeak(VoiceScripts.LETS_PLAY)
-            onReward(profile.ageGroup)
+        if (advance) {
+            if (container.rewards.shouldOpenReward(streak)) {
+                onSpeak(VoiceScripts.LETS_PLAY)
+                onReward(profile.ageGroup)
+            }
+            exercise = container.generator.generate(module, UiLogic.lessonLevel(hits))
         }
-        exercise = container.generator.generate(module, UiLogic.lessonLevel(hits))
         pickLock.set(false)
+    }
+    val onPick: (Int) -> Unit = handler@{ index ->
+        noteAttempt(exercise.isCorrect(index), true)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -168,7 +171,11 @@ fun LessonScreen(
             PlayGrid(exercise)
         }
         if (UiLogic.showsSoupBoard(exercise.play.kind)) {
-            SoupBoard(exercise = exercise, onPick = onPick)
+            SoupBoard(
+                exercise = exercise,
+                onPick = onPick,
+                onMissKeep = { noteAttempt(false, false) },
+            )
         }
         if (UiLogic.showsCipherLegend(exercise.play.kind)) {
             CipherPanel(exercise)
@@ -329,23 +336,41 @@ private fun PlayGrid(exercise: Exercise) {
 private fun SoupBoard(
     exercise: Exercise,
     onPick: (Int) -> Unit,
+    onMissKeep: () -> Unit,
 ) {
     val columns = exercise.play.columns.coerceAtLeast(1)
     val cells = exercise.play.cells.ifEmpty { exercise.options }
-    val targets = exercise.play.targetIndices
+    val paths = exercise.play.soupPaths()
     var selected by remember(exercise.prompt) { mutableStateOf(emptyList<Int>()) }
+    var found by remember(exercise.prompt) { mutableStateOf(emptySet<Int>()) }
+    val foundCells = found.flatMap { paths.getOrElse(it) { emptyList() } }.toSet()
     val cellDp = UiLogic.playCellHeightDp(columns)
+    val onGesture: (List<Int>) -> Unit = { path ->
+        val match = UiLogic.soupMatchedPath(path, paths, found)
+        if (match != null) {
+            val next = found + match
+            found = next
+            if (next.size >= paths.size) onPick(paths[match].first())
+        } else {
+            val kind = UiLogic.soupReleaseKind(path, paths, found)
+            if (UiLogic.soupKeepsBoard(kind, paths.size)) {
+                onMissKeep()
+            } else {
+                UiLogic.soupPickIndex(path, paths, found, cells.size)?.let(onPick)
+            }
+        }
+    }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .pointerInput(exercise.prompt, columns, cells.size) {
+            .pointerInput(exercise.prompt, columns, cells.size, found) {
                 awaitEachGesture {
                     val gap = 8.dp.toPx()
                     val path = collectSoupPath(columns, cells.size, gap, size.width.toFloat(), size.height.toFloat()) {
                         selected = it
                     }
-                    UiLogic.soupPickIndex(path, targets, cells.size)?.let(onPick)
+                    onGesture(path)
                     selected = emptyList()
                 }
             },
@@ -362,10 +387,9 @@ private fun SoupBoard(
                         cell = cell,
                         correct = exercise.isCorrect(index),
                         selected = index in selected,
+                        found = index in foundCells,
                         heightDp = cellDp,
-                        onTap = {
-                            UiLogic.soupPickIndex(listOf(index), targets, cells.size)?.let(onPick)
-                        },
+                        onTap = { onGesture(listOf(index)) },
                     )
                 }
             }
@@ -379,6 +403,7 @@ private fun RowScope.SoupCell(
     cell: String,
     correct: Boolean,
     selected: Boolean,
+    found: Boolean,
     heightDp: Int,
     onTap: () -> Unit,
 ) {
@@ -387,7 +412,7 @@ private fun RowScope.SoupCell(
         modifier = Modifier
             .weight(1f)
             .height(heightDp.dp)
-            .background(Color(UiLogic.soupSelectedArgb(selected)))
+            .background(Color(UiLogic.soupSelectedArgb(selected, found)))
             .testTag(UiLogic.answerTag(correct))
             .semantics { onClick { onTap(); true } },
     ) {

@@ -52,17 +52,13 @@ class PlayBoardFactory(
         module: LearningModule,
         level: Int = 0,
     ): Exercise {
-        val piece =
-            if (module == LearningModule.SHAPES) {
-                GeometricShape.entries[random.nextInt(GeometricShape.entries.size)].displayName
-            } else {
-                random.nextInt(1, 10).toString()
-            }
+        val n = if (level >= 2) 3 else 2
+        val hole = random.nextInt(n * n)
+        val full = PuzzlePatterns.cells(module, n, random)
+        val piece = full[hole]
+        val cells = full.mapIndexed { i, value -> if (i == hole) "?" else value }
         val others = numericOrShapes(piece)
         val options = (others + piece).shuffled(random)
-        val n = if (level >= 2) 3 else 2
-        val last = n * n - 1
-        val cells = List(n * n) { i -> if (i == last) "?" else (i + 1).toString() }
         return Exercise(
             module = module,
             prompt = "Qual é a peça que falta?",
@@ -88,7 +84,7 @@ class PlayBoardFactory(
     private fun shapeSudoku(level: Int): Exercise {
         val n = 2 + minOf(level, 1)
         val glyphs = GeometricShape.entries.take(n).map { it.displayName }
-        val full = List(n * n) { i -> glyphs[(i / n + i % n) % n] }
+        val full = SudokuGrids.filled(n, random).map { glyphs[it - 1] }
         val hole = random.nextInt(full.size)
         val answer = full[hole]
         val cells = full.mapIndexed { i, value -> if (i == hole) "" else value }
@@ -109,8 +105,13 @@ class PlayBoardFactory(
         module: LearningModule,
         level: Int,
     ): Exercise {
-        val n = if (module == LearningModule.NUMBERS) 2 + minOf(level, 1) else 4 + minOf(level, 2)
-        val full = List(n * n) { i -> (i / n + i % n) % n + 1 }
+        val n =
+            if (module == LearningModule.NUMBERS || module == LearningModule.COUNTING) {
+                2 + minOf(level, 1)
+            } else {
+                4 + minOf(level, 2)
+            }
+        val full = SudokuGrids.filled(n, random)
         val hole = random.nextInt(full.size)
         val answer = full[hole]
         val cells = full.mapIndexed { i, value -> if (i == hole) "" else value.toString() }
@@ -196,32 +197,22 @@ class PlayBoardFactory(
 
     private fun wordSoup(level: Int): Exercise {
         val size = 4 + minOf(level, 2)
-        val candidates = WORDS.filter { it.length <= size }
-        val word = candidates[random.nextInt(candidates.size)]
-        val pool = LETTERS.filter { it !in word }
-        val letters = MutableList(size * size) { pool[random.nextInt(pool.length)].toString() }
-        val maxCol = size - word.length
-        val col = if (maxCol <= 0) 0 else random.nextInt(maxCol + 1)
-        val row = random.nextInt(size)
-        val start = row * size + col
-        val path =
-            word.mapIndexed { i, char ->
-                val index = start + i
-                letters[index] = char.toString()
-                index
-            }
+        val soup = WordSoupBuilder(random).build(size, 2 + minOf(level, 1))
+        val listed = soup.words.joinToString(", ")
+        val hits = soup.paths.flatten()
         return Exercise(
             module = LearningModule.LOGIC,
-            prompt = "Encontra a palavra $word na sopa.",
-            spoken = "Procura a palavra $word. Desliza o dedo por todas as letras.",
-            options = letters.toList(),
-            correctIndex = path.first(),
+            prompt = "Encontra as palavras: $listed.",
+            spoken = "Procura as palavras $listed. Desliza o dedo por cada uma.",
+            options = soup.cells,
+            correctIndex = hits.first(),
             play =
                 PlayBoard(
                     kind = PlayKind.SOUP,
-                    cells = letters.toList(),
+                    cells = soup.cells,
                     columns = size,
-                    targetIndices = path,
+                    targetIndices = hits,
+                    wordPaths = soup.paths,
                 ),
         )
     }
@@ -265,12 +256,7 @@ class PlayBoardFactory(
         if (kinds > 1) legend.add("●=2")
         if (kinds > 2) legend.add("■=3")
         val code = "⭐".repeat(stars) + "●".repeat(dots) + "■".repeat(boxes)
-        val spoken =
-            if (kinds == 1) {
-                "Cada estrela vale um. Quantas são?"
-            } else {
-                "Lê a legenda. Que número é o código?"
-            }
+        val spoken = CipherSpeech.counting(kinds)
         val options = numericOptions(value, 1, 12).map { it.toString() }
         return Exercise(
             module = module,
@@ -313,7 +299,7 @@ class PlayBoardFactory(
         return Exercise(
             module = module,
             prompt = "$code = ?",
-            spoken = "Triângulo vale $promptLeft. Círculo vale $right. Quanto é?",
+            spoken = CipherSpeech.fromLegend(cells, "Quanto é?"),
             options = options,
             correctIndex = options.indexOf(answer.toString()),
             play =
@@ -352,6 +338,5 @@ class PlayBoardFactory(
                 "trinta",
             )
         val SYMBOLS: List<String> = listOf("▲", "●", "■", "◆", "★", "♥")
-        const val LETTERS: String = "abcdefghijklmnopqrstuvwxyz"
     }
 }

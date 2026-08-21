@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-08-20
-**Last agent focus:** Godot GLES host relaunch, isolated Room skip, AGP 9 / Daemon Toolchain
+**Last updated:** 2026-08-21
+**Last agent focus:** Soup keep-board; tap boost; HUD contrast; course clamps
 
 ---
 
@@ -15,8 +15,9 @@ Native Kotlin/Compose educational math game for ages 3 and 7.
 Privacy: on-device only. Decision log: GitHub Epics via github-issue-adr;
 authored backlog is `docs/issues.yml`.
 
-Reward engines: **Godot 4** in `:engine2d` (age 3) and `:engine3d` (age 7).
-Unity is not used. Native Canvas/GLES is the Robolectric fallback.
+Reward engines: **Godot 4** in `:engine2d` (age 3 platformer) and `:engine3d`
+(age 7 2.5D off-road race). Unity is not used. Native Canvas is the
+Robolectric fallback. `Kart3dEngine` GLES remains unit-tested.
 
 ## Pins
 
@@ -82,6 +83,9 @@ bash scripts/ci-local.sh
   MainActivity (host relaunch), not `Activity.recreate()`, not ProcessPhoenix,
   and not `startActivity` of the same `singleInstance` plugin from the dying
   engine process.
+- Compose `pointerInput` `size` is `IntSize` (`width: Int`). Use
+  `size.width.coerceAtLeast(1).toFloat()`, not `coerceAtLeast(1f)`.
+  `:app` is not compiled on this VM (`ANDROID_HOME` unset); CI catches it.
 
 ## Suggested next work
 
@@ -89,6 +93,7 @@ bash scripts/ci-local.sh
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 
-Known follow-ups not in this pass: encrypted PIN DataStore, release R8 with Godot JNI keep rules, per-frame KartScene allocations.
+This pass: sopa miss keeps found words; Godot boost is tap-only; runner
+stays on the course; HUD contrast; gate posts; consonant soup filler.
 
-*Last updated: 2026-08-20*
+*Last updated: 2026-08-21*
