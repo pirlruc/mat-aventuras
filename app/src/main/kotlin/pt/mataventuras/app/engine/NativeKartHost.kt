@@ -72,7 +72,7 @@ internal object NativeKartHost {
                         .pointerInput(Unit) {
                             awaitEachGesture {
                                 val down = awaitFirstDown()
-                                val nx = down.position.x / size.width.coerceAtLeast(1f)
+                                val nx = down.position.x / size.width.coerceAtLeast(1).toFloat()
                                 loop.handleTouch(nx, MotionEvent.ACTION_DOWN)
                                 while (true) {
                                     val event = awaitPointerEvent()
@@ -82,7 +82,7 @@ internal object NativeKartHost {
                                         change.consume()
                                         break
                                     }
-                                    val next = change.position.x / size.width.coerceAtLeast(1f)
+                                    val next = change.position.x / size.width.coerceAtLeast(1).toFloat()
                                     loop.handleTouch(next, MotionEvent.ACTION_MOVE)
                                     change.consume()
                                 }

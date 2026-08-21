@@ -83,6 +83,9 @@ bash scripts/ci-local.sh
   MainActivity (host relaunch), not `Activity.recreate()`, not ProcessPhoenix,
   and not `startActivity` of the same `singleInstance` plugin from the dying
   engine process.
+- Compose `pointerInput` `size` is `IntSize` (`width: Int`). Use
+  `size.width.coerceAtLeast(1).toFloat()`, not `coerceAtLeast(1f)`.
+  `:app` is not compiled on this VM (`ANDROID_HOME` unset); CI catches it.
 
 ## Suggested next work
 
