@@ -115,6 +115,10 @@ bash scripts/check-ci-local.sh
   `allowedLines` / `allowedFunctionsPerClass` (not the 1.x `threshold` names).
   Do not revert to `io.gitlab.arturbosch.detekt` 1.23.8: that plugin still calls
   deprecated `ReportingExtension.file` (removed in Gradle 10).
+- `android-actions/setup-android` must be v4+: v3.2.2 still runs
+  `sdkmanager tools`, and that package no longer exists.
+- Grype must not scan `.ci-venv` (semgrep's protobuf/pip). Run it before the
+  venv is created and `--exclude` CI/build trees.
 - Age-7 sudoku uses `SudokuHoles.EXTRA_BLANK` (`·`) for extra houses and `""`
   for the question cell. UI glows only the question cell. Punching extra
   blanks must keep the question uniquely determined.

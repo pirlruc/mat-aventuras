@@ -29,6 +29,12 @@ fi
 
 cd "$ROOT"
 "$GRYPE" version
-# Catalog the repo (Gradle manifests + lockfiles when present). Only fail on
-# high/critical; medium is printed by grype and tracked in MAT-004-T4 for SBOM.
-"$GRYPE" dir:"$ROOT" --fail-on high --only-fixed=false
+# Catalog Gradle manifests. Skip CI venvs, build trees, and git metadata so
+# runner Python (semgrep/mobsfscan) is not treated as product dependencies.
+"$GRYPE" dir:"$ROOT" \
+  --fail-on high \
+  --only-fixed=false \
+  --exclude '**/.ci-venv/**' \
+  --exclude '**/build/**' \
+  --exclude '**/.gradle/**' \
+  --exclude '**/.git/**'
