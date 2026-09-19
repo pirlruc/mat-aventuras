@@ -1,0 +1,19 @@
+# Documented companion pins (SC-DEP-004).
+# CI asserts each gitlink SHA equals the sha recorded here, and that the
+# annotated tag name is the bootstrap ref cited in README / handoff.
+#
+# Bump by checking out the annotated tag in the submodule, then updating
+# tag + sha together. Do not edit one without the other.
+
+guardrails:
+  path: docs/guardrails
+  tag: "1.6.0"
+  sha: "77cf16eb52c76c9cf676594f23b4b1fd73c5fc81"
+
+scaffold:
+  path: .github/scaffold
+  tag: "1.5.0"
+  sha: "9e04ed530fcbed1c0441c68ed96aed8e2dc2bec9"
+
+methodologies:
+  tag: "1.5.0"

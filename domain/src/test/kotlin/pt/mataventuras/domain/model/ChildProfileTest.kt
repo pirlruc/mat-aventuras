@@ -38,6 +38,8 @@ class ChildProfileTest {
     fun modulesPerAgeGroup() {
         assertEquals(3, modulesFor(AgeGroup.THREE_YEARS).size)
         assertEquals(4, modulesFor(AgeGroup.SEVEN_YEARS).size)
+        assertTrue(LearningModule.ADDITION.isSevenYears())
+        assertFalse(LearningModule.COUNTING.isSevenYears())
         assertTrue(LearningModule.COUNTING in modulesFor(AgeGroup.THREE_YEARS))
         assertTrue(LearningModule.MULTIPLICATION in modulesFor(AgeGroup.SEVEN_YEARS))
     }

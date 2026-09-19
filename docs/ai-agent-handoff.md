@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-08-21
-**Last agent focus:** Pin lesson Sair/Ficar footer so age-7 sudoku can confirm leave
+**Last updated:** 2026-09-19
+**Last agent focus:** Bump guardrails 1.6.0 / scaffold 1.5.0; drop dead code; harder age-7 games
 
 ---
 
@@ -22,11 +22,14 @@ Robolectric fallback. `Kart3dEngine` GLES remains unit-tested.
 
 ## Pins
 
+Documented in `docs/companion-pins.yml` (SC-DEP-004). CI asserts gitlink SHA
+equals the recorded sha.
+
 | Companion | How | Value |
 | --- | --- | --- |
-| methodologies | annotated tag in docs | `1.2.0` |
-| guardrails | submodule SHA `docs/guardrails/` | `0354a747` (tag `1.3.0`) |
-| github-scaffold | submodule SHA `.github/scaffold/` | `aac408cc` (tag `1.2.0`) |
+| methodologies | annotated tag in docs | `1.5.0` |
+| guardrails | submodule SHA `docs/guardrails/` | `77cf16eb` (tag `1.6.0`) |
+| github-scaffold | submodule SHA `.github/scaffold/` | `9e04ed53` (tag `1.5.0`) |
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 
@@ -35,12 +38,13 @@ Robolectric fallback. `Kart3dEngine` GLES remains unit-tested.
 | Epic | Status | Notes |
 | --- | --- | --- |
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
-| MAT-002 | open | Emulator instrumented tests remain; Robolectric 95% and richer packs are in tree |
+| MAT-002 | open | T4 (harder age-7) done in tree; T1 emulator CI and T5 tap-to-fill sudoku remain |
 | MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin Activities + assets; native fallback under Robolectric |
-| MAT-004 | open in GitHub until human sync; T1–T3 done in tree | Split CI, SAST, gitleaks, privacy hardening workflow; CodeQL/OSV still open (T4) |
+| MAT-004 | open | T5 grype + companion pins done in tree; CodeQL/OSV still open (T4) |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
-KT-DELIV-001 (500-line PR soft limit) is not a gap for this first PR.
+KT-DOC-001 is public-type KDoc (no numeric `doc_coverage`). KT-CPLX-002 is
+detekt `LongMethod` / complexity rules — do not invent a Python-style MI.
 
 GitHub labels/milestones and issue sync need a write token:
 
@@ -57,23 +61,25 @@ publishing issues without approval).
 ```bash
 python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only
 python3 scripts/lint-doc-links.py --root .
+python3 scripts/verify-companion-pins.py
 ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
 python3 scripts/verify-coverage.py
-bash scripts/ci-local.sh
+bash scripts/check-ci-local.sh
 ```
 
 ## Known pitfalls
 
 - Private companion repos: local submodule clone needs a PAT with Contents: Read
   on `pirlruc/guardrails` and `pirlruc/github-scaffold`. GitHub Actions does not
-  clone them; it uses `scripts/` helpers and `config/kotlin.thresholds.yml`.
+  clone them; it uses `scripts/` helpers, `config/kotlin.thresholds.yml`, and
+  `docs/companion-pins.yml` for the gitlink SHA assert.
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
   can still gate `:domain`. With the SDK, coverage is required for all three.
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`; this cloud run used
-  `cursor/games-usability-f702` per the agent environment.
+  `cursor/code-quality-games-4741` per the agent environment.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
 - Run `:domain:ktlintFormat` before `:domain:ktlintCheck` (parallel format+check races).
 - Never construct `GodotFragment` under Robolectric (`GodotRuntime.shouldEmbed`
@@ -92,7 +98,7 @@ bash scripts/ci-local.sh
   Sair/Ficar sit in a footer so the confirm-leave buttons stay on screen.
   Tests click those footer buttons without `performScrollTo` (they are not
   inside the scrollable play column). `LessonPlayColumn` / `LessonExitBar`
-  keep `LessonScreen` above the KT-CPLX-002 MI floor of 40.
+  keep Compose screens out of detekt `LongMethod`.
 - `:app` kover is 95% line and branch. New arcade/scene branches need tests
   (`EngineCoverageTest`); do not exclude them to make the gate pass.
 - `OffroadScene.fill` clears the span list each call. Four gates put the first
@@ -109,18 +115,25 @@ bash scripts/ci-local.sh
   `allowedLines` / `allowedFunctionsPerClass` (not the 1.x `threshold` names).
   Do not revert to `io.gitlab.arturbosch.detekt` 1.23.8: that plugin still calls
   deprecated `ReportingExtension.file` (removed in Gradle 10).
+- `android-actions/setup-android` must be v4+: v3.2.2 still runs
+  `sdkmanager tools`, and that package no longer exists.
+- Grype must not scan `.ci-venv` (semgrep's protobuf/pip). Run it before the
+  venv is created and `--exclude` CI/build trees.
+- Age-7 sudoku uses `SudokuHoles.EXTRA_BLANK` (`·`) for extra houses and `""`
+  for the question cell. UI glows only the question cell. Punching extra
+  blanks must keep the question uniquely determined.
 
 ## Suggested next work
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
-3. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
+3. MAT-002-T5: tap-to-fill remaining sudoku blanks (not one highlighted house).
+4. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 
-This pass: soup words unique in every direction (no 2-letter fillers);
-runner jump is a long upward swipe, not a tap; kart uses full left/right
-steer, rivals, META gantry, and side-tap bands; 4×4/6×6 sudoku with box
-gutters; invaders/chomp/climb prizes; Godot boot waits for a real window.
-Kart arches/rivals/META draw 140 m ahead so the first 96 m gate is visible
-from the start line. Age-7 board lessons scroll; Sair/Ficar stay in a footer.
+This pass: guardrails 1.6.0 + scaffold 1.5.0; dropped invented Kotlin MI /
+numeric KDoc ratio; grype (KT-SEC-004); companion pin assert (SC-DEP-004);
+removed unused soup `extraCells` and the broken `:dominio` local runner;
+deduplicated number-words / extrema / architecture table; age-7 two-digit
+arithmetic, missing factor, skip-counting, extra sudoku blanks.
 
-*Last updated: 2026-08-21*
+*Last updated: 2026-09-19*

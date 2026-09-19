@@ -45,22 +45,19 @@ fun LeaderboardAndRewardsScreen(
     onBack: () -> Unit,
 ) {
     val table by produceState(emptyList<LeaderboardEntry>()) {
+        value = emptyList()
         container.repository.observeProfiles().collect { profiles ->
             value = container.leaderboard.rank(profiles, container.repository.allSessions())
         }
     }
     val badges by produceState(emptyList<UnlockedBadge>(), activeProfile?.id) {
-        if (activeProfile == null) {
-            value = emptyList()
-            return@produceState
-        }
+        value = emptyList()
+        if (activeProfile == null) return@produceState
         container.repository.observeBadges(activeProfile.id).collect { value = it }
     }
     val avatars by produceState(emptyList<UnlockedAvatar>(), activeProfile?.id) {
-        if (activeProfile == null) {
-            value = emptyList()
-            return@produceState
-        }
+        value = emptyList()
+        if (activeProfile == null) return@produceState
         container.repository.observeAvatars(activeProfile.id).collect { value = it }
     }
 

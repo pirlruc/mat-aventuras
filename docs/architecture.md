@@ -1,9 +1,9 @@
 # Architecture — Mat Aventuras
 
 Technical guide for the native Android educational math game.
-Methodology: [github-issue-adr @ 1.2.0](https://github.com/pirlruc/methodologies/tree/1.2.0/github-issue-adr).
+Methodology: [github-issue-adr @ 1.5.0](https://github.com/pirlruc/methodologies/tree/1.5.0/github-issue-adr).
 Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (not ADR markdown files).
-Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.3.0`.
+Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.6.0`.
 
 Language split: **code, comments, KDoc, and this documentation are English**.
 **User-visible UI copy, TTS, and dialogue are Portuguese from Portugal (pt-PT).**
@@ -75,13 +75,6 @@ constraint warns about. A single engine is enough; Godot is that engine.
 Unity-as-a-library would still have to live in `:engine2d` / `:engine3d`,
 but it is a worse fit for APK size, heap, and a local-only privacy policy.
 
-| Layer | Technology | Process |
-| --- | --- | --- |
-| Menus, lessons, parental PIN, leaderboard | Jetpack Compose | default |
-| 2D prizes (age 3, and sometimes age 7) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
-| 2.5D off-road race (age 7) | Godot 4 Node2D with rivals; native Canvas fallback | `:engine3d` |
-| Persistence | Room + DataStore | default only (engines return extras) |
-
 ## Modules
 
 ```
@@ -128,10 +121,6 @@ attach `NativeKartHost` / `NativeRunnerHost` instead.
 
 Simulation is in `:domain` (`Platformer2dEngine`, `OffroadRacerEngine`,
 `Kart3dEngine`) so physics is unit-tested without an emulator.
-
-The oval GLES kart (`Kart3dEngine` / `KartRenderer`) remains as a
-unit-testable mesh path. Production Godot and the native fallback both use
-the 2D perspective racer.
 
 ## State and local storage
 
@@ -212,7 +201,7 @@ Finishing a reward Activity awards 15 bonus points on the last profile.
 | Age | Lessons (Compose, mascot-hosted) | Reward mini-game |
 | --- | --- | --- |
 | **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D runner, letter-climb, or maze (`RunnerPluginActivity` in `:engine2d`) |
-| **7** | Addition incl. missing addend (`ADDITION`); subtraction (`SUBTRACTION`); multiplication (`MULTIPLICATION`); logic even/largest/smallest (`LOGIC`) | Dirt race with rivals (`KartPluginActivity` in `:engine3d`) plus 2D invaders/maze/climb |
+| **7** | Two-digit addition and missing addend; two-digit subtraction; times-tables 3–12 with a missing factor; skip-counting and extrema (`LOGIC`) | Dirt race with rivals (`KartPluginActivity` in `:engine3d`) plus 2D invaders/maze/climb |
 
 Age 7 confirms before leaving a lesson (`VoiceScripts.confirmExit`).
 Age 3 leaves immediately. A finished reward returns `RESULT_FINISHED`;
@@ -230,8 +219,9 @@ the host speaks a pt-PT line and applies bonus points.
 ## Guardrails
 
 Pinned at `docs/guardrails/` when that submodule is cloned. GitHub Actions
-reads the same numbers from `config/kotlin.thresholds.yml` (CI-022 fail-closed)
-because the companion repos are private.
+reads Kotlin numeric gates from `config/kotlin.thresholds.yml` (CI-022
+fail-closed) because the companion repos are private. Submodule SHAs must
+match `docs/companion-pins.yml` (SC-DEP-004).
 `:domain` kover verify is 95% line + branch. When the Android SDK is present,
 `:data` and `:app` use the same numeric gate (Robolectric unit tests).
 Remaining emulator instrumented tests are tracked in MAT-002-T1.

@@ -7,6 +7,7 @@ import android.view.HapticFeedbackConstants
 import kotlin.math.cos
 import kotlin.math.sin
 import pt.mataventuras.domain.math.PlayKind
+import pt.mataventuras.domain.math.SudokuHoles
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
@@ -201,14 +202,39 @@ internal object UiLogic {
     ): Int = if (columns <= 0) 0 else (cellCount + columns - 1) / columns
 
     /**
-     * Empty sudoku cells show a question mark.
+     * Empty sudoku cells show a question mark. Extra blanks stay empty.
      */
-    fun holeLabel(cell: String): String = cell.ifEmpty { "?" }
+    fun holeLabel(cell: String): String =
+        when {
+            isExtraBlank(cell) -> ""
+            cell.isEmpty() -> "?"
+            else -> cell
+        }
 
     /**
-     * Puzzle and sudoku holes glow so the missing piece is obvious.
+     * Extra sudoku blanks that are not the question cell.
      */
-    fun isBoardHole(cell: String): Boolean = cell.isEmpty() || cell == "?"
+    fun isExtraBlank(cell: String): Boolean = cell == SudokuHoles.EXTRA_BLANK
+
+    /**
+     * The cell whose value the option buttons ask for.
+     */
+    fun isQuestionHole(cell: String): Boolean = cell.isEmpty() || cell == "?"
+
+    /**
+     * Puzzle and sudoku holes, including extra blanks on harder boards.
+     */
+    fun isBoardHole(cell: String): Boolean = isQuestionHole(cell) || isExtraBlank(cell)
+
+    /**
+     * Question cells glow; extra blanks stay pale so the asked house is obvious.
+     */
+    fun sudokuCellArgb(cell: String): Long =
+        when {
+            isQuestionHole(cell) -> 0xFFFFF59D
+            isExtraBlank(cell) -> 0xFFEEEEEE
+            else -> 0xFFE3F2FD
+        }
 
     /**
      * Glyph on the correct/wrong flash (kids can read a tick or cross).

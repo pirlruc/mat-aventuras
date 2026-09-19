@@ -379,14 +379,13 @@ private fun SudokuBoard(exercise: Exercise) {
             ) {
                 rowCells.forEachIndexed { col, cell ->
                     val index = row * columns + col
-                    val hole = UiLogic.isBoardHole(cell)
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .weight(1f)
                             .height(cellDp.dp)
                             .padding(start = UiLogic.sudokuGapDp(col, boxW).dp)
-                            .background(if (hole) Color(0xFFFFF59D) else Color(0xFFE3F2FD))
+                            .background(Color(UiLogic.sudokuCellArgb(cell)))
                             .testTag("board-cell-$index"),
                     ) {
                         GridCellFace(module = exercise.module, cell = cell)

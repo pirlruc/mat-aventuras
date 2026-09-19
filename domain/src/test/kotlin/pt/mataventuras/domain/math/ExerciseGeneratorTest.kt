@@ -46,6 +46,8 @@ class ExerciseGeneratorTest {
         val sum = parts[0].toInt() + parts[1].toInt()
         assertEquals(sum.toString(), exercise.options[exercise.correctIndex])
         assertTrue(exercise.spoken.contains("mais"))
+        assertTrue(parts[0].toInt() >= 12)
+        assertTrue(parts[1].toInt() >= 12)
     }
 
     @Test
@@ -63,6 +65,8 @@ class ExerciseGeneratorTest {
             val value = exercise.options[exercise.correctIndex].toInt()
             assertTrue(value >= 0)
             assertTrue(exercise.spoken.contains("menos"))
+            val parts = exercise.prompt.replace(" = ?", "").split(" − ")
+            assertTrue(parts[0].toInt() >= 30)
         }
     }
 
@@ -106,14 +110,32 @@ class ExerciseGeneratorTest {
     }
 
     @Test
+    fun multiplicationCoversProductAndMissingFactor() {
+        val usesGap = (0..8).map { ExerciseGenerator(Random(it)).multiplication().prompt.contains("× ?") }.toSet()
+        assertEquals(2, usesGap.size)
+    }
+
+    @Test
     fun multiplicationAnswerMatchesTheProduct() {
-        val exercise = generator.multiplication()
+        val exercise = generator.multiplicationProduct()
         val parts = exercise.prompt.replace(" = ?", "").split(" × ")
         assertEquals(
             (parts[0].toInt() * parts[1].toInt()).toString(),
             exercise.options[exercise.correctIndex],
         )
         assertTrue(exercise.spoken.contains("vezes"))
+        val a = parts[0].toInt()
+        val b = parts[1].toInt()
+        assertTrue(a in 3..12)
+        assertTrue(b in 3..12)
+    }
+
+    @Test
+    fun missingFactorAsksTheUnknownTimes() {
+        val exercise = generator.missingFactor()
+        assertTrue(exercise.prompt.contains("× ?"))
+        assertTrue(exercise.spoken.contains("dividir"))
+        assertEquals(4, exercise.options.size)
     }
 
     @Test

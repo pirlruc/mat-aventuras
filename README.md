@@ -25,7 +25,7 @@ friend, and a local score.
    start a lesson.
 4. Each screen is one short puzzle:
    - four answer buttons
-   - a mini-sudoku with one empty cell
+   - a mini-sudoku (age 7 leaves several houses empty)
    - sopa de letras — slide a finger along **every** hidden word (across,
      down, or diagonal, either way). A wrong slide keeps the words you
      already found
@@ -45,6 +45,10 @@ friend, and a local score.
    Green arches are checkpoints you drive through. The yellow **META** banner
    overhead is the start/finish line you pass under — it is not a wall.
    Other prizes: letter invaders, maze, or letter-climb.
+
+Age 7 arithmetic uses two-digit sums and differences, times-tables through 12
+(including a missing factor), and skip-counting. Mini-sudoku hides extra
+houses so the glowing cell is not obvious from a single neighbour.
 
 Leave a lesson from the on-screen exit control. Age 7 asks for confirmation.
 
@@ -94,9 +98,9 @@ Architecture, engine isolation, and the Godot plugin contract:
 - Decision log: Epics in [docs/issues.yml](docs/issues.yml) (no ADR files)
 - Agent notes: [docs/ai-agent-handoff.md](docs/ai-agent-handoff.md)
 
-Process: [github-issue-adr](https://github.com/pirlruc/methodologies/tree/1.2.0/github-issue-adr) @ `1.2.0`.
-Guardrails: [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.3.0`.
-Scaffold: [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.2.0`.
+Process: [github-issue-adr](https://github.com/pirlruc/methodologies/tree/1.5.0/github-issue-adr) @ `1.5.0`.
+Guardrails: [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.6.0`.
+Scaffold: [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.5.0`.
 
 Full CI with the SDK:
 

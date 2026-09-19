@@ -69,6 +69,14 @@ class BoardHelpersTest {
         assertTrue(none.cells.size == 1)
         val shapes = PuzzlePatterns.cells(LearningModule.SHAPES, 2, Random(4))
         assertEquals(4, shapes.size)
+        val punched = SudokuHoles.withHoles(SudokuGrids.filled(4, Random(1)), 4, 0, 4, Random(2))
+        assertEquals("", punched[0])
+        assertTrue(punched.any { it == SudokuHoles.EXTRA_BLANK })
+        val single = SudokuHoles.withHoles(SudokuGrids.filled(4, Random(3)), 4, 5, 0, Random(0))
+        assertEquals(1, single.count { it.isEmpty() })
+        assertFalse(single.contains(SudokuHoles.EXTRA_BLANK))
+        assertTrue(PortugueseNumberWords.CIPHER.all { it.length >= 4 })
+        assertTrue("soma" in PortugueseNumberWords.SOUP)
     }
 
     @Test

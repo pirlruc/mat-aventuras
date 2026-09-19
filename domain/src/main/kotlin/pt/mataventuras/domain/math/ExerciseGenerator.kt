@@ -78,10 +78,10 @@ class ExerciseGenerator(
     }
 
     internal fun additionSum(): Exercise {
-        val a = random.nextInt(1, 10)
-        val b = random.nextInt(1, 10)
+        val a = random.nextInt(12, 48)
+        val b = random.nextInt(12, 48)
         val sum = a + b
-        val options = numericOptions(sum, 2, 18)
+        val options = numericOptions(sum, 20, 96)
         return Exercise(
             module = LearningModule.ADDITION,
             prompt = "$a + $b = ?",
@@ -92,10 +92,10 @@ class ExerciseGenerator(
     }
 
     internal fun missingAddend(): Exercise {
-        val a = random.nextInt(1, 10)
-        val b = random.nextInt(1, 10)
+        val a = random.nextInt(11, 40)
+        val b = random.nextInt(11, 40)
         val sum = a + b
-        val options = numericOptions(b, 1, 10)
+        val options = numericOptions(b, 8, 42)
         return Exercise(
             module = LearningModule.ADDITION,
             prompt = "$a + ? = $sum",
@@ -106,10 +106,10 @@ class ExerciseGenerator(
     }
 
     internal fun subtraction(): Exercise {
-        val a = random.nextInt(2, 13)
-        val b = random.nextInt(1, a)
+        val a = random.nextInt(30, 90)
+        val b = random.nextInt(11, a - 8)
         val difference = a - b
-        val options = numericOptions(difference, 0, 12)
+        val options = numericOptions(difference, 1, 80)
         return Exercise(
             module = LearningModule.SUBTRACTION,
             prompt = "$a − $b = ?",
@@ -120,10 +120,14 @@ class ExerciseGenerator(
     }
 
     internal fun multiplication(): Exercise {
-        val a = random.nextInt(1, 11)
-        val b = random.nextInt(1, 11)
+        return if (random.nextBoolean()) multiplicationProduct() else missingFactor()
+    }
+
+    internal fun multiplicationProduct(): Exercise {
+        val a = random.nextInt(3, 13)
+        val b = random.nextInt(3, 13)
         val product = a * b
-        val options = numericOptions(product, 1, 100)
+        val options = numericOptions(product, 6, 144)
         return Exercise(
             module = LearningModule.MULTIPLICATION,
             prompt = "$a × $b = ?",
@@ -133,21 +137,35 @@ class ExerciseGenerator(
         )
     }
 
+    internal fun missingFactor(): Exercise {
+        val a = random.nextInt(3, 13)
+        val b = random.nextInt(3, 13)
+        val product = a * b
+        val options = numericOptions(b, 2, 13)
+        return Exercise(
+            module = LearningModule.MULTIPLICATION,
+            prompt = "$a × ? = $product",
+            spoken = "Quanto é $product a dividir por $a?",
+            options = options.map { it.toString() },
+            correctIndex = options.indexOf(b),
+        )
+    }
+
     internal fun logic(): Exercise =
         when (random.nextInt(3)) {
-            0 -> evenSequence()
-            1 -> largestNumber()
-            else -> smallestNumber()
+            0 -> skipSequence()
+            1 -> extrema(largest = true)
+            else -> extrema(largest = false)
         }
 
-    private fun evenSequence(): Exercise {
-        val start = random.nextInt(1, 6)
-        val step = 2
+    private fun skipSequence(): Exercise {
+        val start = random.nextInt(3, 18)
+        val step = listOf(3, 4, 5, 6, 10)[random.nextInt(5)]
         val n1 = start
         val n2 = start + step
         val n3 = start + step * 2
         val next = start + step * 3
-        val options = numericOptions(next, next - 4, next + 4)
+        val options = numericOptions(next, next - 8, next + 12)
         return Exercise(
             module = LearningModule.LOGIC,
             prompt = "Completa: $n1, $n2, $n3, …",
@@ -157,35 +175,21 @@ class ExerciseGenerator(
         )
     }
 
-    private fun largestNumber(): Exercise {
+    private fun extrema(largest: Boolean): Exercise {
         val values = mutableSetOf<Int>()
         while (values.size < 4) {
-            values += random.nextInt(1, 50)
+            values += random.nextInt(12, 180)
         }
         val list = values.toList()
-        val largest = list.max()
+        val target = if (largest) list.max() else list.min()
+        val prompt = if (largest) "Qual é o maior número?" else "Qual é o menor número?"
+        val spoken = if (largest) "Toca no maior número." else "Toca no menor número."
         return Exercise(
             module = LearningModule.LOGIC,
-            prompt = "Qual é o maior número?",
-            spoken = "Toca no maior número.",
+            prompt = prompt,
+            spoken = spoken,
             options = list.map { it.toString() },
-            correctIndex = list.indexOf(largest),
-        )
-    }
-
-    private fun smallestNumber(): Exercise {
-        val values = mutableSetOf<Int>()
-        while (values.size < 4) {
-            values += random.nextInt(1, 50)
-        }
-        val list = values.toList()
-        val smallest = list.min()
-        return Exercise(
-            module = LearningModule.LOGIC,
-            prompt = "Qual é o menor número?",
-            spoken = "Toca no menor número.",
-            options = list.map { it.toString() },
-            correctIndex = list.indexOf(smallest),
+            correctIndex = list.indexOf(target),
         )
     }
 

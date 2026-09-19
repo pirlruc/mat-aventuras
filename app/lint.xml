@@ -8,8 +8,4 @@
     <issue id="MissingClass">
         <ignore path="src/main/AndroidManifest.xml" />
     </issue>
-    <!-- Compose lint false positive: produceState assigns via the setter in the lambda. -->
-    <issue id="ProduceStateDoesNotAssignValue">
-        <ignore path="src/main/kotlin/pt/mataventuras/app/ui/rewards/LeaderboardAndRewardsScreen.kt" />
-    </issue>
 </lint>

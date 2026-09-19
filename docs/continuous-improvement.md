@@ -71,7 +71,8 @@ https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
 | --- | --- |
 | Product code | Playable pt-PT math game |
 | Process | github-issue-adr + pinned guardrails |
-| CI | JVM coverage gate; optional Android assemble |
+| CI | JVM coverage gate; optional Android assemble; grype |
+| Companion pins | `docs/companion-pins.yml` gitlink SHA/tag match |
 
 ## Non-negotiable constraints
 

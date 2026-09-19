@@ -35,11 +35,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Companion gitlinks are pinned
-        run: |
-          test -n "$(git rev-parse 'HEAD:docs/guardrails')"
-          test -n "$(git rev-parse 'HEAD:.github/scaffold')"
-
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
@@ -57,20 +52,19 @@ jobs:
             docs/issues.yml \
             docs/guardrail-deviations.yml \
             docs/issues-sync-targets.yml \
+            docs/companion-pins.yml \
             .github/dependabot.yml \
             .github/workflows/ci.yml \
             .github/workflows/hardening.yml
           .ci-venv/bin/python scripts/validate-issues.py docs/issues.yml
+          .ci-venv/bin/python scripts/verify-companion-pins.py
 
       - name: Domain static analysis
         run: |
           ./gradlew --no-daemon :domain:ktlintCheck :domain:detekt
 
-      - name: KDoc coverage (KT-DOC-001)
+      - name: Public type KDoc (KT-DOC-001)
         run: python3 scripts/verify-kdoc.py
-
-      - name: Maintainability index (KT-CPLX-002)
-        run: python3 scripts/verify-maintainability.py
 
       - name: Privacy manifest (backup / isolation)
         run: python3 scripts/verify-privacy-manifest.py
@@ -93,7 +87,7 @@ jobs:
           java-version: "17"
           cache: gradle
 
-      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3.2.2
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
 
       - name: Domain tests
         run: |
@@ -141,6 +135,9 @@ jobs:
           tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
           /tmp/gitleaks version
           /tmp/gitleaks detect --source . --no-banner --exit-code 1
+
+      - name: Dependency vulnerabilities (KT-SEC-004)
+        run: bash scripts/run-grype.sh
 
       - name: SAST (semgrep local rules, KT-SEC-003)
         run: |

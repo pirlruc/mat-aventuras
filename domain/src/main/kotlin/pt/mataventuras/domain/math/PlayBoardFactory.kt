@@ -3,6 +3,7 @@ package pt.mataventuras.domain.math
 import kotlin.random.Random
 import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
+import pt.mataventuras.domain.model.isSevenYears
 
 /**
  * Builds interactive boards. Prompt text is pt-PT UI copy.
@@ -52,7 +53,7 @@ class PlayBoardFactory(
         module: LearningModule,
         level: Int = 0,
     ): Exercise {
-        val n = if (level >= 2) 3 else 2
+        val n = if (module.isSevenYears() || level >= 2) 3 else 2
         val hole = random.nextInt(n * n)
         val full = PuzzlePatterns.cells(module, n, random)
         val piece = full[hole]
@@ -105,11 +106,12 @@ class PlayBoardFactory(
         module: LearningModule,
         level: Int,
     ): Exercise {
-        val n = if (level >= 2 && module != LearningModule.NUMBERS && module != LearningModule.COUNTING) 6 else 4
+        val n = if (level >= 2 && module.isSevenYears()) 6 else 4
         val full = SudokuGrids.filled(n, random)
         val hole = random.nextInt(full.size)
+        val extra = if (module.isSevenYears()) 3 + level * 2 else 0
+        val cells = SudokuHoles.withHoles(full, n, hole, extra, random)
         val answer = full[hole]
-        val cells = full.mapIndexed { i, value -> if (i == hole) "" else value.toString() }
         val options = numericOptions(answer, 1, n).map { it.toString() }
         return Exercise(
             module = module,
@@ -191,8 +193,8 @@ class PlayBoardFactory(
     }
 
     private fun wordSoup(level: Int): Exercise {
-        val size = 4 + minOf(level, 2)
-        val soup = WordSoupBuilder(random).build(size, 2 + minOf(level, 1))
+        val size = 5 + minOf(level, 1)
+        val soup = WordSoupBuilder(random).build(size, 3 + minOf(level, 1))
         val listed = soup.words.joinToString(", ")
         val hits = soup.paths.flatten()
         return Exercise(
@@ -213,13 +215,13 @@ class PlayBoardFactory(
     }
 
     private fun wordCipher(level: Int): Exercise {
-        val width = 4 + minOf(level, 2)
-        val candidates = WORDS.filter { it.length == width }
+        val width = 5 + minOf(level, 1)
+        val candidates = PortugueseNumberWords.CIPHER.filter { it.length == width }
         val word = candidates[random.nextInt(candidates.size)]
         val symbols = SYMBOLS.take(word.length)
         val legend = word.mapIndexed { i, ch -> "${symbols[i]}=$ch" }
         val code = word.indices.joinToString("") { symbols[it] }
-        val others = WORDS.filter { it != word }.shuffled(random).take(3)
+        val others = PortugueseNumberWords.CIPHER.filter { it != word }.shuffled(random).take(3)
         val options = (others + word).shuffled(random)
         return Exercise(
             module = LearningModule.LOGIC,
@@ -274,35 +276,24 @@ class PlayBoardFactory(
         module: LearningModule,
         level: Int,
     ): Exercise {
-        val left = random.nextInt(2 + level, 6 + level * 2)
-        val right = random.nextInt(1, 5 + level)
-        val mulBit = if (module == LearningModule.MULTIPLICATION) 1 else 0
-        val subBit = if (module == LearningModule.SUBTRACTION) 1 else 0
-        val third = (1 - mulBit) * (level / 2).coerceAtMost(1) * random.nextInt(1, 4)
-        val answer =
-            left * (mulBit * (right - 1) + 1) + (1 - subBit) * (1 - mulBit) * (right + third)
-        val promptLeft = left + subBit * (right + third)
-        val infix = " ${listOf("+", "−", "×")[subBit + 2 * mulBit]} "
-        val cells =
-            if (third == 0) {
-                listOf("▲=$promptLeft", "●=$right")
-            } else {
-                listOf("▲=$promptLeft", "●=$right", "■=$third")
-            }
-        val code = if (third == 0) "▲$infix●" else "▲$infix●$infix■"
-        val options = numericOptions(answer, 1, 80).map { it.toString() }
+        val left = random.nextInt(6 + level * 2, 16 + level * 4)
+        val right = random.nextInt(3 + level, 10 + level * 2)
+        val third = cipherThird(random, module, level)
+        val spec = cipherSpec(module, left, right, third)
+        val cells = spec.legend()
+        val options = numericOptions(spec.answer, 1, 80).map { it.toString() }
         return Exercise(
             module = module,
-            prompt = "$code = ?",
+            prompt = "${spec.code} = ?",
             spoken = CipherSpeech.fromLegend(cells, "Quanto é?"),
             options = options,
-            correctIndex = options.indexOf(answer.toString()),
+            correctIndex = options.indexOf(spec.answer.toString()),
             play =
                 PlayBoard(
                     kind = PlayKind.CIPHER,
                     cells = cells,
                     columns = cells.size,
-                    cipherCode = code,
+                    cipherCode = spec.code,
                 ),
         )
     }
@@ -317,21 +308,50 @@ class PlayBoardFactory(
     }
 
     private companion object {
-        val WORDS: List<String> =
-            listOf(
-                "dois",
-                "três",
-                "seis",
-                "sete",
-                "oito",
-                "nove",
-                "cinco",
-                "vinte",
-                "treze",
-                "quatro",
-                "quinze",
-                "trinta",
-            )
         val SYMBOLS: List<String> = listOf("▲", "●", "■", "◆", "★", "♥")
     }
 }
+
+private data class CipherSpec(
+    val infix: String,
+    val promptLeft: Int,
+    val answer: Int,
+    val right: Int,
+    val third: Int,
+) {
+    val code: String
+        get() = if (third == 0) "▲$infix●" else "▲$infix●$infix■"
+
+    fun legend(): List<String> =
+        if (third == 0) {
+            listOf("▲=$promptLeft", "●=$right")
+        } else {
+            listOf("▲=$promptLeft", "●=$right", "■=$third")
+        }
+}
+
+private fun cipherThird(
+    random: Random,
+    module: LearningModule,
+    level: Int,
+): Int =
+    if (module != LearningModule.MULTIPLICATION && level >= 2) {
+        random.nextInt(2, 6)
+    } else {
+        0
+    }
+
+private fun cipherSpec(
+    module: LearningModule,
+    left: Int,
+    right: Int,
+    third: Int,
+): CipherSpec =
+    when (module) {
+        LearningModule.SUBTRACTION ->
+            CipherSpec(" − ", left + right + third, left, right, third)
+        LearningModule.MULTIPLICATION ->
+            CipherSpec(" × ", left, left * right, right, 0)
+        else ->
+            CipherSpec(" + ", left, left + right + third, right, third)
+    }
