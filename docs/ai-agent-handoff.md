@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-09-19
-**Last agent focus:** Merge arcade lives/HUD to main; delete stale Godot branches
+**Last agent focus:** Merge PR #11 (MAT-003-T5 backlog) and delete leftover branches
 
 ---
 
@@ -58,8 +58,10 @@ python3 .github/scaffold/scripts/issues-sync.py --repo pirlruc/mat-aventuras --y
 ```
 
 Do not git-merge `cursor/godot-black-screen-*`; those branches were deleted after
-the lives/HUD port landed on `main` via PR #10. Native Canvas paint for
-invaders/chomp/climb remains MAT-004-T7.
+the lives/HUD port landed on `main` via PR #10. PR #11 recorded MAT-003-T5 as
+done in `docs/issues.yml`. Native Canvas paint for invaders/chomp/climb remains
+MAT-004-T7. GitHub has no MAT-* issues yet (only probe #8); sync still needs a
+write token and `issues-sync.py`.
 
 ## Commands
 
@@ -156,8 +158,9 @@ bash scripts/check-ci-local.sh
 5. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
 6. MAT-004-T8: `MasterKey.Builder` and Room schema migrations (no destructive wipe).
 
-This pass: merged PR #10 (arcade lives/HUD) to `main`; deleted
-`cursor/arcade-lives-port-b361`, `cursor/godot-black-screen-invaders-5d7b`,
-and `cursor/godot-black-screen-lives-80ab`. Authored MAT-003-T5 as done.
+This pass: merged PR #10 (arcade lives/HUD) and PR #11 (MAT-003-T5 done in
+`docs/issues.yml`) to `main`. Deleted `cursor/arcade-lives-port-b361`,
+`cursor/issues-arcade-lives-b361`, `cursor/godot-black-screen-invaders-5d7b`,
+and `cursor/godot-black-screen-lives-80ab`. GitHub issue #8 is a probe; leave it.
 
 *Last updated: 2026-09-19*
