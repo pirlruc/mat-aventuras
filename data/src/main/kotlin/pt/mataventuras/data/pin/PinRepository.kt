@@ -123,9 +123,7 @@ class PinRepository(
 }
 
 private fun isHex(value: String): Boolean =
-    value.length >= 2 &&
-        value.length % 2 == 0 &&
-        value.all { ch -> ch in '0'..'9' || ch in 'a'..'f' || ch in 'A'..'F' }
+    value.length >= 2 && value.length % 2 == 0 && value.all { it.digitToIntOrNull(radix = 16) != null }
 
 private const val KEY_HASH: String = "hash"
 private const val KEY_SALT: String = "salt"

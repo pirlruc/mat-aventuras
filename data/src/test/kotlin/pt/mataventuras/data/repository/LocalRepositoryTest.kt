@@ -125,6 +125,9 @@ class LocalRepositoryTest {
         pins.seedPartial("AA", saltHex = "BB", failureCount = 1, lockoutMs = 2)
         assertEquals("AA", pins.read()!!.hashHex)
         assertEquals("BB", pins.read()!!.saltHex)
+        pins.seedPartial("09afAF", saltHex = "0a", failureCount = 0, lockoutMs = 0)
+        assertEquals("09afAF", pins.read()!!.hashHex)
+        assertEquals("0a", pins.read()!!.saltHex)
         pins.seedPartial("a", saltHex = "bb", failureCount = 0, lockoutMs = 0)
         try {
             pins.read()
