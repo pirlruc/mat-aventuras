@@ -261,8 +261,73 @@ class LocalRepositoryTest {
 private class FailCommitPreferences(
     private val inner: android.content.SharedPreferences,
 ) : android.content.SharedPreferences by inner {
-    override fun edit(): android.content.SharedPreferences.Editor =
-        object : android.content.SharedPreferences.Editor by inner.edit() {
-            override fun commit(): Boolean = false
-        }
+    override fun edit(): android.content.SharedPreferences.Editor = FailCommitEditor(inner.edit())
+}
+
+private class FailCommitEditor(
+    private val inner: android.content.SharedPreferences.Editor,
+) : android.content.SharedPreferences.Editor {
+    override fun putString(
+        key: String?,
+        value: String?,
+    ): android.content.SharedPreferences.Editor {
+        inner.putString(key, value)
+        return this
+    }
+
+    override fun putStringSet(
+        key: String?,
+        values: MutableSet<String>?,
+    ): android.content.SharedPreferences.Editor {
+        inner.putStringSet(key, values)
+        return this
+    }
+
+    override fun putInt(
+        key: String?,
+        value: Int,
+    ): android.content.SharedPreferences.Editor {
+        inner.putInt(key, value)
+        return this
+    }
+
+    override fun putLong(
+        key: String?,
+        value: Long,
+    ): android.content.SharedPreferences.Editor {
+        inner.putLong(key, value)
+        return this
+    }
+
+    override fun putFloat(
+        key: String?,
+        value: Float,
+    ): android.content.SharedPreferences.Editor {
+        inner.putFloat(key, value)
+        return this
+    }
+
+    override fun putBoolean(
+        key: String?,
+        value: Boolean,
+    ): android.content.SharedPreferences.Editor {
+        inner.putBoolean(key, value)
+        return this
+    }
+
+    override fun remove(key: String?): android.content.SharedPreferences.Editor {
+        inner.remove(key)
+        return this
+    }
+
+    override fun clear(): android.content.SharedPreferences.Editor {
+        inner.clear()
+        return this
+    }
+
+    override fun commit(): Boolean = false
+
+    override fun apply() {
+        inner.apply()
+    }
 }
