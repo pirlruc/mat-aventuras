@@ -38,13 +38,14 @@ friend, and a local score.
    to reverse, and **swipe well up** to jump (a tap no longer jumps). Collect
    every coin. Enemies patrol the ground — stomp them or grab a mushroom/star
    to transform. Falling in a hole puts the runner back on the last safe
-   ground. Other prizes: climb letter floors while dodging barrels, or eat
-   dots in a small maze.
+   ground. Other prizes: climb letter floors while dodging barrels (3 lives),
+   or eat dots in a small maze (3 lives).
 7. **Age 7 prize:** tap the **left or right** of the screen to steer fully;
    **tap the middle** for a short boost. Race three laps against other karts.
    Green arches are checkpoints you drive through. The yellow **META** banner
    overhead is the start/finish line you pass under — it is not a wall.
-   Other prizes: letter invaders, maze, or letter-climb.
+   Other prizes: letter invaders (5 lives, destroy the whole fleet), maze,
+   or letter-climb.
 
 Age 7 arithmetic uses two-digit sums and differences, times-tables through 12
 (including a missing factor), and skip-counting. Mini-sudoku hides extra

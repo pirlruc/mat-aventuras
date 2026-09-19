@@ -13,12 +13,16 @@ import pt.mataventuras.app.engine.IsolatedEngineActivity
  */
 internal object GodotEmbed {
     private const val TAG: String = "godot"
+    private const val WAITING: String = "godot-wait"
+    private const val ATTACH_FALLBACK_MS: Long = 1_200L
 
     @Volatile
     private var restartedOnce: Boolean = false
 
     /**
      * Replaces the Activity content with a Godot fragment running [scene].
+     * Waits until the host FrameLayout has a real size so GLES does not
+     * start on a 0×0 SurfaceView.
      */
     fun attach(
         activity: IsolatedEngineActivity,
@@ -28,21 +32,13 @@ internal object GodotEmbed {
         if (activity.findViewById<View>(R.id.godot_fragment_container) == null) {
             activity.setContentView(R.layout.godot_host)
         }
-        val existing =
-            activity.supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
-                ?: activity.supportFragmentManager.findFragmentByTag(TAG)
-        if (existing is RewardGodotFragment) return
-        val fragment =
-            RewardGodotFragment().apply {
-                arguments =
-                    Bundle().apply {
-                        putString(RewardGodotFragment.ARG_SCENE, scene)
-                    }
-            }
-        activity.supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.godot_fragment_container, fragment, TAG)
-            .commitNowAllowingStateLoss()
+        val container = activity.findViewById<View>(R.id.godot_fragment_container) ?: return
+        if (alreadyAttached(activity)) return
+        if (GodotRuntime.isSurfaceReady(container.width, container.height)) {
+            commitFragment(activity, scene)
+            return
+        }
+        waitThenAttach(activity, container, scene)
     }
 
     /**
@@ -79,5 +75,47 @@ internal object GodotEmbed {
      */
     fun killIsolatedProcess() {
         Runtime.getRuntime().exit(0)
+    }
+
+    private fun alreadyAttached(activity: IsolatedEngineActivity): Boolean {
+        val existing =
+            activity.supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
+                ?: activity.supportFragmentManager.findFragmentByTag(TAG)
+        return existing is RewardGodotFragment
+    }
+
+    private fun commitFragment(
+        activity: IsolatedEngineActivity,
+        scene: String,
+    ) {
+        if (activity.isFinishing || activity.isDestroyed || alreadyAttached(activity)) return
+        val fragment =
+            RewardGodotFragment().apply {
+                arguments =
+                    Bundle().apply {
+                        putString(RewardGodotFragment.ARG_SCENE, scene)
+                    }
+            }
+        activity.supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.godot_fragment_container, fragment, TAG)
+            .commitNowAllowingStateLoss()
+    }
+
+    private fun waitThenAttach(
+        activity: IsolatedEngineActivity,
+        container: View,
+        scene: String,
+    ) {
+        if (container.tag == WAITING) return
+        container.tag = WAITING
+        val attempt = Runnable { commitFragment(activity, scene) }
+        container.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
+            if (GodotRuntime.isSurfaceReady(view.width, view.height)) view.post(attempt)
+        }
+        container.post {
+            if (GodotRuntime.isSurfaceReady(container.width, container.height)) attempt.run()
+        }
+        container.postDelayed(attempt, ATTACH_FALLBACK_MS)
     }
 }

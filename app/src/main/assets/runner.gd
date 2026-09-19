@@ -30,6 +30,8 @@ var camera_x := 0.0
 var pal_sky: Color = Color("7EC0ED")
 var pal_grass: Color = Color("3D9E2F")
 var pal_brick: Color = Color("C75A1A")
+var world: Node2D
+var backdrop: ColorRect
 var enemies: Array[Vector3] = [] # min_x, max_x, speed
 var enemy_nodes: Array[ColorRect] = []
 var stomped: Array[bool] = []
@@ -49,6 +51,16 @@ var flick_y := 0.0
 func _ready() -> void:
 	theme = Time.get_ticks_msec() % 4
 	_cache_palette()
+	Host.fit_viewport(self)
+	var back_layer := CanvasLayer.new()
+	back_layer.layer = -20
+	backdrop = ColorRect.new()
+	backdrop.color = pal_sky
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	back_layer.add_child(backdrop)
+	add_child(back_layer)
+	world = Node2D.new()
+	add_child(world)
 	_layout()
 	_draw_world()
 	_make_player()
@@ -58,14 +70,11 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
-	hud.position = Vector2(24, 24)
-	hud.add_theme_font_size_override("font_size", 28)
-	hud.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	hud.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	hud.add_theme_constant_override("outline_size", 10)
+	Host.skin_hud(hud, self)
 	layer.add_child(hud)
 	_update_hud()
 	RenderingServer.set_default_clear_color(pal_sky)
+	_fit_world()
 
 
 func _cache_palette() -> void:
@@ -108,18 +117,18 @@ func _draw_world() -> void:
 	var sky := ColorRect.new()
 	sky.color = pal_sky
 	sky.size = Vector2(2200, 720)
-	add_child(sky)
+	world.add_child(sky)
 	var band := ColorRect.new()
 	band.color = pal_sky.darkened(0.18)
 	band.position = Vector2(0, 300)
 	band.size = Vector2(2200, 220)
-	add_child(band)
+	world.add_child(band)
 	for i in 6:
 		var cloud := ColorRect.new()
 		cloud.color = Color(1, 1, 1, 0.55)
 		cloud.position = Vector2(80.0 + i * 320.0, 40.0 + float(i % 3) * 18.0)
 		cloud.size = Vector2(110, 36)
-		add_child(cloud)
+		world.add_child(cloud)
 	_add_brick(0, GROUND_Y, 2200, 24, pal_grass)
 	_add_brick(0, GROUND_Y + 24.0, 2200, 176, pal_brick)
 	for pit in pits:
@@ -147,7 +156,7 @@ func _add_part(color: Color, size: Vector2) -> void:
 	var part := ColorRect.new()
 	part.color = color
 	part.size = size
-	add_child(part)
+	world.add_child(part)
 	player_parts.append(part)
 
 
@@ -157,7 +166,7 @@ func _make_coins() -> void:
 		coin.color = Color("FFD54F")
 		coin.size = Vector2(18, 18)
 		coin.position = Vector2(cx, GROUND_Y - 56.0)
-		add_child(coin)
+		world.add_child(coin)
 		coin_nodes.append(coin)
 
 
@@ -166,7 +175,7 @@ func _make_enemies() -> void:
 		var body := ColorRect.new()
 		body.color = Color("6D4C41")
 		body.size = Vector2(28, 22)
-		add_child(body)
+		world.add_child(body)
 		enemy_nodes.append(body)
 
 
@@ -176,7 +185,7 @@ func _make_powers() -> void:
 		node.color = Color("E53935") if power_grow[i] else Color("FFF176")
 		node.size = Vector2(20, 20)
 		node.position = Vector2(power_xs[i], GROUND_Y - 58.0)
-		add_child(node)
+		world.add_child(node)
 		power_nodes.append(node)
 
 
@@ -185,7 +194,7 @@ func _add_brick(px: float, py: float, w: float, h: float, color: Color) -> void:
 	brick.color = color
 	brick.position = Vector2(px, py)
 	brick.size = Vector2(w, h)
-	add_child(brick)
+	world.add_child(brick)
 
 
 func _input(event: InputEvent) -> void:
@@ -224,7 +233,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _nx(pos: Vector2) -> float:
-	return pos.x / maxf(get_viewport().get_visible_rect().size.x, 1.0)
+	return pos.x / maxf(Host.view_size(self).x, 1.0)
 
 
 func _run_from(nx: float) -> float:
@@ -237,6 +246,7 @@ func _run_from(nx: float) -> float:
 func _process(delta: float) -> void:
 	if finished:
 		return
+	Host.fit_viewport(self)
 	delta = minf(delta, 0.05)
 	elapsed += delta
 	star_timer = maxf(star_timer - delta, 0.0)
@@ -258,13 +268,22 @@ func _process(delta: float) -> void:
 		vy = 0.0
 		on_ground = true
 		in_pit_fall = false
-	camera_x = x - 240.0
-	position = Vector2(-camera_x, 0)
+	_fit_world()
 	_place_player()
 	_place_enemies()
 	_collect_coins()
 	_collect_powers()
 	_bump_enemies()
+
+
+func _fit_world() -> void:
+	var sz := Host.view_size(self)
+	backdrop.size = sz
+	backdrop.color = pal_sky
+	var s := sz.y / 720.0
+	camera_x = x - 240.0
+	world.scale = Vector2(s, s)
+	world.position = Vector2(-camera_x * s, 0.0)
 
 
 func _place_player() -> void:
@@ -389,6 +408,7 @@ func _bump_enemies() -> void:
 
 
 func _update_hud() -> void:
+	Host.skin_hud(hud, self)
 	var extra := ""
 	if form == 2:
 		extra = "\nEstrela!"
