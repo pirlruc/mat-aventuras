@@ -4,8 +4,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pt.mataventuras.app.di.isRobolectricFingerprint
 import pt.mataventuras.app.di.pinIterationsFor
+import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
 import pt.mataventuras.domain.model.AgeGroup
@@ -241,8 +241,8 @@ class UiLogicTest {
         HomeNav.announceAndGo({ announced = it }, VoiceScripts.LEADERBOARD, { went = true })
         assertEquals(VoiceScripts.LEADERBOARD, announced)
         assertTrue(went)
-        assertTrue(isRobolectricFingerprint("robolectric"))
-        assertFalse(isRobolectricFingerprint("google/sdk_gphone64"))
+        assertTrue(GodotRuntime.isRobolectricFingerprint("robolectric"))
+        assertFalse(GodotRuntime.isRobolectricFingerprint("google/sdk_gphone64"))
         assertEquals(1_000, pinIterationsFor("robolectric"))
         assertEquals(
             pt.mataventuras.domain.parent.PinPolicy.ITERATIONS,
