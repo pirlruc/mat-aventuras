@@ -13,6 +13,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
+import pt.mataventuras.data.pin.encryptedPinPreferences
+import pt.mataventuras.data.pin.pinPreferences
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.LearningSession
@@ -80,7 +82,12 @@ class LocalRepositoryTest {
 
     @Test
     fun pinRepositoryRoundTrips() = runTest {
-        val pins = PinRepository(ApplicationProvider.getApplicationContext(), storeName = "parent_pin_repo_test")
+        val pins =
+            PinRepository(
+                ApplicationProvider.getApplicationContext(),
+                storeName = "parent_pin_repo_test",
+                allowPlaintextFallback = true,
+            )
         pins.clear()
         assertEquals(false, pins.isSet())
         val state = PinPolicy(iterations = 1_000).create("2468")
@@ -89,6 +96,7 @@ class LocalRepositoryTest {
         assertEquals(state.hashHex, pins.read()!!.hashHex)
         pins.seedPartial("aa", saltHex = null, failureCount = null, lockoutMs = null)
         assertEquals(null, pins.read())
+        assertEquals(false, pins.isSet())
         pins.seedPartial("aa", saltHex = "bb", failureCount = null, lockoutMs = null)
         val partial = pins.read()!!
         assertEquals(0, partial.consecutiveFailures)
@@ -97,12 +105,142 @@ class LocalRepositoryTest {
         val filled = pins.read()!!
         assertEquals(2, filled.consecutiveFailures)
         assertEquals(9L, filled.lockedUntilEpochMs)
-        val defaults = PinRepository(ApplicationProvider.getApplicationContext())
+        val defaults =
+            PinRepository(
+                ApplicationProvider.getApplicationContext(),
+                allowPlaintextFallback = true,
+            )
         defaults.clear()
         assertEquals(false, defaults.isSet())
+        pins.save(state)
+        val bumped =
+            pins.update { current ->
+                "ok" to current!!.copy(consecutiveFailures = current.consecutiveFailures + 1)
+            }
+        assertEquals("ok", bumped)
+        assertEquals(1, pins.read()!!.consecutiveFailures)
+        val skipped = pins.update { "keep" to null }
+        assertEquals("keep", skipped)
+        assertEquals(1, pins.read()!!.consecutiveFailures)
+        pins.seedPartial("AA", saltHex = "BB", failureCount = 1, lockoutMs = 2)
+        assertEquals("AA", pins.read()!!.hashHex)
+        assertEquals("BB", pins.read()!!.saltHex)
+        pins.seedPartial("09afAF", saltHex = "0a", failureCount = 0, lockoutMs = 0)
+        assertEquals("09afAF", pins.read()!!.hashHex)
+        assertEquals("0a", pins.read()!!.saltHex)
+        pins.seedPartial("a", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("odd PIN hex must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        pins.seedPartial("abc", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("uneven PIN hex must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        pins.seedPartial("", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("blank PIN hex must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        pins.seedPartial("aa", saltHex = "zz", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("corrupt salt must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        pins.seedPartial("zz", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("corrupt PIN must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        assertEquals(true, pins.isSet())
         pins.clear()
         assertEquals(false, pins.isSet())
+        val none = pins.update { "none" to null }
+        assertEquals("none", none)
+        assertEquals(null, pins.read())
+        val created = pins.update { "created" to state }
+        assertEquals("created", created)
+        assertEquals(true, pins.isSet())
+        assertEquals(state.hashHex, pins.read()!!.hashHex)
     }
+
+    @Test
+    fun pinPreferencesFallsBackWhenEncryptedStoreFails() {
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val prefs =
+            pinPreferences(
+                ctx,
+                "pin_fallback_test",
+                allowPlaintextFallback = true,
+                encrypted = { _, _ -> error("no keystore") },
+            )
+        prefs.edit().putString("hash", "aa").commit()
+        assertEquals("aa", prefs.getString("hash", null))
+        val opened =
+            pinPreferences(
+                ctx,
+                "pin_enc_ok_test",
+                encrypted = { c, n -> c.getSharedPreferences("enc_$n", android.content.Context.MODE_PRIVATE) },
+                fallback = { _, _ -> error("should not fallback") },
+            )
+        opened.edit().putString("hash", "bb").commit()
+        assertEquals("bb", opened.getString("hash", null))
+        try {
+            encryptedPinPreferences(ctx, "pin_keystore_probe")
+        } catch (_: Exception) {
+            // Robolectric has no Android Keystore; production uses this path.
+        }
+        try {
+            pinPreferences(ctx, "pin_fail_closed", encrypted = { _, _ -> error("no keystore") })
+            throw AssertionError("device path must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("no keystore", error.message)
+        }
+    }
+
+    @Test
+    fun pinRepositoryFailsClosedWhenCommitRejected() =
+        runTest {
+            val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+            val inner = ctx.getSharedPreferences("pin_fail_commit", android.content.Context.MODE_PRIVATE)
+            val pins =
+                PinRepository(
+                    ctx,
+                    storeName = "pin_fail_commit_unused",
+                    allowPlaintextFallback = true,
+                    prefs = FailCommitPreferences(inner),
+                )
+            val state = PinPolicy(iterations = 1_000).create("2468")
+            try {
+                pins.save(state)
+                throw AssertionError("save must fail closed")
+            } catch (error: IllegalStateException) {
+                assertEquals("PIN persist failed", error.message)
+            }
+            try {
+                pins.clear()
+                throw AssertionError("clear must fail closed")
+            } catch (error: IllegalStateException) {
+                assertEquals("PIN clear failed", error.message)
+            }
+            try {
+                pins.seedPartial("aa", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+                throw AssertionError("seed must fail closed")
+            } catch (error: IllegalStateException) {
+                assertEquals("PIN seed failed", error.message)
+            }
+        }
 
     @Test
     fun lastProfileStoreRoundTrips() = runTest {
@@ -120,5 +258,79 @@ class LocalRepositoryTest {
         val defaults = pt.mataventuras.data.session.LastProfileStore(ApplicationProvider.getApplicationContext())
         defaults.clear()
         assertEquals(null, defaults.read())
+    }
+}
+
+private class FailCommitPreferences(
+    private val inner: android.content.SharedPreferences,
+) : android.content.SharedPreferences by inner {
+    override fun edit(): android.content.SharedPreferences.Editor = FailCommitEditor(inner.edit())
+}
+
+private class FailCommitEditor(
+    private val inner: android.content.SharedPreferences.Editor,
+) : android.content.SharedPreferences.Editor {
+    override fun putString(
+        key: String?,
+        value: String?,
+    ): android.content.SharedPreferences.Editor {
+        inner.putString(key, value)
+        return this
+    }
+
+    override fun putStringSet(
+        key: String?,
+        values: MutableSet<String>?,
+    ): android.content.SharedPreferences.Editor {
+        inner.putStringSet(key, values)
+        return this
+    }
+
+    override fun putInt(
+        key: String?,
+        value: Int,
+    ): android.content.SharedPreferences.Editor {
+        inner.putInt(key, value)
+        return this
+    }
+
+    override fun putLong(
+        key: String?,
+        value: Long,
+    ): android.content.SharedPreferences.Editor {
+        inner.putLong(key, value)
+        return this
+    }
+
+    override fun putFloat(
+        key: String?,
+        value: Float,
+    ): android.content.SharedPreferences.Editor {
+        inner.putFloat(key, value)
+        return this
+    }
+
+    override fun putBoolean(
+        key: String?,
+        value: Boolean,
+    ): android.content.SharedPreferences.Editor {
+        inner.putBoolean(key, value)
+        return this
+    }
+
+    override fun remove(key: String?): android.content.SharedPreferences.Editor {
+        inner.remove(key)
+        return this
+    }
+
+    override fun clear(): android.content.SharedPreferences.Editor {
+        inner.clear()
+        return this
+    }
+
+    override fun commit(): Boolean = false
+
+    override fun apply() {
+        inner.apply()
     }
 }

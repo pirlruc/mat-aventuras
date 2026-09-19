@@ -19,8 +19,6 @@ import pt.mataventuras.app.ui.navigation.NavGraph
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.rewards.LeaderboardAndRewardsScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
-import pt.mataventuras.app.ui.theme.bodySpSize
-import pt.mataventuras.app.ui.theme.buttonRadius
 import pt.mataventuras.app.ui.theme.titleSpSize
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.tokensFor
@@ -91,10 +89,8 @@ class NavAndParentTest {
     @Test
     fun themeTokensAndMainActivity() {
         val three = tokensFor(AgeGroup.THREE_YEARS)
-        three.buttonRadius()
-        assert(three.titleSpSize.value > three.bodySpSize.value)
+        assert(three.titleSpSize.value > three.bodySp.toFloat())
         val seven = tokensFor(AgeGroup.SEVEN_YEARS)
-        seven.buttonRadius()
         assert(seven.minButtonDp < three.minButtonDp)
         val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
         val activity = controller.get()
@@ -109,6 +105,15 @@ class NavAndParentTest {
                 "hero_pup",
                 "Ana",
             ),
+        )
+        activity.onEngineResult(
+            android.app.Activity.RESULT_OK,
+            android.content.Intent()
+                .putExtra(pt.mataventuras.app.engine.EngineLauncher.RESULT_RESTART, true)
+                .putExtra(
+                    pt.mataventuras.app.engine.EngineLauncher.EXTRA_ENGINE_CLASS,
+                    "pt.mataventuras.app.MainActivity",
+                ),
         )
         activity.onEngineResult(android.app.Activity.RESULT_CANCELED, null)
         activity.finish()

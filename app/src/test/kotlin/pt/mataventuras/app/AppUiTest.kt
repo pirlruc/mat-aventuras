@@ -87,9 +87,6 @@ class AppUiTest {
         assertEquals(EngineLauncher.PROCESS_ENGINE_3D, ":engine3d")
         assertEquals("Rui", three.getStringExtra(EngineLauncher.EXTRA_NAME))
         assertEquals(EngineLauncher.PROCESS_ENGINE_2D, ":engine2d")
-        assertEquals(null, EngineLauncher.processFor(AgeGroup.THREE_YEARS, usingPlugin = false))
-        assertEquals(":engine2d", EngineLauncher.processFor(AgeGroup.THREE_YEARS, usingPlugin = true))
-        assertEquals(":engine3d", EngineLauncher.processFor(AgeGroup.SEVEN_YEARS, usingPlugin = false))
         assertTrue(EngineLauncher.isClassPresent(Kart3dActivity::class.java.name))
         assertTrue(
             EngineLauncher.isClassPresent(
@@ -102,12 +99,6 @@ class AppUiTest {
             ),
         )
         assertFalse(EngineLauncher.isClassPresent("pt.mataventuras.plugin.MissingEngineActivity"))
-        assertFalse(EngineLauncher.wouldUsePlugin(pt.mataventuras.domain.model.EngineKind.THREE_D) { false })
-        assertTrue(
-            EngineLauncher.wouldUsePlugin(pt.mataventuras.domain.model.EngineKind.THREE_D) {
-                it == pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_KART_CLASS
-            },
-        )
         val pluginKart =
             EngineLauncher.intentFor(
                 ctx,
@@ -186,6 +177,31 @@ class AppUiTest {
         val namelessRelaunch = EngineLauncher.relaunchIntent(ctx, namelessRestart)!!
         assertEquals("", namelessRelaunch.getStringExtra(EngineLauncher.EXTRA_MASCOT))
         assertEquals("", namelessRelaunch.getStringExtra(EngineLauncher.EXTRA_NAME))
+        assertNull(
+            EngineLauncher.relaunchIntent(
+                ctx,
+                android.content.Intent()
+                    .putExtra(EngineLauncher.RESULT_RESTART, true)
+                    .putExtra(EngineLauncher.EXTRA_ENGINE_CLASS, "pt.mataventuras.app.MainActivity"),
+            ),
+        )
+        val nativeFallback =
+            EngineLauncher.intentFor(
+                ctx,
+                AgeGroup.SEVEN_YEARS,
+                Mascot.BRAVE_PLUMBER,
+                "Rui",
+                pt.mataventuras.domain.model.EngineKind.TWO_D,
+                RewardGame.INVADERS,
+            ) { false }
+        assertEquals(
+            pt.mataventuras.domain.engine.EnginePluginContract.NATIVE_RUNNER_CLASS,
+            nativeFallback.component!!.className,
+        )
+        assertEquals(
+            RewardGame.RUNNER.name,
+            nativeFallback.getStringExtra(pt.mataventuras.domain.engine.EnginePluginContract.EXTRA_SCENE),
+        )
     }
 
     @Test

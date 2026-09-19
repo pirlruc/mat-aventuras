@@ -3,7 +3,6 @@ package pt.mataventuras.domain.voice
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pt.mataventuras.domain.math.AttemptResult
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.UnlockedAvatar
@@ -36,13 +35,10 @@ class VoiceScriptsTest {
     }
 
     @Test
-    fun rewardModelsAndAttemptResultCoverUnusedLines() {
+    fun rewardModelsCoverPublicDataClasses() {
         val badge = UnlockedBadge("X", 1)
         val avatar = UnlockedAvatar("Y", 2)
-        val result = AttemptResult(true, VoiceScripts.WELL_DONE)
         assertEquals("X", badge.code)
         assertEquals("Y", avatar.avatarId)
-        assertTrue(result.correct)
-        assertEquals("Muito bem!", result.spoken)
     }
 }

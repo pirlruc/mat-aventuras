@@ -12,30 +12,22 @@ import pt.mataventuras.domain.engine.InvadersState
  */
 internal class InvadersLoop(
     private val engine: InvadersEngine = InvadersEngine(),
-    private val nowNs: () -> Long = { System.nanoTime() },
+    nowNs: () -> Long = { System.nanoTime() },
     start: InvadersState = engine.initial(),
 ) {
     var moveX: Float = 0f
     var fire: Boolean = false
     var state: InvadersState = start
         private set
-    private var lastNs: Long = 0L
+    private val clock = FrameClock(nowNs)
 
     fun tick(): InvadersState {
         if (state.finished || !state.alive) return state
-        val dt = delta()
+        val dt = clock.delta()
         val shot = fire
         fire = false
         state = engine.step(state, dt, moveX, shot)
         return state
-    }
-
-    private fun delta(): Float {
-        val now = nowNs()
-        if (lastNs == 0L) lastNs = now
-        val dt = ((now - lastNs) / 1_000_000_000f).coerceAtMost(0.05f)
-        lastNs = now
-        return dt
     }
 }
 
@@ -44,22 +36,18 @@ internal class InvadersLoop(
  */
 internal class ChompLoop(
     private val engine: ChompEngine = ChompEngine(),
-    private val nowNs: () -> Long = { System.nanoTime() },
+    nowNs: () -> Long = { System.nanoTime() },
     start: ChompState = engine.initial(),
 ) {
     var dirX: Int = 0
     var dirY: Int = 0
     var state: ChompState = start
         private set
-    private var lastNs: Long = 0L
+    private val clock = FrameClock(nowNs, maxDt = 0.08f)
 
     fun tick(): ChompState {
         if (state.finished || !state.alive) return state
-        val now = nowNs()
-        if (lastNs == 0L) lastNs = now
-        val dt = ((now - lastNs) / 1_000_000_000f).coerceAtMost(0.08f)
-        lastNs = now
-        state = engine.step(state, dt, dirX, dirY)
+        state = engine.step(state, clock.delta(), dirX, dirY)
         return state
     }
 }
@@ -69,24 +57,20 @@ internal class ChompLoop(
  */
 internal class ClimbLoop(
     private val engine: ClimbEngine = ClimbEngine(),
-    private val nowNs: () -> Long = { System.nanoTime() },
+    nowNs: () -> Long = { System.nanoTime() },
     start: ClimbState = engine.initial(),
 ) {
     var moveX: Float = 0f
     var jumping: Boolean = false
     var state: ClimbState = start
         private set
-    private var lastNs: Long = 0L
+    private val clock = FrameClock(nowNs)
 
     fun tick(): ClimbState {
         if (state.finished || !state.alive) return state
-        val now = nowNs()
-        if (lastNs == 0L) lastNs = now
-        val dt = ((now - lastNs) / 1_000_000_000f).coerceAtMost(0.05f)
-        lastNs = now
         val jump = jumping
         jumping = false
-        state = engine.step(state, dt, moveX, jump)
+        state = engine.step(state, clock.delta(), moveX, jump)
         return state
     }
 }

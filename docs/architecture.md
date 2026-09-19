@@ -60,7 +60,7 @@ Plugin Activities:
 Contract: extras `mascot` / `name`, result `finished`, no Room, no `INTERNET`.
 The Compose host uses `StartActivityForResult` only. Robolectric cannot load
 `libgodot_android.so`, so those Activities attach the native Canvas/GLES
-hosts instead of `GodotFragment`. Domain `Kart3dEngine` /
+hosts instead of `GodotFragment`. Domain `OffroadRacerEngine` /
 `Platformer2dEngine` stay the simulation source of truth.
 
 See [docs/engine-plugin.md](engine-plugin.md).
@@ -102,9 +102,9 @@ and a pt-PT HUD (`Volta`, `Lugar`, `Arcos`, `Impulso`, `META`). Touch: tap
 the left or right third to steer fully; the centre band boosts. AI karts
 share the loop. The yellow META gantry is the lap line you drive under.
 
-The oval GLES kart (`Kart3dEngine` / `KartRenderer`) remains as a
-unit-testable mesh path. Production Godot and the native fallback both use
-the 2D perspective racer.
+The unused oval GLES mesh path (`Kart3dEngine` / `KartRenderer`) was
+removed: production Godot and the native fallback both use the 2D
+perspective racer.
 
 ## Game engine wrapper
 
@@ -119,8 +119,8 @@ A first-time GLES restart is returned to `MainActivity`, which relaunches
 the plugin Activity in a fresh isolated process. Under Robolectric they
 attach `NativeKartHost` / `NativeRunnerHost` instead.
 
-Simulation is in `:domain` (`Platformer2dEngine`, `OffroadRacerEngine`,
-`Kart3dEngine`) so physics is unit-tested without an emulator.
+Simulation is in `:domain` (`Platformer2dEngine`, `OffroadRacerEngine`)
+so physics is unit-tested without an emulator.
 
 ## State and local storage
 
@@ -140,7 +140,9 @@ Leaderboard is a query: profiles ordered by points, then average
 accuracy from sessions (`LeaderboardCalculator`).
 
 PIN state is **not** in Room. `PinRepository` stores PBKDF2 hash + salt
-+ lockout in DataStore (`parent_pin`). Plaintext PIN is never persisted.
++ lockout in `EncryptedSharedPreferences` (`parent_pin`). Android Keystore
+failures fail closed. Robolectric tests opt into a distinct `*_plain`
+private prefs file. Plaintext PIN digits are never persisted.
 `android:allowBackup` is **false**, `fullBackupContent` is false, and
 `dataExtractionRules` exclude databases, shared prefs, and files so ADB
 backup and device-to-device transfer cannot copy profiles or the PIN hash.
@@ -148,8 +150,11 @@ backup and device-to-device transfer cannot copy profiles or the PIN hash.
 ### Parental PIN
 
 - 4 digits, PBKDF2-HMAC-SHA256, 120k iterations, 16-byte salt
+- Encrypted at rest (`EncryptedSharedPreferences` + Android Keystore)
 - Constant-time compare
 - 5 failures → 60 s lockout (`PinPolicy`)
+- Unlock is a single locked read-modify-write so concurrent taps cannot skip lockout
+- Godot `change_scene_to_file` paths are allowlisted to packaged prize scenes per engine kind
 
 ## UI/UX (pt-PT)
 

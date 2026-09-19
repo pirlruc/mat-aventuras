@@ -29,9 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.domain.model.ChildProfile
@@ -58,11 +56,18 @@ fun ParentDashboard(
     var message by remember { mutableStateOf(VoiceScripts.ENTER_PIN) }
     var settingPin by remember { mutableStateOf(false) }
     var summary by remember { mutableStateOf<ParentSummary?>(null) }
+    var pinBusy by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        settingPin = !container.pinRepository.isSet()
-        message = UiLogic.pinPrompt(settingPin)
-        onSpeak(message)
+        try {
+            settingPin = !container.pinRepository.isSet()
+            message = UiLogic.pinPrompt(settingPin)
+            onSpeak(message)
+        } catch (error: Exception) {
+            if (error is kotlin.coroutines.cancellation.CancellationException) throw error
+            settingPin = false
+            message = VoiceScripts.TRY_AGAIN
+        }
     }
 
     if (!unlocked) {
@@ -84,32 +89,32 @@ fun ParentDashboard(
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = {
+                    if (pinBusy) return@Button
+                    pinBusy = true
                     scope.launch {
-                        if (settingPin) {
-                            val (result, created) =
-                                withContext(Dispatchers.Default) { gate.setPin(pin, confirmation) }
+                        try {
+                            val result =
+                                ParentPin.submit(settingPin, pin, confirmation, gate, container.pinRepository)
                             when (result) {
                                 PinGateResult.Unlocked -> {
-                                    container.pinRepository.save(created!!)
+                                    pin = ""
+                                    confirmation = ""
                                     unlocked = true
                                 }
-                                is PinGateResult.Stay -> message = result.message
-                            }
-                        } else {
-                            val state = container.pinRepository.read() ?: return@launch
-                            val (result, next) =
-                                withContext(Dispatchers.Default) { gate.unlock(state, pin) }
-                            container.pinRepository.save(next)
-                            when (result) {
-                                PinGateResult.Unlocked -> unlocked = true
                                 is PinGateResult.Stay -> {
                                     message = result.message
                                     result.speak?.let(onSpeak)
                                 }
                             }
+                        } catch (error: Exception) {
+                            if (error is kotlin.coroutines.cancellation.CancellationException) throw error
+                            message = VoiceScripts.TRY_AGAIN
+                        } finally {
+                            pinBusy = false
                         }
                     }
                 },
+                enabled = !pinBusy,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(UiLogic.pinSubmitLabel(settingPin)) }
             Spacer(Modifier.height(8.dp))

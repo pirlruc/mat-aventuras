@@ -30,12 +30,8 @@ internal data class PlatformerRect(
  * Canvas layout for the age-3 Game Boy-style platformer.
  */
 internal object PlatformerScene {
-    const val SKY_ARGB: Long = 0xFF7EC0ED
-    const val SKY_BAND_ARGB: Long = 0xFF5BA3D9
     const val BRICK_ARGB: Long = 0xFFC75A1A
     const val MORTAR_ARGB: Long = 0xFF5D2E0A
-    const val GRASS_ARGB: Long = 0xFF3D9E2F
-    const val PIT_ARGB: Long = 0xFF1A0A08
     const val COIN_ARGB: Long = 0xFFFFD54F
     private const val SCALE_X: Float = 40f
     private const val SCALE_Y: Float = 12f

@@ -169,6 +169,28 @@ class ParentAndLessonLogicTest {
     }
 
     @Test
+    fun parentPinSubmitSerializesSetAndUnlock() =
+        runTest {
+            val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+            val pins = app.container.pinRepository
+            pins.clear()
+            val gate = pt.mataventuras.domain.parent.PinGate(app.container.pinPolicy)
+            val mismatch = pt.mataventuras.app.ui.parent.ParentPin.submit(true, "1234", "0000", gate, pins)
+            assertTrue(mismatch is pt.mataventuras.domain.parent.PinGateResult.Stay)
+            assertEquals(false, pins.isSet())
+            val created = pt.mataventuras.app.ui.parent.ParentPin.submit(true, "1234", "1234", gate, pins)
+            assertEquals(pt.mataventuras.domain.parent.PinGateResult.Unlocked, created)
+            assertEquals(true, pins.isSet())
+            val asUnlock = pt.mataventuras.app.ui.parent.ParentPin.submit(true, "1234", "", gate, pins)
+            assertEquals(pt.mataventuras.domain.parent.PinGateResult.Unlocked, asUnlock)
+            val wrong = pt.mataventuras.app.ui.parent.ParentPin.submit(false, "0000", "", gate, pins)
+            assertTrue(wrong is pt.mataventuras.domain.parent.PinGateResult.Stay)
+            pins.clear()
+            val missing = pt.mataventuras.app.ui.parent.ParentPin.submit(false, "1234", "", gate, pins)
+            assertTrue(missing is pt.mataventuras.domain.parent.PinGateResult.Stay)
+        }
+
+    @Test
     fun lessonScreenCountsCorrectWrongAndReward() {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         val profile =

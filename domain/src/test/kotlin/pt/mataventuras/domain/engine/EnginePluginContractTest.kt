@@ -60,6 +60,11 @@ class EnginePluginContractTest {
         assertTrue(EnginePluginContract.isNonDefaultProcessName("pt.mataventuras.app:phoenix"))
         assertFalse(EnginePluginContract.isNonDefaultProcessName("pt.mataventuras.app"))
         assertFalse(EnginePluginContract.isNonDefaultProcessName(""))
+        assertTrue(EnginePluginContract.isAllowedEngineClass(EnginePluginContract.PLUGIN_KART_CLASS))
+        assertTrue(EnginePluginContract.isAllowedEngineClass(EnginePluginContract.NATIVE_RUNNER_CLASS))
+        assertFalse(EnginePluginContract.isAllowedEngineClass("pt.mataventuras.app.MainActivity"))
+        assertEquals(RewardGame.RUNNER, RewardCatalog.nativeFallback(EngineKind.TWO_D))
+        assertEquals(RewardGame.KART, RewardCatalog.nativeFallback(EngineKind.THREE_D))
     }
 
     @Test
@@ -83,6 +88,10 @@ class EnginePluginContractTest {
         assertEquals(
             nativeThree,
             EnginePluginResolver.classNameFor(EngineKind.THREE_D, never, nativeTwo, nativeThree),
+        )
+        assertEquals(
+            EnginePluginContract.NATIVE_RUNNER_CLASS,
+            EnginePluginResolver.classNameFor(EngineKind.TWO_D, never),
         )
     }
 

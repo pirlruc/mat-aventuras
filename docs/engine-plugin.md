@@ -35,7 +35,8 @@ reliable.
    `tools:node="remove"`. A GLES restart is returned to the Compose host
    (`restart` extra) so the host relaunches the plugin Activity; Phoenix
    would reincarnate the launcher or drop `StartActivityForResult`.
-7. Native GLES fallback pauses `GLSurfaceView` with the Activity. The APK
+7. Native Canvas fallback (`NativeKartHost` / `NativeRunnerHost`) attaches
+   under Robolectric because `libgodot_android.so` cannot load. The APK
    ships `armeabi-v7a`, `arm64-v8a`, and `x86_64` (no 32-bit x86).
 
 The Compose host starts those Activities with `StartActivityForResult`. When

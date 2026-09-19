@@ -1,7 +1,6 @@
 package pt.mataventuras.app.engine
 
 import android.content.Intent
-import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
@@ -17,12 +16,6 @@ import pt.mataventuras.domain.model.Mascot
  * without sharing the Compose process.
  */
 abstract class IsolatedEngineActivity : FragmentActivity() {
-    /**
-     * Native GLES surface to pause with the Activity. Null on the Godot path
-     * and under Robolectric (no continuous GL thread).
-     */
-    internal var pauseableSurface: GLSurfaceView? = null
-
     private val rewardLock = Any()
 
     @Volatile
@@ -31,47 +24,6 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-    }
-
-    override fun onPause() {
-        pauseEngineSurface()
-        super.onPause()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (!rewardSettled) resumeEngineSurface()
-    }
-
-    override fun onDestroy() {
-        pauseEngineSurface()
-        pauseableSurface = null
-        super.onDestroy()
-    }
-
-    /**
-     * Stops the native GL thread so a backgrounded fallback does not keep drawing.
-     */
-    internal fun pauseEngineSurface() {
-        pauseableSurface?.onPause()
-    }
-
-    /**
-     * Restarts the native GL thread after [onPause].
-     */
-    internal fun resumeEngineSurface() {
-        pauseableSurface?.onResume()
-    }
-
-    /**
-     * Drops continuous rendering once the reward has a result.
-     * [GLSurfaceView.setRenderMode] requires a GL thread; skip when none exists
-     * (Robolectric, or finish before [setRenderer]).
-     */
-    internal fun stopEngineSurface() {
-        val surface = pauseableSurface ?: return
-        runCatching { surface.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY }
-        surface.onPause()
     }
 
     /**
@@ -147,7 +99,6 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
             if (isFinishing) return false
             rewardSettled = true
         }
-        stopEngineSurface()
         setResult(code, result)
         finish()
         return true

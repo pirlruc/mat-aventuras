@@ -32,6 +32,16 @@ object RewardCatalog {
     fun engineKind(game: RewardGame): EngineKind = if (game == RewardGame.KART) EngineKind.THREE_D else EngineKind.TWO_D
 
     /**
+     * Playable native fallback when the Godot plugin Activity is absent.
+     * Arcade 2D prizes stay Godot-only; Canvas hosts the runner or dirt race.
+     */
+    fun nativeFallback(kind: EngineKind): RewardGame =
+        when (kind) {
+            EngineKind.THREE_D -> RewardGame.KART
+            EngineKind.TWO_D -> RewardGame.RUNNER
+        }
+
+    /**
      * Games that fit [age] on [kind]'s process.
      */
     fun gamesFor(
@@ -61,14 +71,29 @@ object RewardCatalog {
     }
 
     /**
-     * Parses an extra, falling back to [RewardGame.RUNNER] or [RewardGame.KART].
+     * Parses an extra, falling back to [nativeFallback] when the name is missing
+     * or belongs to the other engine process.
      */
     fun fromName(
         raw: String?,
         kind: EngineKind,
     ): RewardGame {
         val match = RewardGame.entries.firstOrNull { it.name.equals(raw, ignoreCase = true) }
-        if (match != null) return match
-        return if (kind == EngineKind.THREE_D) RewardGame.KART else RewardGame.RUNNER
+        if (match != null && engineKind(match) == kind) return match
+        return nativeFallback(kind)
+    }
+
+    /**
+     * Godot `res://` path from a fragment extra. Unknown or cross-engine paths
+     * become [nativeFallback] so GDScript cannot `change_scene_to_file` boot
+     * or another process's packed scene.
+     */
+    fun packedScenePath(
+        raw: String?,
+        kind: EngineKind,
+    ): String {
+        val match = RewardGame.entries.firstOrNull { scenePath(it) == raw }
+        val game = if (match != null && engineKind(match) == kind) match else nativeFallback(kind)
+        return scenePath(game)
     }
 }

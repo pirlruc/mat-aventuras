@@ -9,13 +9,12 @@ import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.domain.model.Mascot
-import pt.mataventuras.domain.model.engineKindFor
 import pt.mataventuras.domain.model.pickRewardKind
 
 /**
  * Native host → reward engine. Age 3 launches the Godot runner in `:engine2d`;
  * age 7 randomly launches that platformer or the Godot kart in `:engine3d`.
- * Native Canvas/GLES Activities remain as the fallback when plugin classes
+ * Native Canvas Activities remain as the fallback when plugin classes
  * are absent and for unit tests.
  *
  * Plugin contract (MAT-003): a Godot Activity replaces
@@ -51,7 +50,7 @@ object EngineLauncher {
     const val EXTRA_GODOT_RELAUNCH: String = "godot_relaunch"
 
     /**
-     * Isolated process name for the 3D (Godot or native GLES) Activity.
+     * Isolated process name for the 3D (Godot or native Canvas) Activity.
      */
     const val PROCESS_ENGINE_3D: String = EnginePluginContract.PROCESS_ENGINE_3D
 
@@ -86,7 +85,8 @@ object EngineLauncher {
 
     /**
      * Intent that relaunches the plugin Activity after a Godot GLES restart.
-     * Null when [data] is not a restart result or the class extra is missing.
+     * Null when [data] is not a restart result, the class extra is missing,
+     * or the class is outside the plugin/native reward allowlist.
      */
     fun relaunchIntent(
         context: Context,
@@ -95,6 +95,7 @@ object EngineLauncher {
         if (data == null) return null
         if (!data.getBooleanExtra(RESULT_RESTART, false)) return null
         val className = data.getStringExtra(EXTRA_ENGINE_CLASS)?.trim()?.takeIf { it.isNotBlank() } ?: return null
+        if (!EnginePluginContract.isAllowedEngineClass(className)) return null
         return Intent().setClassName(context.packageName, className).apply {
             putExtra(EXTRA_MASCOT, data.getStringExtra(EXTRA_MASCOT).orEmpty())
             putExtra(EXTRA_NAME, data.getStringExtra(EXTRA_NAME).orEmpty())
@@ -117,6 +118,8 @@ object EngineLauncher {
     /**
      * Intent for the reward Activity. [kind] defaults to a random pick at age 7.
      * [pluginPresent] is injected in tests; production uses [isClassPresent].
+     * When the plugin class is missing, extras pack the playable native fallback
+     * (runner or dirt race) instead of an arcade scene the Canvas host cannot play.
      */
     fun intentFor(
         context: Context,
@@ -127,37 +130,14 @@ object EngineLauncher {
         game: RewardGame = RewardCatalog.pick(ageGroup, kind),
         pluginPresent: (String) -> Boolean = { isClassPresent(it) },
     ): Intent {
-        val className =
-            EnginePluginResolver.classNameFor(
-                kind = kind,
-                pluginPresent = pluginPresent,
-                nativeTwoD = Platformer2dActivity::class.java.name,
-                nativeThreeD = Kart3dActivity::class.java.name,
-            )
+        val pluginClass = EnginePluginContract.pluginClassName(kind)
+        val usingPlugin = pluginPresent(pluginClass)
+        val className = EnginePluginResolver.classNameFor(kind, pluginPresent = { _ -> usingPlugin })
+        val packed = if (usingPlugin) game else RewardCatalog.nativeFallback(kind)
         return Intent().setClassName(context.packageName, className).apply {
-            EnginePluginContract.launchExtras(mascot.code, name, game).forEach { (key, value) ->
+            EnginePluginContract.launchExtras(mascot.code, name, packed).forEach { (key, value) ->
                 putExtra(key, value)
             }
         }
     }
-
-    /**
-     * Isolated process the destination Activity should declare for [ageGroup].
-     */
-    fun processFor(
-        ageGroup: AgeGroup,
-        usingPlugin: Boolean,
-    ): String? {
-        val kind = engineKindFor(ageGroup)
-        if (!EnginePluginContract.requiresIsolatedProcess(kind, usingPlugin)) return null
-        return EnginePluginContract.processFor(kind)
-    }
-
-    /**
-     * True when [kind] would launch a plugin class under [pluginPresent].
-     */
-    fun wouldUsePlugin(
-        kind: EngineKind,
-        pluginPresent: (String) -> Boolean,
-    ): Boolean = pluginPresent(EnginePluginContract.pluginClassName(kind))
 }

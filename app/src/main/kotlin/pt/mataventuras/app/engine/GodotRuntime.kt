@@ -4,33 +4,15 @@ import android.os.Build
 
 /**
  * When to host a GodotFragment. Robolectric cannot load Godot native libraries,
- * so unit tests always take the native Canvas/GLES fallback inside the plugin
+ * so unit tests always take the native Canvas fallback inside the plugin
  * Activity (still declared on `:engine2d` / `:engine3d` in the manifest).
  *
  * On a real device the Maven `org.godotengine:godot` AAR is on the classpath
  * and [shouldEmbed] is true.
  */
 object GodotRuntime {
-    /** Kart scene path inside `assets/`. */
-    const val SCENE_KART: String = "res://kart.tscn"
-
-    /** Ring-runner scene path inside `assets/`. */
-    const val SCENE_RUNNER: String = "res://runner.tscn"
-
-    /** Letter-invaders scene. */
-    const val SCENE_INVADERS: String = "res://invaders.tscn"
-
-    /** Maze-chomp scene. */
-    const val SCENE_CHOMP: String = "res://chomp.tscn"
-
-    /** Letter-climb scene. */
-    const val SCENE_CLIMB: String = "res://climb.tscn"
-
     /** Runtime plugin name exposed to GDScript as `Engine.get_singleton`. */
     const val PLUGIN_NAME: String = "MatAventuras"
-
-    /** Intent extra GodotActivity reads for launch arguments. Unused by GodotFragment. */
-    const val EXTRA_COMMAND_LINE: String = "command_line_params"
 
     /**
      * True when this process should create a GodotFragment.

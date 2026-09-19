@@ -364,7 +364,7 @@ milestones:
               - Plugin Activity uses android:process :engine3d or :engine2d
               - Intent extras match EngineLauncher (mascot, name, finished)
               - Merged manifest still has no INTERNET permission
-              - Domain Kart3dEngine and Platformer2dEngine remain the Robolectric fallback
+              - Domain OffroadRacerEngine and Platformer2dEngine remain the Robolectric fallback
               - org.godotengine:godot is pinned; Unity is not a dependency
             guardrail_refs:
               - KT-PERF-001
@@ -498,3 +498,43 @@ milestones:
               - KT-SEC-004
               - SC-DEP-004
               - CI-035
+
+          - id: MAT-004-T6
+            status: done
+            title: Encrypt parental PIN at rest and allowlist engine relaunch
+            instructions:
+              files:
+                - data/src/main/kotlin/pt/mataventuras/data/pin/PinRepository.kt
+                - app/src/main/kotlin/pt/mataventuras/app/engine/EngineLauncher.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine/EnginePluginContract.kt
+            verification:
+              - Pin hash and salt live in EncryptedSharedPreferences when Keystore is present
+              - EngineLauncher.relaunchIntent rejects class names outside the plugin/native allowlist
+            guardrail_refs:
+              - KT-SEC-001
+
+          - id: MAT-004-T7
+            status: open
+            title: Playable native Canvas hosts for arcade 2D prizes
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/engine/NativeRewardHost.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine
+            verification:
+              - Native fallback for INVADERS/CHOMP/CLIMB is a playable Canvas loop, not a hint TextView
+            guardrail_refs:
+              - KT-TEST-001
+
+          - id: MAT-004-T8
+            status: open
+            title: Replace deprecated MasterKeys and migrate Room without wipes
+            instructions:
+              files:
+                - data/src/main/kotlin/pt/mataventuras/data/pin/PinRepository.kt
+                - app/src/main/kotlin/pt/mataventuras/app/di/AppContainer.kt
+            verification:
+              - PIN store uses MasterKey.Builder (or equivalent non-deprecated API) without a plaintext device fallback
+              - Room schema changes migrate instead of fallbackToDestructiveMigration
+            guardrail_refs:
+              - KT-SEC-001
+              - KT-API-003

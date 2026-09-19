@@ -6,6 +6,8 @@ import org.godotengine.godot.plugin.UsedByGodot
 import pt.mataventuras.app.engine.GodotBridge
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.app.engine.IsolatedEngineActivity
+import pt.mataventuras.domain.model.EngineKind
+import pt.mataventuras.plugin.KartPluginActivity
 
 /**
  * Runtime Godot plugin: extras in, `completeReward` out. No Room, no network.
@@ -24,7 +26,10 @@ internal class MatAventurasGodotPlugin(
     fun childName(): String = GodotBridge.childName(host)
 
     @UsedByGodot
-    fun rewardScene(): String = GodotBridge.rewardScene(scene)
+    fun rewardScene(): String {
+        val kind = if (host is KartPluginActivity) EngineKind.THREE_D else EngineKind.TWO_D
+        return GodotBridge.rewardScene(scene, kind)
+    }
 
     @UsedByGodot
     fun completeReward(ok: Boolean) {

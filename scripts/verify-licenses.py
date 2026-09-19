@@ -43,6 +43,7 @@ KNOWN: dict[str, str] = {
     "org.jetbrains.kotlinx:kover-gradle-plugin": "Apache-2.0",
     "org.godotengine:godot": "MIT",
     "androidx.fragment:fragment-ktx": "Apache-2.0",
+    "androidx.security:security-crypto": "Apache-2.0",
 }
 
 
