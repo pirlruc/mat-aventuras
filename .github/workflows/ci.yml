@@ -35,11 +35,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Companion gitlinks are pinned
-        run: |
-          test -n "$(git rev-parse 'HEAD:docs/guardrails')"
-          test -n "$(git rev-parse 'HEAD:.github/scaffold')"
-
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
@@ -57,20 +52,19 @@ jobs:
             docs/issues.yml \
             docs/guardrail-deviations.yml \
             docs/issues-sync-targets.yml \
+            docs/companion-pins.yml \
             .github/dependabot.yml \
             .github/workflows/ci.yml \
             .github/workflows/hardening.yml
           .ci-venv/bin/python scripts/validate-issues.py docs/issues.yml
+          .ci-venv/bin/python scripts/verify-companion-pins.py
 
       - name: Domain static analysis
         run: |
           ./gradlew --no-daemon :domain:ktlintCheck :domain:detekt
 
-      - name: KDoc coverage (KT-DOC-001)
+      - name: Public type KDoc (KT-DOC-001)
         run: python3 scripts/verify-kdoc.py
-
-      - name: Maintainability index (KT-CPLX-002)
-        run: python3 scripts/verify-maintainability.py
 
       - name: Privacy manifest (backup / isolation)
         run: python3 scripts/verify-privacy-manifest.py
@@ -150,3 +144,6 @@ jobs:
 
       - name: License allow/deny (SC-LIC-001)
         run: python3 scripts/verify-licenses.py
+
+      - name: Dependency vulnerabilities (KT-SEC-004)
+        run: bash scripts/run-grype.sh

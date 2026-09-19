@@ -186,10 +186,7 @@ class ArcadeEnginesTest {
             dup[4 + i] = ch
         }
         assertTrue(WordSoupScanner.occurrenceCount(dup, 4, "dez") >= 2)
-        assertTrue(WordSoupScanner.extraCells(dup, 4, "dez", setOf(0, 1, 2)).isNotEmpty())
-        assertTrue(WordSoupScanner.extraCells(dup, 4, "dez", (0 until 16).toSet()).isEmpty())
-        assertTrue(WordSoupScanner.extraCells(dup, 0, "dez", emptySet()).isEmpty())
-        assertTrue(WordSoupScanner.extraCells(dup, 4, "", emptySet()).isEmpty())
+        assertFalse(WordSoupScanner.wordIsUnique(dup, 4, "dez"))
         assertEquals("Esquerda · Impulso · Direita", KartHud.CONTROL_HINT)
         assertTrue(KartHud.META_HINT.contains("META"))
     }

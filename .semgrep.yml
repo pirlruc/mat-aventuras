@@ -13,6 +13,18 @@ rules:
     severity: ERROR
     message: Process execution from app code is forbidden.
     pattern: Runtime.getRuntime().exec(...)
+  - id: mat-aventuras-no-process-builder
+    languages: [kotlin]
+    severity: ERROR
+    message: ProcessBuilder from app code is forbidden.
+    pattern: ProcessBuilder(...)
+  - id: mat-aventuras-no-url-connection
+    languages: [kotlin]
+    severity: ERROR
+    message: Outbound HTTP from app code is forbidden (100% on-device).
+    pattern-either:
+      - pattern: URL(...).openConnection()
+      - pattern: HttpURLConnection
   - id: mat-aventuras-no-adb-backup
     languages: [xml]
     severity: ERROR

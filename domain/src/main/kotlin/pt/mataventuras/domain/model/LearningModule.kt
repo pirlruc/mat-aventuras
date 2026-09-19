@@ -32,3 +32,12 @@ fun modulesFor(age: AgeGroup): List<LearningModule> =
                 LearningModule.LOGIC,
             )
     }
+
+/**
+ * True for the age-7 arithmetic and logic modules.
+ */
+fun LearningModule.isSevenYears(): Boolean =
+    this == LearningModule.ADDITION ||
+        this == LearningModule.SUBTRACTION ||
+        this == LearningModule.MULTIPLICATION ||
+        this == LearningModule.LOGIC

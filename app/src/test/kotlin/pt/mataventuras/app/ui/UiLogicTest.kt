@@ -7,6 +7,7 @@ import org.junit.Test
 import pt.mataventuras.app.di.isRobolectricFingerprint
 import pt.mataventuras.app.di.pinIterationsFor
 import pt.mataventuras.domain.math.PlayKind
+import pt.mataventuras.domain.math.SudokuHoles
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
@@ -119,9 +120,17 @@ class UiLogicTest {
         assertEquals(0, UiLogic.boardRowCount(4, 0))
         assertEquals("?", UiLogic.holeLabel(""))
         assertEquals("3", UiLogic.holeLabel("3"))
+        assertEquals("", UiLogic.holeLabel(SudokuHoles.EXTRA_BLANK))
         assertTrue(UiLogic.isBoardHole(""))
         assertTrue(UiLogic.isBoardHole("?"))
+        assertTrue(UiLogic.isBoardHole(SudokuHoles.EXTRA_BLANK))
+        assertTrue(UiLogic.isQuestionHole(""))
+        assertFalse(UiLogic.isQuestionHole(SudokuHoles.EXTRA_BLANK))
+        assertTrue(UiLogic.isExtraBlank(SudokuHoles.EXTRA_BLANK))
         assertFalse(UiLogic.isBoardHole("2"))
+        assertEquals(0xFFFFF59D, UiLogic.sudokuCellArgb(""))
+        assertEquals(0xFFEEEEEE, UiLogic.sudokuCellArgb(SudokuHoles.EXTRA_BLANK))
+        assertEquals(0xFFE3F2FD, UiLogic.sudokuCellArgb("4"))
         assertEquals("✓", UiLogic.answerFlashGlyph(true))
         assertEquals("✗", UiLogic.answerFlashGlyph(false))
         assertEquals(VoiceScripts.WELL_DONE, UiLogic.answerFlashCaption(true))

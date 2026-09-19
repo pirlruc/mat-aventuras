@@ -112,34 +112,8 @@ class WordSoupBuilder(
     private companion object {
         const val NUL: Char = '\u0000'
         const val LETTERS: String = "kwyxj"
-        val WORDS: List<String> =
-            listOf(
-                "dez",
-                "dois",
-                "três",
-                "seis",
-                "sete",
-                "oito",
-                "nove",
-                "soma",
-                "cinco",
-                "vinte",
-                "treze",
-                "quatro",
-                "quinze",
-                "trinta",
-            )
-        val DIRECTIONS: List<IntArray> =
-            listOf(
-                intArrayOf(0, 1),
-                intArrayOf(0, -1),
-                intArrayOf(1, 0),
-                intArrayOf(-1, 0),
-                intArrayOf(1, 1),
-                intArrayOf(1, -1),
-                intArrayOf(-1, 1),
-                intArrayOf(-1, -1),
-            )
+        val WORDS: List<String> = PortugueseNumberWords.SOUP
+        val DIRECTIONS: List<IntArray> = WordSoupScanner.DIRECTIONS
     }
 }
 
@@ -185,27 +159,6 @@ object WordSoupScanner {
     }
 
     /**
-     * Cells of extra copies of [word] that are not on an official path.
-     */
-    fun extraCells(
-        grid: CharArray,
-        size: Int,
-        word: String,
-        protected: Set<Int>,
-    ): List<Int> {
-        if (word.isEmpty() || size <= 0) return emptyList()
-        val extra = ArrayList<Int>()
-        grid.indices.forEach { start ->
-            DIRECTIONS.forEach { dir ->
-                val path = match(grid, size, start, dir, word) ?: return@forEach
-                val key = if (path.first() <= path.last()) path else path.asReversed()
-                if (key.any { it !in protected }) extra += key.filter { it !in protected }
-            }
-        }
-        return extra.distinct()
-    }
-
-    /**
      * Grid edge length, or 0 when [cellCount] is not a square.
      */
     fun sizeOf(cellCount: Int): Int {
@@ -236,7 +189,7 @@ object WordSoupScanner {
         return path
     }
 
-    private val DIRECTIONS: List<IntArray> =
+    internal val DIRECTIONS: List<IntArray> =
         listOf(
             intArrayOf(0, 1),
             intArrayOf(0, -1),

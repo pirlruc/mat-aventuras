@@ -1,7 +1,7 @@
 # Authored backlog for pirlruc/mat-aventuras.
 #
 # Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
-# Methodology: https://github.com/pirlruc/methodologies/tree/1.2.0/github-issue-adr
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.5.0/github-issue-adr
 #
 # The Epic is the decision record — there are no ADR markdown files.
 # Deviations from guardrails go in docs/guardrail-deviations.yml, not here.
@@ -231,6 +231,32 @@ milestones:
             guardrail_refs:
               - KT-TEST-001
 
+          - id: MAT-002-T4
+            status: done
+            title: Raise age-7 arithmetic and board difficulty
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/math/ExerciseGenerator.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/math/PlayBoardFactory.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/math/SudokuGrids.kt
+            verification:
+              - Addition uses two-digit addends; multiplication includes a missing factor
+              - Age-7 sudoku punches extra uniquely-determined blanks
+            guardrail_refs:
+              - KT-TEST-001
+
+          - id: MAT-002-T5
+            status: open
+            title: Let age-7 sudoku fill every remaining blank in turn
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/math/PlayBoardFactory.kt
+                - app/src/main/kotlin/pt/mataventuras/app/ui/lesson/LessonScreen.kt
+            verification:
+              - A 6×6 board with several blanks is solved cell-by-cell, not one highlighted house
+            guardrail_refs:
+              - KT-TEST-001
+
   - name: Phase 3 — Hardening and engines
     status: open
     epics:
@@ -352,8 +378,8 @@ milestones:
           problem: >-
             Phase 1 CI gated :domain coverage in one quality job. Remaining
             Kotlin/CI/supply-chain packs still required SAST, secret scanning,
-            split workflows, docs coverage measurement, maintainability-index
-            enforcement, Android lint, and a license allow-list.
+            split workflows, public-type KDoc, detekt complexity rules, Android
+            lint, a license allow-list, and dependency vulnerability scanning.
           goal: >-
             Close the remaining KT-*, CI-*, and SC-* items that MAT-001 did
             not implement, without inventing ADR files or recording unapproved
@@ -370,8 +396,8 @@ milestones:
             - config/detekt.yml
         acceptance_criteria:
           - Quality, tests, docs, and security are separate jobs or workflows
-          - Secret scan and SAST run on non-Dependabot PRs
-          - KDoc/API docs coverage is measured or a dated deviation exists
+          - Secret scan, SAST, and grype dependency scanning run on non-Dependabot PRs
+          - Public Kotlin types carry KDoc (KT-DOC-001; no invented coverage ratio)
           - Dependabot open-pull-requests-limit stays at the org default of 5
         guardrail_refs:
           - KT-BUILD-002
@@ -379,6 +405,7 @@ milestones:
           - KT-DOC-001
           - KT-SEC-002
           - KT-SEC-003
+          - KT-SEC-004
           - CI-004
           - CI-006
           - CI-009
@@ -388,6 +415,7 @@ milestones:
           - CI-023
           - CI-029
           - SC-LIC-001
+          - SC-DEP-004
         tasks:
           - id: MAT-004-T1
             status: done
@@ -406,14 +434,13 @@ milestones:
 
           - id: MAT-004-T2
             status: done
-            title: Docs coverage, maintainability index, Android lint
+            title: Public KDoc, detekt complexity, Android lint
             instructions:
               files:
                 - config/detekt.yml
                 - .github/workflows/ci.yml
             verification:
-              - KDoc coverage or a recorded deviation
-              - detekt or equivalent enforces min_maintainability_index
+              - detekt CyclomaticComplexMethod / LongMethod (KT-CPLX-001/002)
               - Android lint runs when the SDK is present
             guardrail_refs:
               - KT-DOC-001
@@ -454,3 +481,20 @@ milestones:
               - KT-SEC-002
               - SC-SBOM-001
               - SC-SBOM-002
+
+          - id: MAT-004-T5
+            status: done
+            title: Grype dependency scan and companion pin assert
+            instructions:
+              files:
+                - scripts/run-grype.sh
+                - scripts/verify-companion-pins.py
+                - docs/companion-pins.yml
+                - .github/workflows/ci.yml
+            verification:
+              - security job runs grype and fails on high/critical (KT-SEC-004)
+              - quality job asserts gitlink SHAs match docs/companion-pins.yml (SC-DEP-004)
+            guardrail_refs:
+              - KT-SEC-004
+              - SC-DEP-004
+              - CI-035
