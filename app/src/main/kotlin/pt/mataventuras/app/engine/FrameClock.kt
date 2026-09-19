@@ -15,7 +15,7 @@ internal class FrameClock(
     fun delta(): Float {
         val now = nowNs()
         if (lastNs == 0L) lastNs = now
-        val dt = ((now - lastNs) / 1_000_000_000f).coerceAtMost(maxDt)
+        val dt = ((now - lastNs) / 1_000_000_000f).coerceIn(0f, maxDt)
         lastNs = now
         return dt
     }

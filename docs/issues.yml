@@ -524,3 +524,17 @@ milestones:
               - Native fallback for INVADERS/CHOMP/CLIMB is a playable Canvas loop, not a hint TextView
             guardrail_refs:
               - KT-TEST-001
+
+          - id: MAT-004-T8
+            status: open
+            title: Replace deprecated MasterKeys and migrate Room without wipes
+            instructions:
+              files:
+                - data/src/main/kotlin/pt/mataventuras/data/pin/PinRepository.kt
+                - app/src/main/kotlin/pt/mataventuras/app/di/AppContainer.kt
+            verification:
+              - PIN store uses MasterKey.Builder (or equivalent non-deprecated API) without a plaintext device fallback
+              - Room schema changes migrate instead of fallbackToDestructiveMigration
+            guardrail_refs:
+              - KT-SEC-001
+              - KT-API-003

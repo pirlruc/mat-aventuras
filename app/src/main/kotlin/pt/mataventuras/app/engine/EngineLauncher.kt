@@ -130,12 +130,10 @@ object EngineLauncher {
         game: RewardGame = RewardCatalog.pick(ageGroup, kind),
         pluginPresent: (String) -> Boolean = { isClassPresent(it) },
     ): Intent {
-        val className = EnginePluginResolver.classNameFor(kind = kind, pluginPresent = pluginPresent)
-        val packed = if (pluginPresent(EnginePluginContract.pluginClassName(kind))) {
-            game
-        } else {
-            RewardCatalog.nativeFallback(kind)
-        }
+        val pluginClass = EnginePluginContract.pluginClassName(kind)
+        val usingPlugin = pluginPresent(pluginClass)
+        val className = EnginePluginResolver.classNameFor(kind) { usingPlugin }
+        val packed = if (usingPlugin) game else RewardCatalog.nativeFallback(kind)
         return Intent().setClassName(context.packageName, className).apply {
             EnginePluginContract.launchExtras(mascot.code, name, packed).forEach { (key, value) ->
                 putExtra(key, value)

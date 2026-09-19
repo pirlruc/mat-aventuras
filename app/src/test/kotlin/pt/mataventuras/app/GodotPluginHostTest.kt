@@ -22,6 +22,7 @@ import pt.mataventuras.app.engine.Platformer2dActivity
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.plugin.KartPluginActivity
 import pt.mataventuras.plugin.RunnerPluginActivity
@@ -335,7 +336,9 @@ class GodotPluginHostTest {
         assertTrue(climbScript.contains("barris") || climbScript.contains("Letras"))
         ctx.assets.open("host.gd").close()
         assertEquals("res://kart.tscn", GodotBridge.rewardScene(""))
-        assertEquals("res://runner.tscn", GodotBridge.rewardScene("res://runner.tscn"))
+        assertEquals("res://runner.tscn", GodotBridge.rewardScene("res://runner.tscn", EngineKind.TWO_D))
+        assertEquals("res://kart.tscn", GodotBridge.rewardScene("res://boot.tscn"))
+        assertEquals("res://runner.tscn", GodotBridge.rewardScene("res://kart.tscn", EngineKind.TWO_D))
     }
 
     @Test

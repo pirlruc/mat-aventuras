@@ -3,12 +3,13 @@ package pt.mataventuras.app.engine
 import pt.mataventuras.app.engine.godot.GodotEmbed
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.engine.RewardCatalog
+import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.plugin.KartPluginActivity
 import pt.mataventuras.plugin.RunnerPluginActivity
 
 /**
- * Chooses Godot (device) or the native Canvas/GLES fallback (Robolectric).
+ * Chooses Godot (device) or the native Canvas fallback (Robolectric).
  *
  * [onGodot] defaults to [GodotEmbed.attach] and is only invoked when [embed]
  * is true, so Robolectric never resolves `libgodot_android`.

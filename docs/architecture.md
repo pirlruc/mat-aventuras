@@ -140,9 +140,9 @@ Leaderboard is a query: profiles ordered by points, then average
 accuracy from sessions (`LeaderboardCalculator`).
 
 PIN state is **not** in Room. `PinRepository` stores PBKDF2 hash + salt
-+ lockout in `EncryptedSharedPreferences` (`parent_pin`) when Android
-Keystore is available, and in a private prefs file under Robolectric.
-Plaintext PIN is never persisted.
++ lockout in `EncryptedSharedPreferences` (`parent_pin`). Android Keystore
+failures fail closed. Robolectric tests opt into a distinct `*_plain`
+private prefs file. Plaintext PIN digits are never persisted.
 `android:allowBackup` is **false**, `fullBackupContent` is false, and
 `dataExtractionRules` exclude databases, shared prefs, and files so ADB
 backup and device-to-device transfer cannot copy profiles or the PIN hash.
@@ -153,6 +153,8 @@ backup and device-to-device transfer cannot copy profiles or the PIN hash.
 - Encrypted at rest (`EncryptedSharedPreferences` + Android Keystore)
 - Constant-time compare
 - 5 failures → 60 s lockout (`PinPolicy`)
+- Unlock is a single locked read-modify-write so concurrent taps cannot skip lockout
+- Godot `change_scene_to_file` paths are allowlisted to packaged prize scenes per engine kind
 
 ## UI/UX (pt-PT)
 

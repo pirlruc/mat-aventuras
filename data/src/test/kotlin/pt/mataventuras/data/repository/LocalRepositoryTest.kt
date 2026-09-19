@@ -82,7 +82,12 @@ class LocalRepositoryTest {
 
     @Test
     fun pinRepositoryRoundTrips() = runTest {
-        val pins = PinRepository(ApplicationProvider.getApplicationContext(), storeName = "parent_pin_repo_test")
+        val pins =
+            PinRepository(
+                ApplicationProvider.getApplicationContext(),
+                storeName = "parent_pin_repo_test",
+                allowPlaintextFallback = true,
+            )
         pins.clear()
         assertEquals(false, pins.isSet())
         val state = PinPolicy(iterations = 1_000).create("2468")
@@ -99,9 +104,28 @@ class LocalRepositoryTest {
         val filled = pins.read()!!
         assertEquals(2, filled.consecutiveFailures)
         assertEquals(9L, filled.lockedUntilEpochMs)
-        val defaults = PinRepository(ApplicationProvider.getApplicationContext())
+        val defaults =
+            PinRepository(
+                ApplicationProvider.getApplicationContext(),
+                allowPlaintextFallback = true,
+            )
         defaults.clear()
         assertEquals(false, defaults.isSet())
+        pins.save(state)
+        val bumped =
+            pins.update { current ->
+                "ok" to current!!.copy(consecutiveFailures = current.consecutiveFailures + 1)
+            }
+        assertEquals("ok", bumped)
+        assertEquals(1, pins.read()!!.consecutiveFailures)
+        pins.seedPartial("zz", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("corrupt PIN must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        assertEquals(true, pins.isSet())
         pins.clear()
         assertEquals(false, pins.isSet())
     }
@@ -113,6 +137,7 @@ class LocalRepositoryTest {
             pinPreferences(
                 ctx,
                 "pin_fallback_test",
+                allowPlaintextFallback = true,
                 encrypted = { _, _ -> error("no keystore") },
             )
         prefs.edit().putString("hash", "aa").commit()
@@ -130,6 +155,12 @@ class LocalRepositoryTest {
             encryptedPinPreferences(ctx, "pin_keystore_probe")
         } catch (_: Exception) {
             // Robolectric has no Android Keystore; production uses this path.
+        }
+        try {
+            pinPreferences(ctx, "pin_fail_closed", encrypted = { _, _ -> error("no keystore") })
+            throw AssertionError("device path must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("no keystore", error.message)
         }
     }
 

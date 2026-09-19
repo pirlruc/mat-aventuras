@@ -128,8 +128,12 @@ bash scripts/check-ci-local.sh
 - Age-7 sudoku uses `SudokuHoles.EXTRA_BLANK` (`·`) for extra houses and `""`
   for the question cell. UI glows only the question cell. Punching extra
   blanks must keep the question uniquely determined.
-- PIN prefs use `EncryptedSharedPreferences` on device. Robolectric has no
-  Android Keystore, so `pinPreferences` falls back to private SharedPreferences.
+- PIN prefs use `EncryptedSharedPreferences` on device. Keystore failures
+  fail closed. Robolectric sets `allowPlaintextFallback` and uses a distinct
+  `*_plain` prefs file — never mix encrypted XML with cleartext.
+- `RewardCatalog.fromName` / `packedScenePath` reject cross-engine extras so
+  a 2D process cannot load `kart.tscn` (or `boot.tscn`).
+- PIN unlock goes through `PinRepository.update` so lockout is not racy.
 
 ## Suggested next work
 
@@ -138,11 +142,13 @@ bash scripts/check-ci-local.sh
 3. MAT-002-T5: tap-to-fill remaining sudoku blanks (not one highlighted house).
 4. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 5. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
+6. MAT-004-T8: `MasterKey.Builder` and Room schema migrations (no destructive wipe).
 
 This pass: companion tags already latest (guardrails 1.6.0, scaffold 1.5.0);
 synced Cursor rules from scaffold; dropped unused GLES oval stack, AttemptResult,
-ParentLabels, unused theme APIs, viewmodel-compose; encrypted PIN at rest;
-allowlisted engine relaunch classes; native fallback packs runner/kart when
+ParentLabels, unused theme APIs, viewmodel-compose; encrypted PIN at rest
+(fail closed on device); allowlisted engine relaunch classes and Godot scene
+paths; serialized PIN verify-and-save; native fallback packs runner/kart when
 the plugin is absent.
 
 *Last updated: 2026-09-19*

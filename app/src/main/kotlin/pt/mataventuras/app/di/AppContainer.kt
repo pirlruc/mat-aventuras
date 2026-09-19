@@ -43,7 +43,11 @@ class AppContainer(
     val lastProfile = LastProfileStore(context.applicationContext)
 
     /** Parental PIN store. */
-    val pinRepository = PinRepository(context.applicationContext)
+    val pinRepository =
+        PinRepository(
+            context.applicationContext,
+            allowPlaintextFallback = GodotRuntime.isRobolectricFingerprint(processFingerprint()),
+        )
 
     /** Points and unlocks. */
     val rewards = RewardsEngine()

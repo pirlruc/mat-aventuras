@@ -49,8 +49,8 @@ class MainActivity : ComponentActivity() {
     ) {
         if (isDestroyed) return
         if (isFinishing) return
-        EngineLauncher.relaunchIntent(this, data)?.let {
-            engineLauncher.launch(it)
+        if (data?.getBooleanExtra(EngineLauncher.RESULT_RESTART, false) == true) {
+            EngineLauncher.relaunchIntent(this, data)?.let { engineLauncher.launch(it) }
             return
         }
         val finished = RewardReturn.onResult(resultCode, data, speech::speak)
