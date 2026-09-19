@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-09-19
-**Last agent focus:** Port arcade lives/i-frames and pixel HUD; fix 0×0 attach fallback
+**Last agent focus:** Merge PR #11 (MAT-003-T5 backlog) and delete leftover branches
 
 ---
 
@@ -43,7 +43,7 @@ or supply-chain pack edits. Stay on annotated tags (SC-DEP-004).
 | --- | --- | --- |
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
 | MAT-002 | open | T4 (harder age-7) done in tree; T1 emulator CI and T5 tap-to-fill sudoku remain |
-| MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin Activities + assets; native Canvas fallback under Robolectric |
+| MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin; T5 arcade lives/HUD done in tree |
 | MAT-004 | open | T5 grype + T6 PIN encrypt/allowlist done in tree; CodeQL/OSV (T4) and arcade Canvas (T7) remain |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
@@ -57,8 +57,11 @@ bash .github/scaffold/scripts/setup-issue-scaffold.sh
 python3 .github/scaffold/scripts/issues-sync.py --repo pirlruc/mat-aventuras --yaml docs/issues.yml --dry-run
 ```
 
-This agent cannot `gh issue create` (read-only `gh`, and methodology forbids
-publishing issues without approval).
+Do not git-merge `cursor/godot-black-screen-*`; those branches were deleted after
+the lives/HUD port landed on `main` via PR #10. PR #11 recorded MAT-003-T5 as
+done in `docs/issues.yml`. Native Canvas paint for invaders/chomp/climb remains
+MAT-004-T7. GitHub has no MAT-* issues yet (only probe #8); sync still needs a
+write token and `issues-sync.py`.
 
 ## Commands
 
@@ -155,9 +158,9 @@ bash scripts/check-ci-local.sh
 5. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
 6. MAT-004-T8: `MasterKey.Builder` and Room schema migrations (no destructive wipe).
 
-This pass: ported still-valid arcade work from the August Godot black-screen
-branches onto current main (5-life invaders, 3-life chomp/climb, pixel HUD,
-attach-after-layout). Left behind GLES resurrection, SCENE_* duplication,
-force-quit-as-restart, and boot.tscn rewrites already superseded on main.
+This pass: merged PR #10 (arcade lives/HUD) and PR #11 (MAT-003-T5 done in
+`docs/issues.yml`) to `main`. Deleted `cursor/arcade-lives-port-b361`,
+`cursor/issues-arcade-lives-b361`, `cursor/godot-black-screen-invaders-5d7b`,
+and `cursor/godot-black-screen-lives-80ab`. GitHub issue #8 is a probe; leave it.
 
 *Last updated: 2026-09-19*

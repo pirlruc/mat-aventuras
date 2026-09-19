@@ -371,6 +371,27 @@ milestones:
               - KT-SEC-001
               - KT-API-004
 
+          - id: MAT-003-T5
+            status: done
+            title: Arcade lives, i-frames, and pixel HUD on Godot prizes
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine/InvadersEngine.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine/ChompEngine.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine/ClimbEngine.kt
+                - app/src/main/assets/invaders.gd
+                - app/src/main/assets/chomp.gd
+                - app/src/main/assets/climb.gd
+                - app/src/main/assets/host.gd
+                - app/src/main/kotlin/pt/mataventuras/app/engine/godot/GodotEmbed.kt
+            verification:
+              - Invaders ends at five lost lives or an empty 15-ship fleet
+              - Chomp and climb use three lives with i-frames
+              - GodotEmbed attaches only after the host view is larger than 32 px
+            guardrail_refs:
+              - KT-TEST-001
+              - KT-API-004
+
       - id: MAT-004
         status: open
         title: Remaining Kotlin and CI guardrail gates
