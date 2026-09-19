@@ -14,6 +14,9 @@ object GodotRuntime {
     /** Runtime plugin name exposed to GDScript as `Engine.get_singleton`. */
     const val PLUGIN_NAME: String = "MatAventuras"
 
+    /** Smallest SurfaceView that may host a Godot swap. Below this the first frame is black. */
+    const val SURFACE_MIN_PX: Int = 32
+
     /**
      * True when this process should create a GodotFragment.
      */
@@ -30,6 +33,15 @@ object GodotRuntime {
      * restart, which then blinked the splash.
      */
     fun commandLineFor(): List<String> = emptyList()
+
+    /**
+     * True when the host FrameLayout has a real pixel size for a GLES SurfaceView.
+     * Attaching Godot at 0×0 is what left a black first frame on some tablets.
+     */
+    fun isSurfaceReady(
+        widthPx: Int,
+        heightPx: Int,
+    ): Boolean = widthPx > SURFACE_MIN_PX && heightPx > SURFACE_MIN_PX
 
     /**
      * True when this isolated plugin Activity should ask the Compose host to

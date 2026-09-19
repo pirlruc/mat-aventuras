@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-09-19
-**Last agent focus:** Drop unused GLES oval stack; encrypt PIN; allowlist engine relaunch
+**Last agent focus:** Port arcade lives/i-frames and pixel HUD; fix 0×0 attach fallback
 
 ---
 
@@ -134,6 +134,17 @@ bash scripts/check-ci-local.sh
 - `RewardCatalog.fromName` / `packedScenePath` reject cross-engine extras so
   a 2D process cannot load `kart.tscn` (or `boot.tscn`).
 - PIN unlock goes through `PinRepository.update` so lockout is not racy.
+- Do not merge `cursor/godot-black-screen-invaders-5d7b` or
+  `cursor/godot-black-screen-lives-80ab` as git merges: they fork from PR #6
+  and would restore the GLES oval path deleted in PR #9. Port lives/HUD only.
+- Invaders ends at 5 lives or an empty 15-ship fleet (not 8 hits / first bomb).
+  Chomp and climb use 3 lives with i-frames. Keep GDScript in sync with
+  `:domain` engines.
+- `GodotEmbed.attach` waits for a >32 px host view (layout listener, then a
+  1.2 s sized retry). Only a 4.8 s last resort attaches anyway. Keep
+  `boot.tscn`'s window-size wait; do not treat `onGodotForceQuit` as a GLES
+  restart (`onGodotRestartRequested` already does that). `Host.finish` lingers
+  1.6 s for prize banners; boot errors pass `linger=false`.
 
 ## Suggested next work
 
@@ -144,11 +155,9 @@ bash scripts/check-ci-local.sh
 5. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
 6. MAT-004-T8: `MasterKey.Builder` and Room schema migrations (no destructive wipe).
 
-This pass: companion tags already latest (guardrails 1.6.0, scaffold 1.5.0);
-synced Cursor rules from scaffold; dropped unused GLES oval stack, AttemptResult,
-ParentLabels, unused theme APIs, viewmodel-compose; encrypted PIN at rest
-(fail closed on device); allowlisted engine relaunch classes and Godot scene
-paths; serialized PIN verify-and-save; native fallback packs runner/kart when
-the plugin is absent.
+This pass: ported still-valid arcade work from the August Godot black-screen
+branches onto current main (5-life invaders, 3-life chomp/climb, pixel HUD,
+attach-after-layout). Left behind GLES resurrection, SCENE_* duplication,
+force-quit-as-restart, and boot.tscn rewrites already superseded on main.
 
 *Last updated: 2026-09-19*

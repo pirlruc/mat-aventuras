@@ -84,7 +84,10 @@ HUD copy is pt-PT (`Volta`, `Lugar`, `Arcos`, `Impulso`, `META`).
 Files live in `app/src/main/assets/` (no hidden `.godot` directory;
 `use_hidden_project_data_directory=false`). `run/main_scene` is a full-rect
 `boot.tscn` that `call_deferred`s `change_scene_to_file` with
-`MatAventuras.rewardScene()`. The fragment command line is **empty**.
+`MatAventuras.rewardScene()`. The fragment is attached only after the host
+view is larger than 32×32 px (layout listener, then a 1.2 s sized retry).
+A 4.8 s last resort still attaches so a headless view cannot hang. The
+fragment command line is **empty**.
 Godot 4.6+ Android loads `project.godot` from APK assets. Do not pass
 `--path` (CWD override, blank English error) or `--scene` (races
 `boot.tscn`). GLES is set only in `project.godot`; repeating it on the
@@ -107,6 +110,8 @@ GDScript talks to Android:
 Engine.get_singleton("MatAventuras").completeReward(true)
 ```
 
-The dirt-racer HUD is pt-PT (`Volta`, `Lugar`, `Arcos`, `Impulso`).
+The dirt-racer HUD is pt-PT (`Volta`, `Lugar`, `Arcos`, `Impulso`). Prize
+sprites and HUD labels scale from the live window size (`Host.view_size`).
+Invaders needs all 15 ships down or 5 lives lost; chomp and climb use 3 lives.
 
 Emulator instrumented coverage of Godot init remains MAT-002-T1.

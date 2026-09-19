@@ -33,12 +33,12 @@ func _load_reward() -> void:
 			path = next
 	if not ResourceLoader.exists(path):
 		push_error(\"Reward scene missing: %s\" % path)
-		Host.finish(false)
+		Host.finish(false, false)
 		return
 	var err := get_tree().change_scene_to_file(path)
 	if err != OK:
 		push_error(\"Failed to load reward scene: %s (%s)\" % [path, err])
-		Host.finish(false)
+		Host.finish(false, false)
 "
 
 

@@ -25,10 +25,18 @@ class ArcadeEnginesTest {
         assertTrue(state.shotY > 0f || state.hits >= 0)
         repeat(80) { state = engine.step(state, 0.05f, 0f, true) }
         assertTrue(state.hits >= 0)
-        var bomb = idle.copy(bombX = 0.5f, bombY = 0.9f, shipX = 0.5f)
+        assertTrue(state.lives >= 1)
+        var bomb = idle.copy(bombX = 0.5f, bombY = 0.9f, shipX = 0.5f, grace = 0f, invuln = 0f)
         bomb = engine.step(bomb, 0.05f, 0f, false)
-        assertFalse(bomb.alive)
-        var miss = idle.copy(bombX = 0.1f, bombY = 0.96f)
+        assertTrue(bomb.alive)
+        assertEquals(4, bomb.lives)
+        var lastLife =
+            idle.copy(bombX = 0.5f, bombY = 0.9f, shipX = 0.5f, grace = 0f, invuln = 0f, lives = 1)
+        lastLife = engine.step(lastLife, 0.05f, 0f, false)
+        assertFalse(lastLife.alive)
+        val eight = engine.step(idle.copy(hits = 8, hitsTarget = 8, grace = 0f), 0.02f, 0f, false)
+        assertFalse(eight.finished)
+        var miss = idle.copy(bombX = 0.1f, bombY = 0.96f, grace = 0f)
         miss = engine.step(miss, 0.05f, 0f, false)
         assertTrue(miss.bombY < 0f || miss.alive)
         var won = idle.copy(hits = 1, hitsTarget = 1, aliens = 0)
@@ -46,6 +54,20 @@ class ArcadeEnginesTest {
         assertEquals(deadShip, engine.step(deadShip, 0.05f, 1f, true))
         val farShot = engine.step(idle.copy(shotX = 0.9f, shotY = 0.5f, alienOrigin = 0.12f), 0.02f, 0f, false)
         assertTrue(farShot.shotY > 0f || farShot.shotY < 0f)
+        assertEquals(15, engine.initial().hitsTarget)
+        val spared =
+            engine.step(
+                idle.copy(bombX = 0.5f, bombY = 0.9f, shipX = 0.5f, grace = 0f, invuln = 0.8f, lives = 5),
+                0.05f,
+                0f,
+                false,
+            )
+        assertEquals(5, spared.lives)
+        val shifted = idle.aliens and 1.inv()
+        val bomber = engine.step(idle.copy(aliens = shifted, bombY = -1f, grace = 0f), 0.05f, 0f, false)
+        assertTrue(bomber.bombY >= 0f || bomber.aliens != idle.aliens)
+        val graceEmpty = engine.step(idle.copy(aliens = 0, grace = 1.8f), 0.02f, 0f, false)
+        assertTrue(graceEmpty.finished)
     }
 
     @Test
@@ -67,9 +89,13 @@ class ArcadeEnginesTest {
         var power = start.copy(px = 1, py = 1)
         power = engine.step(power, 0.05f, 0, 0)
         assertTrue(power.form == 1 || power.powerTimer >= 0f)
-        var dead = start.copy(px = 2, py = 1, ghostX = 2, ghostY = 1, form = 0, powerTimer = 0f)
+        var dead = start.copy(px = 2, py = 1, ghostX = 2, ghostY = 1, form = 0, powerTimer = 0f, invuln = 0f, lives = 1)
         dead = engine.step(dead, 0.05f, 0, 0)
         assertFalse(dead.alive)
+        var bump = start.copy(px = 2, py = 1, ghostX = 2, ghostY = 1, form = 0, powerTimer = 0f, invuln = 0f, lives = 3)
+        bump = engine.step(bump, 0.05f, 0, 0)
+        assertTrue(bump.alive)
+        assertEquals(2, bump.lives)
         var clear = start.copy(pellets = 0)
         clear = engine.step(clear, 0.05f, 0, 0)
         assertTrue(clear.finished)
@@ -82,7 +108,7 @@ class ArcadeEnginesTest {
         assertFalse(ChompMaze.isOpen(2, 2))
         assertTrue(ChompMaze.isPower(3, 3))
         assertFalse(ChompMaze.isPower(2, 2))
-        var ghost2 = start.copy(px = 2, py = 3, ghost2X = 2, ghost2Y = 3, form = 0, powerTimer = 0f)
+        var ghost2 = start.copy(px = 2, py = 3, ghost2X = 2, ghost2Y = 3, form = 0, powerTimer = 0f, invuln = 0f, lives = 1)
         ghost2 = engine.step(ghost2, 0.05f, 0, 0)
         assertFalse(ghost2.alive)
         val eaten = start.copy(px = 2, py = 3, pellets = 0)
@@ -94,6 +120,47 @@ class ArcadeEnginesTest {
                 0,
             )
         assertTrue(idleEat.px == 2 || idleEat.alive)
+        val chase =
+            engine.step(
+                start.copy(invuln = 0f, px = 1, py = 3, ghostX = 3, ghostY = 1, ghost2X = 1, ghost2Y = 1),
+                0.05f,
+                0,
+                0,
+            )
+        assertTrue(chase.ghost2Y != 1 || chase.alive)
+        val flee =
+            engine.step(
+                start.copy(invuln = 0f, powerTimer = 2f, px = 2, py = 3, ghostX = 3, ghostY = 3, ghost2X = 1, ghost2Y = 1),
+                0.05f,
+                0,
+                0,
+            )
+        assertEquals(1, flee.form)
+        val poweredHit =
+            engine.step(
+                start.copy(
+                    px = 2,
+                    py = 1,
+                    ghostX = 2,
+                    ghostY = 1,
+                    powerTimer = 2f,
+                    invuln = 0f,
+                    lives = 3,
+                ),
+                0.05f,
+                0,
+                0,
+            )
+        assertTrue(poweredHit.alive)
+        assertEquals(3, poweredHit.lives)
+        val sameCol =
+            engine.step(
+                start.copy(px = 2, py = 3, ghostX = 2, ghostY = 1, invuln = 0f, lives = 3),
+                0.05f,
+                0,
+                0,
+            )
+        assertTrue(sameCol.alive)
     }
 
     @Test
@@ -115,9 +182,13 @@ class ArcadeEnginesTest {
         var mush = start.copy(x = 0.5f, y = 0.34f)
         mush = engine.step(mush, 0.02f, 0f, false)
         assertEquals(1, mush.form)
-        var hit = start.copy(x = 0.9f, y = 0.78f, barrelX = 0.9f, barrelFloor = 3, form = 0)
+        var hit = start.copy(x = 0.9f, y = 0.78f, barrelX = 0.9f, barrelFloor = 3, form = 0, lives = 1, invuln = 0f)
         hit = engine.step(hit, 0.02f, 0f, false)
         assertFalse(hit.alive)
+        var scrape = start.copy(x = 0.9f, y = 0.78f, barrelX = 0.9f, barrelFloor = 3, form = 0, lives = 3, invuln = 0f)
+        scrape = engine.step(scrape, 0.02f, 0f, false)
+        assertTrue(scrape.alive)
+        assertEquals(2, scrape.lives)
         var tank = start.copy(x = 0.9f, y = 0.78f, barrelX = 0.9f, barrelFloor = 3, form = 1)
         tank = engine.step(tank, 0.02f, 0f, false)
         assertTrue(tank.alive)
@@ -142,6 +213,17 @@ class ArcadeEnginesTest {
         var oddBarrel = start.copy(barrelFloor = 9, x = 0.12f, y = 0.12f, barrelX = 0.9f)
         oddBarrel = engine.step(oddBarrel, 0.02f, 0f, false)
         assertTrue(oddBarrel.alive)
+        val airJump = engine.step(start.copy(onFloor = false, y = 0.45f, vy = 0.2f), 0.02f, 0f, true)
+        assertTrue(airJump.vy <= 0.2f || !airJump.onFloor)
+        val iframe =
+            engine.step(
+                start.copy(x = 0.9f, y = 0.78f, barrelX = 0.9f, barrelFloor = 3, form = 0, lives = 3, invuln = 1f),
+                0.02f,
+                0f,
+                false,
+            )
+        assertEquals(3, iframe.lives)
+        assertTrue(iframe.alive)
     }
 
     @Test
