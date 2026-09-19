@@ -96,6 +96,7 @@ class LocalRepositoryTest {
         assertEquals(state.hashHex, pins.read()!!.hashHex)
         pins.seedPartial("aa", saltHex = null, failureCount = null, lockoutMs = null)
         assertEquals(null, pins.read())
+        assertEquals(false, pins.isSet())
         pins.seedPartial("aa", saltHex = "bb", failureCount = null, lockoutMs = null)
         val partial = pins.read()!!
         assertEquals(0, partial.consecutiveFailures)
@@ -118,6 +119,40 @@ class LocalRepositoryTest {
             }
         assertEquals("ok", bumped)
         assertEquals(1, pins.read()!!.consecutiveFailures)
+        val skipped = pins.update { "keep" to null }
+        assertEquals("keep", skipped)
+        assertEquals(1, pins.read()!!.consecutiveFailures)
+        pins.seedPartial("AA", saltHex = "BB", failureCount = 1, lockoutMs = 2)
+        assertEquals("AA", pins.read()!!.hashHex)
+        assertEquals("BB", pins.read()!!.saltHex)
+        pins.seedPartial("a", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("odd PIN hex must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        pins.seedPartial("abc", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("uneven PIN hex must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        pins.seedPartial("", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("blank PIN hex must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
+        pins.seedPartial("aa", saltHex = "zz", failureCount = 0, lockoutMs = 0)
+        try {
+            pins.read()
+            throw AssertionError("corrupt salt must fail closed")
+        } catch (error: IllegalStateException) {
+            assertEquals("corrupt PIN record", error.message)
+        }
         pins.seedPartial("zz", saltHex = "bb", failureCount = 0, lockoutMs = 0)
         try {
             pins.read()
@@ -128,6 +163,13 @@ class LocalRepositoryTest {
         assertEquals(true, pins.isSet())
         pins.clear()
         assertEquals(false, pins.isSet())
+        val none = pins.update { "none" to null }
+        assertEquals("none", none)
+        assertEquals(null, pins.read())
+        val created = pins.update { "created" to state }
+        assertEquals("created", created)
+        assertEquals(true, pins.isSet())
+        assertEquals(state.hashHex, pins.read()!!.hashHex)
     }
 
     @Test
@@ -165,6 +207,39 @@ class LocalRepositoryTest {
     }
 
     @Test
+    fun pinRepositoryFailsClosedWhenCommitRejected() =
+        runTest {
+            val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+            val inner = ctx.getSharedPreferences("pin_fail_commit", android.content.Context.MODE_PRIVATE)
+            val pins =
+                PinRepository(
+                    ctx,
+                    storeName = "pin_fail_commit_unused",
+                    allowPlaintextFallback = true,
+                    prefs = FailCommitPreferences(inner),
+                )
+            val state = PinPolicy(iterations = 1_000).create("2468")
+            try {
+                pins.save(state)
+                throw AssertionError("save must fail closed")
+            } catch (error: IllegalStateException) {
+                assertEquals("PIN persist failed", error.message)
+            }
+            try {
+                pins.clear()
+                throw AssertionError("clear must fail closed")
+            } catch (error: IllegalStateException) {
+                assertEquals("PIN clear failed", error.message)
+            }
+            try {
+                pins.seedPartial("aa", saltHex = "bb", failureCount = 0, lockoutMs = 0)
+                throw AssertionError("seed must fail closed")
+            } catch (error: IllegalStateException) {
+                assertEquals("PIN seed failed", error.message)
+            }
+        }
+
+    @Test
     fun lastProfileStoreRoundTrips() = runTest {
         val store =
             pt.mataventuras.data.session.LastProfileStore(
@@ -181,4 +256,13 @@ class LocalRepositoryTest {
         defaults.clear()
         assertEquals(null, defaults.read())
     }
+}
+
+private class FailCommitPreferences(
+    private val inner: android.content.SharedPreferences,
+) : android.content.SharedPreferences by inner {
+    override fun edit(): android.content.SharedPreferences.Editor =
+        object : android.content.SharedPreferences.Editor by inner.edit() {
+            override fun commit(): Boolean = false
+        }
 }
