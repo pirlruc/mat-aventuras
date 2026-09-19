@@ -80,9 +80,4 @@ internal object GodotEmbed {
     fun killIsolatedProcess() {
         Runtime.getRuntime().exit(0)
     }
-
-    /**
-     * Command line used by [RewardGodotFragment] when arguments are missing.
-     */
-    fun fallbackScene(): String = GodotRuntime.SCENE_KART
 }

@@ -5,6 +5,8 @@ import org.godotengine.godot.GodotFragment
 import org.godotengine.godot.plugin.GodotPlugin
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.app.engine.IsolatedEngineActivity
+import pt.mataventuras.domain.engine.RewardCatalog
+import pt.mataventuras.domain.engine.RewardGame
 
 /**
  * GodotFragment that selects the kart or runner scene and registers the JVM bridge.
@@ -23,7 +25,7 @@ class RewardGodotFragment : GodotFragment() {
 
     override fun getHostPlugins(engine: Godot): Set<GodotPlugin> {
         val host = activity as? IsolatedEngineActivity ?: return emptySet()
-        val scene = arguments?.getString(ARG_SCENE) ?: GodotRuntime.SCENE_KART
+        val scene = arguments?.getString(ARG_SCENE) ?: RewardCatalog.scenePath(RewardGame.KART)
         return setOf(MatAventurasGodotPlugin(engine, host, scene))
     }
 

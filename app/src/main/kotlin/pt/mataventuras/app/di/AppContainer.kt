@@ -6,6 +6,7 @@ import androidx.room.Room
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.repository.LocalRepository
@@ -74,11 +75,9 @@ internal fun pinPolicyForProcess(): PinPolicy =
     PinPolicy(iterations = pinIterationsFor(processFingerprint()))
 
 internal fun pinIterationsFor(fingerprint: String): Int =
-    if (isRobolectricFingerprint(fingerprint)) 1_000 else PinPolicy.ITERATIONS
+    if (GodotRuntime.isRobolectricFingerprint(fingerprint)) 1_000 else PinPolicy.ITERATIONS
 
-internal fun isRobolectricFingerprint(fingerprint: String): Boolean =
-    fingerprint.contains("robolectric", ignoreCase = true)
-
-internal fun roomAllowsMainThread(fingerprint: String): Boolean = isRobolectricFingerprint(fingerprint)
+internal fun roomAllowsMainThread(fingerprint: String): Boolean =
+    GodotRuntime.isRobolectricFingerprint(fingerprint)
 
 internal fun processFingerprint(): String = Build.FINGERPRINT ?: ""

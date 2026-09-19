@@ -39,7 +39,7 @@ class GodotPluginHostTest {
         assertTrue(GodotRuntime.commandLineFor().isEmpty())
         assertFalse(GodotRuntime.commandLineFor().contains("--path"))
         assertFalse(GodotRuntime.commandLineFor().contains("--scene"))
-        assertEquals("command_line_params", GodotRuntime.EXTRA_COMMAND_LINE)
+        assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
         assertTrue(
             GodotRuntime.shouldRestartHost(
                 alreadyRestarted = false,
@@ -80,13 +80,11 @@ class GodotPluginHostTest {
                 fromRelaunch = true,
             ),
         )
-        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
-        assertEquals("MatAventuras", GodotRuntime.PLUGIN_NAME)
-        assertEquals("res://kart.tscn", GodotRuntime.SCENE_KART)
-        assertEquals("res://runner.tscn", GodotRuntime.SCENE_RUNNER)
-        assertEquals("res://invaders.tscn", GodotRuntime.SCENE_INVADERS)
-        assertEquals("res://chomp.tscn", GodotRuntime.SCENE_CHOMP)
-        assertEquals("res://climb.tscn", GodotRuntime.SCENE_CLIMB)
+        assertEquals("res://kart.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.KART))
+        assertEquals("res://runner.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.RUNNER))
+        assertEquals("res://invaders.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.INVADERS))
+        assertEquals("res://chomp.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.CHOMP))
+        assertEquals("res://climb.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.CLIMB))
         assertTrue(NativeKartHost.hudLines(pt.mataventuras.app.engine.OffroadRacerLoop()).first.startsWith("Volta"))
     }
 
@@ -153,7 +151,7 @@ class GodotPluginHostTest {
         val kart = kartController.get()
         var kartScene = ""
         GodotRewardBinder.bindKart(kart, embed = true) { _, scene -> kartScene = scene }
-        assertEquals(GodotRuntime.SCENE_KART, kartScene)
+        assertEquals(pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.KART), kartScene)
         GodotRewardBinder.bindKart(kart, embed = false)
         assertNotNull(kart.nativeSession)
         destroy(kartController)
@@ -166,7 +164,7 @@ class GodotPluginHostTest {
         val runner = runnerController.get()
         var runnerScene = ""
         GodotRewardBinder.bindRunner(runner, embed = true) { _, scene -> runnerScene = scene }
-        assertEquals(GodotRuntime.SCENE_RUNNER, runnerScene)
+        assertEquals(pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.RUNNER), runnerScene)
         GodotRewardBinder.bindRunner(runner, embed = false)
         assertNotNull(runner.loop)
         destroy(runnerController)
@@ -185,7 +183,7 @@ class GodotPluginHostTest {
         assertNotNull(climbController.get().climb)
         var climbScene = ""
         GodotRewardBinder.bindRunner(climbController.get(), embed = true) { _, scene -> climbScene = scene }
-        assertEquals(GodotRuntime.SCENE_CLIMB, climbScene)
+        assertEquals(pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.CLIMB), climbScene)
         destroy(climbController)
         val invadersController =
             Robolectric.buildActivity(
@@ -337,7 +335,7 @@ class GodotPluginHostTest {
         assertTrue(climbScript.contains("barris") || climbScript.contains("Letras"))
         ctx.assets.open("host.gd").close()
         assertEquals("res://kart.tscn", GodotBridge.rewardScene(""))
-        assertEquals("res://runner.tscn", GodotBridge.rewardScene(GodotRuntime.SCENE_RUNNER))
+        assertEquals("res://runner.tscn", GodotBridge.rewardScene("res://runner.tscn"))
     }
 
     @Test
@@ -416,35 +414,9 @@ class GodotPluginHostTest {
         nativeKartController.get().closeFinished()
         assertTrue(nativeKartController.get().isRewardSettled())
         assertFalse(nativeKartController.get().completeReward(ok = false))
-        nativeKartController.get().stopEngineSurface()
         nativeKartController.get().completeRewardOnUi(true)
         nativeKartController.pause()
         nativeKartController.resume()
-        nativeKartController.get().pauseEngineSurface()
-        nativeKartController.get().resumeEngineSurface()
-        nativeKartController.get().pauseableSurface =
-            android.opengl.GLSurfaceView(nativeKartController.get()).also { view ->
-                view.setEGLContextClientVersion(1)
-                view.setRenderer(
-                    object : android.opengl.GLSurfaceView.Renderer {
-                        override fun onSurfaceCreated(
-                            gl: javax.microedition.khronos.opengles.GL10?,
-                            config: javax.microedition.khronos.egl.EGLConfig?,
-                        ) = Unit
-
-                        override fun onSurfaceChanged(
-                            gl: javax.microedition.khronos.opengles.GL10?,
-                            width: Int,
-                            height: Int,
-                        ) = Unit
-
-                        override fun onDrawFrame(gl: javax.microedition.khronos.opengles.GL10?) = Unit
-                    },
-                )
-            }
-        nativeKartController.get().pauseEngineSurface()
-        nativeKartController.get().resumeEngineSurface()
-        nativeKartController.get().stopEngineSurface()
         destroy(nativeKartController)
         assertTrue(nativeKartController.get().isDestroyed)
         nativeKartController.get().completeRewardOnUi(ok = false)

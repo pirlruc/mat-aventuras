@@ -33,11 +33,3 @@ data class Exercise(
         }
     }
 }
-
-/**
- * Result of one attempt, for scoring and spoken feedback.
- */
-data class AttemptResult(
-    val correct: Boolean,
-    val spoken: String,
-)

@@ -5,8 +5,8 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.app.engine.Kart3dInput
+import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.home.ModuleTitles
-import pt.mataventuras.app.ui.parent.ParentLabels
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.Mascot
 
@@ -56,8 +56,8 @@ class Kart3dInputTest {
 
     @Test
     fun parentDurationFormatsMinutesAndSeconds() {
-        assertEquals("0m 0s", ParentLabels.formatDuration(0))
-        assertEquals("1m 1s", ParentLabels.formatDuration(61_000))
-        assertEquals("2m 5s", ParentLabels.formatDuration(125_000))
+        assertEquals("0m 0s", UiLogic.formatDuration(0))
+        assertEquals("1m 1s", UiLogic.formatDuration(61_000))
+        assertEquals("2m 5s", UiLogic.formatDuration(125_000))
     }
 }

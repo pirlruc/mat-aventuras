@@ -46,12 +46,43 @@ internal object NativeRewardHost {
         }
 
     /**
-     * Robolectric placeholder view.
+     * Robolectric / missing-plugin placeholder view.
      */
     fun placeholder(
         activity: IsolatedEngineActivity,
         game: RewardGame,
     ) {
         activity.setContentView(TextView(activity).apply { text = hint(game) })
+    }
+}
+
+/**
+ * Robolectric-safe native host for an arcade prize. Both UI modes show the
+ * same hint view: Compose Canvas for invaders/chomp/climb is not shipped yet.
+ */
+internal object NativeInvadersHost {
+    fun attach(activity: IsolatedEngineActivity): InvadersLoop {
+        NativeRewardHost.placeholder(activity, RewardGame.INVADERS)
+        return InvadersLoop()
+    }
+}
+
+/**
+ * Maze-chomp native host.
+ */
+internal object NativeChompHost {
+    fun attach(activity: IsolatedEngineActivity): ChompLoop {
+        NativeRewardHost.placeholder(activity, RewardGame.CHOMP)
+        return ChompLoop()
+    }
+}
+
+/**
+ * Letter-climb native host.
+ */
+internal object NativeClimbHost {
+    fun attach(activity: IsolatedEngineActivity): ClimbLoop {
+        NativeRewardHost.placeholder(activity, RewardGame.CLIMB)
+        return ClimbLoop()
     }
 }

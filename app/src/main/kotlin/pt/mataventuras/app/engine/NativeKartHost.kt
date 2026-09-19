@@ -107,19 +107,13 @@ internal object NativeKartHost {
                         )
                     }
                 }
-                val extra = KartHud.offTrackLabel(state) ?: KartHud.boostLabel(state)
-                val place = KartHud.placeLabel(
-                    pt.mataventuras.domain.engine.RivalPack.place(state, circuit.length),
-                    pt.mataventuras.domain.engine.RivalPack.fieldSize(state),
-                )
+                val hud = KartHud.raceOverlay(state, circuit.length)
                 Text(
-                    text = listOfNotNull(
+                    text = listOf(
                         KartHud.CONTROL_HINT,
                         KartHud.META_HINT,
-                        KartHud.lapLabel(state),
-                        place,
-                        KartHud.gatesLabel(state),
-                        extra,
+                        hud.first,
+                        hud.second,
                     ).joinToString("\n"),
                     color = Color.White,
                     fontSize = 22.sp,
@@ -135,16 +129,8 @@ internal object NativeKartHost {
     }
 
     /**
-     * Overlay lines for tests that still call the GLES helper.
+     * Overlay lines for tests and HUD helpers.
      */
-    fun hudLines(loop: OffroadRacerLoop): Pair<String, String> {
-        val extra = KartHud.offTrackLabel(loop.state) ?: KartHud.boostLabel(loop.state)
-        val place =
-            KartHud.placeLabel(
-                pt.mataventuras.domain.engine.RivalPack.place(loop.state, loop.circuit.length),
-                pt.mataventuras.domain.engine.RivalPack.fieldSize(loop.state),
-            )
-        val second = listOfNotNull(place, KartHud.gatesLabel(loop.state), extra).joinToString(" · ")
-        return KartHud.lapLabel(loop.state) to second
-    }
+    fun hudLines(loop: OffroadRacerLoop): Pair<String, String> =
+        KartHud.raceOverlay(loop.state, loop.circuit.length)
 }

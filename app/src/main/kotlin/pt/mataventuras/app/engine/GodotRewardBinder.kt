@@ -23,7 +23,7 @@ internal object GodotRewardBinder {
         onGodot: (IsolatedEngineActivity, String) -> Unit = GodotEmbed::attach,
     ) {
         if (embed) {
-            onGodot(activity, GodotRuntime.SCENE_KART)
+            onGodot(activity, RewardCatalog.scenePath(RewardGame.KART))
         } else {
             activity.nativeSession = NativeKartHost.attach(activity)
         }

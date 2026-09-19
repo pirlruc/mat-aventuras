@@ -1,58 +1,45 @@
 package pt.mataventuras.data.pin
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStoreFile
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import pt.mataventuras.domain.parent.PinState
 
 /**
- * Parental PIN hash in DataStore. Plaintext is never persisted.
+ * Parental PIN hash in encrypted prefs when Android Keystore is available.
+ * Plaintext PIN digits are never persisted. Robolectric (no Keystore) falls
+ * back to process-private SharedPreferences so unit tests still round-trip.
  */
 class PinRepository(
     context: Context,
     storeName: String = "parent_pin",
+    private val prefs: SharedPreferences = pinPreferences(context.applicationContext, storeName),
 ) {
-    private val dataStore: DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            produceFile = { context.applicationContext.preferencesDataStoreFile(storeName) },
-        )
-    private val hash = stringPreferencesKey("hash")
-    private val salt = stringPreferencesKey("salt")
-    private val failures = intPreferencesKey("failures")
-    private val lockout = longPreferencesKey("lockout")
-
     /**
      * Stored PIN, or null when none has been set.
      */
-    suspend fun read(): PinState? = dataStore.data.map { prefs ->
-        val hashValue = prefs[hash] ?: return@map null
-        val saltValue = prefs[salt] ?: return@map null
-        PinState(
+    suspend fun read(): PinState? {
+        val hashValue = prefs.getString(KEY_HASH, null) ?: return null
+        val saltValue = prefs.getString(KEY_SALT, null) ?: return null
+        return PinState(
             hashHex = hashValue,
             saltHex = saltValue,
-            consecutiveFailures = prefs[failures] ?: 0,
-            lockedUntilEpochMs = prefs[lockout] ?: 0L,
+            consecutiveFailures = prefs.getInt(KEY_FAILURES, 0),
+            lockedUntilEpochMs = prefs.getLong(KEY_LOCKOUT, 0L),
         )
-    }.first()
+    }
 
     /**
      * Writes hash, salt, failure count, and lockout timestamp.
      */
     suspend fun save(state: PinState) {
-        dataStore.edit { prefs ->
-            prefs[hash] = state.hashHex
-            prefs[salt] = state.saltHex
-            prefs[failures] = state.consecutiveFailures
-            prefs[lockout] = state.lockedUntilEpochMs
-        }
+        prefs.edit()
+            .putString(KEY_HASH, state.hashHex)
+            .putString(KEY_SALT, state.saltHex)
+            .putInt(KEY_FAILURES, state.consecutiveFailures)
+            .putLong(KEY_LOCKOUT, state.lockedUntilEpochMs)
+            .commit()
     }
 
     /**
@@ -64,7 +51,7 @@ class PinRepository(
      * Drops stored PIN state (tests and factory reset).
      */
     suspend fun clear() {
-        dataStore.edit { it.clear() }
+        prefs.edit().clear().commit()
     }
 
     /**
@@ -76,12 +63,46 @@ class PinRepository(
         failureCount: Int?,
         lockoutMs: Long?,
     ) {
-        dataStore.edit { prefs ->
-            prefs.clear()
-            prefs[hash] = hashHex
-            if (saltHex != null) prefs[salt] = saltHex
-            if (failureCount != null) prefs[failures] = failureCount
-            if (lockoutMs != null) prefs[lockout] = lockoutMs
-        }
+        val editor = prefs.edit().clear().putString(KEY_HASH, hashHex)
+        if (saltHex != null) editor.putString(KEY_SALT, saltHex)
+        if (failureCount != null) editor.putInt(KEY_FAILURES, failureCount)
+        if (lockoutMs != null) editor.putLong(KEY_LOCKOUT, lockoutMs)
+        editor.commit()
     }
+}
+
+private const val KEY_HASH: String = "hash"
+private const val KEY_SALT: String = "salt"
+private const val KEY_FAILURES: String = "failures"
+private const val KEY_LOCKOUT: String = "lockout"
+
+/**
+ * Encrypted store, or a private prefs file when Keystore cannot open.
+ */
+internal fun pinPreferences(
+    context: Context,
+    storeName: String,
+    encrypted: (Context, String) -> SharedPreferences = ::encryptedPinPreferences,
+    fallback: (Context, String) -> SharedPreferences = { ctx, name ->
+        ctx.getSharedPreferences(name, Context.MODE_PRIVATE)
+    },
+): SharedPreferences =
+    try {
+        encrypted(context, storeName)
+    } catch (_: Exception) {
+        fallback(context, storeName)
+    }
+
+internal fun encryptedPinPreferences(
+    context: Context,
+    storeName: String,
+): SharedPreferences {
+    val masterKey = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    return EncryptedSharedPreferences.create(
+        storeName,
+        masterKey,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+    )
 }

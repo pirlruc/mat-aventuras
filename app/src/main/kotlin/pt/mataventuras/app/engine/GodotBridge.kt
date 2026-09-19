@@ -1,5 +1,8 @@
 package pt.mataventuras.app.engine
 
+import pt.mataventuras.domain.engine.RewardCatalog
+import pt.mataventuras.domain.engine.RewardGame
+
 /**
  * JVM bridge used by GDScript (`Engine.get_singleton("MatAventuras")`).
  * Kept free of Godot types so Robolectric can cover it.
@@ -28,5 +31,6 @@ internal object GodotBridge {
     /**
      * Scene path GDScript should `change_scene_to_file` after the boot node.
      */
-    fun rewardScene(requested: String): String = requested.ifBlank { GodotRuntime.SCENE_KART }
+    fun rewardScene(requested: String): String =
+        requested.ifBlank { RewardCatalog.scenePath(RewardGame.KART) }
 }

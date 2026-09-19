@@ -33,7 +33,7 @@ object EnginePluginContract {
      */
     const val RESULT_RESTART: String = "restart"
 
-    /** Isolated process for the 3D kart (Godot or native GLES). */
+    /** Isolated process for the 3D kart (Godot or native Canvas fallback). */
     const val PROCESS_ENGINE_3D: String = ":engine3d"
 
     /** Isolated process for the Godot 2D runner (and the native Canvas fallback). */
@@ -47,9 +47,15 @@ object EnginePluginContract {
 
     /**
      * Fully-qualified Activity the Godot host provides for the 3D kart.
-     * Absent class → native GLES kart Activity.
+     * Absent class → native Canvas off-road Activity.
      */
     const val PLUGIN_KART_CLASS: String = "pt.mataventuras.plugin.KartPluginActivity"
+
+    /** Native Canvas 2D fallback Activity. */
+    const val NATIVE_RUNNER_CLASS: String = "pt.mataventuras.app.engine.Platformer2dActivity"
+
+    /** Native Canvas off-road fallback Activity. */
+    const val NATIVE_KART_CLASS: String = "pt.mataventuras.app.engine.Kart3dActivity"
 
     /**
      * Process name the plugin Activity must declare.
@@ -93,6 +99,12 @@ object EnginePluginContract {
     fun isNonDefaultProcessName(processName: String): Boolean = ':' in processName
 
     /**
+     * True when [className] may be relaunched after a GLES restart.
+     * Rejects extras that would start an arbitrary in-app Activity.
+     */
+    fun isAllowedEngineClass(className: String): Boolean = className in ALLOWED_ENGINE_CLASSES
+
+    /**
      * True when [permission] must not appear on a plugin (or host) manifest.
      */
     fun isForbiddenPermission(permission: String): Boolean {
@@ -125,6 +137,14 @@ object EnginePluginContract {
         childName: String,
         game: RewardGame,
     ): Map<String, String> = launchExtras(mascotCode, childName) + (EXTRA_SCENE to game.name)
+
+    private val ALLOWED_ENGINE_CLASSES =
+        setOf(
+            PLUGIN_RUNNER_CLASS,
+            PLUGIN_KART_CLASS,
+            NATIVE_RUNNER_CLASS,
+            NATIVE_KART_CLASS,
+        )
 
     private val FORBIDDEN_PERMISSIONS =
         setOf(

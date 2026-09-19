@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-09-19
-**Last agent focus:** Bump guardrails 1.6.0 / scaffold 1.5.0; drop dead code; harder age-7 games
+**Last agent focus:** Drop unused GLES oval stack; encrypt PIN; allowlist engine relaunch
 
 ---
 
@@ -18,7 +18,7 @@ authored backlog is `docs/issues.yml`.
 Reward engines: **Godot 4** in `:engine2d` (age 3 platformer, letter-climb,
 maze) and `:engine3d` (age 7 2.5D off-road race with rivals). Age 7 can also
 open 2D invaders/maze/climb. Unity is not used. Native Canvas is the
-Robolectric fallback. `Kart3dEngine` GLES remains unit-tested.
+Robolectric fallback (`OffroadRacerEngine` / `Platformer2dEngine`).
 
 ## Pins
 
@@ -33,14 +33,18 @@ equals the recorded sha.
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 
+Latest published companion **tags** are already 1.6.0 / 1.5.0. Companion
+`main` is ahead only with those repos' own CI/docs issue filings — no kotlin
+or supply-chain pack edits. Stay on annotated tags (SC-DEP-004).
+
 ## Delivery status
 
 | Epic | Status | Notes |
 | --- | --- | --- |
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
 | MAT-002 | open | T4 (harder age-7) done in tree; T1 emulator CI and T5 tap-to-fill sudoku remain |
-| MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin Activities + assets; native fallback under Robolectric |
-| MAT-004 | open | T5 grype + companion pins done in tree; CodeQL/OSV still open (T4) |
+| MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin Activities + assets; native Canvas fallback under Robolectric |
+| MAT-004 | open | T5 grype + T6 PIN encrypt/allowlist done in tree; CodeQL/OSV (T4) and arcade Canvas (T7) remain |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
 KT-DOC-001 is public-type KDoc (no numeric `doc_coverage`). KT-CPLX-002 is
@@ -72,14 +76,15 @@ bash scripts/check-ci-local.sh
 - Private companion repos: local submodule clone needs a PAT with Contents: Read
   on `pirlruc/guardrails` and `pirlruc/github-scaffold`. GitHub Actions does not
   clone them; it uses `scripts/` helpers, `config/kotlin.thresholds.yml`, and
-  `docs/companion-pins.yml` for the gitlink SHA assert.
+  `docs/companion-pins.yml` for the gitlink SHA assert. `verify-coverage.py`
+  fails if the overlay is below the submodule org defaults when both exist.
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
   can still gate `:domain`. With the SDK, coverage is required for all three.
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`; this cloud run used
-  `cursor/code-quality-games-4741` per the agent environment.
+  `cursor/code-quality-guardrails-1948` per the agent environment.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
 - Run `:domain:ktlintFormat` before `:domain:ktlintCheck` (parallel format+check races).
 - Never construct `GodotFragment` under Robolectric (`GodotRuntime.shouldEmbed`
@@ -90,7 +95,8 @@ bash scripts/check-ci-local.sh
   command line. First-time GLES restart must return a `restart` extra to
   MainActivity (host relaunch), not `Activity.recreate()`, not ProcessPhoenix,
   and not `startActivity` of the same `singleInstance` plugin from the dying
-  engine process.
+  engine process. `EngineLauncher.relaunchIntent` allowlists plugin/native
+  reward class names only.
 - Compose `pointerInput` `size` is `IntSize` (`width: Int`). Use
   `size.width.coerceAtLeast(1).toFloat()`, not `coerceAtLeast(1f)`.
   `:app` is not compiled on this VM (`ANDROID_HOME` unset); CI catches it.
@@ -122,6 +128,8 @@ bash scripts/check-ci-local.sh
 - Age-7 sudoku uses `SudokuHoles.EXTRA_BLANK` (`·`) for extra houses and `""`
   for the question cell. UI glows only the question cell. Punching extra
   blanks must keep the question uniquely determined.
+- PIN prefs use `EncryptedSharedPreferences` on device. Robolectric has no
+  Android Keystore, so `pinPreferences` falls back to private SharedPreferences.
 
 ## Suggested next work
 
@@ -129,11 +137,12 @@ bash scripts/check-ci-local.sh
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-002-T5: tap-to-fill remaining sudoku blanks (not one highlighted house).
 4. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
+5. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
 
-This pass: guardrails 1.6.0 + scaffold 1.5.0; dropped invented Kotlin MI /
-numeric KDoc ratio; grype (KT-SEC-004); companion pin assert (SC-DEP-004);
-removed unused soup `extraCells` and the broken `:dominio` local runner;
-deduplicated number-words / extrema / architecture table; age-7 two-digit
-arithmetic, missing factor, skip-counting, extra sudoku blanks.
+This pass: companion tags already latest (guardrails 1.6.0, scaffold 1.5.0);
+synced Cursor rules from scaffold; dropped unused GLES oval stack, AttemptResult,
+ParentLabels, unused theme APIs, viewmodel-compose; encrypted PIN at rest;
+allowlisted engine relaunch classes; native fallback packs runner/kart when
+the plugin is absent.
 
 *Last updated: 2026-09-19*

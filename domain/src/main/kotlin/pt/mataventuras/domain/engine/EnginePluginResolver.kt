@@ -13,8 +13,8 @@ object EnginePluginResolver {
     fun classNameFor(
         kind: EngineKind,
         pluginPresent: (String) -> Boolean,
-        nativeTwoD: String,
-        nativeThreeD: String,
+        nativeTwoD: String = EnginePluginContract.NATIVE_RUNNER_CLASS,
+        nativeThreeD: String = EnginePluginContract.NATIVE_KART_CLASS,
     ): String {
         val plugin = EnginePluginContract.pluginClassName(kind)
         if (pluginPresent(plugin)) return plugin

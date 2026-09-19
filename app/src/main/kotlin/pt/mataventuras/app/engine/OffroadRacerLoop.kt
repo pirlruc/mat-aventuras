@@ -12,13 +12,13 @@ internal class OffroadRacerLoop(
     val circuit: OffroadCircuit = OffroadCircuit(1),
     private val engine: OffroadRacerEngine = OffroadRacerEngine(circuit),
     lapsTarget: Int = 3,
-    private val nowNs: () -> Long = { System.nanoTime() },
+    nowNs: () -> Long = { System.nanoTime() },
 ) {
     /** Latest simulation snapshot. */
     var state: OffroadState = engine.initial(lapsTarget = lapsTarget)
         private set
 
-    private var lastNs: Long = 0L
+    private val clock = FrameClock(nowNs)
     private var steer: Float = 0f
     private var boost: Boolean = false
 
@@ -40,13 +40,9 @@ internal class OffroadRacerLoop(
      */
     fun tick(): OffroadState {
         if (state.finished) return state
-        val now = nowNs()
-        if (lastNs == 0L) lastNs = now
-        val dt = ((now - lastNs) / 1_000_000_000f).coerceAtMost(0.05f)
-        lastNs = now
         val burst = boost
         boost = false
-        state = engine.step(state, dt, steer, burst)
+        state = engine.step(state, clock.delta(), steer, burst)
         return state
     }
 }

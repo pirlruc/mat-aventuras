@@ -13,6 +13,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
+import pt.mataventuras.data.pin.encryptedPinPreferences
+import pt.mataventuras.data.pin.pinPreferences
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.LearningSession
@@ -102,6 +104,33 @@ class LocalRepositoryTest {
         assertEquals(false, defaults.isSet())
         pins.clear()
         assertEquals(false, pins.isSet())
+    }
+
+    @Test
+    fun pinPreferencesFallsBackWhenEncryptedStoreFails() {
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val prefs =
+            pinPreferences(
+                ctx,
+                "pin_fallback_test",
+                encrypted = { _, _ -> error("no keystore") },
+            )
+        prefs.edit().putString("hash", "aa").commit()
+        assertEquals("aa", prefs.getString("hash", null))
+        val opened =
+            pinPreferences(
+                ctx,
+                "pin_enc_ok_test",
+                encrypted = { c, n -> c.getSharedPreferences("enc_$n", android.content.Context.MODE_PRIVATE) },
+                fallback = { _, _ -> error("should not fallback") },
+            )
+        opened.edit().putString("hash", "bb").commit()
+        assertEquals("bb", opened.getString("hash", null))
+        try {
+            encryptedPinPreferences(ctx, "pin_keystore_probe")
+        } catch (_: Exception) {
+            // Robolectric has no Android Keystore; production uses this path.
+        }
     }
 
     @Test

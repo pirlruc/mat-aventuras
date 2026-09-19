@@ -32,6 +32,12 @@ object RewardCatalog {
     fun engineKind(game: RewardGame): EngineKind = if (game == RewardGame.KART) EngineKind.THREE_D else EngineKind.TWO_D
 
     /**
+     * Playable native fallback when the Godot plugin Activity is absent.
+     * Arcade 2D prizes stay Godot-only; Canvas hosts the runner or dirt race.
+     */
+    fun nativeFallback(kind: EngineKind): RewardGame = if (kind == EngineKind.THREE_D) RewardGame.KART else RewardGame.RUNNER
+
+    /**
      * Games that fit [age] on [kind]'s process.
      */
     fun gamesFor(

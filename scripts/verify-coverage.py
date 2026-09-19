@@ -116,6 +116,19 @@ def check_report(name: str, path: Path, thresholds: dict) -> bool:
 
 
 def thresholds_path() -> Path:
+    primary = THRESHOLDS_CANDIDATES[0]
+    overlay = THRESHOLDS_CANDIDATES[1]
+    if primary.is_file() and overlay.is_file():
+        org = load_thresholds(primary)
+        local = load_thresholds(overlay)
+        for key in REQUIRED:
+            if float(local[key]) < float(org[key]):
+                print(
+                    f"error: overlay {key} {local[key]} is below org default {org[key]}",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+        return overlay
     for path in THRESHOLDS_CANDIDATES:
         if path.is_file():
             return path
