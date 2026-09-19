@@ -132,7 +132,7 @@ object EngineLauncher {
     ): Intent {
         val pluginClass = EnginePluginContract.pluginClassName(kind)
         val usingPlugin = pluginPresent(pluginClass)
-        val className = EnginePluginResolver.classNameFor(kind) { usingPlugin }
+        val className = EnginePluginResolver.classNameFor(kind, pluginPresent = { _ -> usingPlugin })
         val packed = if (usingPlugin) game else RewardCatalog.nativeFallback(kind)
         return Intent().setClassName(context.packageName, className).apply {
             EnginePluginContract.launchExtras(mascot.code, name, packed).forEach { (key, value) ->
