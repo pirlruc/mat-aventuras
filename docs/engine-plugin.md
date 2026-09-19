@@ -85,8 +85,9 @@ Files live in `app/src/main/assets/` (no hidden `.godot` directory;
 `use_hidden_project_data_directory=false`). `run/main_scene` is a full-rect
 `boot.tscn` that `call_deferred`s `change_scene_to_file` with
 `MatAventuras.rewardScene()`. The fragment is attached only after the host
-view is larger than 32×32 px (with a 1.2 s fallback). The fragment command
-line is **empty**.
+view is larger than 32×32 px (layout listener, then a 1.2 s sized retry).
+A 4.8 s last resort still attaches so a headless view cannot hang. The
+fragment command line is **empty**.
 Godot 4.6+ Android loads `project.godot` from APK assets. Do not pass
 `--path` (CWD override, blank English error) or `--scene` (races
 `boot.tscn`). GLES is set only in `project.godot`; repeating it on the

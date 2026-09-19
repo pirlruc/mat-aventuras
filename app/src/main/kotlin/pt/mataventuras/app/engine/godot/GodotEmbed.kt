@@ -14,7 +14,8 @@ import pt.mataventuras.app.engine.IsolatedEngineActivity
 internal object GodotEmbed {
     private const val TAG: String = "godot"
     private const val WAITING: String = "godot-wait"
-    private const val ATTACH_FALLBACK_MS: Long = 1_200L
+    private const val ATTACH_RETRY_MS: Long = 1_200L
+    private const val ATTACH_FORCE_MS: Long = 4_800L
 
     @Volatile
     private var restartedOnce: Boolean = false
@@ -102,6 +103,11 @@ internal object GodotEmbed {
             .commitNowAllowingStateLoss()
     }
 
+    /**
+     * Layout is the happy path. A 1.2 s retry still requires a real size so a
+     * slow first layout does not recreate the 0×0 black screen. Only the 4.8 s
+     * last resort attaches anyway, so a headless view cannot hang forever.
+     */
     private fun waitThenAttach(
         activity: IsolatedEngineActivity,
         container: View,
@@ -109,13 +115,47 @@ internal object GodotEmbed {
     ) {
         if (container.tag == WAITING) return
         container.tag = WAITING
-        val attempt = Runnable { commitFragment(activity, scene) }
-        container.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
-            if (GodotRuntime.isSurfaceReady(view.width, view.height)) view.post(attempt)
+        val listener =
+            object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int,
+                ) {
+                    if (!GodotRuntime.isSurfaceReady(v.width, v.height)) return
+                    v.removeOnLayoutChangeListener(this)
+                    commitFragment(activity, scene)
+                }
+            }
+        container.addOnLayoutChangeListener(listener)
+        val retry = Runnable { tryCommit(activity, container, scene, listener, force = false) }
+        container.post(retry)
+        container.postDelayed(retry, ATTACH_RETRY_MS)
+        container.postDelayed(
+            { tryCommit(activity, container, scene, listener, force = true) },
+            ATTACH_FORCE_MS,
+        )
+    }
+
+    private fun tryCommit(
+        activity: IsolatedEngineActivity,
+        container: View,
+        scene: String,
+        listener: View.OnLayoutChangeListener,
+        force: Boolean,
+    ) {
+        if (activity.isFinishing || activity.isDestroyed || alreadyAttached(activity)) {
+            container.removeOnLayoutChangeListener(listener)
+            return
         }
-        container.post {
-            if (GodotRuntime.isSurfaceReady(container.width, container.height)) attempt.run()
-        }
-        container.postDelayed(attempt, ATTACH_FALLBACK_MS)
+        if (!force && !GodotRuntime.isSurfaceReady(container.width, container.height)) return
+        container.removeOnLayoutChangeListener(listener)
+        commitFragment(activity, scene)
     }
 }

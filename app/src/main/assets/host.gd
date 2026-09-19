@@ -3,6 +3,7 @@ extends Node
 ## Bridge to IsolatedEngineActivity plus screen-pixel helpers for prize games.
 var plugin: Object
 var settling := false
+var fitted := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -52,6 +53,9 @@ func view_size(node: Node) -> Vector2:
 
 func fit_viewport(node: Node) -> Vector2:
 	var size := view_size(node)
+	if size == fitted:
+		return size
+	fitted = size
 	var tree := node.get_tree()
 	if tree:
 		tree.root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
@@ -75,14 +79,17 @@ func skin_hud(hud: Label, node: Node) -> void:
 	hud.add_theme_constant_override("outline_size", maxi(8, int(float(px) * 0.28)))
 
 
-func finish(ok: bool) -> void:
+func finish(ok: bool, linger: bool = true) -> void:
 	if settling:
 		return
 	settling = true
-	var tree := get_tree()
-	if tree:
-		await tree.create_timer(1.6).timeout
+	if linger:
+		var tree := get_tree()
+		if tree:
+			await tree.create_timer(1.6).timeout
 	if plugin:
 		plugin.completeReward(ok)
-	else:
-		get_tree().quit()
+		return
+	var later := get_tree()
+	if later:
+		later.quit()

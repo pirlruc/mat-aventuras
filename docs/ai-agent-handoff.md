@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-09-19
-**Last agent focus:** Port arcade lives/i-frames and pixel HUD from stale Godot branches
+**Last agent focus:** Port arcade lives/i-frames and pixel HUD; fix 0×0 attach fallback
 
 ---
 
@@ -140,9 +140,11 @@ bash scripts/check-ci-local.sh
 - Invaders ends at 5 lives or an empty 15-ship fleet (not 8 hits / first bomb).
   Chomp and climb use 3 lives with i-frames. Keep GDScript in sync with
   `:domain` engines.
-- `GodotEmbed.attach` waits for a >32 px host view (1.2 s fallback). Keep
+- `GodotEmbed.attach` waits for a >32 px host view (layout listener, then a
+  1.2 s sized retry). Only a 4.8 s last resort attaches anyway. Keep
   `boot.tscn`'s window-size wait; do not treat `onGodotForceQuit` as a GLES
-  restart (`onGodotRestartRequested` already does that).
+  restart (`onGodotRestartRequested` already does that). `Host.finish` lingers
+  1.6 s for prize banners; boot errors pass `linger=false`.
 
 ## Suggested next work
 
