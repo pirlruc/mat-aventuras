@@ -18,7 +18,7 @@ internal class OffroadRacerLoop(
     var state: OffroadState = engine.initial(lapsTarget = lapsTarget)
         private set
 
-    private val clock = FrameClock(nowNs)
+    private val ticker = RewardTicker(nowNs)
     private var steer: Float = 0f
     private var boost: Boolean = false
 
@@ -39,10 +39,12 @@ internal class OffroadRacerLoop(
      * Advances one frame.
      */
     fun tick(): OffroadState {
-        if (state.finished) return state
-        val burst = boost
-        boost = false
-        state = engine.step(state, clock.delta(), steer, burst)
+        state =
+            ticker.advance(state, state.finished) { dt ->
+                val burst = boost
+                boost = false
+                engine.step(state, dt, steer, burst)
+            }
         return state
     }
 }

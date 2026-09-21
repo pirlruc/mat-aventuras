@@ -555,7 +555,125 @@ milestones:
                 - app/src/main/kotlin/pt/mataventuras/app/di/AppContainer.kt
             verification:
               - PIN store uses MasterKey.Builder (or equivalent non-deprecated API) without a plaintext device fallback
-              - Room schema changes migrate instead of fallbackToDestructiveMigration
+              - Do not reintroduce fallbackToDestructiveMigration; the next schema version ships an explicit Migration
             guardrail_refs:
               - KT-SEC-001
               - KT-API-003
+
+      - id: MAT-005
+        status: open
+        title: Close review gaps without new coverage deviations
+        overview:
+          problem: >-
+            Prize rules are implemented twice (Kotlin simulation and GDScript),
+            release builds are not minified, :app Kover still omits Compose
+            facades and the Godot JNI package, semgrep only runs the local
+            five-rule pack, child names are stored unbounded, and workflow
+            token scope is not linted. Guardrail deviations stay empty; these
+            gaps are follow-up work, not approved exceptions.
+          goal: >-
+            One simulation feeds both hosts, release bytecode is shrunk without
+            breaking Godot, coverage exclusions shrink to JNI that cannot load
+            in unit tests, SAST covers community Kotlin rules, names are
+            bounded before Room and speech, and workflow lint matches CI-025.
+        architecture:
+          target: >-
+            Keep Godot in the isolated processes and Room in the Compose
+            process. Do not add a network client. Do not record a KT-TEST-002
+            deviation to hide untested Compose or arcade code.
+          modules:
+            - app/src/main/assets
+            - app/src/main/kotlin/pt/mataventuras/app
+            - domain/src/main/kotlin/pt/mataventuras/domain
+            - .github/workflows
+            - .semgrep.yml
+        acceptance_criteria:
+          - Godot prize scenes and :domain engines share one set of rules
+          - Release minify stays compatible with libgodot_android
+          - :app Kover exclusions are limited to JNI types unit tests cannot load
+          - Semgrep CI includes a community Kotlin or Android ruleset and stays green
+          - Child display names are length-capped and free of control characters
+          - Workflow lint (zizmor or equivalent) runs with the existing permissions block
+        guardrail_refs:
+          - KT-TEST-002
+          - KT-SEC-001
+          - KT-SEC-002
+          - KT-PERF-001
+          - CI-025
+        tasks:
+          - id: MAT-005-T1
+            status: open
+            title: Share prize simulation between GDScript and domain engines
+            instructions:
+              files:
+                - app/src/main/assets
+                - domain/src/main/kotlin/pt/mataventuras/domain/engine
+            verification:
+              - Invaders, chomp, climb, runner, and kart do not keep a second copy of lives, speeds, and hit tests
+            guardrail_refs:
+              - KT-TEST-001
+
+          - id: MAT-005-T2
+            status: open
+            title: Enable R8 on the release APK without breaking Godot
+            instructions:
+              files:
+                - app/build.gradle.kts
+                - app/proguard-rules.pro
+            verification:
+              - release isMinifyEnabled is true and a device still embeds the Godot prize
+            guardrail_refs:
+              - KT-SEC-001
+              - KT-PERF-001
+
+          - id: MAT-005-T3
+            status: open
+            title: Shrink app Kover exclusions to Godot JNI only
+            instructions:
+              files:
+                - app/build.gradle.kts
+                - app/src/test
+            verification:
+              - LessonScreenKt and NavGraphKt are no longer excluded
+              - NativeKartHost and NativeRunnerHost are no longer excluded
+              - :app line and branch coverage stay at the org 95 percent gate
+            guardrail_refs:
+              - KT-TEST-002
+
+          - id: MAT-005-T4
+            status: open
+            title: Add a community semgrep pack beside the local rules
+            instructions:
+              files:
+                - .semgrep.yml
+                - .github/workflows/ci.yml
+            verification:
+              - The security job runs a maintained Kotlin or Android ruleset and fails on error
+              - New findings are fixed in tree; do not add a nosemgrep baseline to go green
+            guardrail_refs:
+              - KT-SEC-002
+
+          - id: MAT-005-T5
+            status: open
+            title: Bound child display names before Room and speech
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain
+                - data/src/main/kotlin/pt/mataventuras/data/repository/LocalRepository.kt
+            verification:
+              - Names are trimmed, control characters are dropped, and length is capped
+              - Blank input still falls back to the pt-PT placeholder used by the entry screen
+            guardrail_refs:
+              - KT-SEC-001
+
+          - id: MAT-005-T6
+            status: open
+            title: Lint GitHub workflows for token scope
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+                - .github/workflows/hardening.yml
+            verification:
+              - zizmor or an equivalent workflow linter runs in CI and the current permissions blocks stay default-deny
+            guardrail_refs:
+              - CI-025

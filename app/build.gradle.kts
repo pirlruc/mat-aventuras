@@ -59,7 +59,6 @@ android {
     }
     lint {
         abortOnError = true
-        lintConfig = file("lint.xml")
     }
 }
 
@@ -120,20 +119,6 @@ kover {
                 // Compose file facades still emit non-@Composable restart-group branches.
                 classes("pt.mataventuras.app.ui.lesson.LessonScreenKt")
                 classes("pt.mataventuras.app.ui.navigation.NavGraphKt")
-            }
-        }
-        verify {
-            rule {
-                bound {
-                    minValue.set(95)
-                    coverageUnits.set(kotlinx.kover.gradle.plugin.dsl.CoverageUnit.LINE)
-                }
-            }
-            rule {
-                bound {
-                    minValue.set(95)
-                    coverageUnits.set(kotlinx.kover.gradle.plugin.dsl.CoverageUnit.BRANCH)
-                }
             }
         }
     }

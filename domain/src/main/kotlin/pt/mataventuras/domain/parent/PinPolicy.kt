@@ -1,7 +1,6 @@
 package pt.mataventuras.domain.parent
 
 import java.security.SecureRandom
-import java.security.spec.KeySpec
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -82,7 +81,7 @@ class PinPolicy(
     /**
      * Accepts exactly four digits 0-9.
      */
-    fun isValidFormat(pin: String): Boolean = pin.length == 4 && pin.all { it.isDigit() }
+    fun isValidFormat(pin: String): Boolean = pin.length == 4 && pin.all { it in '0'..'9' }
 
     private fun failed(
         state: PinState,
@@ -104,9 +103,14 @@ class PinPolicy(
         pin: String,
         salt: ByteArray,
     ): ByteArray {
-        val spec: KeySpec = PBEKeySpec(pin.toCharArray(), salt, iterations, HASH_BITS)
-        val factory = SecretKeyFactory.getInstance(ALGORITHM)
-        return factory.generateSecret(spec).encoded
+        val chars = pin.toCharArray()
+        val spec = PBEKeySpec(chars, salt, iterations, HASH_BITS)
+        chars.fill('\u0000')
+        return try {
+            SecretKeyFactory.getInstance(ALGORITHM).generateSecret(spec).encoded
+        } finally {
+            spec.clearPassword()
+        }
     }
 
     /** PBKDF2 parameters and lockout policy. */
@@ -133,10 +137,12 @@ internal fun constantTimeEquals(
     a: ByteArray,
     b: ByteArray,
 ): Boolean {
-    if (a.size != b.size) return false
-    var acc = 0
-    for (i in a.indices) {
-        acc = acc or (a[i].toInt() xor b[i].toInt())
+    val limit = maxOf(a.size, b.size)
+    var acc = a.size xor b.size
+    for (i in 0 until limit) {
+        val left = if (i < a.size) a[i].toInt() and 0xff else 0
+        val right = if (i < b.size) b[i].toInt() and 0xff else 0
+        acc = acc or (left xor right)
     }
     return acc == 0
 }

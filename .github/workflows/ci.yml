@@ -127,7 +127,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Secret scan (gitleaks MIT binary, KT-SEC-002)
+      - name: Secret scan (gitleaks MIT binary, KT-SEC-003)
         run: |
           ver="8.24.3"
           curl -fsSL -o /tmp/gitleaks.tgz \
@@ -139,7 +139,7 @@ jobs:
       - name: Dependency vulnerabilities (KT-SEC-004)
         run: bash scripts/run-grype.sh
 
-      - name: SAST (semgrep local rules, KT-SEC-003)
+      - name: SAST (semgrep local rules, KT-SEC-002)
         run: |
           python3 -m venv .ci-venv
           .ci-venv/bin/pip install -q "setuptools>=70,<82" "semgrep==1.128.1"

@@ -12,9 +12,6 @@ import pt.mataventuras.app.engine.ChompLoop
 import pt.mataventuras.app.engine.ClimbLoop
 import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.engine.InvadersLoop
-import pt.mataventuras.app.engine.NativeChompHost
-import pt.mataventuras.app.engine.NativeClimbHost
-import pt.mataventuras.app.engine.NativeInvadersHost
 import pt.mataventuras.app.engine.NativeRewardHost
 import pt.mataventuras.app.engine.OffroadScene
 import pt.mataventuras.app.engine.OffroadSpan
@@ -64,9 +61,9 @@ class EngineCoverageTest {
         val controller = Robolectric.buildActivity(RunnerPluginActivity::class.java, intent).setup()
         val activity = controller.get()
         assertEquals(RewardGame.INVADERS.name, activity.sceneCode())
-        NativeInvadersHost.attach(activity)
-        NativeChompHost.attach(activity)
-        NativeClimbHost.attach(activity)
+        NativeRewardHost.attach(activity, RewardGame.INVADERS)
+        NativeRewardHost.attach(activity, RewardGame.CHOMP)
+        NativeRewardHost.attach(activity, RewardGame.CLIMB)
         NativeRewardHost.placeholder(activity, RewardGame.KART)
         NativeRewardHost.placeholder(activity, RewardGame.RUNNER)
         controller.pause().stop().destroy()

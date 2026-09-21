@@ -26,37 +26,24 @@ var fire := false
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("0D1B3A"))
 	Host.fit_viewport(self)
-	var layer := CanvasLayer.new()
-	add_child(layer)
-	hud = Label.new()
-	Host.skin_hud(hud, self)
-	layer.add_child(hud)
+	hud = Host.make_hud(self)
 	_update_hud()
 
 
 func _input(event: InputEvent) -> void:
 	if finished:
 		return
-	if event is InputEventScreenTouch:
-		if event.pressed:
-			ship_x = _nx(event.position)
-			fire = true
-		else:
-			fire = false
-	elif event is InputEventScreenDrag:
-		ship_x = _nx(event.position)
-	elif event is InputEventMouseButton:
-		if event.pressed:
-			ship_x = _nx(event.position)
-			fire = true
-		else:
-			fire = false
-	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		ship_x = _nx(event.position)
-
-
-func _nx(pos: Vector2) -> float:
-	return clampf(pos.x / maxf(Host.view_size(self).x, 1.0), 0.08, 0.92)
+	var sample := Host.read_pointer(event)
+	if sample.is_empty():
+		return
+	var nx := clampf(Host.normalized_x(self, sample.pos), 0.08, 0.92)
+	if sample.down:
+		ship_x = nx
+		fire = true
+	elif sample.up:
+		fire = false
+	elif sample.move:
+		ship_x = nx
 
 
 func _process(delta: float) -> void:

@@ -1,6 +1,9 @@
 extends Node
 
 ## Bridge to IsolatedEngineActivity plus screen-pixel helpers for prize games.
+const DEADZONE := 0.14
+const JUMP_FLICK := 56.0
+
 var plugin: Object
 var settling := false
 var fitted := Vector2.ZERO
@@ -65,6 +68,47 @@ func fit_viewport(node: Node) -> Vector2:
 func unit(node: Node) -> float:
 	var size := view_size(node)
 	return minf(size.x, size.y)
+
+
+## CanvasLayer plus a skinned pt-PT label. Prize scenes share this instead of copying it.
+func make_hud(node: Node) -> Label:
+	var layer := CanvasLayer.new()
+	node.add_child(layer)
+	var label := Label.new()
+	skin_hud(label, node)
+	layer.add_child(label)
+	return label
+
+
+## Pointer sample shared by prize scenes.
+## Empty when [event] is not a touch or mouse sample.
+## Keys: pos (Vector2), down (bool), up (bool), move (bool), rel (Vector2).
+func read_pointer(event: InputEvent) -> Dictionary:
+	if event is InputEventScreenTouch:
+		return {"pos": event.position, "down": event.pressed, "up": not event.pressed, "move": false, "rel": Vector2.ZERO}
+	if event is InputEventMouseButton:
+		return {"pos": event.position, "down": event.pressed, "up": not event.pressed, "move": false, "rel": Vector2.ZERO}
+	if event is InputEventScreenDrag:
+		return {"pos": event.position, "down": false, "up": false, "move": true, "rel": event.relative}
+	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		return {"pos": event.position, "down": false, "up": false, "move": true, "rel": event.relative}
+	return {}
+
+
+func normalized_x(node: Node, pos: Vector2) -> float:
+	return pos.x / maxf(view_size(node).x, 1.0)
+
+
+## Full left/right in [-1, 1]. Centre dead-zone is 0 so a boost tap does not steer.
+func axis_from_normalized_x(nx: float) -> float:
+	var delta := nx - 0.5
+	if absf(delta) <= DEADZONE:
+		return 0.0
+	return -1.0 if delta < 0.0 else 1.0
+
+
+func is_jump_flick(dx: float, dy: float) -> bool:
+	return dy <= -JUMP_FLICK and absf(dy) >= absf(dx) * 1.2
 
 
 func skin_hud(hud: Label, node: Node) -> void:

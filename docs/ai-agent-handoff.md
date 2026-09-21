@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-09-19
-**Last agent focus:** Merge PR #11 (MAT-003-T5 backlog) and delete leftover branches
+**Last updated:** 2026-09-21
+**Last agent focus:** Deduplicate prize input/HUD and tighten PIN plus Room fail-closed behavior
 
 ---
 
@@ -44,7 +44,8 @@ or supply-chain pack edits. Stay on annotated tags (SC-DEP-004).
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
 | MAT-002 | open | T4 (harder age-7) done in tree; T1 emulator CI and T5 tap-to-fill sudoku remain |
 | MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin; T5 arcade lives/HUD done in tree |
-| MAT-004 | open | T5 grype + T6 PIN encrypt/allowlist done in tree; CodeQL/OSV (T4) and arcade Canvas (T7) remain |
+| MAT-004 | open | T5 grype + T6 PIN encrypt/allowlist done in tree; CodeQL/OSV (T4), arcade Canvas (T7), and MasterKey (T8) remain. Destructive Room wipe is already removed |
+| MAT-005 | open | Review follow-ups: shared simulation, R8, narrower Kover excludes, community semgrep, name bounds, zizmor |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
 KT-DOC-001 is public-type KDoc (no numeric `doc_coverage`). KT-CPLX-002 is
@@ -137,6 +138,13 @@ bash scripts/check-ci-local.sh
 - `RewardCatalog.fromName` / `packedScenePath` reject cross-engine extras so
   a 2D process cannot load `kart.tscn` (or `boot.tscn`).
 - PIN unlock goes through `PinRepository.update` so lockout is not racy.
+- PIN digits are ASCII `0-9` only. `PinPolicy.derive` clears the password chars and the `PBEKeySpec`.
+- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is still 1; the next bump needs an explicit `Migration` (MAT-004-T8). `security-crypto` 1.0.0 has no `MasterKey.Builder` — that half of T8 needs a library bump.
+- Prize GDScript pointer/HUD/steer helpers live on the `Host` autoload (`read_pointer`, `make_hud`, `axis_from_normalized_x`). Keep them aligned with `EngineInputMap` (dead-zone 0.14, jump flick 56 px).
+- Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
+- `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest `tools:node="remove"` stubs use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
+- Local secret scan: `git config core.hooksPath .githooks` runs `scripts/gitleaks-pre-commit.sh` (KT-SEC-003). CI still scans; the hook fails closed if `gitleaks` is missing.
+- Guardrails tag `1.6.0` (`77cf16eb`) is still the newest published tag. `docs/guardrail-deviations.yml` stays empty. KT-SEC-002 is semgrep; KT-SEC-003 is gitleaks.
 - Do not merge `cursor/godot-black-screen-invaders-5d7b` or
   `cursor/godot-black-screen-lives-80ab` as git merges: they fork from PR #6
   and would restore the GLES oval path deleted in PR #9. Port lives/HUD only.
@@ -156,11 +164,7 @@ bash scripts/check-ci-local.sh
 3. MAT-002-T5: tap-to-fill remaining sudoku blanks (not one highlighted house).
 4. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
 5. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
-6. MAT-004-T8: `MasterKey.Builder` and Room schema migrations (no destructive wipe).
+6. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
+7. MAT-005: shared Godot/domain simulation, release R8, narrower Kover excludes, community semgrep, bounded child names, workflow lint.
 
-This pass: merged PR #10 (arcade lives/HUD) and PR #11 (MAT-003-T5 done in
-`docs/issues.yml`) to `main`. Deleted `cursor/arcade-lives-port-b361`,
-`cursor/issues-arcade-lives-b361`, `cursor/godot-black-screen-invaders-5d7b`,
-and `cursor/godot-black-screen-lives-80ab`. GitHub issue #8 is a probe; leave it.
-
-*Last updated: 2026-09-19*
+*Last updated: 2026-09-21*

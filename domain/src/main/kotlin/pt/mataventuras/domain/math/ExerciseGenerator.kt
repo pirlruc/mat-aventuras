@@ -35,13 +35,12 @@ class ExerciseGenerator(
 
     internal fun counting(): Exercise {
         val quantity = random.nextInt(1, 11)
-        val options = numericOptions(quantity, 1, 10)
-        return Exercise(
+        return numericChoice(
             module = LearningModule.COUNTING,
             prompt = "Quantas estrelas vês?",
             spoken = "Conta as estrelas. Quantas são?",
-            options = options.map { it.toString() },
-            correctIndex = options.indexOf(quantity),
+            options = numericOptions(quantity, 1, 10),
+            correct = quantity,
             visualCount = quantity,
         )
     }
@@ -62,13 +61,12 @@ class ExerciseGenerator(
 
     internal fun number(): Exercise {
         val value = random.nextInt(0, 10)
-        val options = numericOptions(value, 0, 9)
-        return Exercise(
+        return numericChoice(
             module = LearningModule.NUMBERS,
             prompt = "Qual é o número $value?",
             spoken = "Encontra o número $value.",
-            options = options.map { it.toString() },
-            correctIndex = options.indexOf(value),
+            options = numericOptions(value, 0, 9),
+            correct = value,
             visualCount = value,
         )
     }
@@ -80,14 +78,12 @@ class ExerciseGenerator(
     internal fun additionSum(): Exercise {
         val a = random.nextInt(12, 48)
         val b = random.nextInt(12, 48)
-        val sum = a + b
-        val options = numericOptions(sum, 20, 96)
-        return Exercise(
+        return numericChoice(
             module = LearningModule.ADDITION,
             prompt = "$a + $b = ?",
             spoken = "Quanto é $a mais $b?",
-            options = options.map { it.toString() },
-            correctIndex = options.indexOf(sum),
+            options = numericOptions(a + b, 20, 96),
+            correct = a + b,
         )
     }
 
@@ -95,13 +91,12 @@ class ExerciseGenerator(
         val a = random.nextInt(11, 40)
         val b = random.nextInt(11, 40)
         val sum = a + b
-        val options = numericOptions(b, 8, 42)
-        return Exercise(
+        return numericChoice(
             module = LearningModule.ADDITION,
             prompt = "$a + ? = $sum",
             spoken = "Quanto falta a $a para $sum?",
-            options = options.map { it.toString() },
-            correctIndex = options.indexOf(b),
+            options = numericOptions(b, 8, 42),
+            correct = b,
         )
     }
 
@@ -109,13 +104,12 @@ class ExerciseGenerator(
         val a = random.nextInt(30, 90)
         val b = random.nextInt(11, a - 8)
         val difference = a - b
-        val options = numericOptions(difference, 1, 80)
-        return Exercise(
+        return numericChoice(
             module = LearningModule.SUBTRACTION,
             prompt = "$a − $b = ?",
             spoken = "Quanto é $a menos $b?",
-            options = options.map { it.toString() },
-            correctIndex = options.indexOf(difference),
+            options = numericOptions(difference, 1, 80),
+            correct = difference,
         )
     }
 
@@ -127,13 +121,12 @@ class ExerciseGenerator(
         val a = random.nextInt(3, 13)
         val b = random.nextInt(3, 13)
         val product = a * b
-        val options = numericOptions(product, 6, 144)
-        return Exercise(
+        return numericChoice(
             module = LearningModule.MULTIPLICATION,
             prompt = "$a × $b = ?",
             spoken = "Quanto é $a vezes $b?",
-            options = options.map { it.toString() },
-            correctIndex = options.indexOf(product),
+            options = numericOptions(product, 6, 144),
+            correct = product,
         )
     }
 
@@ -141,13 +134,12 @@ class ExerciseGenerator(
         val a = random.nextInt(3, 13)
         val b = random.nextInt(3, 13)
         val product = a * b
-        val options = numericOptions(b, 2, 13)
-        return Exercise(
+        return numericChoice(
             module = LearningModule.MULTIPLICATION,
             prompt = "$a × ? = $product",
             spoken = "Quanto é $product a dividir por $a?",
-            options = options.map { it.toString() },
-            correctIndex = options.indexOf(b),
+            options = numericOptions(b, 2, 13),
+            correct = b,
         )
     }
 
@@ -165,13 +157,12 @@ class ExerciseGenerator(
         val n2 = start + step
         val n3 = start + step * 2
         val next = start + step * 3
-        val options = numericOptions(next, next - 8, next + 12)
-        return Exercise(
+        return numericChoice(
             module = LearningModule.LOGIC,
             prompt = "Completa: $n1, $n2, $n3, …",
             spoken = "Que número vem a seguir na sequência $n1, $n2, $n3?",
-            options = options.map { it.toString() },
-            correctIndex = options.indexOf(next),
+            options = numericOptions(next, next - 8, next + 12),
+            correct = next,
         )
     }
 
@@ -212,3 +203,20 @@ class ExerciseGenerator(
         return set.toList().shuffled(random)
     }
 }
+
+private fun numericChoice(
+    module: LearningModule,
+    prompt: String,
+    spoken: String,
+    options: List<Int>,
+    correct: Int,
+    visualCount: Int = 0,
+): Exercise =
+    Exercise(
+        module = module,
+        prompt = prompt,
+        spoken = spoken,
+        options = options.map { it.toString() },
+        correctIndex = options.indexOf(correct),
+        visualCount = visualCount,
+    )

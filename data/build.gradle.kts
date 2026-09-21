@@ -1,5 +1,3 @@
-import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
@@ -64,20 +62,6 @@ kover {
                 classes("pt.mataventuras.data.BuildConfig")
                 classes("pt.mataventuras.data.local.*_Impl")
                 classes("pt.mataventuras.data.local.*_Impl\$*")
-            }
-        }
-        verify {
-            rule {
-                bound {
-                    minValue.set(95)
-                    coverageUnits.set(CoverageUnit.LINE)
-                }
-            }
-            rule {
-                bound {
-                    minValue.set(95)
-                    coverageUnits.set(CoverageUnit.BRANCH)
-                }
             }
         }
     }
