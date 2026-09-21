@@ -535,7 +535,7 @@ milestones:
               - KT-SEC-001
 
           - id: MAT-004-T7
-            status: open
+            status: done
             title: Playable native Canvas hosts for arcade 2D prizes
             instructions:
               files:
