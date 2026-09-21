@@ -1,7 +1,6 @@
 extends Node2D
 
 ## Age-7 Super Off Road-style 2.5D dirt circuit with rivals. HUD is pt-PT.
-const DEADZONE := 0.14
 const LAPS_TARGET := 3
 const GATES_TARGET := 4
 const LENGTH := 480.0
@@ -49,11 +48,7 @@ func _ready() -> void:
 		Vector4(58.0, 0.18, 26.0, 0.0),
 		Vector4(84.0, -0.08, 23.0, 0.0),
 	]
-	var layer := CanvasLayer.new()
-	add_child(layer)
-	hud = Label.new()
-	Host.skin_hud(hud, self)
-	layer.add_child(hud)
+	hud = Host.make_hud(self)
 	_update_hud(false)
 	RenderingServer.set_default_clear_color(pal_sky)
 	Host.fit_viewport(self)
@@ -97,32 +92,21 @@ func _sample(values: Array[float], dist: float) -> float:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch:
-		if event.pressed:
-			_steer_at(event.position, true)
-		else:
-			steer = 0.0
-	elif event is InputEventMouseButton:
-		if event.pressed:
-			_steer_at(event.position, true)
-		else:
-			steer = 0.0
-	elif event is InputEventScreenDrag:
-		_steer_at(event.position, false)
-	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		_steer_at(event.position, false)
+	var sample := Host.read_pointer(event)
+	if sample.is_empty():
+		return
+	if sample.down:
+		_steer_at(sample.pos, true)
+	elif sample.up:
+		steer = 0.0
+	elif sample.move:
+		_steer_at(sample.pos, false)
 
 
 func _steer_at(pos: Vector2, arm_boost: bool) -> void:
-	var width: float = maxf(Host.view_size(self).x, 1.0)
-	var nx: float = pos.x / width
-	var delta := nx - 0.5
-	if absf(delta) <= DEADZONE:
-		steer = 0.0
-		if arm_boost:
-			boosting = true
-	else:
-		steer = -1.0 if delta < 0.0 else 1.0
+	steer = Host.axis_from_normalized_x(Host.normalized_x(self, pos))
+	if steer == 0.0 and arm_boost:
+		boosting = true
 
 
 func _process(delta: float) -> void:

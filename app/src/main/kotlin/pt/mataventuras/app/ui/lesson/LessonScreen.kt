@@ -3,6 +3,7 @@ package pt.mataventuras.app.ui.lesson
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -61,6 +62,7 @@ import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.domain.math.Exercise
+import pt.mataventuras.domain.math.SudokuPlay
 import pt.mataventuras.domain.model.AgeGroup
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
@@ -111,6 +113,11 @@ fun LessonScreen(
         }
     }
 
+    val fillSudoku = UiLogic.sudokuFillsEveryBlank(exercise.play)
+    var sudoku by remember(exercise.prompt, exercise.play.cells) {
+        mutableStateOf(SudokuPlay.start(exercise.play.cells))
+    }
+
     val noteAttempt: (Boolean, Boolean) -> Unit = handler@{ correct, advance ->
         if (!pickLock.compareAndSet(false, true)) return@handler
         flashCorrect = correct
@@ -143,7 +150,18 @@ fun LessonScreen(
         pickLock.set(false)
     }
     val onPick: (Int) -> Unit = handler@{ index ->
-        noteAttempt(exercise.isCorrect(index), true)
+        if (!fillSudoku) {
+            noteAttempt(exercise.isCorrect(index), true)
+            return@handler
+        }
+        val token = exercise.options.getOrNull(index) ?: return@handler
+        val step = SudokuPlay.place(sudoku, token, exercise.play.solution)
+        if (!step.correct) {
+            noteAttempt(false, false)
+            return@handler
+        }
+        sudoku = step.state
+        if (step.solved) noteAttempt(true, true)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -161,6 +179,10 @@ fun LessonScreen(
                 scrollState = scrollState,
                 onPick = onPick,
                 onMissKeep = { noteAttempt(false, false) },
+                boardCells = if (fillSudoku) sudoku.cells else exercise.play.cells,
+                boardFocus = if (fillSudoku) sudoku.focus else -1,
+                fillEveryBlank = fillSudoku,
+                onBoardFocus = { index -> sudoku = SudokuPlay.focus(sudoku, index) },
             )
             LessonExitBar(
                 ageGroup = profile.ageGroup,
@@ -192,6 +214,10 @@ private fun LessonPlayColumn(
     scrollState: ScrollState,
     onPick: (Int) -> Unit,
     onMissKeep: () -> Unit,
+    boardCells: List<String>,
+    boardFocus: Int,
+    fillEveryBlank: Boolean,
+    onBoardFocus: (Int) -> Unit,
 ) {
     val tokens = LocalUiTokens.current
     Column(
@@ -217,7 +243,13 @@ private fun LessonPlayColumn(
                 color = Color(0xFF0D47A1),
                 modifier = Modifier.testTag("sudoku-banner"),
             )
-            SudokuBoard(exercise)
+            SudokuBoard(
+                exercise = exercise,
+                cells = boardCells,
+                focus = boardFocus,
+                fillEveryBlank = fillEveryBlank,
+                onFocus = onBoardFocus,
+            )
         }
         if (UiLogic.showsSoupBoard(exercise.play.kind)) {
             SoupBoard(exercise = exercise, onPick = onPick, onMissKeep = onMissKeep)
@@ -246,7 +278,12 @@ private fun LessonPlayColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp)
-                            .testTag(UiLogic.answerTag(exercise.isCorrect(index))),
+                            .testTag(
+                                UiLogic.optionAnswerTag(
+                                    correct = exercise.isCorrect(index),
+                                    fillEveryBlank = fillEveryBlank,
+                                ),
+                            ),
                     ) {
                         VisualOption(module = module, text = text)
                     }
@@ -359,9 +396,15 @@ private fun AnswerFlash(
 }
 
 @Composable
-private fun SudokuBoard(exercise: Exercise) {
+private fun SudokuBoard(
+    exercise: Exercise,
+    cells: List<String>,
+    focus: Int,
+    fillEveryBlank: Boolean,
+    onFocus: (Int) -> Unit,
+) {
     val columns = exercise.play.columns.coerceAtLeast(1)
-    val cells = exercise.play.cells.ifEmpty { exercise.options }
+    val shown = cells.ifEmpty { exercise.options }
     val cellDp = UiLogic.playCellHeightDp(columns) + 8
     val boxW = UiLogic.sudokuBoxWidth(columns)
     val boxH = UiLogic.sudokuBoxHeight(columns)
@@ -371,7 +414,7 @@ private fun SudokuBoard(exercise: Exercise) {
             .background(Color(0xFF0D47A1))
             .padding(6.dp),
     ) {
-        cells.chunked(columns).forEachIndexed { row, rowCells ->
+        shown.chunked(columns).forEachIndexed { row, rowCells ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -385,10 +428,23 @@ private fun SudokuBoard(exercise: Exercise) {
                             .weight(1f)
                             .height(cellDp.dp)
                             .padding(start = UiLogic.sudokuGapDp(col, boxW).dp)
-                            .background(Color(UiLogic.sudokuCellArgb(cell)))
-                            .testTag("board-cell-$index"),
+                            .background(
+                                Color(
+                                    UiLogic.sudokuCellArgb(
+                                        cell,
+                                        focused = index == focus,
+                                        fillEveryBlank = fillEveryBlank,
+                                    ),
+                                ),
+                            )
+                            .testTag("board-cell-$index")
+                            .then(sudokuFocusModifier(fillEveryBlank, cell) { onFocus(index) }),
                     ) {
-                        GridCellFace(module = exercise.module, cell = cell)
+                        GridCellFace(
+                            module = exercise.module,
+                            cell = cell,
+                            fillEveryBlank = fillEveryBlank,
+                        )
                     }
                 }
             }
@@ -564,12 +620,24 @@ private fun PuzzleFrame(exercise: Exercise) {
     }
 }
 
+private fun sudokuFocusModifier(
+    fillEveryBlank: Boolean,
+    cell: String,
+    onFocus: () -> Unit,
+): Modifier =
+    if (fillEveryBlank && SudokuPlay.isBlank(cell)) {
+        Modifier.clickable(onClick = onFocus)
+    } else {
+        Modifier
+    }
+
 @Composable
 private fun GridCellFace(
     module: LearningModule,
     cell: String,
+    fillEveryBlank: Boolean = false,
 ) {
-    val label = UiLogic.holeLabel(cell)
+    val label = UiLogic.holeLabel(cell, fillEveryBlank)
     val shape = UiLogic.shapeKind(label)
     val dots = UiLogic.optionInt(label) ?: 0
     when {

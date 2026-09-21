@@ -48,10 +48,15 @@ class PinPolicyTest {
         assertFalse(policy.isValidFormat("12"))
         assertFalse(policy.isValidFormat("abcd"))
         assertFalse(policy.isValidFormat("12345"))
+        assertFalse(policy.isValidFormat("\u0661\u0662\u0663\u0664"))
+        assertFalse(policy.isValidFormat("\uFF11\uFF12\uFF13\uFF14"))
         val state = policy.create("1234")
         val (result, same) = policy.attempt(state, "12ab")
         assertEquals(PinResult.InvalidFormat, result)
         assertEquals(state, same)
+        val (unicode, unchanged) = policy.attempt(state, "\u0661\u0662\u0663\u0664")
+        assertEquals(PinResult.InvalidFormat, unicode)
+        assertEquals(state, unchanged)
     }
 
     @Test(expected = IllegalArgumentException::class)

@@ -26,52 +26,27 @@ var letters := [Vector2(0.28, 0.12), Vector2(0.72, 0.34), Vector2(0.28, 0.56), V
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("4E342E"))
 	Host.fit_viewport(self)
-	var layer := CanvasLayer.new()
-	add_child(layer)
-	hud = Label.new()
-	Host.skin_hud(hud, self)
-	layer.add_child(hud)
+	hud = Host.make_hud(self)
 	_update_hud()
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch:
-		if event.pressed:
-			move_x = _run(_nx(event.position))
-			flick_x = 0.0
-			flick_y = 0.0
-		else:
-			move_x = 0.0
-	elif event is InputEventMouseButton:
-		if event.pressed:
-			move_x = _run(_nx(event.position))
-			flick_x = 0.0
-			flick_y = 0.0
-		else:
-			move_x = 0.0
-	elif event is InputEventScreenDrag:
-		move_x = _run(_nx(event.position))
-		flick_x += event.relative.x
-		flick_y += event.relative.y
-		if flick_y < -56.0 and absf(flick_y) >= absf(flick_x) * 1.2:
+	var sample := Host.read_pointer(event)
+	if sample.is_empty():
+		return
+	var axis := Host.axis_from_normalized_x(Host.normalized_x(self, sample.pos))
+	if sample.down:
+		move_x = axis
+		flick_x = 0.0
+		flick_y = 0.0
+	elif sample.up:
+		move_x = 0.0
+	elif sample.move:
+		move_x = axis
+		flick_x += sample.rel.x
+		flick_y += sample.rel.y
+		if Host.is_jump_flick(flick_x, flick_y):
 			jumping = true
-	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		move_x = _run(_nx(event.position))
-		flick_x += event.relative.x
-		flick_y += event.relative.y
-		if flick_y < -56.0 and absf(flick_y) >= absf(flick_x) * 1.2:
-			jumping = true
-
-
-func _nx(pos: Vector2) -> float:
-	return pos.x / maxf(Host.view_size(self).x, 1.0)
-
-
-func _run(nx: float) -> float:
-	var delta := nx - 0.5
-	if absf(delta) <= 0.14:
-		return 0.0
-	return -1.0 if delta < 0.0 else 1.0
 
 
 func _process(delta: float) -> void:

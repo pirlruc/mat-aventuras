@@ -56,7 +56,6 @@ jobs:
           comment-summary-in-pr: false
 
   mobile-sast:
-    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -71,3 +70,41 @@ jobs:
 
       - name: MobSF source SAST
         run: bash scripts/run-mobsfscan.sh
+
+  sbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+
+      - name: Assemble debug APK
+        run: ./gradlew --no-daemon :app:assembleDebug
+
+      - name: CycloneDX SBOM and OSV (SC-SBOM-001 / SC-SBOM-002)
+        run: bash scripts/run-osv-sbom.sh app/build/outputs/apk/debug/app-debug.apk
+
+  workflow-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: zizmor (CI-025)
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          inputs: .github/workflows .github/dependabot.yml
+          advanced-security: "false"
+          annotations: "true"
+          version: "1.30.1"

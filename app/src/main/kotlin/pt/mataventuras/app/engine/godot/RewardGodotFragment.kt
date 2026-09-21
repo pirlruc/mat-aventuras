@@ -1,5 +1,6 @@
 package pt.mataventuras.app.engine.godot
 
+import android.annotation.SuppressLint
 import org.godotengine.godot.Godot
 import org.godotengine.godot.GodotFragment
 import org.godotengine.godot.plugin.GodotPlugin
@@ -20,7 +21,11 @@ import pt.mataventuras.plugin.KartPluginActivity
  * thread while the engine thread is swapping is what produced
  * `EGL_BAD_SURFACE` / `BufferQueue has no connected producer` and a black view.
  * [GodotFragment] already pauses and resumes the renderer in order.
+ *
+ * MissingSuperCall is limited to this class: the JNI host methods must not
+ * call super. Other files in this package stay under the lint check.
  */
+@SuppressLint("MissingSuperCall")
 class RewardGodotFragment : GodotFragment() {
     override fun getCommandLine(): List<String> = GodotRuntime.commandLineFor()
 

@@ -26,11 +26,7 @@ func _ready() -> void:
 	pellets = _mask()
 	RenderingServer.set_default_clear_color(Color("0D47A1"))
 	Host.fit_viewport(self)
-	var layer := CanvasLayer.new()
-	add_child(layer)
-	hud = Label.new()
-	Host.skin_hud(hud, self)
-	layer.add_child(hud)
+	hud = Host.make_hud(self)
 	_update_hud()
 
 
@@ -50,25 +46,12 @@ func _open(x: int, y: int) -> bool:
 
 
 func _input(event: InputEvent) -> void:
-	var pos := Vector2.ZERO
-	var pressed := false
-	if event is InputEventScreenTouch and event.pressed:
-		pos = event.position
-		pressed = true
-	elif event is InputEventScreenDrag:
-		pos = event.position
-		pressed = true
-	elif event is InputEventMouseButton and event.pressed:
-		pos = event.position
-		pressed = true
-	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		pos = event.position
-		pressed = true
-	if not pressed:
+	var sample := Host.read_pointer(event)
+	if sample.is_empty() or sample.up:
 		return
 	var size := Host.view_size(self)
-	var nx := pos.x / maxf(size.x, 1.0) - 0.5
-	var ny := pos.y / maxf(size.y, 1.0) - 0.5
+	var nx := sample.pos.x / maxf(size.x, 1.0) - 0.5
+	var ny := sample.pos.y / maxf(size.y, 1.0) - 0.5
 	if absf(nx) > absf(ny):
 		dir = Vector2i(1 if nx > 0.0 else -1, 0)
 	else:

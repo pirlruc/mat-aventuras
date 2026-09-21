@@ -6,9 +6,6 @@ const GROUND_Y := 520.0
 const SPEED := 220.0
 const GRAVITY := 980.0
 const JUMP_V := -520.0
-const DEADZONE := 0.14
-const JUMP_FLICK := 56.0
-
 var x := 80.0
 var y := GROUND_Y
 var vy := 0.0
@@ -67,11 +64,7 @@ func _ready() -> void:
 	_make_coins()
 	_make_enemies()
 	_make_powers()
-	var layer := CanvasLayer.new()
-	add_child(layer)
-	hud = Label.new()
-	Host.skin_hud(hud, self)
-	layer.add_child(hud)
+	hud = Host.make_hud(self)
 	_update_hud()
 	RenderingServer.set_default_clear_color(pal_sky)
 	_fit_world()
@@ -198,49 +191,23 @@ func _add_brick(px: float, py: float, w: float, h: float, color: Color) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch:
-		finger_down = event.pressed
-		if event.pressed:
-			finger_x = _nx(event.position)
-			move_x = _run_from(finger_x)
-			flick_x = 0.0
-			flick_y = 0.0
-		else:
-			move_x = 0.0
-	elif event is InputEventMouseButton:
-		finger_down = event.pressed
-		if event.pressed:
-			finger_x = _nx(event.position)
-			move_x = _run_from(finger_x)
-			flick_x = 0.0
-			flick_y = 0.0
-		else:
-			move_x = 0.0
-	elif event is InputEventScreenDrag:
-		finger_x = _nx(event.position)
-		move_x = _run_from(finger_x)
-		flick_x += event.relative.x
-		flick_y += event.relative.y
-		if flick_y < -JUMP_FLICK and absf(flick_y) >= absf(flick_x) * 1.2:
+	var sample := Host.read_pointer(event)
+	if sample.is_empty():
+		return
+	finger_down = sample.down or sample.move
+	finger_x = Host.normalized_x(self, sample.pos)
+	if sample.down:
+		move_x = Host.axis_from_normalized_x(finger_x)
+		flick_x = 0.0
+		flick_y = 0.0
+	elif sample.up:
+		move_x = 0.0
+	elif sample.move:
+		move_x = Host.axis_from_normalized_x(finger_x)
+		flick_x += sample.rel.x
+		flick_y += sample.rel.y
+		if Host.is_jump_flick(flick_x, flick_y):
 			jumping = true
-	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		finger_x = _nx(event.position)
-		move_x = _run_from(finger_x)
-		flick_x += event.relative.x
-		flick_y += event.relative.y
-		if flick_y < -JUMP_FLICK and absf(flick_y) >= absf(flick_x) * 1.2:
-			jumping = true
-
-
-func _nx(pos: Vector2) -> float:
-	return pos.x / maxf(Host.view_size(self).x, 1.0)
-
-
-func _run_from(nx: float) -> float:
-	var delta := nx - 0.5
-	if absf(delta) <= DEADZONE:
-		return 0.0
-	return -1.0 if delta < 0.0 else 1.0
 
 
 func _process(delta: float) -> void:

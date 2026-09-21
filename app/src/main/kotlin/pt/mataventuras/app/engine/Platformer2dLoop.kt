@@ -24,19 +24,22 @@ internal class Platformer2dLoop(
     var state: Platformer2dState = engine.initial(ringsTarget = ringsTarget)
         private set
 
-    private val clock = FrameClock(nowNs)
+    private val ticker = RewardTicker(nowNs)
 
     /**
      * Advances one frame. Returns the snapshot after collect.
      */
     fun tick(): Platformer2dState {
-        if (state.finished || !state.alive) return state
-        val jump = jumping
-        jumping = false
-        state = engine.step(state, clock.delta(), jump, moveX)
-        level.coins.forEachIndexed { i, coinX ->
-            state = engine.collect(state, coinX, coinIndex = i)
-        }
+        state =
+            ticker.advance(state, state.finished || !state.alive) { dt ->
+                val jump = jumping
+                jumping = false
+                var next = engine.step(state, dt, jump, moveX)
+                level.coins.forEachIndexed { i, coinX ->
+                    next = engine.collect(next, coinX, coinIndex = i)
+                }
+                next
+            }
         return state
     }
 }

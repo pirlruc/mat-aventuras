@@ -8,6 +8,7 @@ import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.mapping.toDomain
 import pt.mataventuras.data.mapping.toEntity
 import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.ChildName
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningSession
 import pt.mataventuras.domain.model.Mascot
@@ -44,7 +45,7 @@ class LocalRepository(
         val id = database.profileDao().insert(
             ChildProfile(
                 id = 0,
-                name = name.trim(),
+                name = ChildName.sanitize(name),
                 ageGroup = ageGroup,
                 favouriteMascot = mascot,
                 avatarId = AvatarCode.STARTER.name,

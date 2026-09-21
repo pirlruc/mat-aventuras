@@ -24,22 +24,28 @@
         android:usesCleartextTraffic="false"
         tools:replace="android:name,android:theme,android:allowBackup,android:fullBackupContent,android:dataExtractionRules">
 
-        <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver" tools:node="remove" />
+        <receiver
+            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            tools:node="remove"
+            tools:ignore="MissingClass" />
 
         <!-- Godot merge: no URI sharing and no phoenix restart process. -->
         <activity
             android:name="org.godotengine.godot.utils.ProcessPhoenix"
-            tools:node="remove" />
+            tools:node="remove"
+            tools:ignore="MissingClass" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
-            tools:node="remove" />
+            tools:node="remove"
+            tools:ignore="MissingClass" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
-            tools:node="merge">
+            tools:node="merge"
+            tools:ignore="MissingClass">
             <meta-data
                 android:name="androidx.profileinstaller.ProfileInstallerInitializer"
                 tools:node="remove" />

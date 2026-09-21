@@ -24,6 +24,8 @@ data class PlayBoard(
     val targetIndices: List<Int> = emptyList(),
     val cipherCode: String = "",
     val wordPaths: List<List<Int>> = emptyList(),
+    /** Full grid for cell-by-cell sudoku. Empty keeps the single-house button flow. */
+    val solution: List<String> = emptyList(),
 ) {
     /**
      * Hidden soup words. Falls back to a single [targetIndices] path.

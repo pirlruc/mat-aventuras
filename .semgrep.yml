@@ -30,3 +30,17 @@ rules:
     severity: ERROR
     message: ADB/cloud backup must stay disabled so PIN hashes and profiles never leave the device.
     pattern: android:allowBackup="true"
+  - id: mat-aventuras-no-world-readable-prefs
+    languages: [kotlin]
+    severity: ERROR
+    message: World-readable preferences would expose the PIN store.
+    pattern-either:
+      - pattern: Context.MODE_WORLD_READABLE
+      - pattern: Context.MODE_WORLD_WRITEABLE
+  - id: mat-aventuras-no-destructive-room-migration
+    languages: [kotlin]
+    severity: ERROR
+    message: Room must not wipe on-device profiles when the schema changes.
+    pattern-either:
+      - pattern: fallbackToDestructiveMigration(...)
+      - pattern: fallbackToDestructiveMigration()

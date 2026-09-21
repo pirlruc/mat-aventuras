@@ -4,6 +4,7 @@ version: 2
 
 multi-ecosystem-groups:
   all-dependencies:
+    open-pull-requests-limit: 5
     schedule:
       interval: monthly
       time: "06:00"
@@ -16,10 +17,12 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     patterns: ["*"]
-    open-pull-requests-limit: 5
     multi-ecosystem-group: all-dependencies
+    cooldown:
+      default-days: 7
   - package-ecosystem: gradle
     directory: /
     patterns: ["*"]
-    open-pull-requests-limit: 5
     multi-ecosystem-group: all-dependencies
+    cooldown:
+      default-days: 7

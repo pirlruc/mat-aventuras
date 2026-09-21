@@ -8,6 +8,25 @@ import pt.mataventuras.domain.engine.InvadersEngine
 import pt.mataventuras.domain.engine.InvadersState
 
 /**
+ * Shared clock for prize loops. A settled game does not consume a frame.
+ */
+internal class RewardTicker(
+    nowNs: () -> Long = { System.nanoTime() },
+    maxDt: Float = 0.05f,
+) {
+    private val clock = FrameClock(nowNs, maxDt)
+
+    /**
+     * Returns [state] when [settled] is true; otherwise [step] with the frame delta.
+     */
+    fun <S> advance(
+        state: S,
+        settled: Boolean,
+        step: (Float) -> S,
+    ): S = if (settled) state else step(clock.delta())
+}
+
+/**
  * Frame loop for the letter-invaders prize.
  */
 internal class InvadersLoop(
@@ -19,14 +38,15 @@ internal class InvadersLoop(
     var fire: Boolean = false
     var state: InvadersState = start
         private set
-    private val clock = FrameClock(nowNs)
+    private val ticker = RewardTicker(nowNs)
 
     fun tick(): InvadersState {
-        if (state.finished || !state.alive) return state
-        val dt = clock.delta()
-        val shot = fire
-        fire = false
-        state = engine.step(state, dt, moveX, shot)
+        state =
+            ticker.advance(state, state.finished || !state.alive) { dt ->
+                val shot = fire
+                fire = false
+                engine.step(state, dt, moveX, shot)
+            }
         return state
     }
 }
@@ -43,11 +63,13 @@ internal class ChompLoop(
     var dirY: Int = 0
     var state: ChompState = start
         private set
-    private val clock = FrameClock(nowNs, maxDt = 0.08f)
+    private val ticker = RewardTicker(nowNs, maxDt = 0.08f)
 
     fun tick(): ChompState {
-        if (state.finished || !state.alive) return state
-        state = engine.step(state, clock.delta(), dirX, dirY)
+        state =
+            ticker.advance(state, state.finished || !state.alive) { dt ->
+                engine.step(state, dt, dirX, dirY)
+            }
         return state
     }
 }
@@ -64,13 +86,15 @@ internal class ClimbLoop(
     var jumping: Boolean = false
     var state: ClimbState = start
         private set
-    private val clock = FrameClock(nowNs)
+    private val ticker = RewardTicker(nowNs)
 
     fun tick(): ClimbState {
-        if (state.finished || !state.alive) return state
-        val jump = jumping
-        jumping = false
-        state = engine.step(state, clock.delta(), moveX, jump)
+        state =
+            ticker.advance(state, state.finished || !state.alive) { dt ->
+                val jump = jumping
+                jumping = false
+                engine.step(state, dt, moveX, jump)
+            }
         return state
     }
 }

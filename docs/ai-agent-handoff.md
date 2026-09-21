@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-09-19
-**Last agent focus:** Merge PR #11 (MAT-003-T5 backlog) and delete leftover branches
+**Last updated:** 2026-09-21
+**Last agent focus:** Age-7 sudoku fill, child-name bounds, and CI scan gates
 
 ---
 
@@ -42,9 +42,10 @@ or supply-chain pack edits. Stay on annotated tags (SC-DEP-004).
 | Epic | Status | Notes |
 | --- | --- | --- |
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
-| MAT-002 | open | T4 (harder age-7) done in tree; T1 emulator CI and T5 tap-to-fill sudoku remain |
+| MAT-002 | open | T4 and T5 done in tree; T1 emulator CI remains |
 | MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin; T5 arcade lives/HUD done in tree |
-| MAT-004 | open | T5 grype + T6 PIN encrypt/allowlist done in tree; CodeQL/OSV (T4) and arcade Canvas (T7) remain |
+| MAT-004 | open | T4 CodeQL/OSV, T5 grype, and T6 PIN encrypt/allowlist done in tree. Arcade Canvas (T7) and MasterKey (T8) remain. Destructive Room wipe is already removed |
+| MAT-005 | open | T4 community semgrep, T5 child names, and T6 zizmor done in tree. Shared simulation (T1), release R8 (T2), and narrower Kover excludes (T3) remain |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
 KT-DOC-001 is public-type KDoc (no numeric `doc_coverage`). KT-CPLX-002 is
@@ -128,15 +129,26 @@ bash scripts/check-ci-local.sh
   `sdkmanager tools`, and that package no longer exists.
 - Grype must not scan `.ci-venv` (semgrep's protobuf/pip). Run it before the
   venv is created and `--exclude` CI/build trees.
-- Age-7 sudoku uses `SudokuHoles.EXTRA_BLANK` (`·`) for extra houses and `""`
-  for the question cell. UI glows only the question cell. Punching extra
-  blanks must keep the question uniquely determined.
+- Age-7 sudoku publishes `PlayBoard.solution`. The lesson fills every uniquely
+  determined blank in turn: the focused house glows, other holes stay pale,
+  and digit buttons use the `sudoku-digit` tag. Age 3 keeps an empty solution,
+  one glowing question cell, and `correct-answer`. Extra blanks stay uniquely
+  determined (`SudokuHoles.EXTRA_BLANK` is `·`; the question cell is `""`).
 - PIN prefs use `EncryptedSharedPreferences` on device. Keystore failures
   fail closed. Robolectric sets `allowPlaintextFallback` and uses a distinct
   `*_plain` prefs file — never mix encrypted XML with cleartext.
 - `RewardCatalog.fromName` / `packedScenePath` reject cross-engine extras so
   a 2D process cannot load `kart.tscn` (or `boot.tscn`).
 - PIN unlock goes through `PinRepository.update` so lockout is not racy.
+- PIN digits are ASCII `0-9` only. `PinPolicy.derive` clears the password chars and the `PBEKeySpec`.
+- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is still 1; the next bump needs an explicit `Migration` (MAT-004-T8). `security-crypto` 1.0.0 has no `MasterKey.Builder` — that half of T8 needs a library bump.
+- Prize GDScript pointer/HUD/steer helpers live on the `Host` autoload (`read_pointer`, `make_hud`, `axis_from_normalized_x`). Keep them aligned with `EngineInputMap` (dead-zone 0.14, jump flick 56 px).
+- Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
+- `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
+- Local secret scan: `git config core.hooksPath .githooks` runs `scripts/gitleaks-pre-commit.sh` (KT-SEC-003). CI still scans; the hook fails closed if `gitleaks` is missing.
+- Guardrails tag `1.6.0` (`77cf16eb`) is still the newest published tag. `docs/guardrail-deviations.yml` stays empty. KT-SEC-002 is semgrep; KT-SEC-003 is gitleaks.
+- Do not gate jobs on `github.actor == 'dependabot[bot]'` (zizmor `bot-conditions`). Dependabot updates use `cooldown.default-days: 7`. Workflow lint is zizmor-action `v0.6.4` (`cc914d7f`) with `advanced-security: false` and zizmor `1.30.1`, scoped to `.github/workflows` and `.github/dependabot.yml` so the scaffold submodule is not audited.
+- CodeQL action `v4.38.1` commit is `1c5b675653bb5c22dbe9b12b556ec555138e09fd` (the tag object is not the commit). `upload: never` keeps `contents: read`. The compile step must stay manual (`build-mode: manual`). The APK SBOM is the debug runtime classpath (`scripts/gradle-to-cyclonedx.py` + osv-scanner `2.6.0`). Dex has no Maven coordinates, so scanning the APK file itself yields an empty bill. Community semgrep is `p/kotlin` beside `.semgrep.yml`, still semgrep `1.128.1`, and it runs after grype so `.ci-venv` is not scanned.
 - Do not merge `cursor/godot-black-screen-invaders-5d7b` or
   `cursor/godot-black-screen-lives-80ab` as git merges: they fork from PR #6
   and would restore the GLES oval path deleted in PR #9. Port lives/HUD only.
@@ -153,14 +165,8 @@ bash scripts/check-ci-local.sh
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
-3. MAT-002-T5: tap-to-fill remaining sudoku blanks (not one highlighted house).
-4. MAT-004-T4: CodeQL + OSV/SBOM if GitHub Advanced Security and a release SBOM are wanted.
-5. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
-6. MAT-004-T8: `MasterKey.Builder` and Room schema migrations (no destructive wipe).
+3. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
+4. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
+5. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes.
 
-This pass: merged PR #10 (arcade lives/HUD) and PR #11 (MAT-003-T5 done in
-`docs/issues.yml`) to `main`. Deleted `cursor/arcade-lives-port-b361`,
-`cursor/issues-arcade-lives-b361`, `cursor/godot-black-screen-invaders-5d7b`,
-and `cursor/godot-black-screen-lives-80ab`. GitHub issue #8 is a probe; leave it.
-
-*Last updated: 2026-09-19*
+*Last updated: 2026-09-21*
