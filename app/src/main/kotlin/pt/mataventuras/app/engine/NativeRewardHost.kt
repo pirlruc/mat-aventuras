@@ -41,10 +41,11 @@ internal object NativeRewardHost {
             board.onNorm = { nx, _, action ->
                 loop.moveX = ArcadeInput.steer(nx)
                 if (action == MotionEvent.ACTION_UP) loop.fire = true
-                if (action == MotionEvent.ACTION_DOWN) return@onNorm
-                val state = loop.tick()
-                settle(activity, state.finished && state.alive, state.finished || !state.alive)
-                board.refresh()
+                if (action != MotionEvent.ACTION_DOWN) {
+                    val state = loop.tick()
+                    settle(activity, state.finished && state.alive, state.finished || !state.alive)
+                    board.refresh()
+                }
             }
         }
     }
@@ -62,14 +63,14 @@ internal object NativeRewardHost {
                 if (action == MotionEvent.ACTION_DOWN) {
                     originX = nx
                     originY = ny
-                    return@onNorm
+                } else {
+                    val dir = ArcadeInput.chompDir(nx - originX, ny - originY)
+                    loop.dirX = dir.first
+                    loop.dirY = dir.second
+                    val state = loop.tick()
+                    settle(activity, state.finished && state.alive, state.finished || !state.alive)
+                    board.refresh()
                 }
-                val dir = ArcadeInput.chompDir(nx - originX, ny - originY)
-                loop.dirX = dir.first
-                loop.dirY = dir.second
-                val state = loop.tick()
-                settle(activity, state.finished && state.alive, state.finished || !state.alive)
-                board.refresh()
             }
         }
     }
@@ -85,13 +86,15 @@ internal object NativeRewardHost {
             board.onNorm = { nx, ny, action ->
                 if (action == MotionEvent.ACTION_DOWN) {
                     originY = ny
-                    return@onNorm
+                } else {
+                    loop.moveX = ArcadeInput.steer(nx)
+                    if (action == MotionEvent.ACTION_UP) {
+                        loop.jumping = ArcadeInput.climbJump(ny - originY)
+                    }
+                    val state = loop.tick()
+                    settle(activity, state.finished && state.alive, state.finished || !state.alive)
+                    board.refresh()
                 }
-                loop.moveX = ArcadeInput.steer(nx)
-                if (action == MotionEvent.ACTION_UP) loop.jumping = ArcadeInput.climbJump(ny - originY)
-                val state = loop.tick()
-                settle(activity, state.finished && state.alive, state.finished || !state.alive)
-                board.refresh()
             }
         }
     }
