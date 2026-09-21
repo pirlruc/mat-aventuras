@@ -18,8 +18,12 @@ updates:
     patterns: ["*"]
     open-pull-requests-limit: 5
     multi-ecosystem-group: all-dependencies
+    cooldown:
+      default-days: 7
   - package-ecosystem: gradle
     directory: /
     patterns: ["*"]
     open-pull-requests-limit: 5
     multi-ecosystem-group: all-dependencies
+    cooldown:
+      default-days: 7

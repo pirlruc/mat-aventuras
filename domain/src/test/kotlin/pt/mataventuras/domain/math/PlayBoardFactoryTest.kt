@@ -39,12 +39,16 @@ class PlayBoardFactoryTest {
         assertTrue(shapeSudoku.isCorrect(shapeSudoku.correctIndex))
 
         val numberSudoku = factory.sudoku(LearningModule.LOGIC)
-        assertTrue(numberSudoku.prompt.contains("Sudoku"))
+        assertEquals("Preenche as casas vazias.", numberSudoku.prompt)
         assertEquals(4, numberSudoku.play.columns)
         assertEquals(16, numberSudoku.play.cells.size)
+        assertEquals(16, numberSudoku.play.solution.size)
         assertTrue(numberSudoku.play.cells.contains(""))
         assertTrue(numberSudoku.play.cells.any { it == SudokuHoles.EXTRA_BLANK })
+        assertTrue(numberSudoku.isCorrect(numberSudoku.correctIndex))
         val miniSudoku = factory.sudoku(LearningModule.NUMBERS)
+        assertEquals("Sudoku: que número falta?", miniSudoku.prompt)
+        assertTrue(miniSudoku.play.solution.isEmpty())
         assertEquals(4, miniSudoku.play.columns)
         assertEquals(16, miniSudoku.play.cells.size)
 

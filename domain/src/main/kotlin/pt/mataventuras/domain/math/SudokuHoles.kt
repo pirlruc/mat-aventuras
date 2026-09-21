@@ -29,7 +29,7 @@ object SudokuHoles {
             if (extra.size >= extraWanted) break
             extra += index
             val trial = render(full, question, extra, glyph)
-            if (!questionUnique(trial, size, question, glyph(full[question]), letters)) {
+            if (!blanksStayUnique(trial, size, full, glyph, letters)) {
                 extra.remove(index)
             }
         }
@@ -50,6 +50,28 @@ object SudokuHoles {
             }
         }
 
+    private fun blanksStayUnique(
+        cells: List<String>,
+        size: Int,
+        full: List<Int>,
+        glyph: (Int) -> String,
+        alphabet: List<String>,
+    ): Boolean =
+        cells.indices.all { index ->
+            val hole = cells[index].isEmpty() || cells[index] == EXTRA_BLANK
+            !hole || questionUnique(cells, size, index, glyph(full[index]), alphabet)
+        }
+
+    /**
+     * Symbols that may sit in [index] without repeating a row, column, or box.
+     */
+    internal fun candidates(
+        cells: List<String>,
+        size: Int,
+        index: Int,
+        alphabet: List<String>,
+    ): List<String> = alphabet.filter { canPlace(cells, size, index, it) }
+
     private fun questionUnique(
         cells: List<String>,
         size: Int,
@@ -57,7 +79,7 @@ object SudokuHoles {
         expected: String,
         alphabet: List<String>,
     ): Boolean {
-        val fits = alphabet.filter { canPlace(cells, size, question, it) }
+        val fits = candidates(cells, size, question, alphabet)
         return fits.size == 1 && fits.first() == expected
     }
 

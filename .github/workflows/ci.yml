@@ -19,15 +19,7 @@ permissions:
   contents: read
 
 jobs:
-  dependabot:
-    if: github.actor == 'dependabot[bot]'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - run: echo "Secret-using jobs are skipped for Dependabot."
-
   quality:
-    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -55,7 +47,8 @@ jobs:
             docs/companion-pins.yml \
             .github/dependabot.yml \
             .github/workflows/ci.yml \
-            .github/workflows/hardening.yml
+            .github/workflows/hardening.yml \
+            .github/workflows/codeql.yml
           .ci-venv/bin/python scripts/validate-issues.py docs/issues.yml
           .ci-venv/bin/python scripts/verify-companion-pins.py
 
@@ -73,7 +66,6 @@ jobs:
         run: shellcheck scripts/*.sh
 
   test:
-    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -106,7 +98,6 @@ jobs:
           python3 scripts/verify-coverage.py
 
   docs:
-    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -118,7 +109,6 @@ jobs:
         run: python3 scripts/lint-doc-links.py --root .
 
   security:
-    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -139,11 +129,12 @@ jobs:
       - name: Dependency vulnerabilities (KT-SEC-004)
         run: bash scripts/run-grype.sh
 
-      - name: SAST (semgrep local rules, KT-SEC-002)
+      - name: SAST (local rules and p/kotlin, KT-SEC-002)
         run: |
           python3 -m venv .ci-venv
           .ci-venv/bin/pip install -q "setuptools>=70,<82" "semgrep==1.128.1"
           .ci-venv/bin/semgrep --config .semgrep.yml --error --quiet --metrics off
+          .ci-venv/bin/semgrep --config p/kotlin --error --quiet --metrics off
 
       - name: License allow/deny (SC-LIC-001)
         run: python3 scripts/verify-licenses.py

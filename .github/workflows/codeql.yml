@@ -1,0 +1,57 @@
+# CodeQL java-kotlin (KT-SEC-002 / CI-005). Upload stays off so the job can
+# keep contents: read; High/Critical still fail via the SARIF gate.
+name: codeql
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 1 * *"
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: java-kotlin
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+
+      - uses: github/codeql-action/init@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        with:
+          languages: java-kotlin
+          build-mode: manual
+
+      - name: Compile Kotlin for CodeQL tracing
+        run: |
+          ./gradlew --no-daemon \
+            :domain:compileKotlin \
+            :data:compileDebugKotlin \
+            :app:compileDebugKotlin
+
+      - uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        with:
+          upload: never
+          upload-database: false
+          output: codeql-results
+
+      - name: Fail on high or critical (CI-005)
+        run: python3 scripts/fail-on-sarif-severity.py --min-severity high codeql-results

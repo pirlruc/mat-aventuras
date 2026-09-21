@@ -246,7 +246,7 @@ milestones:
               - KT-TEST-001
 
           - id: MAT-002-T5
-            status: open
+            status: done
             title: Let age-7 sudoku fill every remaining blank in turn
             instructions:
               files:
@@ -490,7 +490,7 @@ milestones:
               - KT-PERF-001
 
           - id: MAT-004-T4
-            status: open
+            status: done
             title: CodeQL and OSV/SBOM gates (remaining finsilo security jobs)
             instructions:
               files:
@@ -641,7 +641,7 @@ milestones:
               - KT-TEST-002
 
           - id: MAT-005-T4
-            status: open
+            status: done
             title: Add a community semgrep pack beside the local rules
             instructions:
               files:
@@ -654,7 +654,7 @@ milestones:
               - KT-SEC-002
 
           - id: MAT-005-T5
-            status: open
+            status: done
             title: Bound child display names before Room and speech
             instructions:
               files:
@@ -667,7 +667,7 @@ milestones:
               - KT-SEC-001
 
           - id: MAT-005-T6
-            status: open
+            status: done
             title: Lint GitHub workflows for token scope
             instructions:
               files:

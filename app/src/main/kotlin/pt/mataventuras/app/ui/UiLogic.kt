@@ -6,9 +6,11 @@ import android.speech.tts.TextToSpeech
 import android.view.HapticFeedbackConstants
 import kotlin.math.cos
 import kotlin.math.sin
+import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
 import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.ChildName
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
@@ -194,6 +196,14 @@ internal object UiLogic {
     fun answerTag(correct: Boolean): String = if (correct) "correct-answer" else "distractor"
 
     /**
+     * Age-7 sudoku fills every blank, so no single button is the whole answer.
+     */
+    fun optionAnswerTag(
+        correct: Boolean,
+        fillEveryBlank: Boolean,
+    ): String = if (fillEveryBlank) "sudoku-digit" else answerTag(correct)
+
+    /**
      * Rows needed to lay out [cellCount] in [columns].
      */
     fun boardRowCount(
@@ -204,8 +214,12 @@ internal object UiLogic {
     /**
      * Empty sudoku cells show a question mark. Extra blanks stay empty.
      */
-    fun holeLabel(cell: String): String =
+    fun holeLabel(
+        cell: String,
+        fillEveryBlank: Boolean = false,
+    ): String =
         when {
+            fillEveryBlank && isBoardHole(cell) -> ""
             isExtraBlank(cell) -> ""
             cell.isEmpty() -> "?"
             else -> cell
@@ -229,12 +243,23 @@ internal object UiLogic {
     /**
      * Question cells glow; extra blanks stay pale so the asked house is obvious.
      */
-    fun sudokuCellArgb(cell: String): Long =
+    fun sudokuCellArgb(
+        cell: String,
+        focused: Boolean = false,
+        fillEveryBlank: Boolean = false,
+    ): Long =
         when {
+            !isBoardHole(cell) -> 0xFFE3F2FD
+            fillEveryBlank && focused -> 0xFFFFF59D
+            fillEveryBlank -> 0xFFEEEEEE
             isQuestionHole(cell) -> 0xFFFFF59D
-            isExtraBlank(cell) -> 0xFFEEEEEE
-            else -> 0xFFE3F2FD
+            else -> 0xFFEEEEEE
         }
+
+    /**
+     * True when the board is solved house by house instead of one glowing cell.
+     */
+    fun sudokuFillsEveryBlank(play: PlayBoard): Boolean = play.solution.isNotEmpty()
 
     /**
      * Glyph on the correct/wrong flash (kids can read a tick or cross).
@@ -378,7 +403,7 @@ internal object UiLogic {
     /**
      * Child name when the text field is blank.
      */
-    fun fallbackChildName(name: String): String = name.trim().ifBlank { "Amigo" }
+    fun fallbackChildName(name: String): String = ChildName.sanitize(name)
 
     /**
      * Mascot chip size in dp.

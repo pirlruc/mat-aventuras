@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.app.di.pinIterationsFor
 import pt.mataventuras.app.engine.GodotRuntime
+import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
 import pt.mataventuras.domain.model.AgeGroup
@@ -116,11 +117,18 @@ class UiLogicTest {
         assertFalse(UiLogic.showsOptionPalette(PlayKind.SOUP))
         assertEquals("correct-answer", UiLogic.answerTag(true))
         assertEquals("distractor", UiLogic.answerTag(false))
+        assertEquals("correct-answer", UiLogic.optionAnswerTag(correct = true, fillEveryBlank = false))
+        assertEquals("distractor", UiLogic.optionAnswerTag(correct = false, fillEveryBlank = false))
+        assertEquals("sudoku-digit", UiLogic.optionAnswerTag(correct = true, fillEveryBlank = true))
+        assertEquals("sudoku-digit", UiLogic.optionAnswerTag(correct = false, fillEveryBlank = true))
         assertEquals(3, UiLogic.boardRowCount(9, 3))
         assertEquals(0, UiLogic.boardRowCount(4, 0))
         assertEquals("?", UiLogic.holeLabel(""))
         assertEquals("3", UiLogic.holeLabel("3"))
         assertEquals("", UiLogic.holeLabel(SudokuHoles.EXTRA_BLANK))
+        assertEquals("", UiLogic.holeLabel("", fillEveryBlank = true))
+        assertEquals("", UiLogic.holeLabel(SudokuHoles.EXTRA_BLANK, fillEveryBlank = true))
+        assertEquals("4", UiLogic.holeLabel("4", fillEveryBlank = true))
         assertTrue(UiLogic.isBoardHole(""))
         assertTrue(UiLogic.isBoardHole("?"))
         assertTrue(UiLogic.isBoardHole(SudokuHoles.EXTRA_BLANK))
@@ -131,6 +139,11 @@ class UiLogicTest {
         assertEquals(0xFFFFF59D, UiLogic.sudokuCellArgb(""))
         assertEquals(0xFFEEEEEE, UiLogic.sudokuCellArgb(SudokuHoles.EXTRA_BLANK))
         assertEquals(0xFFE3F2FD, UiLogic.sudokuCellArgb("4"))
+        assertEquals(0xFFFFF59D, UiLogic.sudokuCellArgb("", focused = true, fillEveryBlank = true))
+        assertEquals(0xFFEEEEEE, UiLogic.sudokuCellArgb(SudokuHoles.EXTRA_BLANK, fillEveryBlank = true))
+        assertEquals(0xFFE3F2FD, UiLogic.sudokuCellArgb("4", focused = true, fillEveryBlank = true))
+        assertFalse(UiLogic.sudokuFillsEveryBlank(PlayBoard()))
+        assertTrue(UiLogic.sudokuFillsEveryBlank(PlayBoard(solution = listOf("1"))))
         assertEquals("✓", UiLogic.answerFlashGlyph(true))
         assertEquals("✗", UiLogic.answerFlashGlyph(false))
         assertEquals(VoiceScripts.WELL_DONE, UiLogic.answerFlashCaption(true))

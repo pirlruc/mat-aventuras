@@ -106,21 +106,35 @@ class PlayBoardFactory(
         module: LearningModule,
         level: Int,
     ): Exercise {
-        val n = if (level >= 2 && module.isSevenYears()) 6 else 4
+        val seven = module.isSevenYears()
+        val n = if (level >= 2 && seven) 6 else 4
         val full = SudokuGrids.filled(n, random)
         val hole = random.nextInt(full.size)
-        val extra = if (module.isSevenYears()) 3 + level * 2 else 0
+        val extra = if (seven) 3 + level * 2 else 0
         val cells = SudokuHoles.withHoles(full, n, hole, extra, random)
         val answer = full[hole]
-        val options = numericOptions(answer, 1, n).map { it.toString() }
+        val options = if (seven) (1..n).map { it.toString() } else numericOptions(answer, 1, n).map { it.toString() }
+        val prompt = if (seven) "Preenche as casas vazias." else "Sudoku: que número falta?"
+        val spoken =
+            if (seven) {
+                "Preenche cada casa vazia, uma de cada vez."
+            } else {
+                "Isto é um sudoku. Que número falta na casa vazia?"
+            }
         return Exercise(
             module = module,
-            prompt = "Sudoku: que número falta?",
-            spoken = "Isto é um sudoku. Que número falta na casa vazia?",
+            prompt = prompt,
+            spoken = spoken,
             options = options,
             correctIndex = options.indexOf(answer.toString()),
             visualCount = answer,
-            play = PlayBoard(kind = PlayKind.SUDOKU, cells = cells, columns = n),
+            play =
+                PlayBoard(
+                    kind = PlayKind.SUDOKU,
+                    cells = cells,
+                    columns = n,
+                    solution = if (seven) full.map { it.toString() } else emptyList(),
+                ),
         )
     }
 
