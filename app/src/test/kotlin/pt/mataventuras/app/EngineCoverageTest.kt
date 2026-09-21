@@ -1,13 +1,18 @@
 package pt.mataventuras.app
 
+import android.view.MotionEvent
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import java.util.ArrayList
+import pt.mataventuras.app.engine.ArcadeBoardView
 import pt.mataventuras.app.engine.ChompLoop
 import pt.mataventuras.app.engine.ClimbLoop
 import pt.mataventuras.app.engine.EngineLauncher
@@ -67,6 +72,71 @@ class EngineCoverageTest {
         NativeRewardHost.placeholder(activity, RewardGame.KART)
         NativeRewardHost.placeholder(activity, RewardGame.RUNNER)
         controller.pause().stop().destroy()
+    }
+
+    @Test
+    fun arcadeCanvasStepsOnTouchInsteadOfAHintLabel() {
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        RewardGame.entries
+            .filter { it == RewardGame.INVADERS || it == RewardGame.CHOMP || it == RewardGame.CLIMB }
+            .forEach { game ->
+                val intent =
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeGroup.SEVEN_YEARS,
+                        Mascot.HERO_PUP,
+                        "Ana",
+                        game = game,
+                    )
+                val controller = Robolectric.buildActivity(RunnerPluginActivity::class.java, intent).setup()
+                val activity = controller.get()
+                NativeRewardHost.attach(activity, game)
+                val board = activity.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+                assertTrue(board is ArcadeBoardView)
+                assertFalse(board is TextView)
+                val view = board as ArcadeBoardView
+                view.show(emptyList())
+                view.draw(android.graphics.Canvas())
+                view.dispatchTouchEvent(MotionEvent.obtain(0L, 8L, MotionEvent.ACTION_MOVE, 10f, 10f, 0))
+                view.measure(
+                    android.view.View.MeasureSpec.makeMeasureSpec(240, android.view.View.MeasureSpec.EXACTLY),
+                    android.view.View.MeasureSpec.makeMeasureSpec(240, android.view.View.MeasureSpec.EXACTLY),
+                )
+                view.layout(0, 0, 240, 240)
+                assertTrue(view.spanCount() > 3)
+                view.draw(android.graphics.Canvas())
+                view.dispatchTouchEvent(MotionEvent.obtain(0L, 16L, MotionEvent.ACTION_DOWN, 40f, 200f, 0))
+                view.dispatchTouchEvent(MotionEvent.obtain(0L, 32L, MotionEvent.ACTION_MOVE, 200f, 80f, 0))
+                view.dispatchTouchEvent(MotionEvent.obtain(0L, 48L, MotionEvent.ACTION_UP, 200f, 40f, 0))
+                settleArcade(game, activity, view)
+                assertTrue(view.spanCount() > 3)
+                controller.pause().stop().destroy()
+            }
+    }
+
+    private fun settleArcade(
+        game: RewardGame,
+        activity: RunnerPluginActivity,
+        view: ArcadeBoardView,
+    ) {
+        listOf(true to true, false to false, true to false).forEach { (finished, alive) ->
+            when (game) {
+                RewardGame.INVADERS -> {
+                    val loop = activity.invaders!!
+                    loop.state = loop.state.copy(finished = finished, alive = alive)
+                }
+                RewardGame.CHOMP -> {
+                    val loop = activity.chomp!!
+                    loop.state = loop.state.copy(finished = finished, alive = alive)
+                }
+                RewardGame.CLIMB -> {
+                    val loop = activity.climb!!
+                    loop.state = loop.state.copy(finished = finished, alive = alive)
+                }
+                else -> Unit
+            }
+            view.dispatchTouchEvent(MotionEvent.obtain(0L, 64L, MotionEvent.ACTION_MOVE, 120f, 120f, 0))
+        }
     }
 
     @Test

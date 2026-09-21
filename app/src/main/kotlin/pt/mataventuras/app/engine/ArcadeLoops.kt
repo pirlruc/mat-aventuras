@@ -37,7 +37,7 @@ internal class InvadersLoop(
     var moveX: Float = 0f
     var fire: Boolean = false
     var state: InvadersState = start
-        private set
+        internal set
     private val ticker = RewardTicker(nowNs)
 
     fun tick(): InvadersState {
@@ -62,7 +62,7 @@ internal class ChompLoop(
     var dirX: Int = 0
     var dirY: Int = 0
     var state: ChompState = start
-        private set
+        internal set
     private val ticker = RewardTicker(nowNs, maxDt = 0.08f)
 
     fun tick(): ChompState {
@@ -85,7 +85,7 @@ internal class ClimbLoop(
     var moveX: Float = 0f
     var jumping: Boolean = false
     var state: ClimbState = start
-        private set
+        internal set
     private val ticker = RewardTicker(nowNs)
 
     fun tick(): ClimbState {

@@ -129,7 +129,7 @@ class ClimbEngine {
         y: Float,
     ): Boolean = kotlin.math.abs(state.x - x) < 0.08f && kotlin.math.abs(state.y - y) < 0.08f
 
-    private companion object {
+    internal companion object {
         val FLOORS: FloatArray = floatArrayOf(0.12f, 0.34f, 0.56f, 0.78f)
         val LETTERS: Array<Pair<Float, Float>> =
             arrayOf(

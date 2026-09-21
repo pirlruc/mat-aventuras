@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-09-21
-**Last agent focus:** Age-7 sudoku fill, child-name bounds, and CI scan gates
+**Last agent focus:** Playable native Canvas for invaders, chomp, and climb
 
 ---
 
@@ -18,7 +18,8 @@ authored backlog is `docs/issues.yml`.
 Reward engines: **Godot 4** in `:engine2d` (age 3 platformer, letter-climb,
 maze) and `:engine3d` (age 7 2.5D off-road race with rivals). Age 7 can also
 open 2D invaders/maze/climb. Unity is not used. Native Canvas is the
-Robolectric fallback (`OffroadRacerEngine` / `Platformer2dEngine`).
+Robolectric fallback (`OffroadRacerEngine` / `Platformer2dEngine`, and
+`ArcadeBoardView` for invaders, chomp, and climb).
 
 ## Pins
 
@@ -44,7 +45,7 @@ or supply-chain pack edits. Stay on annotated tags (SC-DEP-004).
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
 | MAT-002 | open | T4 and T5 done in tree; T1 emulator CI remains |
 | MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin; T5 arcade lives/HUD done in tree |
-| MAT-004 | open | T4 CodeQL/OSV, T5 grype, and T6 PIN encrypt/allowlist done in tree. Arcade Canvas (T7) and MasterKey (T8) remain. Destructive Room wipe is already removed |
+| MAT-004 | open | T4–T7 done in tree. MasterKey (T8) remains. Destructive Room wipe is already removed |
 | MAT-005 | open | T4 community semgrep, T5 child names, and T6 zizmor done in tree. Shared simulation (T1), release R8 (T2), and narrower Kover excludes (T3) remain |
 
 `docs/guardrail-deviations.yml` is empty. Do not re-add KT-TEST-002.
@@ -60,9 +61,10 @@ python3 .github/scaffold/scripts/issues-sync.py --repo pirlruc/mat-aventuras --y
 
 Do not git-merge `cursor/godot-black-screen-*`; those branches were deleted after
 the lives/HUD port landed on `main` via PR #10. PR #11 recorded MAT-003-T5 as
-done in `docs/issues.yml`. Native Canvas paint for invaders/chomp/climb remains
-MAT-004-T7. GitHub has no MAT-* issues yet (only probe #8); sync still needs a
-write token and `issues-sync.py`.
+done in `docs/issues.yml`. MAT-004-T7 paints invaders, chomp, and climb on
+`ArcadeBoardView` (domain tests cover `ArcadeScene`). `:app` Robolectric proof
+is CI, because this VM has no Android SDK. GitHub has no MAT-* issues yet
+(only probe #8); sync still needs a write token and `issues-sync.py`.
 
 ## Commands
 
@@ -129,6 +131,7 @@ bash scripts/check-ci-local.sh
   `sdkmanager tools`, and that package no longer exists.
 - Grype must not scan `.ci-venv` (semgrep's protobuf/pip). Run it before the
   venv is created and `--exclude` CI/build trees.
+- Native invaders/chomp/climb fallback is `ArcadeBoardView`, not a hint `TextView`. Touch steps the domain loop once; do not add `withFrameNanos` on that path. `ArcadeScene` owns the rectangles. `NativeRewardHost.placeholder` remains for kart/runner hint tags only.
 - Age-7 sudoku publishes `PlayBoard.solution`. The lesson fills every uniquely
   determined blank in turn: the focused house glows, other holes stay pale,
   and digit buttons use the `sudoku-digit` tag. Age 3 keeps an empty solution,
@@ -165,8 +168,7 @@ bash scripts/check-ci-local.sh
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
-3. MAT-004-T7: playable native Canvas for invaders/chomp/climb (hint TextView today).
-4. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
-5. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes.
+3. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
+4. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes.
 
 *Last updated: 2026-09-21*

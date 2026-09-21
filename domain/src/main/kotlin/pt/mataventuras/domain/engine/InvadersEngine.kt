@@ -161,9 +161,9 @@ class InvadersEngine {
 
     private fun bomber(state: InvadersState): Pair<Float, Float> {
         val i = Integer.numberOfTrailingZeros(state.aliens)
-        val col = i % 5
-        val row = i / 5
-        return (state.alienOrigin + col * 0.12f) to (0.12f + row * 0.12f)
+        val col = i % COLUMNS
+        val row = i / COLUMNS
+        return (state.alienOrigin + col * STEP) to (TOP + row * STEP)
     }
 
     private fun hitAlien(
@@ -174,10 +174,10 @@ class InvadersEngine {
     ): Int {
         for (i in 0 until FLEET) {
             if (mask and (1 shl i) == 0) continue
-            val col = i % 5
-            val row = i / 5
-            val ax = origin + col * 0.12f
-            val ay = 0.12f + row * 0.12f
+            val col = i % COLUMNS
+            val row = i / COLUMNS
+            val ax = origin + col * STEP
+            val ay = TOP + row * STEP
             if (kotlin.math.abs(ax - shotX) < 0.05f && kotlin.math.abs(ay - shotY) < 0.06f) {
                 return 1 shl i
             }
@@ -185,7 +185,16 @@ class InvadersEngine {
         return -1
     }
 
-    private companion object {
+    internal companion object {
+        /** Aliens in one row. */
+        const val COLUMNS: Int = 5
+
+        /** Normalized gap between alien centres. */
+        const val STEP: Float = 0.12f
+
+        /** Normalized y of the top row. */
+        const val TOP: Float = 0.12f
+
         const val FLEET: Int = 15
         const val FULL_GRID: Int = (1 shl FLEET) - 1
         const val LIVES_MAX: Int = 5
