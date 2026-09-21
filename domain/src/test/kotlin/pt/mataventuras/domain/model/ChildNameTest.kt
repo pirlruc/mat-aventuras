@@ -9,6 +9,8 @@ class ChildNameTest {
         assertEquals(ChildName.PLACEHOLDER, ChildName.sanitize("  \n\t "))
         assertEquals(ChildName.PLACEHOLDER, ChildName.sanitize("\u0000"))
         assertEquals("Ana", ChildName.sanitize(" Ana\u0007 "))
+        assertEquals("Ana", ChildName.sanitize("Ana\u202E"))
+        assertEquals("Ana", ChildName.sanitize("A\u200Bna"))
         assertEquals("João", ChildName.sanitize("  João  "))
         assertEquals("Ana Maria", ChildName.sanitize("Ana   Maria"))
         assertEquals("B".repeat(ChildName.MAX_LENGTH), ChildName.sanitize("B".repeat(40)))

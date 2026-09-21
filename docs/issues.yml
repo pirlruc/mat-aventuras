@@ -497,7 +497,7 @@ milestones:
                 - .github/workflows
             verification:
               - CodeQL java-kotlin job fails on High/Critical
-              - CycloneDX SBOM + OSV Scanner run on a built APK
+              - CycloneDX SBOM + OSV Scanner run on the debug runtime classpath of a built APK
             guardrail_refs:
               - KT-SEC-002
               - SC-SBOM-001

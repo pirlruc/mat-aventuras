@@ -3,6 +3,7 @@ package pt.mataventuras.app.ui.lesson
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -625,7 +626,7 @@ private fun sudokuFocusModifier(
     onFocus: () -> Unit,
 ): Modifier =
     if (fillEveryBlank && SudokuPlay.isBlank(cell)) {
-        Modifier.semantics { onClick { onFocus(); true } }
+        Modifier.clickable(onClick = onFocus)
     } else {
         Modifier
     }

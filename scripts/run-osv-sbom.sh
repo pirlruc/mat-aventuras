@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# CycloneDX SBOM of a built APK, then OSV (SC-SBOM-001 / SC-SBOM-002).
-# Fail closed if the APK or either tool is missing (CI-035).
-# High/Critical findings fail the job (CI-005).
+# CycloneDX SBOM of the runtime classpath for a built APK, then OSV
+# (SC-SBOM-001 / SC-SBOM-002). Fail closed if the APK, the dependency
+# report, or osv-scanner is missing (CI-035). High/Critical findings fail
+# the job (CI-005).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SYFT_VERSION="1.52.0"
 OSV_VERSION="2.6.0"
 
 if [[ $# -ne 1 || ! -f $1 ]]; then
@@ -15,20 +15,12 @@ fi
 
 apk_dir="$(cd "$(dirname "$1")" && pwd)"
 APK="${apk_dir}/$(basename "$1")"
-WORKDIR="${TMPDIR:-/tmp}/mat-aventuras-osv-sbom-${SYFT_VERSION}"
+WORKDIR="${TMPDIR:-/tmp}/mat-aventuras-osv-sbom"
 mkdir -p "$WORKDIR"
-SYFT="${WORKDIR}/syft"
 OSV="${WORKDIR}/osv-scanner"
+DEPS="${DEPS_FILE:-${WORKDIR}/debug-runtime.txt}"
 SBOM="${WORKDIR}/app.cdx.json"
 SARIF="${WORKDIR}/osv.sarif"
-
-install_syft() {
-  local url
-  url="https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_amd64.tar.gz"
-  curl -fsSL -o "${WORKDIR}/syft.tgz" "$url"
-  tar -xzf "${WORKDIR}/syft.tgz" -C "$WORKDIR" syft
-  chmod +x "$SYFT"
-}
 
 install_osv() {
   local url
@@ -37,22 +29,22 @@ install_osv() {
   chmod +x "$OSV"
 }
 
-if [[ ! -x $SYFT ]]; then
-  install_syft
-fi
 if [[ ! -x $OSV ]]; then
   install_osv
 fi
-if [[ ! -x $SYFT || ! -x $OSV ]]; then
-  echo "error: syft or osv-scanner is not executable" >&2
+if [[ ! -x $OSV ]]; then
+  echo "error: osv-scanner is not executable" >&2
   exit 1
 fi
 
-"$SYFT" scan "file:${APK}" -o "cyclonedx-json=${SBOM}" -q
-if [[ ! -s $SBOM ]]; then
-  echo "error: CycloneDX SBOM was not written" >&2
-  exit 1
+if [[ -z ${DEPS_FILE:-} ]]; then
+  (
+    cd "$ROOT"
+    ./gradlew --no-daemon :app:dependencies --configuration debugRuntimeClasspath --console=plain
+  ) > "$DEPS"
 fi
+
+python3 "${ROOT}/scripts/gradle-to-cyclonedx.py" "$APK" "$DEPS" "$SBOM"
 
 status=0
 "$OSV" scan source -L "$SBOM" --format sarif --output-file "$SARIF" --verbosity error || status=$?
