@@ -7,6 +7,7 @@ const JUMP_FLICK := 56.0
 var plugin: Object
 var settling := false
 var fitted := Vector2.ZERO
+var _end_timer: SceneTreeTimer
 
 
 func _ready() -> void:
@@ -130,7 +131,15 @@ func finish(ok: bool, linger: bool = true) -> void:
 	if linger:
 		var tree := get_tree()
 		if tree:
-			await tree.create_timer(1.6).timeout
+			# SceneTree holds the timer. Awaiting here would be dropped: callers
+			# do not await finish(), so the reward would never complete.
+			_end_timer = tree.create_timer(1.6)
+			_end_timer.timeout.connect(_complete.bind(ok))
+			return
+	_complete(ok)
+
+
+func _complete(ok: bool) -> void:
 	if plugin:
 		plugin.completeReward(ok)
 		return

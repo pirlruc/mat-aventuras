@@ -21,8 +21,7 @@
         android:supportsRtl="true"
         android:localeConfig="@xml/locales_config"
         android:theme="@style/Theme.MatAventuras"
-        android:usesCleartextTraffic="false"
-        tools:replace="android:name,android:theme,android:allowBackup,android:fullBackupContent,android:dataExtractionRules">
+        android:usesCleartextTraffic="false">
 
         <receiver
             android:name="androidx.profileinstaller.ProfileInstallReceiver"
