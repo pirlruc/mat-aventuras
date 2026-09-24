@@ -121,8 +121,11 @@ bash scripts/check-ci-local.sh
 - Do not call `Godot` `renderView.onPause()` from `RewardGodotFragment`.
   That disconnects the BufferQueue while the GL thread is swapping and
   yields `EGL_BAD_SURFACE` / a black SurfaceView. Let `GodotFragment` order
-  pause/resume. `boot.tscn` waits for `DisplayServer.window_get_size()` and
-  a real viewport before `change_scene_to_file`.
+  pause/resume. `boot.tscn` counts frames in `_process` until
+  `DisplayServer.window_get_size()` and the viewport are real, then calls
+  `change_scene_to_file`. Do not `call_deferred` a function that `await`s:
+  the coroutine stops at the first `await` and the blue boot rect stays up.
+  Do not call `RenderingServer.force_draw()` from that wait.
 - Detekt is `dev.detekt` `2.0.0-alpha.6`. Config keys use `allowedComplexity` /
   `allowedLines` / `allowedFunctionsPerClass` (not the 1.x `threshold` names).
   Do not revert to `io.gitlab.arturbosch.detekt` 1.23.8: that plugin still calls
@@ -162,7 +165,8 @@ bash scripts/check-ci-local.sh
   1.2 s sized retry). Only a 4.8 s last resort attaches anyway. Keep
   `boot.tscn`'s window-size wait; do not treat `onGodotForceQuit` as a GLES
   restart (`onGodotRestartRequested` already does that). `Host.finish` lingers
-  1.6 s for prize banners; boot errors pass `linger=false`.
+  1.6 s for prize banners via a `SceneTreeTimer` signal (callers do not
+  `await` it); boot errors pass `linger=false`.
 
 ## Suggested next work
 
@@ -171,4 +175,4 @@ bash scripts/check-ci-local.sh
 3. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
 4. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes.
 
-*Last updated: 2026-09-21*
+*Last updated: 2026-09-24*
