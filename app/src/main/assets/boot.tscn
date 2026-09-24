@@ -4,8 +4,8 @@
 script/source = "extends ColorRect
 
 ## Waits until the Android SurfaceView has a real size, then loads the reward.
-## Frame counting stays in _process. call_deferred plus await drops the
-## coroutine at the first await, which left this blue rect on screen.
+## Frame counting stays in _process. A deferred coroutine stops at the
+## first suspension, which left this blue rect on screen.
 var _frames := 0
 var _sized_frames := 0
 var _started := false

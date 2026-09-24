@@ -131,8 +131,8 @@ func finish(ok: bool, linger: bool = true) -> void:
 	if linger:
 		var tree := get_tree()
 		if tree:
-			# SceneTree holds the timer. Awaiting here would be dropped: callers
-			# do not await finish(), so the reward would never complete.
+			# SceneTree holds the timer. Callers do not wait on finish(), so a
+			# coroutine would be dropped and the reward would never complete.
 			_end_timer = tree.create_timer(1.6)
 			_end_timer.timeout.connect(_complete.bind(ok))
 			return
