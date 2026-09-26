@@ -11,6 +11,7 @@ class ExerciseGenerator(
     private val random: Random = Random.Default,
 ) {
     private val boards: PlayBoardFactory = PlayBoardFactory(random, ::numericOptions)
+    private val games: ArithmeticGames = ArithmeticGames(random, ::numericOptions)
 
     /**
      * Next exercise for [module], mixing classic buttons with boards.
@@ -29,6 +30,7 @@ class ExerciseGenerator(
             LearningModule.ADDITION -> addition()
             LearningModule.SUBTRACTION -> subtraction()
             LearningModule.MULTIPLICATION -> multiplication()
+            LearningModule.DIVISION -> division()
             LearningModule.LOGIC -> logic()
         }
     }
@@ -100,48 +102,14 @@ class ExerciseGenerator(
         )
     }
 
-    internal fun subtraction(): Exercise {
-        val a = random.nextInt(30, 90)
-        val b = random.nextInt(11, a - 8)
-        val difference = a - b
-        return numericChoice(
-            module = LearningModule.SUBTRACTION,
-            prompt = "$a − $b = ?",
-            spoken = "Quanto é $a menos $b?",
-            options = numericOptions(difference, 1, 80),
-            correct = difference,
-        )
-    }
+    internal fun subtraction(): Exercise = games.subtraction()
 
-    internal fun multiplication(): Exercise {
-        return if (random.nextBoolean()) multiplicationProduct() else missingFactor()
-    }
+    internal fun multiplication(): Exercise = games.multiplication()
 
-    internal fun multiplicationProduct(): Exercise {
-        val a = random.nextInt(3, 13)
-        val b = random.nextInt(3, 13)
-        val product = a * b
-        return numericChoice(
-            module = LearningModule.MULTIPLICATION,
-            prompt = "$a × $b = ?",
-            spoken = "Quanto é $a vezes $b?",
-            options = numericOptions(product, 6, 144),
-            correct = product,
-        )
-    }
-
-    internal fun missingFactor(): Exercise {
-        val a = random.nextInt(3, 13)
-        val b = random.nextInt(3, 13)
-        val product = a * b
-        return numericChoice(
-            module = LearningModule.MULTIPLICATION,
-            prompt = "$a × ? = $product",
-            spoken = "Quanto é $product a dividir por $a?",
-            options = numericOptions(b, 2, 13),
-            correct = b,
-        )
-    }
+    /**
+     * Exact division game: share, groups, quotient, or frog jumps.
+     */
+    internal fun division(): Exercise = games.division()
 
     internal fun logic(): Exercise =
         when (random.nextInt(3)) {
@@ -204,7 +172,7 @@ class ExerciseGenerator(
     }
 }
 
-private fun numericChoice(
+internal fun numericChoice(
     module: LearningModule,
     prompt: String,
     spoken: String,

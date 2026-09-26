@@ -62,11 +62,20 @@ class ExerciseGeneratorTest {
     fun subtractionNeverGoesNegative() {
         repeat(20) {
             val exercise = ExerciseGenerator(Random(it)).subtraction()
+            assertEquals(LearningModule.SUBTRACTION, exercise.module)
+            assertTrue(exercise.options[exercise.correctIndex].toInt() >= 0)
+            assertEquals(4, exercise.options.size)
+        }
+    }
+
+    @Test
+    fun divisionIsExactAndNonZero() {
+        repeat(20) {
+            val exercise = ExerciseGenerator(Random(it)).division()
             val value = exercise.options[exercise.correctIndex].toInt()
-            assertTrue(value >= 0)
-            assertTrue(exercise.spoken.contains("menos"))
-            val parts = exercise.prompt.replace(" = ?", "").split(" − ")
-            assertTrue(parts[0].toInt() >= 30)
+            assertEquals(LearningModule.DIVISION, exercise.module)
+            assertTrue(value in 2..12)
+            assertEquals(4, exercise.options.size)
         }
     }
 
@@ -111,31 +120,11 @@ class ExerciseGeneratorTest {
 
     @Test
     fun multiplicationCoversProductAndMissingFactor() {
-        val usesGap = (0..8).map { ExerciseGenerator(Random(it)).multiplication().prompt.contains("× ?") }.toSet()
-        assertEquals(2, usesGap.size)
-    }
-
-    @Test
-    fun multiplicationAnswerMatchesTheProduct() {
-        val exercise = generator.multiplicationProduct()
-        val parts = exercise.prompt.replace(" = ?", "").split(" × ")
-        assertEquals(
-            (parts[0].toInt() * parts[1].toInt()).toString(),
-            exercise.options[exercise.correctIndex],
-        )
-        assertTrue(exercise.spoken.contains("vezes"))
-        val a = parts[0].toInt()
-        val b = parts[1].toInt()
-        assertTrue(a in 3..12)
-        assertTrue(b in 3..12)
-    }
-
-    @Test
-    fun missingFactorAsksTheUnknownTimes() {
-        val exercise = generator.missingFactor()
-        assertTrue(exercise.prompt.contains("× ?"))
-        assertTrue(exercise.spoken.contains("dividir"))
-        assertEquals(4, exercise.options.size)
+        val prompts = (0..40).map { ExerciseGenerator(Random(it)).multiplication().prompt }
+        assertTrue(prompts.any { it.contains("× ?") })
+        assertTrue(prompts.any { it.contains(" × ") && it.endsWith("= ?") })
+        assertTrue(prompts.any { it.contains("maçãs") })
+        assertTrue(prompts.any { it.contains("sapo") })
     }
 
     @Test

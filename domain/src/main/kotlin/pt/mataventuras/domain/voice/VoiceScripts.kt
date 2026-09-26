@@ -46,7 +46,8 @@ object VoiceScripts {
     const val AGE_THREE_PREVIEW: String =
         "Contar, formas e números. Sudoku, sopa, puzzle e códigos. Prémio: plataforma, labirinto ou a subir letras!"
     const val AGE_SEVEN_PREVIEW: String =
-        "Somar, subtrair, multiplicar e lógica. Sudoku, sopa e códigos. Prémio: corrida, invasores ou labirinto!"
+        "Somar, subtrair, multiplicar, dividir e lógica. " +
+            "Jogos do sapo, das filas e das cruzes. Prémio: corrida, invasores ou labirinto!"
     const val REWARD_FINISHED: String = "Boa! Ganhaste um prémio. Vamos continuar."
     const val REWARD_RETURN: String = "Boa! Vamos continuar."
 

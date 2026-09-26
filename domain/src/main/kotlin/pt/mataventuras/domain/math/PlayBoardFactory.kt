@@ -26,6 +26,7 @@ class PlayBoardFactory(
             PlayKind.SOUP -> soup(module, level)
             PlayKind.PUZZLE -> puzzle(module, level)
             PlayKind.CIPHER -> cipher(module, level)
+            PlayKind.GROUPS -> GroupBoards(random, numericOptions).make(module, level)
             PlayKind.CHOICE -> error("CHOICE is built by ExerciseGenerator.")
         }
 
@@ -348,12 +349,23 @@ private fun cipherThird(
     random: Random,
     module: LearningModule,
     level: Int,
-): Int =
-    if (module != LearningModule.MULTIPLICATION && level >= 2) {
+): Int {
+    val twoTerms = module == LearningModule.MULTIPLICATION || module == LearningModule.DIVISION
+    return if (!twoTerms && level >= 2) {
         random.nextInt(2, 6)
     } else {
         0
     }
+}
+
+private fun divisionCipher(
+    left: Int,
+    right: Int,
+): CipherSpec {
+    val divisor = right.coerceIn(2, 12)
+    val quotient = (left % 8) + 2
+    return CipherSpec(" ÷ ", quotient * divisor, quotient, divisor, 0)
+}
 
 private fun cipherSpec(
     module: LearningModule,
@@ -366,6 +378,7 @@ private fun cipherSpec(
             CipherSpec(" − ", left + right + third, left, right, third)
         LearningModule.MULTIPLICATION ->
             CipherSpec(" × ", left, left * right, right, 0)
+        LearningModule.DIVISION -> divisionCipher(left, right)
         else ->
             CipherSpec(" + ", left, left + right + third, right, third)
     }

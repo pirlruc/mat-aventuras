@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-09-21
-**Last agent focus:** Playable native Canvas for invaders, chomp, and climb
+**Last updated:** 2026-09-26
+**Last agent focus:** Age-7 subtraction, multiplication, and division games
 
 ---
 
@@ -135,6 +135,10 @@ bash scripts/check-ci-local.sh
 - Grype must not scan `.ci-venv` (semgrep's protobuf/pip). Run it before the
   venv is created and `--exclude` CI/build trees.
 - Native invaders/chomp/climb fallback is `ArcadeBoardView`, not a hint `TextView`. Touch steps the domain loop once; do not add `withFrameNanos` on that path. `ArcadeScene` owns the rectangles. `NativeRewardHost.placeholder` remains for kart/runner hint tags only.
+- Age-7 division is exact (factors 2–10, no remainder). Subtraction still
+  uses the Unicode minus `−` in equation prompts. Picture games are
+  `PlayKind.GROUPS` (`●` kept, `✕` removed). The alien hosts both
+  multiplication and division.
 - Age-7 sudoku publishes `PlayBoard.solution`. The lesson fills every uniquely
   determined blank in turn: the focused house glows, other holes stay pale,
   and digit buttons use the `sudoku-digit` tag. Age 3 keeps an empty solution,
@@ -175,4 +179,4 @@ bash scripts/check-ci-local.sh
 3. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
 4. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes.
 
-*Last updated: 2026-09-24*
+*Last updated: 2026-09-26*

@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.app.di.pinIterationsFor
 import pt.mataventuras.app.engine.GodotRuntime
+import pt.mataventuras.domain.math.GroupTokens
 import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
@@ -175,6 +176,16 @@ class UiLogicTest {
         assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.SOUP))
         assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.CIPHER))
         assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.PUZZLE))
+        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.GROUPS))
+        assertTrue(UiLogic.showsGroupsBoard(PlayKind.GROUPS))
+        assertFalse(UiLogic.showsGroupsBoard(PlayKind.CHOICE))
+        assertTrue(UiLogic.scrollsForBoard(PlayKind.GROUPS))
+        assertFalse(UiLogic.scrollsForBoard(PlayKind.CHOICE))
+        assertEquals("Jogo das cruzes", UiLogic.groupsBanner(LearningModule.SUBTRACTION))
+        assertEquals("Jogo das filas", UiLogic.groupsBanner(LearningModule.DIVISION))
+        assertEquals("Jogo da grelha", UiLogic.groupsBanner(LearningModule.MULTIPLICATION))
+        assertEquals(0xFFFFCDD2, UiLogic.groupTokenArgb(GroupTokens.REMOVED))
+        assertEquals(0xFFC8E6C9, UiLogic.groupTokenArgb(GroupTokens.KEPT))
     }
 
     @Test

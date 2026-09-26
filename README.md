@@ -11,7 +11,7 @@ no account, no advert, and no internet permission.
 | Age | What they practise | Prize game |
 | --- | --- | --- |
 | **3 years** | Counting 1–10, shapes, digits 0–9 | Platformer, letter-climb, or maze |
-| **7 years** | Addition, subtraction, multiplication, logic | Dirt race with rivals, invaders, maze, or climb |
+| **7 years** | Addition, subtraction, multiplication, division, logic | Dirt race with rivals, invaders, maze, or climb |
 
 A parent or teacher picks the age band once. Each child gets a name, a mascot
 friend, and a local score.
@@ -48,8 +48,11 @@ friend, and a local score.
    or letter-climb.
 
 Age 7 arithmetic uses two-digit sums and differences, times-tables through 12
-(including a missing factor), and skip-counting. Mini-sudoku hides extra
-houses so the glowing cell is not obvious from a single neighbour.
+(including a missing factor), and exact division (no remainder) with factors
+2–10. Subtraction, multiplication, and division are also picture and story
+games: crossed counters, dot arrays, equal rows, fair shares, and a frog on
+a number line. Mini-sudoku hides extra houses so the glowing cell is not
+obvious from a single neighbour.
 
 Leave a lesson from the on-screen exit control. Age 7 asks for confirmation.
 

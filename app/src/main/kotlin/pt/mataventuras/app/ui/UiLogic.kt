@@ -6,6 +6,7 @@ import android.speech.tts.TextToSpeech
 import android.view.HapticFeedbackConstants
 import kotlin.math.cos
 import kotlin.math.sin
+import pt.mataventuras.domain.math.GroupTokens
 import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
@@ -78,10 +79,7 @@ internal object UiLogic {
         age: AgeGroup,
         kind: PlayKind,
     ): Boolean =
-        !lessonFillsViewport(age) ||
-            showsPlayGrid(kind) ||
-            showsCipherLegend(kind) ||
-            showsPuzzleFrame(kind)
+        !lessonFillsViewport(age) || scrollsForBoard(kind)
 
     /**
      * Shape for an option label, or null when the label is not a shape name.
@@ -158,6 +156,33 @@ internal object UiLogic {
      * Puzzle shows a frame with a glowing hole.
      */
     fun showsPuzzleFrame(kind: PlayKind): Boolean = kind == PlayKind.PUZZLE
+
+    /**
+     * Picture game: crossed counters, a dot array, or equal rows.
+     */
+    fun showsGroupsBoard(kind: PlayKind): Boolean = kind == PlayKind.GROUPS
+
+    /**
+     * pt-PT title above a picture game.
+     */
+    fun groupsBanner(module: LearningModule): String =
+        when (module) {
+            LearningModule.SUBTRACTION -> "Jogo das cruzes"
+            LearningModule.DIVISION -> "Jogo das filas"
+            else -> "Jogo da grelha"
+        }
+
+    /**
+     * Kept counters stay green. Crossed counters are the ones that left.
+     */
+    fun groupTokenArgb(cell: String): Long =
+        if (cell == GroupTokens.REMOVED) 0xFFFFCDD2 else 0xFFC8E6C9
+
+    /**
+     * Boards taller than a choice row scroll so Sair stays on screen.
+     */
+    fun scrollsForBoard(kind: PlayKind): Boolean =
+        showsPlayGrid(kind) || showsCipherLegend(kind) || showsPuzzleFrame(kind) || showsGroupsBoard(kind)
 
     /**
      * Lesson board size / cipher alphabet from consecutive hits (0, 3, 6, 9+).
