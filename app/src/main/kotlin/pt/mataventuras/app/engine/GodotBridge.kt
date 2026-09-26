@@ -29,7 +29,7 @@ internal object GodotBridge {
     }
 
     /**
-     * Scene path GDScript should `change_scene_to_file` after the boot node.
+     * Scene path GDScript should load after the boot node.
      * Unknown paths fall back to the native prize for [kind].
      */
     fun rewardScene(

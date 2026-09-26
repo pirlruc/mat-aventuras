@@ -50,8 +50,11 @@ func _input(event: InputEvent) -> void:
 	if sample.is_empty() or sample.up:
 		return
 	var size := Host.view_size(self)
-	var nx := sample.pos.x / maxf(size.x, 1.0) - 0.5
-	var ny := sample.pos.y / maxf(size.y, 1.0) - 0.5
+	# Dictionary values are Variant. Inferring with := makes Godot 4.7 drop
+	# this script, so the scene stays the solid boot blue and the maze never starts.
+	var pos: Vector2 = sample.pos
+	var nx := pos.x / maxf(size.x, 1.0) - 0.5
+	var ny := pos.y / maxf(size.y, 1.0) - 0.5
 	if absf(nx) > absf(ny):
 		dir = Vector2i(1 if nx > 0.0 else -1, 0)
 	else:
