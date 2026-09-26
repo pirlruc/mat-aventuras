@@ -83,8 +83,10 @@ HUD copy is pt-PT (`Volta`, `Lugar`, `Arcos`, `Impulso`, `META`).
 
 Files live in `app/src/main/assets/` (no hidden `.godot` directory;
 `use_hidden_project_data_directory=false`). `run/main_scene` is a full-rect
-`boot.tscn` that counts frames in `_process`, then calls `change_scene_to_file` with
-`MatAventuras.rewardScene()`. The fragment is attached only after the host
+`boot.gd` counts frames in `_process`, loads the packed scene from
+`MatAventuras.rewardScene()`, and calls `change_scene_to_packed` only when
+that scene's script compiled. A dropped script used to leave the blue boot
+clear color up with no prize running. The fragment is attached only after the host
 view is larger than 32×32 px (layout listener, then a 1.2 s sized retry).
 A 4.8 s last resort still attaches so a headless view cannot hang. The
 fragment command line is **empty**.

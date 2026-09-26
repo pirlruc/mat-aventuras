@@ -114,9 +114,9 @@ perspective racer.
 is not hosting a Godot view.
 
 On device those Activities attach `GodotFragment` after the host FrameLayout
-has a real pixel size. `boot.tscn` still waits for a sized window, then
-switches to `res://kart.tscn` or `res://runner.tscn` through the
-`MatAventuras` plugin. Invaders ends at five lost lives or an empty fleet;
+has a real pixel size. `boot.gd` still waits for a sized window, then
+switches to the packed prize from the `MatAventuras` plugin only if that
+scene's script compiled. Invaders ends at five lost lives or an empty fleet;
 chomp and climb use three lives with i-frames. A first-time GLES restart is
 returned to `MainActivity`, which relaunches the plugin Activity in a fresh
 isolated process. Under Robolectric they attach `NativeKartHost` /
