@@ -10,6 +10,7 @@ enum class LearningModule {
     ADDITION,
     SUBTRACTION,
     MULTIPLICATION,
+    DIVISION,
     LOGIC,
 }
 
@@ -29,6 +30,7 @@ fun modulesFor(age: AgeGroup): List<LearningModule> =
                 LearningModule.ADDITION,
                 LearningModule.SUBTRACTION,
                 LearningModule.MULTIPLICATION,
+                LearningModule.DIVISION,
                 LearningModule.LOGIC,
             )
     }
@@ -36,8 +38,4 @@ fun modulesFor(age: AgeGroup): List<LearningModule> =
 /**
  * True for the age-7 arithmetic and logic modules.
  */
-fun LearningModule.isSevenYears(): Boolean =
-    this == LearningModule.ADDITION ||
-        this == LearningModule.SUBTRACTION ||
-        this == LearningModule.MULTIPLICATION ||
-        this == LearningModule.LOGIC
+fun LearningModule.isSevenYears(): Boolean = this in modulesFor(AgeGroup.SEVEN_YEARS)

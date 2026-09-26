@@ -226,5 +226,37 @@ class PlayBoardFactoryTest {
         assertTrue(CipherSpeech.fromLegend(listOf("▲=4", "●=2", "■=1"), "Quanto é?").contains("Quadrado vale 1"))
         val seq = PuzzlePatterns.cells(LearningModule.COUNTING, 2, Random(1))
         assertEquals(4, seq.size)
+        assertEquals(PlayKind.GROUPS, factory.make(PlayKind.GROUPS, LearningModule.DIVISION).play.kind)
+    }
+
+    @Test
+    fun operationPuzzlesAndCiphersMatchTheModule() {
+        val sub = filled(factory.puzzle(LearningModule.SUBTRACTION))
+        val subStep = sub[1] - sub[0]
+        assertTrue(subStep < 0)
+        assertTrue(sub.all { it > 0 })
+        assertTrue(sub.indices.all { sub[it] == sub[0] + it * subStep })
+        val mul = filled(factory.puzzle(LearningModule.MULTIPLICATION))
+        val mulStep = mul[1] - mul[0]
+        assertTrue(mulStep in listOf(2, 3, 4, 5, 6, 10))
+        val div = filled(factory.puzzle(LearningModule.DIVISION))
+        val divStep = div[1] - div[0]
+        assertTrue(divStep in listOf(-2, -3, -4, -5, -6))
+        assertTrue(div.all { it > 0 })
+        val numbers = PuzzlePatterns.cells(LearningModule.NUMBERS, 2, Random(2))
+        assertEquals(4, numbers.size)
+        val code = factory.cipher(LearningModule.DIVISION, 2)
+        assertEquals(2, code.play.cells.size)
+        assertTrue(code.prompt.contains("÷"))
+        val dividend = code.play.cells.first { it.startsWith("▲") }.substringAfter("=").toInt()
+        val divisor = code.play.cells.first { it.startsWith("●") }.substringAfter("=").toInt()
+        assertEquals(0, dividend % divisor)
+        assertEquals((dividend / divisor).toString(), code.options[code.correctIndex])
+    }
+
+    private fun filled(exercise: Exercise): List<Int> {
+        val hole = exercise.play.cells.indexOf("?")
+        val answer = exercise.options[exercise.correctIndex]
+        return exercise.play.cells.mapIndexed { i, cell -> if (i == hole) answer else cell }.map { it.toInt() }
     }
 }

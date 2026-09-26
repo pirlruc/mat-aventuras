@@ -4,7 +4,8 @@ import kotlin.random.Random
 import pt.mataventuras.domain.model.LearningModule
 
 /**
- * How an exercise is presented. CHOICE is four buttons; the others add a board.
+ * How an exercise is presented. CHOICE is four buttons. GROUPS is a picture game.
+ * The others add a board.
  */
 enum class PlayKind {
     CHOICE,
@@ -12,6 +13,7 @@ enum class PlayKind {
     SOUP,
     PUZZLE,
     CIPHER,
+    GROUPS,
 }
 
 /**
@@ -83,7 +85,7 @@ object PlayKinds {
                     PlayKind.CIPHER,
                     PlayKind.PUZZLE,
                 )
-            LearningModule.ADDITION, LearningModule.SUBTRACTION, LearningModule.MULTIPLICATION ->
+            LearningModule.ADDITION ->
                 listOf(
                     PlayKind.CHOICE,
                     PlayKind.SUDOKU,
@@ -91,6 +93,16 @@ object PlayKinds {
                     PlayKind.SUDOKU,
                     PlayKind.CIPHER,
                     PlayKind.PUZZLE,
+                )
+            LearningModule.SUBTRACTION, LearningModule.MULTIPLICATION, LearningModule.DIVISION ->
+                listOf(
+                    PlayKind.CHOICE,
+                    PlayKind.CHOICE,
+                    PlayKind.GROUPS,
+                    PlayKind.GROUPS,
+                    PlayKind.CIPHER,
+                    PlayKind.PUZZLE,
+                    PlayKind.SUDOKU,
                 )
             LearningModule.LOGIC ->
                 listOf(

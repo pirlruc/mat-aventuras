@@ -260,6 +260,16 @@ private fun LessonPlayColumn(
         if (UiLogic.showsPuzzleFrame(exercise.play.kind)) {
             PuzzleFrame(exercise)
         }
+        if (UiLogic.showsGroupsBoard(exercise.play.kind)) {
+            Text(
+                UiLogic.groupsBanner(module),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF1B5E20),
+                modifier = Modifier.testTag("groups-banner"),
+            )
+            GroupsBoard(exercise)
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -590,6 +600,28 @@ private fun CipherPanel(exercise: Exercise) {
             fontWeight = FontWeight.ExtraBold,
             color = Color(0xFF0D47A1),
         )
+    }
+}
+
+@Composable
+private fun GroupsBoard(exercise: Exercise) {
+    val columns = exercise.play.columns.coerceAtLeast(1)
+    val cellDp = UiLogic.playCellHeightDp(columns)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        exercise.play.cells.chunked(columns).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { cell ->
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(cellDp.dp)
+                            .background(Color(UiLogic.groupTokenArgb(cell))),
+                    ) {
+                        Text(cell, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    }
+                }
+            }
+        }
     }
 }
 

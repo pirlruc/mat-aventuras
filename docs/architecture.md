@@ -187,7 +187,7 @@ Colour is never the only signal: shapes have names and silhouettes.
 | `hero_pup` | Cão Herói | numbers, logic |
 | `pink_piglet` | Porquinho Rosa | shapes |
 | `brave_plumber` | Canalizador Valente | add/sub |
-| `mischievous_alien` | Extraterrestre Travesso | multiply |
+| `mischievous_alien` | Extraterrestre Travesso | multiply, divide |
 
 ### Theme and icon
 
@@ -209,7 +209,7 @@ Finishing a reward Activity awards 15 bonus points on the last profile.
 | Age | Lessons (Compose, mascot-hosted) | Reward mini-game |
 | --- | --- | --- |
 | **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D runner, letter-climb, or maze (`RunnerPluginActivity` in `:engine2d`) |
-| **7** | Two-digit addition and missing addend; two-digit subtraction; times-tables 3–12 with a missing factor; skip-counting and extrema (`LOGIC`) | Dirt race with rivals (`KartPluginActivity` in `:engine3d`) plus 2D invaders/maze/climb |
+| **7** | Two-digit addition and missing addend; two-digit subtraction (take-away, comparison, number-line); times-tables 3–12 with a missing factor and equal groups; exact division 2–10 (fair share and grouping); skip-counting and extrema (`LOGIC`) | Dirt race with rivals (`KartPluginActivity` in `:engine3d`) plus 2D invaders/maze/climb |
 
 Age 7 confirms before leaving a lesson (`VoiceScripts.confirmExit`).
 Age 3 leaves immediately. A finished reward returns `RESULT_FINISHED`;

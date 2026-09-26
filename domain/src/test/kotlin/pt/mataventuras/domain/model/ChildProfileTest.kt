@@ -31,17 +31,20 @@ class ChildProfileTest {
         assertEquals(Mascot.BRAVE_PLUMBER, mascotFor(LearningModule.ADDITION))
         assertEquals(Mascot.BRAVE_PLUMBER, mascotFor(LearningModule.SUBTRACTION))
         assertEquals(Mascot.MISCHIEVOUS_ALIEN, mascotFor(LearningModule.MULTIPLICATION))
+        assertEquals(Mascot.MISCHIEVOUS_ALIEN, mascotFor(LearningModule.DIVISION))
         assertEquals(Mascot.HERO_PUP, mascotFor(LearningModule.LOGIC))
     }
 
     @Test
     fun modulesPerAgeGroup() {
         assertEquals(3, modulesFor(AgeGroup.THREE_YEARS).size)
-        assertEquals(4, modulesFor(AgeGroup.SEVEN_YEARS).size)
+        assertEquals(5, modulesFor(AgeGroup.SEVEN_YEARS).size)
         assertTrue(LearningModule.ADDITION.isSevenYears())
+        assertTrue(LearningModule.DIVISION.isSevenYears())
         assertFalse(LearningModule.COUNTING.isSevenYears())
         assertTrue(LearningModule.COUNTING in modulesFor(AgeGroup.THREE_YEARS))
         assertTrue(LearningModule.MULTIPLICATION in modulesFor(AgeGroup.SEVEN_YEARS))
+        assertTrue(LearningModule.DIVISION in modulesFor(AgeGroup.SEVEN_YEARS))
     }
 
     @Test

@@ -21,6 +21,7 @@ internal object ModuleTitles {
             LearningModule.ADDITION -> "Somar com o ${mascot.displayName}"
             LearningModule.SUBTRACTION -> "Subtrair com o ${mascot.displayName}"
             LearningModule.MULTIPLICATION -> "Multiplicar com o ${mascot.displayName}"
+            LearningModule.DIVISION -> "Dividir com o ${mascot.displayName}"
             LearningModule.LOGIC -> "Lógica com o ${mascot.displayName}"
         }
 }

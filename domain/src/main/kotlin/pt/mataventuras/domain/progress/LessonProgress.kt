@@ -34,5 +34,6 @@ object LessonProgress {
             LearningModule.ADDITION,
             LearningModule.SUBTRACTION,
             LearningModule.MULTIPLICATION,
+            LearningModule.DIVISION,
         )
 }

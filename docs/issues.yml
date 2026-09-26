@@ -257,6 +257,20 @@ milestones:
             guardrail_refs:
               - KT-TEST-001
 
+          - id: MAT-002-T6
+            status: done
+            title: Age-7 subtraction, multiplication, and division games
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/math/ArithmeticGames.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/math/GroupBoards.kt
+                - domain/src/main/kotlin/pt/mataventuras/domain/model/LearningModule.kt
+            verification:
+              - Division is exact and is an age-7 module
+              - Subtraction, multiplication, and division mix story games with picture boards
+            guardrail_refs:
+              - KT-TEST-001
+
   - name: Phase 3 — Hardening and engines
     status: open
     epics:
