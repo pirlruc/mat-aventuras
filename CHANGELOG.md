@@ -14,3 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cite methodologies `1.7.0` from repo-owned docs.
 - Run actionlint `1.7.12` (the commondevops ci-lint pin) and rescan security
   jobs on the 1st and the 15th.
+- Record non-numeric guardrail departures (Android static analysis, the
+  Godot `MissingSuperCall` suppression, coverage exclusions, Dokka
+  `doc_coverage` not applicable) and track the SDK-only proof as MAT-006.
+- Init `docs/guardrails` with `GUARDRAILS_READ_TOKEN` and call commondevops
+  `5.1.2` reusables with `COMMONDEVOPS_READ_TOKEN`.

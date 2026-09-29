@@ -229,14 +229,18 @@ the host speaks a pt-PT line and applies bonus points.
 
 Pinned at `docs/guardrails/` (tag `1.8.0`) and `.github/scaffold/` (tag `1.7.0`),
 the same two submodules [commondevops](https://github.com/pirlruc/commondevops)
-uses. GitHub Actions reads Kotlin numeric gates from
-`config/kotlin.thresholds.yml` (CI-022 fail-closed) because those companion
-repos are private and Actions does not clone them. Submodule SHAs must match
+uses. CI inits `docs/guardrails` with `GUARDRAILS_READ_TOKEN`
+(`scripts/checkout-guardrails.sh`). Push to `main` fails closed when that
+secret is missing. Other events, including Dependabot, skip and keep
+`config/kotlin.thresholds.yml` (CI-022 / CI-024). Submodule SHAs must match
 `docs/companion-pins.yml` (SC-DEP-004). Sync scaffold files with
 `.github/scaffold/scripts/sync-templates.sh`. The 1.7.0 release of those
 synced rules still links guardrails `1.7.0` and methodologies `1.6.0`; leave
 that text as the scaffold contract. This repo's own docs cite methodologies
 `1.7.0` and the guardrails submodule at `1.8.0`.
+
+Departures that are not lowered numbers live in `docs/guardrail-deviations.yml`
+and render into Epic MAT-006. Coverage floors stay at 95.
 
 `:domain` kover verify is 95% line + branch. When the Android SDK is present,
 `:data` and `:app` use the same numeric gate (Robolectric unit tests).
@@ -245,22 +249,43 @@ app does not publish API docs, so that ratio is not applicable. Public types
 still carry KDoc (`scripts/verify-kdoc.py`).
 Remaining emulator instrumented tests are tracked in MAT-002-T1.
 
+`:app` and `:data` are omitted from the Gradle build when `ANDROID_HOME` is
+unset (`settings.gradle.kts`). This agent VM has no Android SDK, so those
+modules are not compiled, tested, or linted here. ktlint and detekt are
+applied only on `:domain`, including in the CI quality job, so Android
+sources are not statically analyzed until MAT-006-T1. The CI test job does
+install the SDK and runs `:data` and `:app` unit tests, Kover, and
+`:app:lintDebug`. CodeQL compile and the APK bill need that same SDK
+(MAT-006-T2, MAT-006-T3).
+
 ### Shared CI jobs
+
+`.github/workflows/shared-ci.yml` calls commondevops at peeled commit
+`b3c462bed0de4f6475e6be7875c4ababd831acc6` (annotated tag `5.1.2`). `uses:`
+and `scripts_ref` are that same SHA (CI-018 / CI-034). `checkout_token` is
+`COMMONDEVOPS_READ_TOKEN`. A `uses:` line cannot carry a PAT; when the ops
+repo is private again, this repository still needs Actions access to read
+the workflow file. The public window is temporary. Do not drop the token.
+
+Token-free copies stay in `ci.yml` and `hardening.yml` so Dependabot, which
+receives no Actions secrets (CI-024), still has a green path. Fork pull
+requests skip the reusable jobs because they have no secret.
 
 | Ops repo | Reuse here |
 | --- | --- |
-| commondevops `common-infra-lint` | actionlint, shellcheck, zizmor. Hadolint has no Dockerfile in this repo. The reusable workflow checks out private commondevops, so public CI keeps those steps in-repo (actionlint `1.7.12`, shellcheck, zizmor). |
-| commondevops `common-doc-verify` | YAML parse, markdown links, and ruff on helper scripts. Same private checkout. Local scripts already parse YAML and lint links. |
-| commondevops `common-scaffold-verify` | `issues-sync.py --validate-only` once the scaffold submodule is present. CI calls `scripts/validate-issues.py` so the private checkout is optional. |
-| commondevops `common-secrets-sast` | gitleaks plus semgrep. The reusable config is `--config auto`, which is not `p/kotlin` (KT-SEC-002). This repo keeps gitleaks `8.24.3`, `.semgrep.yml`, and `p/kotlin`. |
-| commondevops `common-supply-chain` | Syft/Grype/Trivy on the filesystem. The APK bill is Gradle runtime classpath via `scripts/gradle-to-cyclonedx.py` because dex has no Maven coordinates. Keep that job. |
-| commondevops `common-scorecard` / `common-release` | Scorecard needs a PAT. This app has no installable release yet. |
+| commondevops `common-infra-lint` | Called from `shared-ci.yml` (actionlint, shellcheck, hadolint no-ops with no Dockerfile, zizmor). In-repo actionlint `1.7.12`, shellcheck, and zizmor stay for Dependabot. |
+| commondevops `common-doc-verify` | Called with the caller YAML list and link lint. `ruff_paths` stays empty: helper scripts are not a ruff project. |
+| commondevops `common-scaffold-verify` | Called. It no-ops when `scripts/issues-sync.py` is absent. In-repo `scripts/validate-issues.py` still runs. |
+| commondevops `common-secrets-sast` | Called. Its semgrep config is `--config auto`, which is not `p/kotlin` (KT-SEC-002). In-repo gitleaks `8.24.3`, `.semgrep.yml`, and `p/kotlin` stay. |
+| commondevops `common-supply-chain` | Called (Syft directory, Grype, Trivy fs, grant). The APK bill stays `scripts/gradle-to-cyclonedx.py` because dex has no Maven coordinates. |
+| commondevops `common-scorecard` / `common-release` | Scorecard needs `SCORECARD_TOKEN`. This app has no installable release yet. |
 | containerdevops | No production image or Compose stack. |
-| cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
-| pydevops `python-quality` | Expects a uv/pyproject app. Helper scripts are not that package. |
+| cppdevops | No C++ sources. `cpp-mobile-matrix` is NDK/Xcode smoke, not AGP. Godot gameplay is GDScript plus the Kotlin simulation. |
+| pydevops `python-quality` | Installs with `uv sync` when `pyproject.toml` exists, then expects an importable package and a pytest suite. Helper scripts are not that package. |
 
-Dependabot pull requests stay on the token-free jobs above (CI-024). Scheduled
-security jobs run on the 1st and the 15th so the gap stays inside
+Dependabot pull requests stay on the token-free jobs (CI-024). The reusable
+workflows also skip `dependabot[bot]` internally. Scheduled security jobs
+run on the 1st and the 15th so the gap stays inside
 `security_rescan_interval_days` (CI-029).
 
 Local parity (CI-008):

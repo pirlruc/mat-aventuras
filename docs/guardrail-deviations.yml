@@ -5,5 +5,76 @@
 #
 # Field definitions: https://github.com/pirlruc/guardrails#deviation-rule
 # Approval flow:     https://github.com/pirlruc/methodologies/blob/1.7.0/github-issue-adr/docs/process/guardrail-compliance.md
+#
+# None of these entries lower a numeric gate. statement_coverage and branch_coverage stay 95.
+# doc_coverage is not applicable (no published API). lint_exception_max_days stays 14.
+# key, org_default, and repo_value are omitted because the guardrail is not parameterized
+# by a changed number. approved_by is omitted for the same reason.
 
-deviations: []
+deviations:
+  - id: KT-BUILD-002
+    epic: MAT-006
+    why: >-
+      ktlint and detekt are applied only in domain/build.gradle.kts. The CI
+      quality job runs :domain:ktlintCheck and :domain:detekt. :app and :data
+      are Android library/application modules. This agent VM has no Android
+      SDK, so settings.gradle.kts does not include them and the plugins were
+      not added there. Formatter and static analysis therefore do not cover
+      those production sources. MAT-006-T1 applies the plugins once an SDK
+      host can prove the tasks.
+    owner: pirlruc
+    review: 2026-12-31
+
+  - id: KT-BUILD-002
+    epic: MAT-006
+    why: >-
+      RewardGodotFragment carries a permanent @SuppressLint("MissingSuperCall").
+      Those GodotFragment overrides must not call super: doing so disconnects
+      the BufferQueue and yields EGL_BAD_SURFACE / a black SurfaceView. The
+      14-day lint_exception_max_days clock does not fit a platform contract
+      that forbids the super call. The numeric gate is not lowered.
+    owner: pirlruc
+    review: 2026-12-31
+
+  - id: ANDROID-LINT-001
+    epic: MAT-006
+    why: >-
+      Android Lint shares the Kotlin lint_exception_max_days clock. The same
+      RewardGodotFragment MissingSuperCall suppression cannot expire, because
+      calling super is incorrect for this JNI host. Lint errors still fail
+      :app:lintDebug on the SDK CI job. There is no directory-wide lint.xml.
+    owner: pirlruc
+    review: 2026-12-31
+
+  - id: KT-CPLX-001
+    epic: MAT-006
+    why: >-
+      CyclomaticComplexMethod is a detekt rule, and detekt is not applied to
+      :app or :data. Complexity of those production sources is not gated.
+      max_cyclomatic_complexity stays 10 on :domain. MAT-006-T1 is the
+      remediation once an SDK host can run detekt on the Android modules.
+    owner: pirlruc
+    review: 2026-12-31
+
+  - id: KT-TEST-002
+    epic: MAT-006
+    why: >-
+      Line and branch floors stay at the org 95. Exclusions go beyond the
+      named kotlinx.serialization $$serializer members: BuildConfig, Room
+      *_Impl, ComposableSingletons, @Composable and *Kt$* compiler classes,
+      *Activity$*, the Godot JNI package (libgodot_android.so cannot load
+      under Robolectric), NativeKartHost, NativeRunnerHost, LessonScreenKt,
+      and NavGraphKt. MAT-005-T3 removes the screen facades and the two
+      native hosts once an SDK host can prove the floor. This is not a
+      lowered number.
+    owner: pirlruc
+    review: 2026-12-31
+
+  - id: KT-DOC-001
+    epic: MAT-006
+    why: >-
+      The app does not publish API docs, so Dokka doc_coverage is not
+      applicable. Public types still carry KDoc, enforced by
+      scripts/verify-kdoc.py. This is not a lowered number.
+    owner: pirlruc
+    review: 2026-12-31

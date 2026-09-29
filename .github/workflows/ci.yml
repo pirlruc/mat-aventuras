@@ -1,6 +1,7 @@
 # Quality, tests, docs, security (CI-006 / CI-009–012). Action pins are SHAs (CI-001).
-# Companion repos are private; CI uses vendored scripts/thresholds so
-# COMPANION_READ_TOKEN is not required (gitlinks stay pinned for local clones).
+# GUARDRAILS_READ_TOKEN inits docs/guardrails. Push to main fails closed without
+# it. Other events skip and keep config/kotlin.thresholds.yml (CI-024).
+# commondevops callers live in shared-ci.yml (COMMONDEVOPS_READ_TOKEN).
 name: ci
 
 on:
@@ -27,6 +28,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Checkout guardrails submodule
+        env:
+          GUARDRAILS_READ_TOKEN: ${{ secrets.GUARDRAILS_READ_TOKEN }}
+        run: bash scripts/checkout-guardrails.sh
+
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
@@ -48,7 +54,8 @@ jobs:
             .github/dependabot.yml \
             .github/workflows/ci.yml \
             .github/workflows/hardening.yml \
-            .github/workflows/codeql.yml
+            .github/workflows/codeql.yml \
+            .github/workflows/shared-ci.yml
           .ci-venv/bin/python scripts/validate-issues.py docs/issues.yml
           .ci-venv/bin/python scripts/verify-companion-pins.py
 
@@ -75,6 +82,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Checkout guardrails submodule
+        env:
+          GUARDRAILS_READ_TOKEN: ${{ secrets.GUARDRAILS_READ_TOKEN }}
+        run: bash scripts/checkout-guardrails.sh
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
