@@ -102,9 +102,9 @@ Architecture, engine isolation, and the Godot plugin contract:
 - Decision log: Epics in [docs/issues.yml](docs/issues.yml) (no ADR files)
 - Agent notes: [docs/ai-agent-handoff.md](docs/ai-agent-handoff.md)
 
-Process: [github-issue-adr](https://github.com/pirlruc/methodologies/tree/1.5.0/github-issue-adr) @ `1.5.0`.
-Guardrails: [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.6.0`.
-Scaffold: [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.5.0`.
+Process: [github-issue-adr](https://github.com/pirlruc/methodologies/tree/1.7.0/github-issue-adr) @ `1.7.0`.
+Guardrails: [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.8.0`.
+Scaffold: [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.7.0`.
 
 Full CI with the SDK:
 

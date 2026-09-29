@@ -7,13 +7,13 @@
 
 guardrails:
   path: docs/guardrails
-  tag: "1.6.0"
-  sha: "77cf16eb52c76c9cf676594f23b4b1fd73c5fc81"
+  tag: "1.8.0"
+  sha: "aa5184ceaa5d005a71d984fd771564cb10b63681"
 
 scaffold:
   path: .github/scaffold
-  tag: "1.5.0"
-  sha: "9e04ed530fcbed1c0441c68ed96aed8e2dc2bec9"
+  tag: "1.7.0"
+  sha: "e76bb3fda306c490b4b3ea5e1a4e3977e04a1a1d"
 
 methodologies:
-  tag: "1.5.0"
+  tag: "1.7.0"

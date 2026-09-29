@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-09-26
-**Last agent focus:** Prize scenes must leave the blue boot clear color
+**Last updated:** 2026-09-29
+**Last agent focus:** Guardrails 1.8.0, scaffold 1.7.0, and shared CI reuse
 
 ---
 
@@ -28,15 +28,17 @@ equals the recorded sha.
 
 | Companion | How | Value |
 | --- | --- | --- |
-| methodologies | annotated tag in docs | `1.5.0` |
-| guardrails | submodule SHA `docs/guardrails/` | `77cf16eb` (tag `1.6.0`) |
-| github-scaffold | submodule SHA `.github/scaffold/` | `9e04ed53` (tag `1.5.0`) |
+| methodologies | annotated tag in docs | `1.7.0` |
+| guardrails | submodule SHA `docs/guardrails/` | `aa5184ce` (tag `1.8.0`) |
+| github-scaffold | submodule SHA `.github/scaffold/` | `e76bb3fd` (tag `1.7.0`) |
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
+| actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
 
-Latest published companion **tags** are already 1.6.0 / 1.5.0. Companion
-`main` is ahead only with those repos' own CI/docs issue filings — no kotlin
-or supply-chain pack edits. Stay on annotated tags (SC-DEP-004).
+Stay on annotated tags (SC-DEP-004). Scaffold tag `1.7.0` synced rules still
+link guardrails `1.7.0` and methodologies `1.6.0`. That text is the scaffold
+contract; do not hand-edit it. Repo-owned docs cite methodologies `1.7.0`.
+Scaffold `main` already bumps those links and is not a release.
 
 ## Delivery status
 
@@ -72,6 +74,7 @@ is CI, because this VM has no Android SDK. GitHub has no MAT-* issues yet
 python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only
 python3 scripts/lint-doc-links.py --root .
 python3 scripts/verify-companion-pins.py
+bash scripts/run-actionlint.sh
 ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
 python3 scripts/verify-coverage.py
 bash scripts/check-ci-local.sh
@@ -160,7 +163,8 @@ bash scripts/check-ci-local.sh
 - Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
 - `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
 - Local secret scan: `git config core.hooksPath .githooks` runs `scripts/gitleaks-pre-commit.sh` (KT-SEC-003). CI still scans; the hook fails closed if `gitleaks` is missing.
-- Guardrails tag `1.6.0` (`77cf16eb`) is still the newest published tag. `docs/guardrail-deviations.yml` stays empty. KT-SEC-002 is semgrep; KT-SEC-003 is gitleaks.
+- Guardrails tag `1.8.0` (`aa5184ce`) and scaffold tag `1.7.0` (`e76bb3fd`) are the newest published tags. `docs/guardrail-deviations.yml` stays empty. KT-SEC-002 is semgrep `p/kotlin`; KT-SEC-003 is gitleaks. KT-DOC-001 Dokka `doc_coverage` does not apply (no published API). The one `@SuppressLint("MissingSuperCall")` is `RewardGodotFragment`: those JNI overrides must not call super. KT-BUILD-002's 14-day expiry has no named exception for that case.
+- `:app` Kover still excludes Compose facades (`LessonScreenKt`, `NavGraphKt`, `@Composable`, `*Kt$*`), native Canvas hosts, and `engine.godot.*`. MAT-005-T3 wants the first two hosts and the two screen facades measured. This VM has no Android SDK, so those excludes stayed. Room `*_Impl` and `BuildConfig` stay excluded as generated code. KT-TEST-002 names kotlinx.serialization generated members, not Room or the Godot JNI package.
 - Do not gate jobs on `github.actor == 'dependabot[bot]'` (zizmor `bot-conditions`). Dependabot updates use `cooldown.default-days: 7`. Workflow lint is zizmor-action `v0.6.4` (`cc914d7f`) with `advanced-security: false` and zizmor `1.30.1`, scoped to `.github/workflows` and `.github/dependabot.yml` so the scaffold submodule is not audited.
 - CodeQL action `v4.38.1` commit is `1c5b675653bb5c22dbe9b12b556ec555138e09fd` (the tag object is not the commit). `upload: never` keeps `contents: read`. The compile step must stay manual (`build-mode: manual`). The APK SBOM is the debug runtime classpath (`scripts/gradle-to-cyclonedx.py` + osv-scanner `2.6.0`). Dex has no Maven coordinates, so scanning the APK file itself yields an empty bill. Community semgrep is `p/kotlin` beside `.semgrep.yml`, still semgrep `1.128.1`, and it runs after grype so `.ci-venv` is not scanned.
 - Do not merge `cursor/godot-black-screen-invaders-5d7b` or
@@ -181,6 +185,7 @@ bash scripts/check-ci-local.sh
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
 3. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
-4. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes.
+4. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes (needs the Android SDK).
+5. When github-scaffold releases the pin bump already on `main`, re-sync rules so they cite guardrails `1.8.0` and methodologies `1.7.0`.
 
-*Last updated: 2026-09-26*
+*Last updated: 2026-09-29*

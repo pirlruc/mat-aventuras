@@ -8,7 +8,7 @@ on:
     branches: [main]
   pull_request:
   schedule:
-    - cron: "17 4 1 * *" # monthly security re-analysis (CI-029)
+    - cron: "17 4 1,15 * *" # twice monthly; gap stays inside security_rescan_interval_days (CI-029)
   workflow_dispatch:
 
 concurrency:
@@ -64,6 +64,9 @@ jobs:
 
       - name: Shellcheck (CI-023)
         run: shellcheck scripts/*.sh
+
+      - name: actionlint (CI-023)
+        run: bash scripts/run-actionlint.sh
 
   test:
     runs-on: ubuntu-latest

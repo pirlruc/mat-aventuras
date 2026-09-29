@@ -11,9 +11,11 @@ python3 scripts/validate-yaml.py \
   docs/companion-pins.yml \
   .github/dependabot.yml \
   .github/workflows/ci.yml \
-  .github/workflows/hardening.yml
+  .github/workflows/hardening.yml \
+  .github/workflows/codeql.yml
 python3 scripts/verify-companion-pins.py
 python3 scripts/lint-doc-links.py --root "$ROOT"
+bash scripts/run-actionlint.sh
 
 if [[ -f .github/scaffold/scripts/issues-sync.py ]]; then
   python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only

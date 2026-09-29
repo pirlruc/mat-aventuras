@@ -1,9 +1,10 @@
 # Architecture — Mat Aventuras
 
 Technical guide for the native Android educational math game.
-Methodology: [github-issue-adr @ 1.5.0](https://github.com/pirlruc/methodologies/tree/1.5.0/github-issue-adr).
-Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (not ADR markdown files).
-Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.6.0`.
+Methodology: [github-issue-adr @ 1.7.0](https://github.com/pirlruc/methodologies/tree/1.7.0/github-issue-adr).
+Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (no ADR markdown files).
+Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.8.0`.
+Scaffold pin: `.github/scaffold/` → [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.7.0`.
 
 Language split: **code, comments, KDoc, and this documentation are English**.
 **User-visible UI copy, TTS, and dialogue are Portuguese from Portugal (pt-PT).**
@@ -226,13 +227,41 @@ the host speaks a pt-PT line and applies bonus points.
 
 ## Guardrails
 
-Pinned at `docs/guardrails/` when that submodule is cloned. GitHub Actions
-reads Kotlin numeric gates from `config/kotlin.thresholds.yml` (CI-022
-fail-closed) because the companion repos are private. Submodule SHAs must
-match `docs/companion-pins.yml` (SC-DEP-004).
+Pinned at `docs/guardrails/` (tag `1.8.0`) and `.github/scaffold/` (tag `1.7.0`),
+the same two submodules [commondevops](https://github.com/pirlruc/commondevops)
+uses. GitHub Actions reads Kotlin numeric gates from
+`config/kotlin.thresholds.yml` (CI-022 fail-closed) because those companion
+repos are private and Actions does not clone them. Submodule SHAs must match
+`docs/companion-pins.yml` (SC-DEP-004). Sync scaffold files with
+`.github/scaffold/scripts/sync-templates.sh`. The 1.7.0 release of those
+synced rules still links guardrails `1.7.0` and methodologies `1.6.0`; leave
+that text as the scaffold contract. This repo's own docs cite methodologies
+`1.7.0` and the guardrails submodule at `1.8.0`.
+
 `:domain` kover verify is 95% line + branch. When the Android SDK is present,
 `:data` and `:app` use the same numeric gate (Robolectric unit tests).
+KT-DOC-001's Dokka `doc_coverage` ratio applies to publishable modules. This
+app does not publish API docs, so that ratio is not applicable. Public types
+still carry KDoc (`scripts/verify-kdoc.py`).
 Remaining emulator instrumented tests are tracked in MAT-002-T1.
+
+### Shared CI jobs
+
+| Ops repo | Reuse here |
+| --- | --- |
+| commondevops `common-infra-lint` | actionlint, shellcheck, zizmor. Hadolint has no Dockerfile in this repo. The reusable workflow checks out private commondevops, so public CI keeps those steps in-repo (actionlint `1.7.12`, shellcheck, zizmor). |
+| commondevops `common-doc-verify` | YAML parse, markdown links, and ruff on helper scripts. Same private checkout. Local scripts already parse YAML and lint links. |
+| commondevops `common-scaffold-verify` | `issues-sync.py --validate-only` once the scaffold submodule is present. CI calls `scripts/validate-issues.py` so the private checkout is optional. |
+| commondevops `common-secrets-sast` | gitleaks plus semgrep. The reusable config is `--config auto`, which is not `p/kotlin` (KT-SEC-002). This repo keeps gitleaks `8.24.3`, `.semgrep.yml`, and `p/kotlin`. |
+| commondevops `common-supply-chain` | Syft/Grype/Trivy on the filesystem. The APK bill is Gradle runtime classpath via `scripts/gradle-to-cyclonedx.py` because dex has no Maven coordinates. Keep that job. |
+| commondevops `common-scorecard` / `common-release` | Scorecard needs a PAT. This app has no installable release yet. |
+| containerdevops | No production image or Compose stack. |
+| cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
+| pydevops `python-quality` | Expects a uv/pyproject app. Helper scripts are not that package. |
+
+Dependabot pull requests stay on the token-free jobs above (CI-024). Scheduled
+security jobs run on the 1st and the 15th so the gap stays inside
+`security_rescan_interval_days` (CI-029).
 
 Local parity (CI-008):
 

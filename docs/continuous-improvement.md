@@ -71,8 +71,10 @@ https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
 | --- | --- |
 | Product code | Playable pt-PT math game |
 | Process | github-issue-adr + pinned guardrails |
-| CI | JVM coverage gate; optional Android assemble; grype |
+| CI | JVM coverage gate; optional Android assemble; grype; actionlint |
 | Companion pins | `docs/companion-pins.yml` gitlink SHA/tag match |
+| Agent instructions | Generated `AGENTS.md` / `SKILLS.md` from the scaffold sync |
+| Shared CI | Token-free in-repo jobs; private commondevops callers stay unwired |
 
 ## Non-negotiable constraints
 
