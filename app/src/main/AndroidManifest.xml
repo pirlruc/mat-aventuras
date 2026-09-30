@@ -50,6 +50,8 @@
                 tools:node="remove" />
         </provider>
 
+        <!-- Launcher activity. exported is required by MAIN/LAUNCHER. -->
+        <!-- nosemgrep: java.android.security.exported_activity.exported_activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

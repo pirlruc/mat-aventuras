@@ -11,8 +11,10 @@ not ProcessPhoenix.
 from __future__ import annotations
 
 import sys
-import xml.etree.ElementTree as ET  # nosec B405
 from pathlib import Path
+from xml.etree.ElementTree import Element as XmlElement  # nosec B405 # nosemgrep
+
+import defusedxml.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "app/src/main/AndroidManifest.xml"
@@ -28,7 +30,7 @@ PLUGIN_PROCESSES = {
 }
 
 
-def attr(element: ET.Element, name: str, ns: str = ANDROID) -> str:
+def attr(element: XmlElement, name: str, ns: str = ANDROID) -> str:
     """Return a trimmed Android or tools attribute."""
     return (element.get(f"{ns}{name}") or "").strip()
 
@@ -46,7 +48,7 @@ def fail(message: str) -> int:
     return 1
 
 
-def check_internet(root: ET.Element, errors: list[str]) -> None:
+def check_internet(root: XmlElement, errors: list[str]) -> None:
     """Require the INTERNET permission to be removed."""
     for uses in root.findall("uses-permission"):
         name = attr(uses, "name")
@@ -55,7 +57,7 @@ def check_internet(root: ET.Element, errors: list[str]) -> None:
             errors.append("INTERNET must be tools:node=remove")
 
 
-def check_application_flags(application: ET.Element, errors: list[str]) -> None:
+def check_application_flags(application: XmlElement, errors: list[str]) -> None:
     """Require backup and cleartext flags to stay off."""
     if attr(application, "allowBackup") != "false":
         errors.append('android:allowBackup must be "false"')
@@ -68,9 +70,9 @@ def check_application_flags(application: ET.Element, errors: list[str]) -> None:
         errors.append('android:usesCleartextTraffic must be "false"')
 
 
-def index_components(application: ET.Element) -> dict[str, ET.Element]:
+def index_components(application: XmlElement) -> dict[str, XmlElement]:
     """Index application children by fully qualified android:name."""
-    names: dict[str, ET.Element] = {}
+    names: dict[str, XmlElement] = {}
     for child in list(application):
         name = fqcn(attr(child, "name"))
         if name:
@@ -78,7 +80,7 @@ def index_components(application: ET.Element) -> dict[str, ET.Element]:
     return names
 
 
-def check_plugins(names: dict[str, ET.Element], errors: list[str]) -> None:
+def check_plugins(names: dict[str, XmlElement], errors: list[str]) -> None:
     """Require reward activities to be unexported and process-isolated."""
     for class_name, process in PLUGIN_PROCESSES.items():
         element = names.get(class_name)
@@ -91,7 +93,7 @@ def check_plugins(names: dict[str, ET.Element], errors: list[str]) -> None:
             errors.append(f"{class_name} must use android:process={process}")
 
 
-def check_stripped(names: dict[str, ET.Element], errors: list[str]) -> None:
+def check_stripped(names: dict[str, XmlElement], errors: list[str]) -> None:
     """Require Godot merge stubs to be tools:node=remove."""
     stripped = (
         "org.godotengine.godot.utils.ProcessPhoenix",
@@ -111,7 +113,9 @@ def main() -> int:
     """Return 0 when the host manifest matches the privacy rules."""
     if not MANIFEST.is_file():
         return fail(f"missing {MANIFEST}")
-    root = ET.parse(MANIFEST).getroot()  # nosec B314
+    root = ET.parse(MANIFEST).getroot()
+    if root is None:
+        return fail(f"empty {MANIFEST}")
     application = root.find("application")
     if application is None:
         return fail("missing <application>")

@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-09-30
-**Last agent focus:** Root pyproject and pydevops python-quality; VM-limited issues on GitHub
+**Last agent focus:** CI fixes for guardrails checkout, Semgrep, and python-quality Python 3.13
 
 ---
 
@@ -94,9 +94,11 @@ bash scripts/check-ci-local.sh
 - `scripts/checkout-guardrails.sh` inits `docs/guardrails` with
   `GUARDRAILS_READ_TOKEN` (full clone; a shallow fetch of the pinned commit
   fails). Push to `main` fails closed without the token. Other events skip
-  and keep `config/kotlin.thresholds.yml`. The script sets a local
-  `http.extraheader` and unsets it on exit so the token is not left in
-  `.git/config`. `verify-coverage.py` fails if the overlay is below the
+  and keep `config/kotlin.thresholds.yml`. Pass the token with
+  `git -c http.extraheader`. A local `git config` extraheader is not visible
+  to the submodule clone. The exit trap still clears a leftover local
+  header. `verify-coverage.py` and `verify-privacy-manifest.py` parse XML
+  with defusedxml. `verify-coverage.py` fails if the overlay is below the
   submodule org defaults when both exist.
 - `.github/workflows/shared-ci.yml` calls commondevops `5.1.2` at peeled SHA
   `b3c462bed0de4f6475e6be7875c4ababd831acc6` with `COMMONDEVOPS_READ_TOKEN`
@@ -211,7 +213,7 @@ bash scripts/check-ci-local.sh
 4. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes (needs the Android SDK).
 5. MAT-006-T1/T2/T3: on an SDK host, apply ktlint/detekt to `:app` and `:data`, and prove the existing unit-test, lint, CodeQL, and APK SBOM jobs.
 6. When github-scaffold releases the pin bump already on `main`, re-sync rules so they cite guardrails `1.8.0` and methodologies `1.7.0`.
-7. Companion issues filed from this review must be copied into each repo's `docs/issues.yml` and synced (contents write was unavailable): guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. Pin-bump epics on the ops repos were already open. Do not file them again.
-8. python-quality is Medium (CI-022 offsets), not the High/org floors. The install venv must stay in `RUNNER_TEMP` so radon does not scan it. `.bandit` skips assert and subprocess findings because the gate counts every result.
+7. Companion issues filed from this review must be copied into each repo's `docs/issues.yml` and synced (contents write was unavailable): guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The Android launcher Semgrep hit is evidence on commondevops [#165](https://github.com/pirlruc/commondevops/issues/165), not a new epic. Pin-bump epics on the ops repos were already open. Do not file them again.
+8. python-quality is Medium (CI-022 offsets), not the High/org floors. The install venv must stay in `RUNNER_TEMP` so radon does not scan it. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13: the reusable workflow passes that version into `uv sync` of pydevops, and pydevops requires `>=3.13`. `[tool.uv] exclude-newer = "7 days"` is the cooldown key Semgrep expects.
 
-*Last updated: 2026-09-30 (pyproject, python-quality, VM-limited issues)*
+*Last updated: 2026-09-30 (guardrails checkout, defusedxml, python 3.13)*

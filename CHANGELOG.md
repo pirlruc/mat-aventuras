@@ -21,3 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `5.1.2` reusables with `COMMONDEVOPS_READ_TOKEN`.
 - Add a root `pyproject.toml` (`package = false`) and call pydevops
   `python-quality` `2.1.1` for the CI helper scripts.
+- Authenticate the guardrails submodule clone with `git -c`, parse CI XML
+  with defusedxml, and call python-quality on Python 3.13.

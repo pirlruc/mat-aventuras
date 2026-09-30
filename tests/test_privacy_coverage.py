@@ -65,7 +65,7 @@ def test_privacy_flags(
 def test_privacy_plugins(scripts) -> None:
     """Missing, exported, and wrong-process activities are errors."""
     module = scripts["verify-privacy-manifest.py"]
-    element = module.ET.Element("activity")
+    element = module.ET.fromstring("<activity/>")
     element.set(module.ANDROID + "exported", "true")
     element.set(module.ANDROID + "process", ":no")
     errors: list[str] = []
@@ -73,10 +73,10 @@ def test_privacy_plugins(scripts) -> None:
     assert any("exported" in item for item in errors)
     assert any("process" in item for item in errors)
     assert module.fqcn(".Main") == module.PACKAGE + ".Main"
-    application = module.ET.Element("application")
-    application.append(module.ET.Element("activity"))
+    application = module.ET.fromstring("<application/>")
+    application.append(module.ET.fromstring("<activity/>"))
     assert module.index_components(application) == {}
-    present = module.ET.Element("activity")
+    present = module.ET.fromstring("<activity/>")
     present.set(module.TOOLS + "node", "merge")
     stripped: list[str] = []
     names = {"org.godotengine.godot.utils.ProcessPhoenix": present}

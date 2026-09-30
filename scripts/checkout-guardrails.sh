@@ -27,6 +27,7 @@ cleanup() {
 trap cleanup EXIT
 
 export GIT_TERMINAL_PROMPT=0
-git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ${header}"
-# Full clone. A shallow fetch of the pinned non-tip commit fails.
-git submodule update --init docs/guardrails
+# `git -c` is inherited by the clone child. A local extraheader is not:
+# submodule update clones into a new repo that never reads the superproject config.
+git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${header}" \
+  submodule update --init docs/guardrails

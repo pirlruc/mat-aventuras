@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Fail closed if Kover XML does not meet kotlin/profile.thresholds.yml.
 
 CI-022 and KT-TEST-002. Gates every included module. :data and :app are
@@ -9,8 +10,10 @@ from __future__ import annotations
 
 import os
 import sys
-import xml.etree.ElementTree as ET  # nosec B405
 from pathlib import Path
+from xml.etree.ElementTree import Element as XmlElement  # nosec B405 # nosemgrep
+
+import defusedxml.ElementTree as ET
 
 try:
     import yaml
@@ -86,7 +89,7 @@ def find_android_report(module: str) -> Path:
     return candidates[0]
 
 
-def counter_percent(root: ET.Element, kind: str) -> float:
+def counter_percent(root: XmlElement, kind: str) -> float:
     """Return the covered percent for a Kover counter type."""
     for counter in root.findall("counter"):
         if counter.get("type") == kind:
@@ -109,7 +112,10 @@ def check_report(name: str, path: Path, thresholds: dict) -> bool:
     if not path.is_file():
         print(f"error: missing Kover report {path}", file=sys.stderr)
         return False
-    root = ET.parse(path).getroot()  # nosec B314
+    root = ET.parse(path).getroot()
+    if root is None:
+        print(f"error: empty Kover report {path}", file=sys.stderr)
+        return False
     line = counter_percent(root, "LINE")
     branch = counter_percent(root, "BRANCH")
     ok = True
