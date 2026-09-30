@@ -281,7 +281,7 @@ requests skip the reusable jobs because they have no secret.
 | commondevops `common-scorecard` / `common-release` | Scorecard needs `SCORECARD_TOKEN`. This app has no installable release yet. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. `cpp-mobile-matrix` is NDK/Xcode smoke, not AGP. Godot gameplay is GDScript plus the Kotlin simulation. |
-| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `19fa370f5f11bae423d4c0586080dbed32f9ddf8` (annotated tag `2.1.1`). `uses:` and `devops_ref` are that SHA. The job is `if: false` until a tag after 2.1.1: `uv tool install pytest-cov` exits 1 on the pinned uv 0.6.9 ([PDO-TOOL-001](https://github.com/pirlruc/pydevops/issues/170)). Root `pyproject.toml` is `package = false`. Caller `python_version` is 3.13. The venv is created outside the tree. The workflow has no checkout-token input. |
+| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `19fa370f5f11bae423d4c0586080dbed32f9ddf8` (annotated tag `2.1.1`). `uses:` and `devops_ref` are that SHA. The job stays skipped until repository variable `PYTHON_QUALITY_ENABLED` is `true`: `uv tool install pytest-cov` exits 1 on the pinned uv 0.6.9 ([PDO-TOOL-001](https://github.com/pirlruc/pydevops/issues/170)). Root `pyproject.toml` is `package = false`. Caller `python_version` is 3.13. The venv is created outside the tree. The workflow has no checkout-token input. |
 
 Dependabot pull requests stay on the token-free jobs (CI-024). The reusable
 workflows also skip `dependabot[bot]` internally. Scheduled security jobs
