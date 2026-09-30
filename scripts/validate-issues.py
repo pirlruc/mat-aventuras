@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Parse docs/issues.yml and fail on missing or duplicate epic/task ids."""
+
 from __future__ import annotations
 
 import sys
@@ -14,40 +15,60 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _remember(ident: str, seen: set[str], other: set[str], kind: str) -> list[str]:
+    """Record one id and report duplicates or epic/task collisions."""
+    errors: list[str] = []
+    if ident in seen:
+        errors.append(f"duplicate {kind} id: {ident}")
+    if ident in other:
+        other_kind = "task" if kind == "epic" else "epic"
+        errors.append(f"{kind} id collides with {other_kind} id: {ident}")
+    seen.add(ident)
+    return errors
+
+
+def _check_task(
+    task: dict, epic_id: str, epics: set[str], tasks: set[str]
+) -> list[str]:
+    """Return id and title errors for one task."""
+    tid = str(task.get("id") or "")
+    if not tid:
+        return [f"task missing id under epic {epic_id}"]
+    errors = _remember(tid, tasks, epics, "task")
+    if not task.get("title"):
+        errors.append(f"task {tid} missing title")
+    return errors
+
+
+def _check_epic(
+    epic: dict, milestone: str, epics: set[str], tasks: set[str]
+) -> list[str]:
+    """Return id, title, and task errors for one epic."""
+    eid = str(epic.get("id") or "")
+    if not eid:
+        return [f"epic missing id in milestone {milestone}"]
+    errors = _remember(eid, epics, tasks, "epic")
+    if not epic.get("title"):
+        errors.append(f"epic {eid} missing title")
+    for task in epic.get("tasks") or []:
+        errors.extend(_check_task(task, eid, epics, tasks))
+    return errors
+
+
 def collect_ids(data: dict) -> list[str]:
+    """Return manifest id errors. An empty list means the ids are unique."""
     errors: list[str] = []
     epics: set[str] = set()
     tasks: set[str] = set()
     for milestone in data.get("milestones") or []:
-        ms = str(milestone.get("name") or "?")
+        name = str(milestone.get("name") or "?")
         for epic in milestone.get("epics") or []:
-            eid = str(epic.get("id") or "")
-            if not eid:
-                errors.append(f"epic missing id in milestone {ms}")
-                continue
-            if eid in epics:
-                errors.append(f"duplicate epic id: {eid}")
-            if eid in tasks:
-                errors.append(f"epic id collides with task id: {eid}")
-            epics.add(eid)
-            if not epic.get("title"):
-                errors.append(f"epic {eid} missing title")
-            for task in epic.get("tasks") or []:
-                tid = str(task.get("id") or "")
-                if not tid:
-                    errors.append(f"task missing id under epic {eid}")
-                    continue
-                if tid in tasks:
-                    errors.append(f"duplicate task id: {tid}")
-                if tid in epics:
-                    errors.append(f"task id collides with epic id: {tid}")
-                tasks.add(tid)
-                if not task.get("title"):
-                    errors.append(f"task {tid} missing title")
+            errors.extend(_check_epic(epic, name, epics, tasks))
     return errors
 
 
 def main() -> int:
+    """Return 0 when the manifest ids are present and unique."""
     path = ROOT / "docs" / "issues.yml"
     if len(sys.argv) > 1:
         path = Path(sys.argv[1])

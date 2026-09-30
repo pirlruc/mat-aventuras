@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-09-29
-**Last agent focus:** Recorded guardrail departures, MAT-006 SDK proof, token-backed CI
+**Last updated:** 2026-09-30
+**Last agent focus:** Root pyproject and pydevops python-quality; VM-limited issues on GitHub
 
 ---
 
@@ -34,6 +34,7 @@ equals the recorded sha.
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
+| pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `2.1.1`, peeled `19fa370f` |
 
 Stay on annotated tags (SC-DEP-004). Scaffold tag `1.7.0` synced rules still
 link guardrails `1.7.0` and methodologies `1.6.0`. That text is the scaffold
@@ -71,8 +72,9 @@ Do not git-merge `cursor/godot-black-screen-*`; those branches were deleted afte
 the lives/HUD port landed on `main` via PR #10. PR #11 recorded MAT-003-T5 as
 done in `docs/issues.yml`. MAT-004-T7 paints invaders, chomp, and climb on
 `ArcadeBoardView` (domain tests cover `ArcadeScene`). `:app` Robolectric proof
-is CI, because this VM has no Android SDK. GitHub has no MAT-* issues yet
-(only probe #8); sync still needs a write token and `issues-sync.py`.
+is CI, because this VM has no Android SDK. MAT-006 is GitHub #19 (tasks #20, #21, #22). MAT-002-T1 is #23.
+This VM cannot run the Android SDK or an emulator. `docs/issues.yml`
+already contains those ids; after merge, sync so the manifest owns the bodies.
 
 ## Commands
 
@@ -210,5 +212,6 @@ bash scripts/check-ci-local.sh
 5. MAT-006-T1/T2/T3: on an SDK host, apply ktlint/detekt to `:app` and `:data`, and prove the existing unit-test, lint, CodeQL, and APK SBOM jobs.
 6. When github-scaffold releases the pin bump already on `main`, re-sync rules so they cite guardrails `1.8.0` and methodologies `1.7.0`.
 7. Companion issues filed from this review must be copied into each repo's `docs/issues.yml` and synced (contents write was unavailable): guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. Pin-bump epics on the ops repos were already open. Do not file them again.
+8. python-quality is Medium (CI-022 offsets), not the High/org floors. The install venv must stay in `RUNNER_TEMP` so radon does not scan it. `.bandit` skips assert and subprocess findings because the gate counts every result.
 
-*Last updated: 2026-09-29 (deviations, MAT-006, token-backed shared CI)*
+*Last updated: 2026-09-30 (pyproject, python-quality, VM-limited issues)*

@@ -281,7 +281,7 @@ requests skip the reusable jobs because they have no secret.
 | commondevops `common-scorecard` / `common-release` | Scorecard needs `SCORECARD_TOKEN`. This app has no installable release yet. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. `cpp-mobile-matrix` is NDK/Xcode smoke, not AGP. Godot gameplay is GDScript plus the Kotlin simulation. |
-| pydevops `python-quality` | Installs with `uv sync` when `pyproject.toml` exists, then expects an importable package and a pytest suite. Helper scripts are not that package. |
+| pydevops `python-quality` | Called from `python-quality.yml` at peeled commit `19fa370f5f11bae423d4c0586080dbed32f9ddf8` (annotated tag `2.1.1`). `uses:` and `devops_ref` are that SHA. Root `pyproject.toml` is `package = false` (CI helpers, not an installable app). The venv is created outside the tree so radon does not scan it. The workflow has no checkout-token input. |
 
 Dependabot pull requests stay on the token-free jobs (CI-024). The reusable
 workflows also skip `dependabot[bot]` internally. Scheduled security jobs
@@ -296,6 +296,8 @@ python3 scripts/lint-doc-links.py --root .
 ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
 python3 scripts/verify-coverage.py
 bash scripts/ci-local.sh
+uv sync --all-groups --all-extras
+pytest --cov=scripts --cov=tests --cov-branch
 ```
 
 Bootstrap labels/milestones (needs write token; not done by this agent):

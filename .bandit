@@ -1,0 +1,4 @@
+[bandit]
+# CI runs `bandit -r . -x ./.devops` and counts every result.
+# Asserts are the test suite. Git is invoked with a fixed argv.
+skips = B101,B404,B603,B607

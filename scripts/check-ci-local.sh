@@ -13,7 +13,8 @@ python3 scripts/validate-yaml.py \
   .github/workflows/ci.yml \
   .github/workflows/hardening.yml \
   .github/workflows/codeql.yml \
-  .github/workflows/shared-ci.yml
+  .github/workflows/shared-ci.yml \
+  .github/workflows/python-quality.yml
 python3 scripts/verify-companion-pins.py
 python3 scripts/lint-doc-links.py --root "$ROOT"
 bash scripts/run-actionlint.sh

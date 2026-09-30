@@ -1,11 +1,15 @@
-# Fail closed if Kover XML does not meet kotlin/profile.thresholds.yml (CI-022, KT-TEST-002).
-# Gates every included module. :data and :app are required when the Android SDK is present.
+"""Fail closed if Kover XML does not meet kotlin/profile.thresholds.yml.
+
+CI-022 and KT-TEST-002. Gates every included module. :data and :app are
+required when the Android SDK is present. An overlay below the org floors
+fails closed instead of being applied.
+"""
 
 from __future__ import annotations
 
 import os
 import sys
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405
 from pathlib import Path
 
 try:
@@ -23,6 +27,7 @@ REQUIRED = ("statement_coverage", "branch_coverage")
 
 
 def load_thresholds(path: Path) -> dict:
+    """Load statement and branch floors. Exit 1 when a required key is empty."""
     if not path.is_file():
         print(f"error: missing thresholds file {path}", file=sys.stderr)
         sys.exit(1)
@@ -32,12 +37,15 @@ def load_thresholds(path: Path) -> dict:
         sys.exit(1)
     for key in REQUIRED:
         if key not in data or data[key] in (None, ""):
-            print(f"error: required threshold {key!r} missing or empty", file=sys.stderr)
+            print(
+                f"error: required threshold {key!r} missing or empty", file=sys.stderr
+            )
             sys.exit(1)
     return data
 
 
 def android_sdk_present() -> bool:
+    """Return true when ANDROID_HOME or local.properties sdk.dir is a directory."""
     env = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
     if env and Path(env).is_dir():
         return True
@@ -52,6 +60,7 @@ def android_sdk_present() -> bool:
 
 
 def reports() -> list[tuple[str, Path]]:
+    """Return Kover report paths. Android modules are included only with an SDK."""
     found = [("domain", ROOT / "domain" / "build" / "reports" / "kover" / "report.xml")]
     if android_sdk_present():
         found.append(("data", find_android_report("data")))
@@ -60,6 +69,7 @@ def reports() -> list[tuple[str, Path]]:
 
 
 def find_android_report(module: str) -> Path:
+    """Pick the first existing Android Kover XML, or the debug default path."""
     base = ROOT / module / "build" / "reports" / "kover"
     candidates = [
         base / "reportDebug.xml",
@@ -77,13 +87,17 @@ def find_android_report(module: str) -> Path:
 
 
 def counter_percent(root: ET.Element, kind: str) -> float:
+    """Return the covered percent for a Kover counter type."""
     for counter in root.findall("counter"):
         if counter.get("type") == kind:
             missed = int(counter.get("missed", "0"))
             covered = int(counter.get("covered", "0"))
             total = missed + covered
             if total == 0:
-                print(f"error: {kind} counter has zero instrumentable lines", file=sys.stderr)
+                print(
+                    f"error: {kind} counter has zero instrumentable lines",
+                    file=sys.stderr,
+                )
                 sys.exit(1)
             return 100.0 * covered / total
     print(f"error: no {kind} counter in Kover report", file=sys.stderr)
@@ -91,22 +105,25 @@ def counter_percent(root: ET.Element, kind: str) -> float:
 
 
 def check_report(name: str, path: Path, thresholds: dict) -> bool:
+    """Return true when one module report meets both floors."""
     if not path.is_file():
         print(f"error: missing Kover report {path}", file=sys.stderr)
         return False
-    root = ET.parse(path).getroot()
+    root = ET.parse(path).getroot()  # nosec B314
     line = counter_percent(root, "LINE")
     branch = counter_percent(root, "BRANCH")
     ok = True
-    if line + 1e-9 < float(thresholds["statement_coverage"]):
+    line_floor = thresholds["statement_coverage"]
+    branch_floor = thresholds["branch_coverage"]
+    if line + 1e-9 < float(line_floor):
         print(
-            f"error: {name} statement coverage {line:.2f}% < {thresholds['statement_coverage']}",
+            f"error: {name} statement coverage {line:.2f}% < {line_floor}",
             file=sys.stderr,
         )
         ok = False
-    if branch + 1e-9 < float(thresholds["branch_coverage"]):
+    if branch + 1e-9 < float(branch_floor):
         print(
-            f"error: {name} branch coverage {branch:.2f}% < {thresholds['branch_coverage']}",
+            f"error: {name} branch coverage {branch:.2f}% < {branch_floor}",
             file=sys.stderr,
         )
         ok = False
@@ -116,6 +133,7 @@ def check_report(name: str, path: Path, thresholds: dict) -> bool:
 
 
 def thresholds_path() -> Path:
+    """Prefer the pinned pack, and refuse an overlay below the org floors."""
     primary = THRESHOLDS_CANDIDATES[0]
     overlay = THRESHOLDS_CANDIDATES[1]
     if primary.is_file() and overlay.is_file():
@@ -124,7 +142,8 @@ def thresholds_path() -> Path:
         for key in REQUIRED:
             if float(local[key]) < float(org[key]):
                 print(
-                    f"error: overlay {key} {local[key]} is below org default {org[key]}",
+                    f"error: overlay {key} {local[key]} "
+                    f"is below org default {org[key]}",
                     file=sys.stderr,
                 )
                 sys.exit(1)
@@ -141,6 +160,7 @@ def thresholds_path() -> Path:
 
 
 def main() -> int:
+    """Return 0 when every included module meets the coverage floors."""
     thresholds = load_thresholds(thresholds_path())
     ok = True
     for name, path in reports():

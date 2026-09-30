@@ -74,7 +74,7 @@ https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
 | CI | JVM coverage gate; optional Android assemble; grype; actionlint |
 | Companion pins | `docs/companion-pins.yml` gitlink SHA/tag match |
 | Agent instructions | Generated `AGENTS.md` / `SKILLS.md` from the scaffold sync |
-| Shared CI | Token-backed commondevops callers plus token-free in-repo jobs for Dependabot |
+| Shared CI | Token-backed commondevops callers, pydevops python-quality, and token-free in-repo jobs for Dependabot |
 
 ## Non-negotiable constraints
 

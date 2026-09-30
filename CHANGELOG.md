@@ -19,3 +19,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `doc_coverage` not applicable) and track the SDK-only proof as MAT-006.
 - Init `docs/guardrails` with `GUARDRAILS_READ_TOKEN` and call commondevops
   `5.1.2` reusables with `COMMONDEVOPS_READ_TOKEN`.
+- Add a root `pyproject.toml` (`package = false`) and call pydevops
+  `python-quality` `2.1.1` for the CI helper scripts.

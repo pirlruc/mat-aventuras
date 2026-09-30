@@ -52,7 +52,10 @@ def check_file(md_file: Path, root: Path) -> list[str]:
         path_only = path_from_destination(raw)
         if path_only is None:
             continue
-        if any(target_ok(candidate) for candidate in candidate_targets(md_file, path_only, root)):
+        if any(
+            target_ok(candidate)
+            for candidate in candidate_targets(md_file, path_only, root)
+        ):
             continue
         target = _missing_target(md_file, path_only, root)
         failures.append(_failure_message(rel, raw, target))
