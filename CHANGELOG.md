@@ -23,3 +23,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `python-quality` `2.1.1` for the CI helper scripts.
 - Authenticate the guardrails submodule clone with `git -c`, parse CI XML
   with defusedxml, and call python-quality on Python 3.13.
+- Pin the uv dependency cutoff to the lock timestamp. python-quality's
+  uv 0.6.9 cannot parse `exclude-newer = "7 days"`.
