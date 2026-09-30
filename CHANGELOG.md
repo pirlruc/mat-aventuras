@@ -25,3 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with defusedxml, and call python-quality on Python 3.13.
 - Pin the uv dependency cutoff to the lock timestamp. python-quality's
   uv 0.6.9 cannot parse `exclude-newer = "7 days"`.
+- Leave the python-quality caller skipped until a tag after 2.1.1.
+  `uv tool install pytest-cov` exits 1 on the pinned uv (PDO-TOOL-001).

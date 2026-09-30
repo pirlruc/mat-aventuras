@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-09-30
-**Last agent focus:** CI fixes for guardrails checkout, Semgrep, and python-quality Python 3.13
+**Last agent focus:** python-quality caller paused on PDO-TOOL-001
 
 ---
 
@@ -214,6 +214,6 @@ bash scripts/check-ci-local.sh
 5. MAT-006-T1/T2/T3: on an SDK host, apply ktlint/detekt to `:app` and `:data`, and prove the existing unit-test, lint, CodeQL, and APK SBOM jobs.
 6. When github-scaffold releases the pin bump already on `main`, re-sync rules so they cite guardrails `1.8.0` and methodologies `1.7.0`.
 7. Companion issues filed from this review must be copied into each repo's `docs/issues.yml` and synced (contents write was unavailable): guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The Android launcher Semgrep hit is evidence on commondevops [#165](https://github.com/pirlruc/commondevops/issues/165), not a new epic. Pin-bump epics on the ops repos were already open. Do not file them again.
-8. python-quality is Medium (CI-022 offsets), not the High/org floors. The install venv must stay in `RUNNER_TEMP` so radon does not scan it. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13: the reusable workflow passes that version into `uv sync` of pydevops, and pydevops requires `>=3.13`. pydevops installs uv 0.6.9, which cannot parse `exclude-newer = "7 days"` (that form needs uv 0.9.17). The pyproject cutoff is the timestamp already stored in `uv.lock`.
+8. python-quality is Medium (CI-022 offsets), not the High/org floors. The install venv must stay in `RUNNER_TEMP` so radon does not scan it. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff is the lock timestamp because uv 0.6.9 cannot parse `exclude-newer = "7 days"`. The caller job is `if: false` until a tag after 2.1.1: `uv tool install pytest-cov==7.1.0` exits 1 (pydevops #170, PDO-TOOL-001). Do not pin `main`.
 
-*Last updated: 2026-09-30 (guardrails checkout, defusedxml, python 3.13)*
+*Last updated: 2026-09-30 (python-quality paused on PDO-TOOL-001)*

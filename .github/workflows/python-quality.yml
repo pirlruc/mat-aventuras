@@ -3,6 +3,11 @@
 # The reusable workflow does not accept a checkout token. When pydevops is
 # private again, this repository still needs Actions access so uses: can read
 # the workflow file. Fork pull requests are skipped: they have no secret.
+#
+# The job is off until a tag after 2.1.1. qa-install-toolchain runs
+# `uv tool install pytest-cov==7.1.0`, and uv 0.6.9 exits 1 because that
+# package has no console script. That is pydevops #170 (PDO-TOOL-001).
+# There is no newer annotated tag to pin. Turn the job back on when one ships.
 name: python-quality
 
 on:
@@ -19,7 +24,9 @@ permissions: {}
 
 jobs:
   python-quality:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # PDO-TOOL-001. Restore the fork-PR guard when this job runs again:
+    # github.event_name != 'pull_request' || head.repo.full_name == github.repository
+    if: false
     permissions:
       contents: write
       actions: write
