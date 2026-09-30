@@ -48,6 +48,7 @@ KNOWN: dict[str, str] = {
 
 
 def modules() -> list[str]:
+    """Return sorted Maven coordinates declared in the version catalog."""
     text = CATALOG.read_text(encoding="utf-8")
     found = re.findall(r'module\s*=\s*"([^"]+)"', text)
     found += re.findall(r'group\s*=\s*"([^"]+)"\s*,\s*name\s*=\s*"([^"]+)"', text)
@@ -61,6 +62,7 @@ def modules() -> list[str]:
 
 
 def main() -> int:
+    """Return 0 when no catalog module uses a denied license."""
     denied: list[str] = []
     print("SC-LIC-001 license scan (version catalog):")
     for module in modules():

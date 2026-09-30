@@ -1,0 +1,30 @@
+[project]
+name = "mat-aventuras"
+version = "0.0.0"
+description = "On-device Portuguese math game and its CI helpers"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "defusedxml>=0.7",
+  "pyyaml>=6",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "pytest-cov>=6",
+  "types-defusedxml>=0.7",
+  "types-pyyaml>=6",
+]
+
+[tool.uv]
+package = false
+# "7 days" needs uv >= 0.9.17. pydevops python-quality installs uv 0.6.9,
+# which only accepts a timestamp. This is the cutoff already in uv.lock.
+exclude-newer = "2026-09-23T00:49:53.710163131Z" # nosemgrep: uv-missing-dependency-cooldown
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+exclude = ["\\.venv", "docs/guardrails", "\\.github/scaffold"]

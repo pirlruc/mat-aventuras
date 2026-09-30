@@ -1,7 +1,7 @@
 # Authored backlog for pirlruc/mat-aventuras.
 #
 # Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
-# Methodology: https://github.com/pirlruc/methodologies/tree/1.5.0/github-issue-adr
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.7.0/github-issue-adr
 #
 # The Epic is the decision record — there are no ADR markdown files.
 # Deviations from guardrails go in docs/guardrail-deviations.yml, not here.
@@ -188,7 +188,7 @@ milestones:
         acceptance_criteria:
           - Instrumented tests run in CI on an emulator
           - Lesson packs include missing-addend and smallest-number items
-          - :app and :data keep the org 95% coverage gate with no deviation
+          - :app and :data keep the org 95% coverage gate; exclusion departures stay on MAT-006
         guardrail_refs:
           - KT-TEST-002
           - KT-DOC-001
@@ -216,7 +216,7 @@ milestones:
                 - scripts/verify-coverage.py
             verification:
               - python3 scripts/verify-coverage.py gates :app and :data when the SDK is present
-              - docs/guardrail-deviations.yml has no KT-TEST-002 entry
+              - statement_coverage and branch_coverage stay at 95; exclusion departures are recorded on MAT-006, not as a lowered number
             guardrail_refs:
               - KT-TEST-002
 
@@ -583,8 +583,8 @@ milestones:
             release builds are not minified, :app Kover still omits Compose
             facades and the Godot JNI package, semgrep only runs the local
             five-rule pack, child names are stored unbounded, and workflow
-            token scope is not linted. Guardrail deviations stay empty; these
-            gaps are follow-up work, not approved exceptions.
+            token scope is not linted. Coverage floors stay at 95. Exclusions
+            beyond the named generated members are recorded on MAT-006.
           goal: >-
             One simulation feeds both hosts, release bytecode is shrunk without
             breaking Godot, coverage exclusions shrink to JNI that cannot load
@@ -593,8 +593,11 @@ milestones:
         architecture:
           target: >-
             Keep Godot in the isolated processes and Room in the Compose
-            process. Do not add a network client. Do not record a KT-TEST-002
-            deviation to hide untested Compose or arcade code.
+            process. Do not add a network client. KT-TEST-002 floors stay at
+            95. Exclusions beyond kotlinx.serialization are recorded on
+            MAT-006. MAT-005-T3 still removes LessonScreenKt, NavGraphKt,
+            NativeKartHost, and NativeRunnerHost. Do not add exclusions to
+            hide untested Compose or arcade code.
           modules:
             - app/src/main/assets
             - app/src/main/kotlin/pt/mataventuras/app
@@ -691,3 +694,98 @@ milestones:
               - zizmor or an equivalent workflow linter runs in CI and the current permissions blocks stay default-deny
             guardrail_refs:
               - CI-025
+
+      - id: MAT-006
+        status: open
+        title: Prove Android analysis the agent VM cannot run
+        overview:
+          problem: >-
+            This agent VM has no Android SDK, so settings.gradle.kts omits
+            :app and :data. ktlint and detekt are plugins on :domain only, and
+            the CI quality job runs only those domain tasks. The GitHub Actions
+            test job already installs the SDK and runs :data and :app unit
+            tests, Kover, and :app:lintDebug, but that job was not executed
+            here. CodeQL's manual Kotlin compile and the APK CycloneDX bill
+            have the same SDK dependency.
+          goal: >-
+            An SDK host proves static analysis, unit tests, Kover, lint,
+            CodeQL compile, and the APK bill for the Android modules, and the
+            recorded deviations shrink to what that proof still requires.
+            Numeric coverage floors stay at 95.
+        decision: >-
+          In the context of an agent VM with no Android SDK, facing :app and
+          :data omitted from the Gradle build and ktlint/detekt applied only
+          on :domain, we decided to record the analysis and coverage
+          departures and require an SDK host to prove the Android jobs, to
+          achieve an honest guardrail record without lowering the 95 percent
+          floors, accepting that this VM cannot compile the Android modules.
+        architecture:
+          target: >-
+            Keep the SDK include gate in settings.gradle.kts. Apply the same
+            formatter and detekt config to :app and :data once an SDK host
+            can compile them. Do not remove Kover exclusions until that host
+            shows the 95 percent floor still holds. MAT-005-T3 owns shrinking
+            LessonScreenKt, NavGraphKt, NativeKartHost, and NativeRunnerHost.
+          modules:
+            - app/
+            - data/
+            - domain/build.gradle.kts
+            - .github/workflows/ci.yml
+            - .github/workflows/codeql.yml
+            - .github/workflows/hardening.yml
+        acceptance_criteria:
+          - ktlint and detekt run on :app and :data in CI
+          - :data and :app unit tests, Kover, and :app:lintDebug are green on an SDK runner
+          - CodeQL java-kotlin compiles :data and :app and the APK CycloneDX/OSV job is green
+          - statement_coverage and branch_coverage remain 95
+        guardrail_refs:
+          - KT-BUILD-002
+          - KT-CPLX-001
+          - KT-TEST-002
+          - KT-DOC-001
+          - ANDROID-LINT-001
+        tasks:
+          - id: MAT-006-T1
+            status: open
+            title: Apply ktlint and detekt to the Android modules
+            instructions:
+              files:
+                - app/build.gradle.kts
+                - data/build.gradle.kts
+                - .github/workflows/ci.yml
+            verification:
+              - CI runs :app and :data ktlint and detekt on a runner with the Android SDK
+              - This VM cannot include those projects while ANDROID_HOME is unset
+            guardrail_refs:
+              - KT-BUILD-002
+              - KT-CPLX-001
+
+          - id: MAT-006-T2
+            status: open
+            title: Prove Android unit tests, Kover, and lint on an SDK host
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+                - app/src/test
+                - data/src/test
+            verification:
+              - :data:testDebugUnitTest, :app:testDebugUnitTest, Kover verify, and :app:lintDebug pass
+              - The steps already exist in the CI test job; they were not run on the agent VM
+            guardrail_refs:
+              - KT-TEST-002
+              - ANDROID-LINT-001
+
+          - id: MAT-006-T3
+            status: open
+            title: Prove CodeQL compile and the APK bill on an SDK host
+            instructions:
+              files:
+                - .github/workflows/codeql.yml
+                - .github/workflows/hardening.yml
+                - scripts/run-osv-sbom.sh
+            verification:
+              - codeql.yml compiles :data and :app and the SARIF gate stays green
+              - hardening.yml assembles the debug APK and the CycloneDX/OSV scan stays green
+            guardrail_refs:
+              - KT-SEC-002
+              - KT-SEC-004

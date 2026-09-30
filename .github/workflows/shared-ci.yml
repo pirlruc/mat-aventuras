@@ -1,0 +1,89 @@
+# commondevops reusable workflows. Pin is the peeled commit of annotated tag 5.1.2
+# (CI-018 / CI-034): uses: and scripts_ref are the same SHA.
+# uses: cannot carry a PAT. COMMONDEVOPS_READ_TOKEN is the checkout_token that
+# reads scripts when the ops repo is private. Same-owner Actions access is still
+# required for the uses: fetch. Token-free jobs stay in ci.yml so Dependabot
+# (CI-024) is not all-skipped. Fork pull requests are skipped: they have no secret.
+name: shared-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 1,15 * *"
+  workflow_dispatch:
+
+concurrency:
+  group: shared-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  infra-lint:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+    uses: pirlruc/commondevops/.github/workflows/common-infra-lint.yml@b3c462bed0de4f6475e6be7875c4ababd831acc6
+    with:
+      blocking: true
+      scripts_ref: b3c462bed0de4f6475e6be7875c4ababd831acc6
+    secrets:
+      checkout_token: ${{ secrets.COMMONDEVOPS_READ_TOKEN }}
+
+  doc-verify:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+    uses: pirlruc/commondevops/.github/workflows/common-doc-verify.yml@b3c462bed0de4f6475e6be7875c4ababd831acc6
+    with:
+      blocking: true
+      yaml_files: >-
+        docs/issues.yml
+        docs/guardrail-deviations.yml
+        docs/issues-sync-targets.yml
+        docs/companion-pins.yml
+        .github/dependabot.yml
+        .github/workflows/ci.yml
+        .github/workflows/hardening.yml
+        .github/workflows/codeql.yml
+        .github/workflows/shared-ci.yml
+        .github/workflows/python-quality.yml
+      run_link_lint: true
+      scripts_ref: b3c462bed0de4f6475e6be7875c4ababd831acc6
+    secrets:
+      checkout_token: ${{ secrets.COMMONDEVOPS_READ_TOKEN }}
+
+  scaffold-verify:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+    uses: pirlruc/commondevops/.github/workflows/common-scaffold-verify.yml@b3c462bed0de4f6475e6be7875c4ababd831acc6
+    with:
+      blocking: true
+      scripts_ref: b3c462bed0de4f6475e6be7875c4ababd831acc6
+
+  secrets-sast:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/commondevops/.github/workflows/common-secrets-sast.yml@b3c462bed0de4f6475e6be7875c4ababd831acc6
+    with:
+      blocking: true
+      scripts_ref: b3c462bed0de4f6475e6be7875c4ababd831acc6
+    secrets:
+      checkout_token: ${{ secrets.COMMONDEVOPS_READ_TOKEN }}
+
+  supply-chain:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/commondevops/.github/workflows/common-supply-chain.yml@b3c462bed0de4f6475e6be7875c4ababd831acc6
+    with:
+      blocking: true
+      scripts_ref: b3c462bed0de4f6475e6be7875c4ababd831acc6
+    secrets:
+      checkout_token: ${{ secrets.COMMONDEVOPS_READ_TOKEN }}

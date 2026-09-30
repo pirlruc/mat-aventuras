@@ -5,6 +5,7 @@ An Android APK stores dex, not Maven coordinates, so OSV cannot match
 packages inside the archive. This reads `gradle :app:dependencies` output
 and records the APK's SHA-256 on the root component (SC-SBOM-001).
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -18,6 +19,7 @@ ARROW = re.compile(r"->\s+([A-Za-z0-9_.+\-]+)")
 
 
 def parse_dependencies(text: str) -> list[tuple[str, str, str]]:
+    """Parse `gradle dependencies` text into group, name, version tuples."""
     resolved: dict[tuple[str, str], str] = {}
     for line in text.splitlines():
         if "---" not in line:
@@ -37,10 +39,12 @@ def parse_dependencies(text: str) -> list[tuple[str, str, str]]:
 
 
 def purl(group: str, name: str, version: str) -> str:
+    """Return a Maven package URL."""
     return f"pkg:maven/{group}/{name}@{version}"
 
 
 def bom(apk: Path, dependencies: list[tuple[str, str, str]]) -> dict:
+    """Build a CycloneDX document for an APK and its runtime coordinates."""
     digest = hashlib.sha256(apk.read_bytes()).hexdigest()
     components = []
     for group, name, version in dependencies:
@@ -72,6 +76,7 @@ def bom(apk: Path, dependencies: list[tuple[str, str, str]]) -> dict:
 
 
 def main() -> int:
+    """Write a CycloneDX file. Return 2 on usage errors and 1 on missing input."""
     if len(sys.argv) != 4:
         print("usage: gradle-to-cyclonedx.py APK DEPS_TXT SBOM_JSON", file=sys.stderr)
         return 2

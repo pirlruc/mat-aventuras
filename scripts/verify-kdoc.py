@@ -20,25 +20,42 @@ DECL = re.compile(
 SKIP_NAMES = {"Companion"}
 
 
-def main() -> int:
+def is_public_decl(raw: str, match: re.Match[str]) -> bool:
+    """Return true for a top-level public type declaration."""
+    indent = match.group(1)
+    name = match.group(3)
+    if name in SKIP_NAMES or indent != "":
+        return False
+    hidden = ("private ", "internal ", "protected ")
+    return not any(token in raw for token in hidden)
+
+
+def scan_file(path: pathlib.Path) -> tuple[int, list[str]]:
+    """Count public types in one file and list those without KDoc."""
     missing: list[str] = []
     total = 0
-    for glob in SRC_GLOBS:
-        for path in sorted(ROOT.glob(glob)):
-            lines = path.read_text(encoding="utf-8").splitlines()
-            for index, raw in enumerate(lines):
-                match = DECL.match(raw.rstrip())
-                if match is None:
-                    continue
-                indent, _kind, name = match.group(1), match.group(2), match.group(3)
-                if name in SKIP_NAMES or indent != "":
-                    continue
-                if any(token in raw for token in ("private ", "internal ", "protected ")):
-                    continue
-                total += 1
-                lookback = "\n".join(lines[max(0, index - 24) : index])
-                if "/**" not in lookback:
-                    missing.append(f"{path.relative_to(ROOT)}:{index + 1}:{name}")
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for index, raw in enumerate(lines):
+        match = DECL.match(raw.rstrip())
+        if match is None or not is_public_decl(raw, match):
+            continue
+        total += 1
+        lookback = "\n".join(lines[max(0, index - 24) : index])
+        if "/**" not in lookback:
+            name = match.group(3)
+            missing.append(f"{path.relative_to(ROOT)}:{index + 1}:{name}")
+    return total, missing
+
+
+def main() -> int:
+    """Return 0 when every public Kotlin type has KDoc."""
+    missing: list[str] = []
+    total = 0
+    for pattern in SRC_GLOBS:
+        for path in sorted(ROOT.glob(pattern)):
+            count, found = scan_file(path)
+            total += count
+            missing.extend(found)
     print(f"kdoc public types: {total - len(missing)}/{total} documented")
     if missing:
         print("KT-DOC-001 missing KDoc on public types:", file=sys.stderr)

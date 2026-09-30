@@ -12,6 +12,11 @@ captures/
 *.ap_
 *.aab
 .ci-venv/
+.ci-tools/
+.venv/
+.coverage
+htmlcov/
+.pytest_cache/
 .kotlin/
 **/__pycache__/
 # Drop-in Godot/Unity AAR (see docs/engine-plugin.md). Do not commit binaries.

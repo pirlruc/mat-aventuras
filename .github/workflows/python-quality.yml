@@ -1,0 +1,48 @@
+# pydevops python-quality. Pin is the peeled commit of annotated tag 2.1.1
+# (CI-018 / CI-034): uses: and devops_ref are the same SHA.
+# The reusable workflow does not accept a checkout token. When pydevops is
+# private again, this repository still needs Actions access so uses: can read
+# the workflow file. Fork pull requests are skipped: they have no secret.
+#
+# The job stays skipped until a tag after 2.1.1. qa-install-toolchain runs
+# `uv tool install pytest-cov==7.1.0`, and uv 0.6.9 exits 1 because that
+# package has no console script. That is pydevops #170 (PDO-TOOL-001).
+# There is no newer annotated tag to pin. Set the repository variable
+# PYTHON_QUALITY_ENABLED to true when one ships. actionlint rejects `if: false`.
+name: python-quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: python-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  python-quality:
+    # PDO-TOOL-001. The variable is unset, so this stays skipped.
+    if: >-
+      vars.PYTHON_QUALITY_ENABLED == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: write
+      actions: write
+      security-events: write
+      pull-requests: write
+    uses: pirlruc/pydevops/.github/workflows/python-quality.yml@19fa370f5f11bae423d4c0586080dbed32f9ddf8
+    with:
+      strictness_level: Medium
+      docstring_format: Google
+      enable_dast: false
+      working_directory: .
+      python_version: "3.13"
+      devops_repository: pirlruc/pydevops
+      devops_ref: 19fa370f5f11bae423d4c0586080dbed32f9ddf8
+      app_install_command: >-
+        UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/mat-venv" uv sync --all-groups --all-extras
+        && echo "${RUNNER_TEMP}/mat-venv/bin" >> "$GITHUB_PATH"

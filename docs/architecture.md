@@ -1,9 +1,10 @@
 # Architecture — Mat Aventuras
 
 Technical guide for the native Android educational math game.
-Methodology: [github-issue-adr @ 1.5.0](https://github.com/pirlruc/methodologies/tree/1.5.0/github-issue-adr).
-Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (not ADR markdown files).
-Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.6.0`.
+Methodology: [github-issue-adr @ 1.7.0](https://github.com/pirlruc/methodologies/tree/1.7.0/github-issue-adr).
+Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (no ADR markdown files).
+Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.8.0`.
+Scaffold pin: `.github/scaffold/` → [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.7.0`.
 
 Language split: **code, comments, KDoc, and this documentation are English**.
 **User-visible UI copy, TTS, and dialogue are Portuguese from Portugal (pt-PT).**
@@ -226,13 +227,66 @@ the host speaks a pt-PT line and applies bonus points.
 
 ## Guardrails
 
-Pinned at `docs/guardrails/` when that submodule is cloned. GitHub Actions
-reads Kotlin numeric gates from `config/kotlin.thresholds.yml` (CI-022
-fail-closed) because the companion repos are private. Submodule SHAs must
-match `docs/companion-pins.yml` (SC-DEP-004).
+Pinned at `docs/guardrails/` (tag `1.8.0`) and `.github/scaffold/` (tag `1.7.0`),
+the same two submodules [commondevops](https://github.com/pirlruc/commondevops)
+uses. CI inits `docs/guardrails` with `GUARDRAILS_READ_TOKEN`
+(`scripts/checkout-guardrails.sh`). Push to `main` fails closed when that
+secret is missing. Other events, including Dependabot, skip and keep
+`config/kotlin.thresholds.yml` (CI-022 / CI-024). Submodule SHAs must match
+`docs/companion-pins.yml` (SC-DEP-004). Sync scaffold files with
+`.github/scaffold/scripts/sync-templates.sh`. The 1.7.0 release of those
+synced rules still links guardrails `1.7.0` and methodologies `1.6.0`; leave
+that text as the scaffold contract. This repo's own docs cite methodologies
+`1.7.0` and the guardrails submodule at `1.8.0`.
+
+Departures that are not lowered numbers live in `docs/guardrail-deviations.yml`
+and render into Epic MAT-006. Coverage floors stay at 95.
+
 `:domain` kover verify is 95% line + branch. When the Android SDK is present,
 `:data` and `:app` use the same numeric gate (Robolectric unit tests).
+KT-DOC-001's Dokka `doc_coverage` ratio applies to publishable modules. This
+app does not publish API docs, so that ratio is not applicable. Public types
+still carry KDoc (`scripts/verify-kdoc.py`).
 Remaining emulator instrumented tests are tracked in MAT-002-T1.
+
+`:app` and `:data` are omitted from the Gradle build when `ANDROID_HOME` is
+unset (`settings.gradle.kts`). This agent VM has no Android SDK, so those
+modules are not compiled, tested, or linted here. ktlint and detekt are
+applied only on `:domain`, including in the CI quality job, so Android
+sources are not statically analyzed until MAT-006-T1. The CI test job does
+install the SDK and runs `:data` and `:app` unit tests, Kover, and
+`:app:lintDebug`. CodeQL compile and the APK bill need that same SDK
+(MAT-006-T2, MAT-006-T3).
+
+### Shared CI jobs
+
+`.github/workflows/shared-ci.yml` calls commondevops at peeled commit
+`b3c462bed0de4f6475e6be7875c4ababd831acc6` (annotated tag `5.1.2`). `uses:`
+and `scripts_ref` are that same SHA (CI-018 / CI-034). `checkout_token` is
+`COMMONDEVOPS_READ_TOKEN`. A `uses:` line cannot carry a PAT; when the ops
+repo is private again, this repository still needs Actions access to read
+the workflow file. The public window is temporary. Do not drop the token.
+
+Token-free copies stay in `ci.yml` and `hardening.yml` so Dependabot, which
+receives no Actions secrets (CI-024), still has a green path. Fork pull
+requests skip the reusable jobs because they have no secret.
+
+| Ops repo | Reuse here |
+| --- | --- |
+| commondevops `common-infra-lint` | Called from `shared-ci.yml` (actionlint, shellcheck, hadolint no-ops with no Dockerfile, zizmor). In-repo actionlint `1.7.12`, shellcheck, and zizmor stay for Dependabot. |
+| commondevops `common-doc-verify` | Called with the caller YAML list and link lint. `ruff_paths` stays empty: helper scripts are not a ruff project. |
+| commondevops `common-scaffold-verify` | Called. It no-ops when `scripts/issues-sync.py` is absent. In-repo `scripts/validate-issues.py` still runs. |
+| commondevops `common-secrets-sast` | Called. Its semgrep config is `--config auto`, which is not `p/kotlin` (KT-SEC-002). In-repo gitleaks `8.24.3`, `.semgrep.yml`, and `p/kotlin` stay. |
+| commondevops `common-supply-chain` | Called (Syft directory, Grype, Trivy fs, grant). The APK bill stays `scripts/gradle-to-cyclonedx.py` because dex has no Maven coordinates. |
+| commondevops `common-scorecard` / `common-release` | Scorecard needs `SCORECARD_TOKEN`. This app has no installable release yet. |
+| containerdevops | No production image or Compose stack. |
+| cppdevops | No C++ sources. `cpp-mobile-matrix` is NDK/Xcode smoke, not AGP. Godot gameplay is GDScript plus the Kotlin simulation. |
+| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `19fa370f5f11bae423d4c0586080dbed32f9ddf8` (annotated tag `2.1.1`). `uses:` and `devops_ref` are that SHA. The job stays skipped until repository variable `PYTHON_QUALITY_ENABLED` is `true`: `uv tool install pytest-cov` exits 1 on the pinned uv 0.6.9 ([PDO-TOOL-001](https://github.com/pirlruc/pydevops/issues/170)). Root `pyproject.toml` is `package = false`. Caller `python_version` is 3.13. The venv is created outside the tree. The workflow has no checkout-token input. |
+
+Dependabot pull requests stay on the token-free jobs (CI-024). The reusable
+workflows also skip `dependabot[bot]` internally. Scheduled security jobs
+run on the 1st and the 15th so the gap stays inside
+`security_rescan_interval_days` (CI-029).
 
 Local parity (CI-008):
 
@@ -242,6 +296,8 @@ python3 scripts/lint-doc-links.py --root .
 ./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
 python3 scripts/verify-coverage.py
 bash scripts/ci-local.sh
+uv sync --all-groups --all-extras
+pytest --cov=scripts --cov=tests --cov-branch
 ```
 
 Bootstrap labels/milestones (needs write token; not done by this agent):

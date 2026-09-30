@@ -1,8 +1,12 @@
-# Org-default numeric gates for Kotlin repositories.
-# CI should read this file as the single source of truth for thresholds.
-# Repos may override values with a recorded justification (Epic required when lowering a gate).
+# Kotlin numeric gates this repo enforces (CI-022).
+# Org defaults live in docs/guardrails/kotlin/profile.thresholds.yml when the
+# submodule is cloned. These values match that file for the keys CI reads.
+# Do not set a key below the org default. doc_coverage is omitted on purpose:
+# this app does not publish a Dokka API, so KT-DOC-001's ratio is not applicable
+# (that is not a lowered number and is not a deviation).
 
 statement_coverage: 95          # KT-TEST-002
 branch_coverage: 95             # KT-TEST-002
 max_cyclomatic_complexity: 10   # KT-CPLX-001
 pr_size_soft_limit_lines: 500   # KT-DELIV-001
+lint_exception_max_days: 14     # KT-BUILD-002
