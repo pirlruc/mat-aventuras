@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-09-30
-**Last agent focus:** python-quality caller paused on PDO-TOOL-001
+**Last updated:** 2026-10-30
+**Last agent focus:** companion pins at guardrails 1.13.1 and scaffold 1.10.2
 
 ---
 
@@ -28,18 +28,18 @@ equals the recorded sha.
 
 | Companion | How | Value |
 | --- | --- | --- |
-| methodologies | annotated tag in docs | `1.7.0` |
-| guardrails | submodule SHA `docs/guardrails/` | `aa5184ce` (tag `1.8.0`) |
-| github-scaffold | submodule SHA `.github/scaffold/` | `e76bb3fd` (tag `1.7.0`) |
+| methodologies | annotated tag in docs | `1.9.2` |
+| guardrails | submodule SHA `docs/guardrails/` | `1945211a` (tag `1.13.1`) |
+| github-scaffold | submodule SHA `.github/scaffold/` | `c8eddcfb` (tag `1.10.2`) |
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
-| pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `2.1.1`, peeled `19fa370f` |
+| commondevops | `.github/workflows/shared-ci.yml` | tag `5.6.2`, peeled `b85f95bb` |
+| pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.3.1`, peeled `55f4e52f` |
+| ci-lint image | `scripts/check-ci-docker.sh` | `sha256:f9001c4c` |
 
-Stay on annotated tags (SC-DEP-004). Scaffold tag `1.7.0` synced rules still
-link guardrails `1.7.0` and methodologies `1.6.0`. That text is the scaffold
-contract; do not hand-edit it. Repo-owned docs cite methodologies `1.7.0`.
-Scaffold `main` already bumps those links and is not a release.
+Stay on annotated tags (SC-DEP-004). Synced scaffold rules are the scaffold
+contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 
 ## Delivery status
 
@@ -100,12 +100,18 @@ bash scripts/check-ci-local.sh
   header. `verify-coverage.py` and `verify-privacy-manifest.py` parse XML
   with defusedxml. `verify-coverage.py` fails if the overlay is below the
   submodule org defaults when both exist.
-- `.github/workflows/shared-ci.yml` calls commondevops `5.1.2` at peeled SHA
-  `b3c462bed0de4f6475e6be7875c4ababd831acc6` with `COMMONDEVOPS_READ_TOKEN`
+- `.github/workflows/shared-ci.yml` calls commondevops `5.6.2` at peeled SHA
+  `b85f95bbac8ba7d82eb90d1d84d1b8d1e8590a12` with `COMMONDEVOPS_READ_TOKEN`
   as `checkout_token`. `uses:` cannot take a PAT. When the ops repo is
   private again, this repo still needs Actions access to read the workflow
-  file. Keep the token-free jobs in `ci.yml`. Do not gate them on
-  `github.actor == 'dependabot[bot]'`.
+  file. Gitleaks, Semgrep (`p/kotlin` plus `.semgrep.yml`), Grype, actionlint,
+  shellcheck, and zizmor live only in those reusable jobs. Keep the token-free
+  Gradle, license, CodeQL, MobSF, and APK-bill jobs in `ci.yml` and
+  `hardening.yml`. Do not gate them on `github.actor == 'dependabot[bot]'`.
+  `scripts/check-ci-docker.sh` runs the host-missing linters in
+  `ghcr.io/pirlruc/ci-lint` at `sha256:f9001c4c`. Scorecard is advisory
+  (`blocking: false`, `publish_results: false`) so it does not need
+  repository settings.
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
   can still gate `:domain`. ktlint and detekt are plugins on `:domain` only,
   so Android sources are not statically analyzed even on the SDK job until
@@ -188,9 +194,9 @@ bash scripts/check-ci-local.sh
 - Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
 - `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
 - Local secret scan: `git config core.hooksPath .githooks` runs `scripts/gitleaks-pre-commit.sh` (KT-SEC-003). CI still scans; the hook fails closed if `gitleaks` is missing.
-- Guardrails tag `1.8.0` (`aa5184ce`) and scaffold tag `1.7.0` (`e76bb3fd`) are the newest published tags. KT-SEC-002 is semgrep `p/kotlin`; KT-SEC-003 is gitleaks. KT-DOC-001 Dokka `doc_coverage` does not apply (no published API) and is recorded, not lowered. The one `@SuppressLint("MissingSuperCall")` is `RewardGodotFragment`: those JNI overrides must not call super. That permanent suppression is recorded under KT-BUILD-002 and ANDROID-LINT-001. The 14-day number is not lowered.
+- Guardrails tag `1.13.1` (`1945211a`) and scaffold tag `1.10.2` (`c8eddcfb`) are the pins. KT-SEC-002 is semgrep `p/kotlin` on `common-secrets-sast`; KT-SEC-003 is gitleaks there too. KT-DOC-001 Dokka `doc_coverage` does not apply (no published API) and is recorded, not lowered. The one `@SuppressLint("MissingSuperCall")` is `RewardGodotFragment`: those JNI overrides must not call super. Guardrails 1.13.1 treats that as a platform contract, so the two suppression deviations can be dropped once the pin is on `main`. The 14-day number is not lowered. `scripts/verify-licenses.py` reads `license_deny_list` from the guardrails supply-chain thresholds (SC-LIC-001), including BUSL-1.1, Commons-Clause, and CC-BY-NC.
 - `:app` Kover still excludes Compose facades (`LessonScreenKt`, `NavGraphKt`, `@Composable`, `*Kt$*`), native Canvas hosts, and `engine.godot.*`. MAT-005-T3 wants the first two hosts and the two screen facades measured. This VM has no Android SDK, so those excludes stayed. Room `*_Impl` and `BuildConfig` stay excluded as generated code. KT-TEST-002 names kotlinx.serialization generated members, not Room or the Godot JNI package.
-- Do not gate jobs on `github.actor == 'dependabot[bot]'` (zizmor `bot-conditions`). Dependabot updates use `cooldown.default-days: 7`. Workflow lint is zizmor-action `v0.6.4` (`cc914d7f`) with `advanced-security: false` and zizmor `1.30.1`, scoped to `.github/workflows` and `.github/dependabot.yml` so the scaffold submodule is not audited.
+- Do not gate jobs on `github.actor == 'dependabot[bot]'` (zizmor `bot-conditions`). Dependabot updates use `cooldown.default-days: 7`. Workflow lint is zizmor inside `common-infra-lint` (and `scripts/check-ci-docker.sh` locally). There is no in-repo zizmor-action job.
 - CodeQL action `v4.38.1` commit is `1c5b675653bb5c22dbe9b12b556ec555138e09fd` (the tag object is not the commit). `upload: never` keeps `contents: read`. The compile step must stay manual (`build-mode: manual`). The APK SBOM is the debug runtime classpath (`scripts/gradle-to-cyclonedx.py` + osv-scanner `2.6.0`). Dex has no Maven coordinates, so scanning the APK file itself yields an empty bill. Community semgrep is `p/kotlin` beside `.semgrep.yml`, still semgrep `1.128.1`, and it runs after grype so `.ci-venv` is not scanned.
 - Do not merge `cursor/godot-black-screen-invaders-5d7b` or
   `cursor/godot-black-screen-lives-80ab` as git merges: they fork from PR #6
@@ -212,8 +218,7 @@ bash scripts/check-ci-local.sh
 3. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
 4. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes (needs the Android SDK).
 5. MAT-006-T1/T2/T3: on an SDK host, apply ktlint/detekt to `:app` and `:data`, and prove the existing unit-test, lint, CodeQL, and APK SBOM jobs.
-6. When github-scaffold releases the pin bump already on `main`, re-sync rules so they cite guardrails `1.8.0` and methodologies `1.7.0`.
-7. Companion issues filed from this review must be copied into each repo's `docs/issues.yml` and synced (contents write was unavailable): guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The Android launcher Semgrep hit is evidence on commondevops [#165](https://github.com/pirlruc/commondevops/issues/165), not a new epic. Pin-bump epics on the ops repos were already open. Do not file them again.
-8. python-quality is Medium (CI-022 offsets), not the High/org floors. The install venv must stay in `RUNNER_TEMP` so radon does not scan it. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff is the lock timestamp because uv 0.6.9 cannot parse `exclude-newer = "7 days"`. The caller job stays skipped until repository variable `PYTHON_QUALITY_ENABLED` is `true`: `uv tool install pytest-cov==7.1.0` exits 1 (pydevops #170, PDO-TOOL-001). actionlint rejects `if: false`. Do not pin `main`.
+6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. Do not file them again.
+7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. PDO-TOOL-001 is fixed in pydevops `3.3.1`, but the reusable workflow pulls `ghcr.io/pirlruc/ci-lint` and `ci-python` and this repo's token gets `manifest unknown`. Leave `PYTHON_QUALITY_ENABLED` unset until those packages are visible. Shared-ci jobs that need a scanner image pass the public `ghcr.io/catthehacker/ubuntu:act-24.04` digest. `install_runner_packages` stays false, and the jobs do not pass `COMMONDEVOPS_READ_TOKEN`. Do not pin `main`.
 
-*Last updated: 2026-09-30 (python-quality paused on PDO-TOOL-001)*
+*Last updated: 2026-10-30 (companion pins 1.13.1 / 1.10.2 / 1.9.2)*

@@ -108,7 +108,7 @@ drops the host result contract. `Activity.recreate()` cannot unload
 
 GDScript talks to Android:
 
-```
+```text
 Engine.get_singleton("MatAventuras").completeReward(true)
 ```
 

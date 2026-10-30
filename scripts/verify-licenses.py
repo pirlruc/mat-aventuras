@@ -13,14 +13,36 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "gradle" / "libs.versions.toml"
+THRESHOLDS = ROOT / "docs" / "guardrails" / "supply-chain" / "profile.thresholds.yml"
 # Populate as third-party licenses are classified. Empty lists mean "deny nothing yet".
 ALLOW: set[str] = set()
-DENY: set[str] = {
+# Fallback matches guardrails SC-LIC-001 when the submodule is not checked out.
+_DENY_FALLBACK = {
     "GPL-2.0",
     "GPL-3.0",
     "AGPL-3.0",
     "SSPL-1.0",
+    "BUSL-1.1",
+    "Commons-Clause",
+    "CC-BY-NC",
 }
+
+
+def load_deny() -> set[str]:
+    """Merge the org license_deny_list with the local fallback."""
+    denied = set(_DENY_FALLBACK)
+    if not THRESHOLDS.is_file():
+        return denied
+    match = re.search(
+        r"license_deny_list:\s*\[([^\]]*)\]",
+        THRESHOLDS.read_text(encoding="utf-8"),
+    )
+    if match:
+        denied.update(re.findall(r'"([^"]+)"', match.group(1)))
+    return denied
+
+
+DENY: set[str] = load_deny()
 
 # Known SPDX identifiers for catalog artifacts (offline, no Maven fetch).
 KNOWN: dict[str, str] = {

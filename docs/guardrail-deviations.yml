@@ -4,7 +4,7 @@
 # Epic body, so nothing is copied into docs/issues.yml or into issue text by hand.
 #
 # Field definitions: https://github.com/pirlruc/guardrails#deviation-rule
-# Approval flow:     https://github.com/pirlruc/methodologies/blob/1.7.0/github-issue-adr/docs/process/guardrail-compliance.md
+# Approval flow:     https://github.com/pirlruc/methodologies/blob/1.9.2/github-issue-adr/docs/process/guardrail-compliance.md
 #
 # None of these entries lower a numeric gate. statement_coverage and branch_coverage stay 95.
 # doc_coverage is not applicable (no published API). lint_exception_max_days stays 14.

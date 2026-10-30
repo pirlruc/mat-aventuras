@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Pin guardrails `1.13.1`, github-scaffold `1.10.2`, and methodologies `1.9.2`.
+- Call commondevops `5.6.2` (pins verify, advisory Scorecard, markdownlint)
+  and pydevops `python-quality` `3.3.1` with `installable_app: false`.
+- Drop in-repo copies of gitleaks, Semgrep, Grype, actionlint, shellcheck,
+  and zizmor. Those run through the reusable workflows. Host-missing linters
+  use `scripts/check-ci-docker.sh`.
+- Read the SC-LIC-001 deny list from the guardrails supply-chain thresholds.
+- Bump `actions/setup-java` to `6.0.1` and Gradle wrapper validation to `6.3.0`.
 - Pin guardrails `1.8.0` and github-scaffold `1.7.0`, and sync the scaffold
   release (rules, issue templates, `AGENTS.md`, `SKILLS.md`).
 - Cite methodologies `1.7.0` from repo-owned docs.
