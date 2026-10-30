@@ -48,18 +48,18 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
 | MAT-002 | open | T4 and T5 done in tree; T1 emulator CI remains |
 | MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin; T5 arcade lives/HUD done in tree |
-| MAT-004 | open | T4–T7 done in tree. MasterKey (T8) remains. Destructive Room wipe is already removed |
-| MAT-005 | open | T4 community semgrep, T5 child names, and T6 zizmor done in tree. Shared simulation (T1), release R8 (T2), and narrower Kover excludes (T3) remain |
-| MAT-006 | open | SDK-host proof for Android analysis, unit tests, CodeQL compile, and the APK bill. Deviations render into this Epic |
+| MAT-004 | open | T4–T7 done in tree. MasterKey (T8) is in the working tree; Room migration is still PR4 |
+| MAT-005 | open | T4–T6 done. T1 shared simulation remains. Release `isMinifyEnabled` is true; device proof of a minified prize is still T2. T3 still shrinks Kover excludes |
+| MAT-006 | open | T1 done in tree (ktlint and detekt on `:app` and `:data`). T2 unit tests and lint pass on this host. T3 CodeQL compile and the APK bill are still open |
 
-`docs/guardrail-deviations.yml` records departures that do not lower a number:
-ktlint/detekt only on `:domain` (KT-BUILD-002, KT-CPLX-001), permanent
-`MissingSuperCall` on `RewardGodotFragment` (KT-BUILD-002, ANDROID-LINT-001),
-Kover exclusions beyond kotlinx.serialization (KT-TEST-002; floors stay 95;
-MAT-005-T3 still shrinks the screen/host excludes), and Dokka `doc_coverage`
-not applicable (KT-DOC-001). Do not add `key` / `org_default` / `repo_value`
-for those. Do not invent Engineering Lead approval. KT-CPLX-002 is detekt
-`LongMethod` — do not invent a Python-style MI.
+`docs/guardrail-deviations.yml` now has two entries, neither of which lowers a number:
+Kover exclusions beyond kotlinx.serialization (KT-TEST-002; floors stay 95),
+and Dokka `doc_coverage` not applicable (KT-DOC-001). Compose functions are
+ignored by detekt complexity and length. `NativeKartHost.attach` and
+`NativeRunnerHost.attach` suppress those two rules until the canvas hosts are
+split. `RewardGodotFragment` keeps `@SuppressLint("MissingSuperCall")` as a
+platform-contract suppression, not a deviation. Do not add `key` /
+`org_default` / `repo_value`. Do not invent Engineering Lead approval.
 
 GitHub labels/milestones and issue sync need a write token:
 
@@ -72,8 +72,9 @@ Do not git-merge `cursor/godot-black-screen-*`; those branches were deleted afte
 the lives/HUD port landed on `main` via PR #10. PR #11 recorded MAT-003-T5 as
 done in `docs/issues.yml`. MAT-004-T7 paints invaders, chomp, and climb on
 `ArcadeBoardView` (domain tests cover `ArcadeScene`). `:app` Robolectric proof
-is CI, because this VM has no Android SDK. MAT-006 is GitHub #19 (tasks #20, #21, #22). MAT-002-T1 is #23.
-This VM cannot run the Android SDK or an emulator. `docs/issues.yml`
+is CI. This host has the Android SDK at `~/Android/Sdk` and Java at
+`/opt/android-studio/jbr`. MAT-006 is GitHub #19 (tasks #20, #21, #22). MAT-002-T1 is #23.
+`docs/issues.yml`
 already contains those ids; after merge, sync so the manifest owns the bodies.
 
 ## Commands
@@ -215,10 +216,10 @@ bash scripts/check-ci-local.sh
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
 2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
-3. MAT-004-T8: `MasterKey.Builder` (needs a security-crypto bump) and an explicit Room `Migration` on the next schema version.
-4. MAT-005-T1/T2/T3: shared Godot/domain simulation, release R8 (device required), narrower Kover excludes (needs the Android SDK).
-5. MAT-006-T1/T2/T3: on an SDK host, apply ktlint/detekt to `:app` and `:data`, and prove the existing unit-test, lint, CodeQL, and APK SBOM jobs.
+3. MAT-004-T8: Room `Migration` when the age-band schema lands. `MasterKey.Builder` is already in `PinRepository`.
+4. MAT-005-T1/T2/T3: shared Godot/domain simulation, a release-variant prize on a device, narrower Kover excludes.
+5. MAT-006-T3: CodeQL manual compile and the APK bill on this SDK host. T1 is done. T2 unit tests and `lintDebug` passed locally.
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. Do not file them again.
 7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. PDO-TOOL-001 is fixed in pydevops `3.3.1`, but the reusable workflow pulls `ghcr.io/pirlruc/ci-lint` and `ci-python` and this repo's token gets `manifest unknown`. Leave `PYTHON_QUALITY_ENABLED` unset until those packages are visible. Shared-ci jobs that need a scanner image pass the public `ghcr.io/catthehacker/ubuntu:act-24.04` digest. `install_runner_packages` stays false, and the jobs do not pass `COMMONDEVOPS_READ_TOKEN`. Do not pin `main`.
 
-*Last updated: 2026-10-30 (companion pins 1.13.1 / 1.10.2 / 1.9.2)*
+*Last updated: 2026-10-30 (Android analysis on :app and :data)*

@@ -120,10 +120,22 @@ internal object OffroadScene {
         ground: Float,
     ) {
         for (i in 0 until circuit.gateCount) {
-            if ((state.collectedMask shr i) and 1 == 1) continue
+            val collected = (state.collectedMask shr i) and 1 == 1
             val ahead = circuit.gateDistance(i) - state.distance
             val wrapped = if (ahead < 0f) ahead + circuit.length else ahead
-            if (wrapped > DRAW_AHEAD) continue
+            if (!collected && wrapped <= DRAW_AHEAD) addGatePosts(out, state, circuit, width, horizon, ground, wrapped)
+        }
+    }
+
+    private fun addGatePosts(
+        out: MutableList<OffroadSpan>,
+        state: OffroadState,
+        circuit: OffroadCircuit,
+        width: Float,
+        horizon: Float,
+        ground: Float,
+        wrapped: Float,
+    ) {
             val t = (wrapped / DRAW_AHEAD).coerceIn(0f, 1f)
             val y = ground - (ground - horizon) * t - 8f
             val scale = 1.4f / (0.4f + t * 2f)
@@ -137,7 +149,6 @@ internal object OffroadScene {
             out.add(OffroadSpan(center - roadW * 0.5f, y - postH, postW, postH, POST_ARGB))
             out.add(OffroadSpan(center + roadW * 0.5f - postW, y - postH, postW, postH, POST_ARGB))
             out.add(OffroadSpan(center - roadW * 0.5f, y - postH, roadW, barH, 0xFF43A047))
-        }
     }
 
     private fun addMeta(

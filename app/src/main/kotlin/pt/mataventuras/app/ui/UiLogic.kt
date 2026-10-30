@@ -310,7 +310,7 @@ internal object UiLogic {
     /**
      * Flash length in milliseconds.
      */
-    fun answerFlashMs(): Int = 960
+    const val ANSWER_FLASH_MS: Int = 960
 
     /**
      * Scale of the flash glyph for [alpha] 0..1.
@@ -336,7 +336,7 @@ internal object UiLogic {
     /**
      * STREAM_MUSIC volume for [ToneGenerator] (0..100).
      */
-    fun answerVolumePercent(): Int = 80
+    const val ANSWER_VOLUME_PERCENT: Int = 80
 
     /**
      * View haptic code. CONFIRM/REJECT need API 30; older devices get a click or long-press.
@@ -438,7 +438,7 @@ internal object UiLogic {
     /**
      * Age-button side in dp. Both bands share a side so the chips match.
      */
-    fun ageButtonSideDp(): Int = 168
+    const val AGE_BUTTON_SIDE_DP: Int = 168
 
     /**
      * Selected chips are fully opaque; unselected stay readable.
@@ -542,20 +542,27 @@ internal object UiLogic {
         cellCount: Int,
         gap: Float,
     ): Int? {
-        if (columns <= 0 || cellCount <= 0 || width <= 0f || height <= 0f) return null
-        val rows = boardRowCount(cellCount, columns)
-        val cellW = (width - gap * (columns - 1)) / columns
-        val cellH = (height - gap * (rows - 1)) / rows
-        if (cellW <= 0f || cellH <= 0f) return null
-        val col = soupSlot(x, cellW, gap, columns) ?: return null
-        val row = soupSlot(y, cellH, gap, rows) ?: return null
-        val index = row * columns + col
-        return if (index in 0 until cellCount) index else null
+        val rows = soupRows(columns, cellCount)
+        val cellW = soupCell(columns, width, gap)
+        val cellH = soupCell(rows, height, gap)
+        val col = soupSlotOrNull(cellW, x, gap, columns)
+        val row = soupSlotOrNull(cellH, y, gap, rows)
+        val index = if (col != null && row != null) row * columns + col else -1
+        return index.takeIf { it in 0 until cellCount }
     }
 
     /**
      * Slot index along one axis of a gapped grid, or null in the padding.
      */
+    private fun soupRows(columns: Int, cellCount: Int): Int =
+        if (columns > 0 && cellCount > 0) boardRowCount(cellCount, columns) else 0
+
+    private fun soupCell(count: Int, span: Float, gap: Float): Float =
+        if (count > 0 && span > 0f) (span - gap * (count - 1)) / count else 0f
+
+    private fun soupSlotOrNull(cell: Float, offset: Float, gap: Float, count: Int): Int? =
+        if (cell > 0f && count > 0) soupSlot(offset, cell, gap, count) else null
+
     fun soupSlot(
         offset: Float,
         cell: Float,
@@ -656,7 +663,11 @@ internal object UiLogic {
         val kind = soupReleaseKind(selected, paths, found)
         if (kind == SoupRelease.IGNORE) return null
         val hit = soupMatchedPath(selected, paths, found)
-        return if (kind == SoupRelease.HIT && hit != null) paths[hit].first() else soupMissIndex(paths.flatten(), cellCount)
+        return if (kind == SoupRelease.HIT && hit != null) {
+            paths[hit].first()
+        } else {
+            soupMissIndex(paths.flatten(), cellCount)
+        }
     }
 
     /**

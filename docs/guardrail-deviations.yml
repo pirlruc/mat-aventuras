@@ -12,50 +12,6 @@
 # by a changed number. approved_by is omitted for the same reason.
 
 deviations:
-  - id: KT-BUILD-002
-    epic: MAT-006
-    why: >-
-      ktlint and detekt are applied only in domain/build.gradle.kts. The CI
-      quality job runs :domain:ktlintCheck and :domain:detekt. :app and :data
-      are Android library/application modules. This agent VM has no Android
-      SDK, so settings.gradle.kts does not include them and the plugins were
-      not added there. Formatter and static analysis therefore do not cover
-      those production sources. MAT-006-T1 applies the plugins once an SDK
-      host can prove the tasks.
-    owner: pirlruc
-    review: 2026-12-31
-
-  - id: KT-BUILD-002
-    epic: MAT-006
-    why: >-
-      RewardGodotFragment carries a permanent @SuppressLint("MissingSuperCall").
-      Those GodotFragment overrides must not call super: doing so disconnects
-      the BufferQueue and yields EGL_BAD_SURFACE / a black SurfaceView. The
-      14-day lint_exception_max_days clock does not fit a platform contract
-      that forbids the super call. The numeric gate is not lowered.
-    owner: pirlruc
-    review: 2026-12-31
-
-  - id: ANDROID-LINT-001
-    epic: MAT-006
-    why: >-
-      Android Lint shares the Kotlin lint_exception_max_days clock. The same
-      RewardGodotFragment MissingSuperCall suppression cannot expire, because
-      calling super is incorrect for this JNI host. Lint errors still fail
-      :app:lintDebug on the SDK CI job. There is no directory-wide lint.xml.
-    owner: pirlruc
-    review: 2026-12-31
-
-  - id: KT-CPLX-001
-    epic: MAT-006
-    why: >-
-      CyclomaticComplexMethod is a detekt rule, and detekt is not applied to
-      :app or :data. Complexity of those production sources is not gated.
-      max_cyclomatic_complexity stays 10 on :domain. MAT-006-T1 is the
-      remediation once an SDK host can run detekt on the Android modules.
-    owner: pirlruc
-    review: 2026-12-31
-
   - id: KT-TEST-002
     epic: MAT-006
     why: >-

@@ -232,7 +232,7 @@ private fun AgeButton(
     huge: Boolean,
     onClick: () -> Unit,
 ) {
-    val side = UiLogic.ageButtonSideDp().dp
+    val side = UiLogic.AGE_BUTTON_SIDE_DP.dp
     Button(
         onClick = onClick,
         modifier = Modifier

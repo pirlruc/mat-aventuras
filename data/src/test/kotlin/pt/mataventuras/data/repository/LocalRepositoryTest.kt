@@ -11,6 +11,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.IOException
+import java.security.GeneralSecurityException
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.pin.encryptedPinPreferences
@@ -206,6 +208,41 @@ class LocalRepositoryTest {
             throw AssertionError("device path must fail closed")
         } catch (error: IllegalStateException) {
             assertEquals("no keystore", error.message)
+        }
+    }
+
+    @Test
+    fun pinPreferencesCoversSecurityAndIoFailures() {
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val security =
+            pinPreferences(
+                ctx,
+                "pin_sec",
+                allowPlaintextFallback = true,
+                encrypted = { _, _ -> throw GeneralSecurityException("sec") },
+            )
+        security.edit().putString("hash", "s").commit()
+        assertEquals("s", security.getString("hash", null))
+        val io =
+            pinPreferences(
+                ctx,
+                "pin_io",
+                allowPlaintextFallback = true,
+                encrypted = { _, _ -> throw IOException("io") },
+            )
+        io.edit().putString("hash", "i").commit()
+        assertEquals("i", io.getString("hash", null))
+        try {
+            pinPreferences(ctx, "pin_sec_closed", encrypted = { _, _ -> throw GeneralSecurityException("sec") })
+            throw AssertionError("security failure must fail closed")
+        } catch (error: GeneralSecurityException) {
+            assertEquals("sec", error.message)
+        }
+        try {
+            pinPreferences(ctx, "pin_io_closed", encrypted = { _, _ -> throw IOException("io") })
+            throw AssertionError("io failure must fail closed")
+        } catch (error: IOException) {
+            assertEquals("io", error.message)
         }
     }
 

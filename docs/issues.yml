@@ -746,7 +746,7 @@ milestones:
           - ANDROID-LINT-001
         tasks:
           - id: MAT-006-T1
-            status: open
+            status: done
             title: Apply ktlint and detekt to the Android modules
             instructions:
               files:
@@ -761,7 +761,7 @@ milestones:
               - KT-CPLX-001
 
           - id: MAT-006-T2
-            status: open
+            status: done
             title: Prove Android unit tests, Kover, and lint on an SDK host
             instructions:
               files:

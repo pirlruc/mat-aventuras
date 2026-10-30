@@ -368,7 +368,7 @@ private fun AnswerFlash(
     LaunchedEffect(tick) {
         if (tick == 0) return@LaunchedEffect
         alpha.snapTo(1f)
-        alpha.animateTo(0f, animationSpec = tween(UiLogic.answerFlashMs()))
+        alpha.animateTo(0f, animationSpec = tween(UiLogic.ANSWER_FLASH_MS))
     }
     val fade = alpha.value
     if (!UiLogic.showsAnswerFlash(fade)) return
@@ -568,7 +568,7 @@ private suspend fun AwaitPointerEventScope.collectSoupPath(
         val change = event.changes.firstOrNull { it.id == down.id } ?: break
         if (!change.pressed) {
             change.consume()
-            break
+            return path
         }
         val next = UiLogic.soupIndexAt(
             change.position.x,

@@ -23,7 +23,9 @@ import pt.mataventuras.plugin.KartPluginActivity
  * [GodotFragment] already pauses and resumes the renderer in order.
  *
  * MissingSuperCall is limited to this class: the JNI host methods must not
- * call super. Other files in this package stay under the lint check.
+ * call super. KT-BUILD-002 and ANDROID-LINT-001 allow a permanent
+ * platform-contract suppression, so this is not a recorded deviation.
+ * Other files in this package stay under the lint check.
  */
 @SuppressLint("MissingSuperCall")
 class RewardGodotFragment : GodotFragment() {

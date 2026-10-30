@@ -98,6 +98,8 @@ jobs:
       - name: Android unit tests, coverage, and lint (KT-TEST-002, KT-BUILD-002)
         run: |
           ./gradlew --no-daemon \
+            :data:ktlintCheck :data:detekt \
+            :app:ktlintCheck :app:detekt \
             :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug \
             :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerifyDebug \
             :app:lintDebug
