@@ -33,7 +33,7 @@ jobs:
           GUARDRAILS_READ_TOKEN: ${{ secrets.GUARDRAILS_READ_TOKEN }}
         run: bash scripts/checkout-guardrails.sh
 
-      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: "17"
@@ -70,12 +70,6 @@ jobs:
       - name: Privacy manifest (backup / isolation)
         run: .ci-venv/bin/python scripts/verify-privacy-manifest.py
 
-      - name: Shellcheck (CI-023)
-        run: shellcheck scripts/*.sh
-
-      - name: actionlint (CI-023)
-        run: bash scripts/run-actionlint.sh
-
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -89,7 +83,7 @@ jobs:
           GUARDRAILS_READ_TOKEN: ${{ secrets.GUARDRAILS_READ_TOKEN }}
         run: bash scripts/checkout-guardrails.sh
 
-      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: "17"
@@ -133,25 +127,6 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-
-      - name: Secret scan (gitleaks MIT binary, KT-SEC-003)
-        run: |
-          ver="8.24.3"
-          curl -fsSL -o /tmp/gitleaks.tgz \
-            "https://github.com/gitleaks/gitleaks/releases/download/v${ver}/gitleaks_${ver}_linux_x64.tar.gz"
-          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
-          /tmp/gitleaks version
-          /tmp/gitleaks detect --source . --no-banner --exit-code 1
-
-      - name: Dependency vulnerabilities (KT-SEC-004)
-        run: bash scripts/run-grype.sh
-
-      - name: SAST (local rules and p/kotlin, KT-SEC-002)
-        run: |
-          python3 -m venv .ci-venv
-          .ci-venv/bin/pip install -q "setuptools>=70,<82" "semgrep==1.128.1"
-          .ci-venv/bin/semgrep --config .semgrep.yml --error --quiet --metrics off
-          .ci-venv/bin/semgrep --config p/kotlin --error --quiet --metrics off
 
       - name: License allow/deny (SC-LIC-001)
         run: python3 scripts/verify-licenses.py

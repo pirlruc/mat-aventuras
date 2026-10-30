@@ -1,0 +1,15 @@
+config:
+  default: true
+  MD013: false
+  MD033: false
+  MD041: false
+  MD060: false
+globs:
+  - "docs/**/*.md"
+  - "README.md"
+  - "CHANGELOG.md"
+  - "SECURITY.md"
+ignores:
+  - "docs/guardrails/**"
+  - ".github/scaffold/**"
+  - "build/**"

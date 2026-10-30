@@ -1,0 +1,22 @@
+{
+  "name": "mat-aventuras",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "vscode",
+  "containerUser": "vscode",
+  "remoteEnv": {
+    "ANDROID_HOME": "/opt/android-sdk",
+    "ANDROID_SDK_ROOT": "/opt/android-sdk",
+    "JAVA_HOME": "/opt/java/openjdk"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-java.extension-pack-for-java",
+        "fwcd.kotlin"
+      ]
+    }
+  },
+  "postCreateCommand": "echo 'sdk.dir=/opt/android-sdk' > local.properties && ./gradlew --version"
+}

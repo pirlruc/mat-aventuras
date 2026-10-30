@@ -79,7 +79,9 @@ def test_pins_match_and_missing(
     assert module.main() == 0
     monkeypatch.setattr(module, "PINS", tmp_path / "missing.yml")
     assert module.main() == 1
-    assert original("docs/guardrails").startswith("aa5184ce")
+    assert original("docs/guardrails").startswith("1945211a")
+    assert "BUSL-1.1" in scripts["verify-licenses.py"].DENY
+    assert "CC-BY-NC" in scripts["verify-licenses.py"].DENY
     with pytest.raises(SystemExit):
         original("no/such/gitlink")
 
