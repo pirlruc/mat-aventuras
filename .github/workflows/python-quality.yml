@@ -6,6 +6,9 @@
 #
 # 3.3.1 installs pytest with pytest-cov (PDO-TOOL-001 is fixed). This repo is
 # not an installable package, so installable_app is false.
+# The job stays skipped until PYTHON_QUALITY_ENABLED is true: the reusable
+# workflow pulls ghcr.io/pirlruc/ci-lint and ci-python, and this repo's token
+# gets "manifest unknown". There is no image override input.
 name: python-quality
 
 on:
@@ -22,7 +25,10 @@ permissions: {}
 
 jobs:
   python-quality:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # Image pull fails for this repo. The variable is unset, so this stays skipped.
+    if: >-
+      vars.PYTHON_QUALITY_ENABLED == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: write
       actions: write
