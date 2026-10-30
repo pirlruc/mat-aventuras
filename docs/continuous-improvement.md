@@ -57,7 +57,7 @@ templates, and docs.
 
 Append new epics/tasks to `docs/issues.yml` in a pull request. Never
 `gh issue create`. Schema:
-https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
+<https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md>
 
 ## Output contract
 

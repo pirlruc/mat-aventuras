@@ -78,7 +78,7 @@ but it is a worse fit for APK size, heap, and a local-only privacy policy.
 
 ## Modules
 
-```
+```text
 :domain   Kotlin JVM — models, exercises, PIN, rewards, engine simulation
 :data     Android library — Room + DataStore (included only when SDK is present)
 :app      Compose UI + Activities (included only when SDK is present)
@@ -143,8 +143,8 @@ permission**. No Retrofit, Firebase, or Play Games.
 Leaderboard is a query: profiles ordered by points, then average
 accuracy from sessions (`LeaderboardCalculator`).
 
-PIN state is **not** in Room. `PinRepository` stores PBKDF2 hash + salt
-+ lockout in `EncryptedSharedPreferences` (`parent_pin`). Android Keystore
+PIN state is **not** in Room. `PinRepository` stores the PBKDF2 hash,
+salt, and lockout in `EncryptedSharedPreferences` (`parent_pin`). Android Keystore
 failures fail closed. Robolectric tests opt into a distinct `*_plain`
 private prefs file. Plaintext PIN digits are never persisted.
 `android:allowBackup` is **false**, `fullBackupContent` is false, and
