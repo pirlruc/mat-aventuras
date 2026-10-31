@@ -1,6 +1,7 @@
 #!/bin/sh
-# Run CI steps missing on the host inside the public ci-lint image.
-# POSIX sh. The image digest matches commondevops common-infra-lint 5.6.2.
+# Run CI steps missing on the host inside ci-lint.
+# The package is private. This repo has Actions read; a local pull needs a GHCR login.
+# POSIX sh. The image digest matches commondevops ci-lint 5.6.1 (still current).
 #
 # Env:
 #   MAT_CI_IMAGE     — override the image (digest pin by default)

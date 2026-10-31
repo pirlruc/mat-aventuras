@@ -26,3 +26,15 @@ updates:
     multi-ecosystem-group: all-dependencies
     cooldown:
       default-days: 7
+  - package-ecosystem: uv
+    directory: /
+    patterns: ["*"]
+    multi-ecosystem-group: all-dependencies
+    cooldown:
+      default-days: 7
+  - package-ecosystem: docker
+    directory: /.devcontainer
+    patterns: ["*"]
+    multi-ecosystem-group: all-dependencies
+    cooldown:
+      default-days: 7

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Android CI calls androiddevops. A pull request that does not touch the app,
+  the domain, Gradle, or scripts skips Gradle, CodeQL, MobSF, and the APK bill.
+- The release workflow attaches the release APK and a SHA-256 checksum.
+
 ## [0.1.0] - 2026-10-30
 
 ### Changed

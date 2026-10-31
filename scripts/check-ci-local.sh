@@ -11,8 +11,6 @@ python3 scripts/validate-yaml.py \
   docs/companion-pins.yml \
   .github/dependabot.yml \
   .github/workflows/ci.yml \
-  .github/workflows/hardening.yml \
-  .github/workflows/codeql.yml \
   .github/workflows/shared-ci.yml \
   .github/workflows/python-quality.yml \
   .github/workflows/emulator.yml \
