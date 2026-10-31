@@ -31,3 +31,9 @@ exclude = ["\\.venv", "docs/guardrails", "\\.github/scaffold"]
 
 [tool.interrogate]
 exclude = ["docs/guardrails", ".github/scaffold", ".devops", "build"]
+
+[tool.pylint.main]
+ignore-paths = ["^docs/guardrails/", "^\\.github/scaffold/", "^\\.devops/", "^build/"]
+
+[tool.pydoclint]
+exclude = "docs/guardrails|\\.github/scaffold|\\.devops|build"
