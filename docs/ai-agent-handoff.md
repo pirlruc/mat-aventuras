@@ -215,7 +215,7 @@ bash scripts/check-ci-local.sh
 ## Suggested next work
 
 1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
-2. MAT-002-T1: emulator instrumented tests in CI, including Godot plugin Activities.
+2. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
 3. MAT-004-T8: Room `Migration` when the age-band schema lands. `MasterKey.Builder` is already in `PinRepository`.
 4. MAT-005-T1/T2/T3: shared Godot/domain simulation, a release-variant prize on a device, narrower Kover excludes.
 5. MAT-006-T3: CodeQL manual compile and the APK bill on this SDK host. T1 is done. T2 unit tests and `lintDebug` passed locally.

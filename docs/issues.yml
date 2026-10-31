@@ -194,7 +194,7 @@ milestones:
           - KT-DOC-001
         tasks:
           - id: MAT-002-T1
-            status: open
+            status: done
             title: Emulator CI for Compose/Room
             instructions:
               files:

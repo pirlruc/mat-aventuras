@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Add an emulator job (`workflow_dispatch` and a monthly schedule) and
+  device smoke tests for Room and the Godot plugin processes.
 - Apply ktlint and detekt to `:app` and `:data`. Compose functions are
   ignored by the complexity and length rules; the canvas hosts keep a
   local suppression until they are split.
