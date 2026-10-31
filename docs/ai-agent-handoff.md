@@ -36,7 +36,7 @@ equals the recorded sha.
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
 | commondevops | `.github/workflows/shared-ci.yml` | tag `5.7.0`, peeled `01d993bc` |
 | androiddevops | `.github/workflows/ci.yml` | tag `1.0.2`, peeled `6146c3b3` |
-| pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.3.5`, peeled `0527d3b2` |
+| pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.3.6`, peeled `fcf8fa8e` |
 | ci-lint image | `scripts/check-ci-docker.sh` | `sha256:f9001c4c` |
 
 Stay on annotated tags (SC-DEP-004). Synced scaffold rules are the scaffold
@@ -224,4 +224,4 @@ bash scripts/check-ci-local.sh
 5. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again.
 6. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. PDO-TOOL-001 is fixed in pydevops `3.3.1`. Callers pin `3.3.4`, which runs the containers as root. This repo has Actions read on `ci-lint` and `ci-python`, so the job is no longer skipped. `install_runner_packages` stays false. Do not pin `main`.
 
-*Last updated: 2026-10-31 (androiddevops 1.0.2; pydevops 3.3.5; commondevops 5.7.0)*
+*Last updated: 2026-10-31 (androiddevops 1.0.2; pydevops 3.3.6; commondevops 5.7.0)*
