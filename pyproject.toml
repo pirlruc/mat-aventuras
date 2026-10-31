@@ -34,6 +34,13 @@ exclude = ["docs/guardrails", ".github/scaffold", ".devops", "build"]
 
 [tool.pylint.main]
 ignore-paths = ["^docs/guardrails/", "^\\.github/scaffold/", "^\\.devops/", "^build/"]
+# scripts/ is inserted on sys.path before the doc_links import so the CLI can
+# run as a file. Pylint needs the same root to resolve those imports.
+source-roots = ["scripts"]
+
+[tool.pylint."messages control"]
+# The CLI inserts scripts/ on sys.path immediately before the import.
+disable = ["import-outside-toplevel"]
 
 [tool.pydoclint]
 exclude = "docs/guardrails|\\.github/scaffold|\\.devops|build"
