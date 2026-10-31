@@ -1,116 +1,75 @@
 # Mat Aventuras
 
-A math game for children aged **3** and **7**. Everything the child sees and
-hears is **Portuguese from Portugal**. Nothing leaves the tablet: there is
-no account, no advert, and no internet permission.
+A game for children aged **3 to 5** and **6 to 8**. Counting, shapes, numbers,
+early arithmetic, memory, letters, and a few prize games. Everything the child
+sees and hears is **Portuguese from Portugal**. Profiles, scores, and the
+parent PIN stay on the device.
 
 ![Ícone de Mat Aventuras](docs/branding/app-icon.png)
 
-## Who it is for
+## Age bands
 
-| Age | What they practise | Prize game |
+A parent picks one band. A lesson can belong to both.
+
+| Band | Lessons | Prize games |
 | --- | --- | --- |
-| **3 years** | Counting 1–10, shapes, digits 0–9 | Platformer, letter-climb, or maze |
-| **7 years** | Addition, subtraction, multiplication, division, logic | Dirt race with rivals, invaders, maze, or climb |
+| 3 a 5 anos | Contar, formas, números, somar, lógica, memória, letras | Plataforma, subir letras, labirinto |
+| 6 a 8 anos | Números, somar, subtrair, multiplicar, dividir, lógica, memória, letras, palavras | Those, plus invasores and the kart race |
 
-A parent or teacher picks the age band once. Each child gets a name, a mascot
-friend, and a local score.
+## Games
 
-## How to play
+| Game | What the child does | Bands |
+| --- | --- | --- |
+| Contar | Count stars from 1 to 10 | 3–5 |
+| Formas | Match a shape | 3–5 |
+| Números | Digits, and a small sudoku | 3–5 and 6–8 |
+| Somar | Add | 3–5 and 6–8 |
+| Subtrair | Subtract | 6–8 |
+| Multiplicar | Times tables | 6–8 |
+| Dividir | Exact division | 6–8 |
+| Lógica | Finish a sequence | 3–5 and 6–8 |
+| Memória | Find pairs of numbers, letters, or icons | 3–5 and 6–8 |
+| Letras | Match an upper-case letter to its lower-case pair | 3–5 and 6–8 |
+| Palavras | Fill the missing letter of a Portuguese word | 6–8 |
+| Plataforma | Run, jump, and collect coins | 3–5 and 6–8 |
+| Subir letras | Climb letter floors | 3–5 and 6–8 |
+| Labirinto | Eat the dots | 3–5 and 6–8 |
+| Invasores | Clear the fleet | 6–8 |
+| Corrida | Steer a kart through three laps | 6–8 |
 
-1. Open the app. Choose **Três anos** or **Sete anos**, or **Continuar como**
-   the last child on this tablet.
-2. Type the child's name and pick a mascot.
-3. Home is a **grid of modules**, not a numbered campaign. Tap a module to
-   start a lesson.
-4. Each screen is one short puzzle:
-   - four answer buttons
-   - a mini-sudoku (age 7 leaves several houses empty)
-   - sopa de letras — slide a finger along **every** hidden word (across,
-     down, or diagonal, either way). A wrong slide keeps the words you
-     already found
-   - a missing puzzle piece
-   - a symbol code (the voice names every symbol)
-5. A green tick or red cross stays on screen for about a second so the child
-   can see it. After **three correct answers in a row**, a prize game opens
-   in landscape.
-6. **Age 3 prize:** hold the **right** of the screen to run forward, the **left**
-   to reverse, and **swipe well up** to jump (a tap no longer jumps). Collect
-   every coin. Enemies patrol the ground — stomp them or grab a mushroom/star
-   to transform. Falling in a hole puts the runner back on the last safe
-   ground. Other prizes: climb letter floors while dodging barrels (3 lives),
-   or eat dots in a small maze (3 lives).
-7. **Age 7 prize:** tap the **left or right** of the screen to steer fully;
-   **tap the middle** for a short boost. Race three laps against other karts.
-   Green arches are checkpoints you drive through. The yellow **META** banner
-   overhead is the start/finish line you pass under — it is not a wall.
-   Other prizes: letter invaders (5 lives, destroy the whole fleet), maze,
-   or letter-climb.
+Three correct answers in a row open a prize in landscape. Leave a lesson from
+the on-screen exit control.
 
-Age 7 arithmetic uses two-digit sums and differences, times-tables through 12
-(including a missing factor), and exact division (no remainder) with factors
-2–10. Subtraction, multiplication, and division are also picture and story
-games: crossed counters, dot arrays, equal rows, fair shares, and a frog on
-a number line. Mini-sudoku hides extra houses so the glowing cell is not
-obvious from a single neighbour.
+## Install
 
-Leave a lesson from the on-screen exit control. Age 7 asks for confirmation.
+Install the debug APK from the GitHub Release tagged
+[0.1.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.1.0).
+Pin that tag. The release page lists the SHA-256 of `app-debug.apk`.
 
-## For parents
+The app is not on a store.
 
-Open **Painel dos pais** and set a four-digit PIN the first time. Later visits
-ask for that PIN. The app stores only a hash, never the digits.
+## Privacy and permissions
 
-The dashboard shows time on task and modules that need more practice.
-**Classificação** and **Recompensas** (badges) are local to this device.
+- No account, no advert, and no `INTERNET` permission.
+- The parent PIN is stored as a hash, never as the four digits.
+- Android backup and device-to-device transfer are off, so a profile is not
+  copied to another tablet.
 
-Profiles, the PIN, and the leaderboard stay in on-device storage. Android
-backup and device-to-device transfer are turned off so they cannot copy to
-another tablet.
+## Build from source
 
-## Install from this repository
-
-You need **JDK 17+** and an **Android SDK**. Then:
+You need JDK 17 or newer and an Android SDK.
 
 ```bash
 echo "sdk.dir=/path/to/Android/Sdk" > local.properties
 ./gradlew :app:assembleDebug
 ```
 
-Install `app/build/outputs/apk/debug/app-debug.apk` on the tablet
-(USB debugging or `adb install`). The app is not published on a store from
-this repository.
-
-Without an SDK you can still run the math and engine tests:
-
-```bash
-./gradlew :domain:test :domain:koverVerify :domain:detekt
-```
-
-## Language and privacy
-
-- **UI, TTS, and dialogue:** Portuguese from Portugal (pt-PT).
-- **Code, comments, and technical docs:** English.
-- **Network:** the merged manifest strips `INTERNET` and related permissions.
+The APK is `app/build/outputs/apk/debug/app-debug.apk`.
 
 ## For contributors
 
-Architecture, engine isolation, and the Godot plugin contract:
-
-- [docs/architecture.md](docs/architecture.md)
-- [docs/engine-plugin.md](docs/engine-plugin.md)
-- Decision log: Epics in [docs/issues.yml](docs/issues.yml) (no ADR files)
-- Agent notes: [docs/ai-agent-handoff.md](docs/ai-agent-handoff.md)
-
-Process: [github-issue-adr](https://github.com/pirlruc/methodologies/tree/1.9.2/github-issue-adr) @ `1.9.2`.
-Guardrails: [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.13.1`.
-Scaffold: [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.10.2`.
-
-Full CI with the SDK:
-
-```bash
-bash scripts/ci-local.sh
-```
+- [Architecture](docs/architecture.md)
+- [Decision log](https://github.com/pirlruc/mat-aventuras/issues?q=label%3Aepic)
 
 ## License
 

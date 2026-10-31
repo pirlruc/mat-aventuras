@@ -1,0 +1,24 @@
+# Publishes a GitHub Release for an annotated tag that already exists.
+# Pin is the peeled commit of commondevops 5.6.2 (CI-001).
+# The first release, 0.1.0, also uploads a debug APK built on a machine
+# with the Android SDK. This caller does not build that APK.
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Annotated tag to release, for example 0.1.0
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  release:
+    permissions:
+      contents: write
+      id-token: write
+    uses: pirlruc/commondevops/.github/workflows/common-release.yml@b85f95bbac8ba7d82eb90d1d84d1b8d1e8590a12
+    with:
+      tag: ${{ inputs.tag }}
