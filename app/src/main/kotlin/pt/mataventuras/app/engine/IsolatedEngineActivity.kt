@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
 import pt.mataventuras.domain.engine.EnginePluginContract
+import pt.mataventuras.domain.model.ChildName
 import pt.mataventuras.domain.model.Mascot
 
 /**
@@ -18,8 +19,15 @@ import pt.mataventuras.domain.model.Mascot
 abstract class IsolatedEngineActivity : FragmentActivity() {
     private val rewardLock = Any()
 
+    private companion object {
+        const val MASCOT_EXTRA_MAX: Int = 32
+    }
+
     @Volatile
     private var rewardSettled: Boolean = false
+
+    /** GLES restart already requested by this Activity, not by the process. */
+    internal var godotRestarted: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +43,17 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
      * Mascot extra, or empty when the host omitted it.
      */
     internal fun mascotCode(): String =
-        intent.getStringExtra(EnginePluginContract.EXTRA_MASCOT).orEmpty()
+        intent.getStringExtra(EnginePluginContract.EXTRA_MASCOT).orEmpty().take(MASCOT_EXTRA_MAX)
 
     /**
-     * Child display name extra, or empty.
+     * Child display name extra, capped and stripped of control characters.
+     * A missing extra stays empty so tests can tell it apart from a real name.
      */
-    internal fun childName(): String =
-        intent.getStringExtra(EnginePluginContract.EXTRA_NAME).orEmpty()
+    internal fun childName(): String {
+        val raw = intent.getStringExtra(EnginePluginContract.EXTRA_NAME).orEmpty()
+        if (raw.isBlank()) return ""
+        return ChildName.sanitize(raw)
+    }
 
     /**
      * Reward scene extra, or empty when the host omitted it.

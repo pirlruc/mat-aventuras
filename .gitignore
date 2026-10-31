@@ -13,6 +13,8 @@ captures/
 *.aab
 .ci-venv/
 .ci-tools/
+app/src/main/assets/godot/
+app/src/main/assets/*.uid
 .venv/
 .coverage
 htmlcov/
