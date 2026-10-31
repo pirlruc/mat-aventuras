@@ -285,7 +285,7 @@ requests skip those reusable jobs because they have no secret.
 | commondevops `common-release` | Not called yet. The first GitHub Release uses it. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
-| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `c6606e8be14ac0847fb17d6dae773f401f593b07` (annotated tag `3.3.2`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`. |
+| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `920612fbc6c771bb7c8e936a173780e7d03550ad` (annotated tag `3.3.3`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`. |
 
 Dependabot pull requests stay on the token-free jobs (CI-024). The reusable
 workflows also skip `dependabot[bot]` internally. Scheduled security jobs
