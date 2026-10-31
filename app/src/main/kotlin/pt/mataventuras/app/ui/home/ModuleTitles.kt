@@ -13,15 +13,29 @@ internal object ModuleTitles {
     fun of(
         module: LearningModule,
         mascot: Mascot,
-    ): String =
+    ): String = "${noun(module)} com o ${mascot.displayName}"
+
+    private fun noun(module: LearningModule): String =
+        earlyNoun(module) ?: laterNoun(module)
+
+    private fun earlyNoun(module: LearningModule): String? =
         when (module) {
-            LearningModule.COUNTING -> "Contar com o ${mascot.displayName}"
-            LearningModule.SHAPES -> "Formas com o ${mascot.displayName}"
-            LearningModule.NUMBERS -> "Números com o ${mascot.displayName}"
-            LearningModule.ADDITION -> "Somar com o ${mascot.displayName}"
-            LearningModule.SUBTRACTION -> "Subtrair com o ${mascot.displayName}"
-            LearningModule.MULTIPLICATION -> "Multiplicar com o ${mascot.displayName}"
-            LearningModule.DIVISION -> "Dividir com o ${mascot.displayName}"
-            LearningModule.LOGIC -> "Lógica com o ${mascot.displayName}"
+            LearningModule.COUNTING -> "Contar"
+            LearningModule.SHAPES -> "Formas"
+            LearningModule.NUMBERS -> "Números"
+            LearningModule.ADDITION -> "Somar"
+            LearningModule.SUBTRACTION -> "Subtrair"
+            else -> null
+        }
+
+    private fun laterNoun(module: LearningModule): String =
+        when (module) {
+            LearningModule.MULTIPLICATION -> "Multiplicar"
+            LearningModule.DIVISION -> "Dividir"
+            LearningModule.LOGIC -> "Lógica"
+            LearningModule.MEMORY -> "Memória"
+            LearningModule.LETTERS -> "Letras"
+            LearningModule.WORDS -> "Palavras"
+            else -> "Jogar"
         }
 }

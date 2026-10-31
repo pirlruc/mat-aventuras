@@ -27,6 +27,8 @@ class PlayBoardFactory(
             PlayKind.PUZZLE -> puzzle(module, level)
             PlayKind.CIPHER -> cipher(module, level)
             PlayKind.GROUPS -> GroupBoards(random, numericOptions).make(module, level)
+            PlayKind.MEMORY -> MemoryBoards(random).make(module, level)
+            PlayKind.WORD_COMPLETE -> WordComplete(random).make(module, level)
             PlayKind.CHOICE -> error("CHOICE is built by ExerciseGenerator.")
         }
 

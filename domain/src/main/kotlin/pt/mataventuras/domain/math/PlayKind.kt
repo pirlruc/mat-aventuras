@@ -14,6 +14,8 @@ enum class PlayKind {
     PUZZLE,
     CIPHER,
     GROUPS,
+    MEMORY,
+    WORD_COMPLETE,
 }
 
 /**
@@ -55,7 +57,7 @@ object PlayKinds {
      * Kinds mixed into [module]. Age 3 avoids letter-only boards except pictures.
      */
     fun forModule(module: LearningModule): List<PlayKind> =
-        when (module) {
+        dedicated(module) ?: when (module) {
             LearningModule.COUNTING ->
                 listOf(
                     PlayKind.CHOICE,
@@ -113,6 +115,14 @@ object PlayKinds {
                     PlayKind.SOUP,
                     PlayKind.CIPHER,
                 )
+            else -> error("Not a mixed lesson.")
+        }
+
+    private fun dedicated(module: LearningModule): List<PlayKind>? =
+        when (module) {
+            LearningModule.MEMORY, LearningModule.LETTERS -> listOf(PlayKind.MEMORY)
+            LearningModule.WORDS -> listOf(PlayKind.WORD_COMPLETE)
+            else -> null
         }
 
     /**

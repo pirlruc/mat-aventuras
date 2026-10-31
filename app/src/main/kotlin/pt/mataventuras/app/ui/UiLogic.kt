@@ -213,7 +213,13 @@ internal object UiLogic {
     /**
      * Soup cells are the answers; other kinds keep a palette.
      */
-    fun showsOptionPalette(kind: PlayKind): Boolean = kind != PlayKind.SOUP
+    fun showsOptionPalette(kind: PlayKind): Boolean =
+        kind != PlayKind.SOUP && kind != PlayKind.MEMORY
+
+    /**
+     * Pair grid. Taps are not a single correct option.
+     */
+    fun showsMemoryBoard(kind: PlayKind): Boolean = kind == PlayKind.MEMORY
 
     /**
      * Test tag for a tappable answer.

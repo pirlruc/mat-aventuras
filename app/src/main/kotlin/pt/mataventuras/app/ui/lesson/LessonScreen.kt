@@ -260,6 +260,9 @@ private fun LessonPlayColumn(
         if (UiLogic.showsPuzzleFrame(exercise.play.kind)) {
             PuzzleFrame(exercise)
         }
+        if (UiLogic.showsMemoryBoard(exercise.play.kind)) {
+            MemoryBoard(exercise, onPick)
+        }
         if (UiLogic.showsGroupsBoard(exercise.play.kind)) {
             Text(
                 UiLogic.groupsBanner(module),

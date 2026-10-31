@@ -9,7 +9,7 @@ Living log for agents picking up work on this repository.
 
 ## What this repo is
 
-Native Kotlin/Compose educational math game for ages 3 and 7.
+Native Kotlin/Compose educational math game for ages 3–5 and 6–8.
 **UI/TTS/dialogue:** Portuguese from Portugal.
 **Code, comments, KDoc, documentation:** English.
 Privacy: on-device only. Decision log: GitHub Epics via github-issue-adr;
@@ -50,7 +50,12 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin; T5 arcade lives/HUD done in tree |
 | MAT-004 | open | T4–T7 done in tree. MasterKey (T8) is in the working tree; Room migration is still PR4 |
 | MAT-005 | open | T4–T6 done. T1 shared simulation remains. Release `isMinifyEnabled` is true; device proof of a minified prize is still T2. T3 still shrinks Kover excludes |
-| MAT-006 | open | T1 done in tree (ktlint and detekt on `:app` and `:data`). T2 unit tests and lint pass on this host. T3 CodeQL compile and the APK bill are still open |
+| MAT-006 | open | T1 and T2 done. T3 CodeQL compile and the APK bill are still open |
+| MAT-007 | open | Bands and Room v2 are on main. T2 per-band difficulty tables are still open |
+| MAT-008 | open | Memory and word-completion boards are on `feature-memory-word-games` |
+| MAT-009 | open | Headless import and typed scripts are on main. T2 prize UX is still open |
+| MAT-010 | open | Companion pins and reusable CI are on main |
+| MAT-011 | open | Backlog only. Do not implement these games in 0.1.0 |
 
 `docs/guardrail-deviations.yml` now has two entries, neither of which lowers a number:
 Kover exclusions beyond kotlinx.serialization (KT-TEST-002; floors stay 95),
@@ -190,7 +195,7 @@ bash scripts/check-ci-local.sh
   a 2D process cannot load `kart.tscn` (or `boot.tscn`).
 - PIN unlock goes through `PinRepository.update` so lockout is not racy.
 - PIN digits are ASCII `0-9` only. `PinPolicy.derive` clears the password chars and the `PBEKeySpec`.
-- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is still 1; the next bump needs an explicit `Migration` (MAT-004-T8). `security-crypto` 1.0.0 has no `MasterKey.Builder` — that half of T8 needs a library bump.
+- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is 2. `MIGRATION_1_2` rewrites `THREE_YEARS` and `SEVEN_YEARS`. `security-crypto` is `1.1.0-alpha06` so `MasterKey.Builder` exists. `LearningModule.isSevenYears` is the harder-board switch, not "includes 6–8": NUMBERS must stay the easy sudoku.
 - Prize GDScript pointer/HUD/steer helpers live on the `Host` autoload (`read_pointer`, `make_hud`, `axis_from_normalized_x`). Keep them aligned with `EngineInputMap` (dead-zone 0.14, jump flick 56 px).
 - Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
 - `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
@@ -214,12 +219,11 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Human: bootstrap labels/milestones and sync `docs/issues.yml`.
-2. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
-3. MAT-004-T8: Room `Migration` when the age-band schema lands. `MasterKey.Builder` is already in `PinRepository`.
-4. MAT-005-T1/T2/T3: shared Godot/domain simulation, a release-variant prize on a device, narrower Kover excludes.
-5. MAT-006-T3: CodeQL manual compile and the APK bill on this SDK host. T1 is done. T2 unit tests and `lintDebug` passed locally.
-6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. Do not file them again.
-7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. PDO-TOOL-001 is fixed in pydevops `3.3.1`, but the reusable workflow pulls `ghcr.io/pirlruc/ci-lint` and `ci-python` and this repo's token gets `manifest unknown`. Leave `PYTHON_QUALITY_ENABLED` unset until those packages are visible. Shared-ci jobs that need a scanner image pass the public `ghcr.io/catthehacker/ubuntu:act-24.04` digest. `install_runner_packages` stays false, and the jobs do not pass `COMMONDEVOPS_READ_TOKEN`. Do not pin `main`.
+1. Finish the 0.1.0 README and release after this lessons PR merges.
+2. MAT-009-T2: prize loading, failure, and result screens. MAT-007-T2: per-band difficulty tables.
+3. MAT-005-T2/T3 and MAT-006-T3 stay open: minified prize on a device, narrower Kover excludes, CodeQL compile, APK bill.
+4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
+5. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. Do not file them again.
+6. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. PDO-TOOL-001 is fixed in pydevops `3.3.1`, but the reusable workflow pulls `ghcr.io/pirlruc/ci-lint` and `ci-python` and this repo's token gets `manifest unknown`. Leave `PYTHON_QUALITY_ENABLED` unset until those packages are visible. Shared-ci jobs that need a scanner image pass the public `ghcr.io/catthehacker/ubuntu:act-24.04` digest. `install_runner_packages` stays false, and the jobs do not pass `COMMONDEVOPS_READ_TOKEN`. Do not pin `main`.
 
-*Last updated: 2026-10-31 (age bands 3–5 and 6–8, Room v2)*
+*Last updated: 2026-10-30 (memory and word lessons, MAT-007..011)*

@@ -789,3 +789,152 @@ milestones:
             guardrail_refs:
               - KT-SEC-002
               - KT-SEC-004
+
+      - id: MAT-007
+        status: open
+        title: Age bands of 3–5 and 6–8
+        decision: >-
+          In the context of lessons that a three-year-old and a seven-year-old
+          cannot share, facing a profile stored as a single age, we decided to
+          persist two bands and let a module belong to both, to achieve one
+          curriculum that grows with the child, accepting a Room migration for
+          existing profiles.
+        acceptance_criteria:
+          - Profiles store THREE_TO_FIVE or SIX_TO_EIGHT and v1 rows migrate
+          - Counting and shapes stay on 3–5; subtraction, multiplication, and division stay on 6–8
+          - Shared modules can take a harder board on the older band
+        tasks:
+          - id: MAT-007-T1
+            status: done
+            title: Replace AgeGroup with AgeBand and migrate Room to v2
+            verification:
+              - AgeBandMigrationTest rewrites THREE_YEARS and SEVEN_YEARS
+              - The age screen says 3 a 5 anos and 6 a 8 anos
+          - id: MAT-007-T2
+            status: open
+            title: Move operand ranges into a per-band difficulty table
+            verification:
+              - NUMBERS, ADDITION, and LOGIC take the child's band, not only isSevenYears
+
+      - id: MAT-008
+        status: open
+        title: Memory and word-completion lessons
+        decision: >-
+          In the context of the regular lesson list, facing only arithmetic
+          and logic boards, we decided to add pair-matching and missing-letter
+          play for both bands, to achieve early literacy beside the math,
+          accepting a larger home list and new PlayKind values.
+        acceptance_criteria:
+          - MEMORY and LETTERS appear for both bands; WORDS appears for 6–8 only
+          - A young memory board is 2×3 identical pairs; an older board is 4×4
+          - A word board hides one letter and accepts only that letter
+          - Domain branch coverage stays at 95
+        tasks:
+          - id: MAT-008-T1
+            status: done
+            title: Add MEMORY and WORD_COMPLETE boards
+            verification:
+              - MemoryAndWordsTest covers pairs, mismatches, and a hidden letter
+              - Spoken lines live in VoiceScripts
+
+      - id: MAT-009
+        status: open
+        title: Godot prize reliability and prize UX
+        decision: >-
+          In the context of prize scenes that stay on the blue boot color,
+          facing Variant inference that drops a whole GDScript, we decided to
+          type every sample field and fail the headless import on that warning,
+          to achieve a prize that actually starts, accepting a pinned Godot
+          editor in local CI.
+        acceptance_criteria:
+          - inference_on_variant is an error in project.godot
+          - scripts/check-godot.sh imports the asset tree headless
+          - Leaving a prize reports a result to the host
+        tasks:
+          - id: MAT-009-T1
+            status: done
+            title: Type prize scripts and check them headless
+            verification:
+              - invaders, climb, runner, and kart assign Vector2 before use
+              - boot.gd defaults to runner.tscn
+          - id: MAT-009-T2
+            status: open
+            title: Loading, failure, and result screens for a prize
+            verification:
+              - A mascot overlay shows while the engine starts
+              - Timeout offers Tentar outra vez and Voltar to the Canvas host
+              - A Ganhaste card replaces the spoken-only return
+              - The 3–5 HUD is icon-first and kart boost is its own button
+
+      - id: MAT-010
+        status: open
+        title: Companion pins and reusable CI
+        decision: >-
+          In the context of a public Android app, facing copied security jobs
+          and stale companion pins, we decided to call commondevops for the
+          shared scanners and pin guardrails and scaffold by tag, to achieve
+          one ops path, accepting a public Ubuntu image while ci-lint stays
+          private.
+        acceptance_criteria:
+          - companion-pins.yml records guardrails 1.13.1 and scaffold 1.10.2
+          - Gitleaks, Semgrep, Grype, actionlint, shellcheck, and zizmor are not copied into ci.yml
+        tasks:
+          - id: MAT-010-T1
+            status: done
+            title: Bump companions and drop duplicated scanner jobs
+            verification:
+              - shared-ci.yml calls commondevops 5.6.2
+              - scripts/check-ci-docker.sh covers the host-missing linters
+
+      - id: MAT-011
+        status: open
+        title: Further lessons and prizes
+        decision: >-
+          In the context of the 3–5 and 6–8 bands, facing a short lesson list,
+          we decided to keep the next games as an authored backlog instead of
+          building them in the first release, to achieve a scoped 0.1.0,
+          accepting that colour, money, and the extra prizes wait.
+        acceptance_criteria:
+          - Each idea below is an open task and is not implemented in 0.1.0
+        tasks:
+          - id: MAT-011-T1
+            status: open
+            title: Lessons for 3–5 beyond the current boards
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/math
+            verification:
+              - Colour and shape sorting
+              - Qual é diferente
+              - Connect-the-dots 1–10
+              - Repeating patterns
+              - Big and small
+              - Syllable clapping
+              - Shadows
+          - id: MAT-011-T2
+            status: open
+            title: Lessons for 6–8 beyond the current boards
+            verification:
+              - Reading the clock
+              - Euros and cents
+              - Simple fractions
+              - Ordering numbers to 100
+              - Word problems
+              - Tangram
+              - Spelling with syllables
+          - id: MAT-011-T3
+            status: open
+            title: Prizes for 3–5 beyond runner, climb, and chomp
+            verification:
+              - Balloon pop by number or letter
+              - Fishing
+              - Colouring
+              - Bubble-pop rhythm
+          - id: MAT-011-T4
+            status: open
+            title: Prizes for 6–8 beyond invaders and kart
+            verification:
+              - Snake that eats the right answer
+              - Breakout with letters
+              - Simple tower defence
+              - Endless runner with math gates

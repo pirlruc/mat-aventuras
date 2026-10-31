@@ -23,7 +23,11 @@ class ExerciseGenerator(
     ): Exercise {
         val kind = PlayKinds.pick(module, random)
         if (kind != PlayKind.CHOICE) return boards.make(kind, module, level)
-        return when (module) {
+        return choice(module)
+    }
+
+    internal fun choice(module: LearningModule): Exercise =
+        when (module) {
             LearningModule.COUNTING -> counting()
             LearningModule.SHAPES -> shape()
             LearningModule.NUMBERS -> number()
@@ -32,8 +36,8 @@ class ExerciseGenerator(
             LearningModule.MULTIPLICATION -> multiplication()
             LearningModule.DIVISION -> division()
             LearningModule.LOGIC -> logic()
+            else -> error("Board lessons are not choice questions.")
         }
-    }
 
     internal fun counting(): Exercise {
         val quantity = random.nextInt(1, 11)
