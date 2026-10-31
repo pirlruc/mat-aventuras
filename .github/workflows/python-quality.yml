@@ -1,10 +1,10 @@
-# pydevops python-quality. Pin is the peeled commit of annotated tag 3.3.1
+# pydevops python-quality. Pin is the peeled commit of annotated tag 3.3.2
 # (CI-018 / CI-034): uses: and devops_ref are the same SHA.
 # The reusable workflow does not accept a checkout token. When pydevops is
 # private again, this repository still needs Actions access so uses: can read
 # the workflow file. Fork pull requests are skipped: they have no secret.
 #
-# 3.3.1 installs pytest with pytest-cov (PDO-TOOL-001 is fixed). This repo is
+# 3.3.2 runs the job containers as root. 3.3.1 installs pytest with pytest-cov. This repo is
 # not an installable package, so installable_app is false.
 # This repo has Actions read on ci-lint and ci-python, so the job runs.
 # Fork pull requests are skipped.
@@ -31,7 +31,7 @@ jobs:
       packages: read
       security-events: write
       pull-requests: write
-    uses: pirlruc/pydevops/.github/workflows/python-quality.yml@55f4e52faba65c8bd08623adcb22668860c04d14
+    uses: pirlruc/pydevops/.github/workflows/python-quality.yml@c6606e8be14ac0847fb17d6dae773f401f593b07
     with:
       strictness_level: Medium
       docstring_format: Google
@@ -40,7 +40,7 @@ jobs:
       working_directory: .
       python_version: "3.13"
       devops_repository: pirlruc/pydevops
-      devops_ref: 55f4e52faba65c8bd08623adcb22668860c04d14
+      devops_ref: c6606e8be14ac0847fb17d6dae773f401f593b07
       app_install_command: >-
         UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/mat-venv" uv sync --all-groups --all-extras
         && echo "${RUNNER_TEMP}/mat-venv/bin" >> "$GITHUB_PATH"

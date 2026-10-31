@@ -88,7 +88,6 @@ jobs:
     with:
       blocking: true
       scripts_ref: 01d993bc72eebc8806ae85f9459c4f3d6dd3415e
-      container_image: ghcr.io/pirlruc/ci-supply-chain@sha256:7bbd542d5971594f6192da0ed0c49e29fc0c58328333d0920ab3143a2a0e04d3
 
   pins:
     permissions:

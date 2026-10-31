@@ -4,7 +4,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="1.0.0"
-LOCK_SHA="b56948f24666d00384bd516a2b3c4eb8eb6c5938"
+LOCK_SHA="6146c3b38d8915e92742a2a4eef6bd276047ac91"
 VENV="${TMPDIR:-/tmp}/mat-aventuras-mobsfscan-${VERSION}"
 OUT="${MOBSF_SARIF:-$ROOT/app/build/reports/mobsfscan.sarif}"
 mkdir -p "$(dirname "$OUT")"

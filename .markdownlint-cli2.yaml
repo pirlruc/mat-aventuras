@@ -5,6 +5,8 @@ config:
   MD036: false
   MD041: false
   MD060: false
+  MD024:
+    siblings_only: true
 globs:
   - "docs/**/*.md"
   - "README.md"

@@ -1,7 +1,7 @@
 # Quality and Android builds. Heavy jobs skip a pull request that does not
 # touch the app, the domain, Gradle, or scripts. The gate job still runs, so a
 # docs-only pull request is not blocked on a skipped Gradle build.
-# Android jobs call androiddevops 1.0.1 (CI-018).
+# Android jobs call androiddevops 1.0.2 (CI-018).
 name: ci
 
 on:
@@ -96,9 +96,9 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
     with:
-      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
       gradle_tasks: >-
         :domain:ktlintCheck :domain:detekt :domain:test :domain:koverXmlReport :domain:koverVerify
         :data:ktlintCheck :data:detekt :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug
@@ -110,7 +110,7 @@ jobs:
         .ci-venv/bin/pip install --require-hashes -r requirements-ci.txt &&
         .ci-venv/bin/python scripts/verify-coverage.py
     secrets:
-      checkout_token: ${{ github.token }}
+      checkout_token: ${{ secrets.GITHUB_TOKEN }}
       command_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
 
   codeql:
@@ -119,36 +119,36 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
     with:
-      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
       upload: never
       build_command: >-
         ./gradlew --no-daemon :domain:compileKotlin :data:compileDebugKotlin :app:compileDebugKotlin
     secrets:
-      checkout_token: ${{ github.token }}
+      checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
   mobsf:
     needs: changes
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
     with:
-      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
     secrets:
-      checkout_token: ${{ github.token }}
+      checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
   sbom:
     needs: changes
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
     with:
-      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
     secrets:
-      checkout_token: ${{ github.token }}
+      checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
   dependency-review:
     if: github.event_name == 'pull_request'

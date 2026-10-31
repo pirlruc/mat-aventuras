@@ -17,11 +17,11 @@ jobs:
   apk:
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-release-apk.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    uses: pirlruc/androiddevops/.github/workflows/android-release-apk.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
     with:
-      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
     secrets:
-      checkout_token: ${{ github.token }}
+      checkout_token: ${{ secrets.GITHUB_TOKEN }}
       keystore_base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       keystore_password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       key_alias: ${{ secrets.ANDROID_KEY_ALIAS }}

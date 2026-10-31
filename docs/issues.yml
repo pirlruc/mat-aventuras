@@ -957,5 +957,5 @@ milestones:
             status: done
             title: Call androiddevops and skip heavy jobs on docs-only pulls
             verification:
-              - ci.yml calls androiddevops 1.0.1
+              - ci.yml calls androiddevops 1.0.2
               - shared-ci.yml calls commondevops 5.7.0 with ci-lint
