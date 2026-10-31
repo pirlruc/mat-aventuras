@@ -1,10 +1,10 @@
-# pydevops python-quality. Pin is the peeled commit of annotated tag 3.3.7
+# pydevops python-quality. Pin is the peeled commit of annotated tag 3.3.8
 # (CI-018 / CI-034): uses: and devops_ref are the same SHA.
 # The reusable workflow does not accept a checkout token. When pydevops is
 # private again, this repository still needs Actions access so uses: can read
 # the workflow file. Fork pull requests are skipped: they have no secret.
 #
-# 3.3.7 tells pylint to skip .devops by directory name. 3.3.6 logs each tool. This repo is
+# 3.3.8 treats the string false as a non-package, so mypy is skipped. This repo is
 # not an installable package, so installable_app is false.
 # This repo has Actions read on ci-lint and ci-python, so the job runs.
 # Fork pull requests are skipped.
@@ -31,7 +31,7 @@ jobs:
       packages: read
       security-events: write
       pull-requests: write
-    uses: pirlruc/pydevops/.github/workflows/python-quality.yml@1293e3462c692deebb903e3d18a18ead77bbe2ad
+    uses: pirlruc/pydevops/.github/workflows/python-quality.yml@7e54906ede4ae1d67829082278024334da34beca
     with:
       strictness_level: Medium
       docstring_format: Google
@@ -40,7 +40,7 @@ jobs:
       working_directory: .
       python_version: "3.13"
       devops_repository: pirlruc/pydevops
-      devops_ref: 1293e3462c692deebb903e3d18a18ead77bbe2ad
+      devops_ref: 7e54906ede4ae1d67829082278024334da34beca
       app_install_command: >-
         UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/mat-venv" uv sync --all-groups --all-extras
         && echo "${RUNNER_TEMP}/mat-venv/bin" >> "$GITHUB_PATH"
