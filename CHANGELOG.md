@@ -13,17 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to both bands. Existing profiles migrate from `THREE_YEARS` and
   `SEVEN_YEARS` without deleting rows.
 - The name field accepts 24 characters, matching `ChildName`.
-
-### Fixed
-
-- Type Godot pointer samples so a Dictionary value cannot drop a prize script.
-- Default the boot scene to the 2D runner when the engine plugin is absent.
-- Give every Godot prize a Sair control that settles the reward as not won.
-- Keep the GLES restart flag on the Activity instead of the process.
-- Cap the child-name and mascot extras read by the engine.
-
-### Changed
-
 - Add an emulator job (`workflow_dispatch` and a monthly schedule) and
   device smoke tests for Room and the Godot plugin processes.
 - Apply ktlint and detekt to `:app` and `:data`. Compose functions are
@@ -61,3 +50,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Leave the python-quality caller skipped until repository variable
   `PYTHON_QUALITY_ENABLED` is `true`. `uv tool install pytest-cov` exits 1
   on the pinned uv (PDO-TOOL-001).
+
+### Fixed
+
+- Type Godot pointer samples so a Dictionary value cannot drop a prize script.
+- Default the boot scene to the 2D runner when the engine plugin is absent.
+- Give every Godot prize a Sair control that settles the reward as not won.
+- Keep the GLES restart flag on the Activity instead of the process.
+- Cap the child-name and mascot extras read by the engine.
