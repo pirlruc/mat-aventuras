@@ -17,7 +17,7 @@ import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.pin.encryptedPinPreferences
 import pt.mataventuras.data.pin.pinPreferences
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.LearningSession
 import pt.mataventuras.domain.model.Mascot
@@ -46,7 +46,7 @@ class LocalRepositoryTest {
 
     @Test
     fun createProfilePersistsStarterAvatarAndSessions() = runTest {
-        val id = repository.createProfile(" Ana ", AgeGroup.THREE_YEARS, Mascot.HERO_PUP)
+        val id = repository.createProfile(" Ana ", AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP)
         val profile = repository.getProfile(id)!!
         assertEquals("Ana", profile.name)
         assertEquals(AvatarCode.STARTER.name, profile.avatarId)

@@ -10,7 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.repository.LocalRepository
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.Mascot
 
 /**
@@ -30,7 +30,7 @@ class RoomSmokeTest {
                 val id =
                     LocalRepository(database).createProfile(
                         "Ana",
-                        AgeGroup.THREE_YEARS,
+                        AgeBand.THREE_TO_FIVE,
                         Mascot.SPEEDY_HEDGEHOG,
                     )
                 assertTrue(id > 0L)

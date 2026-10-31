@@ -2,10 +2,14 @@ package pt.mataventuras.domain.model
 
 /**
  * Child age band. Drives UI tokens, curriculum, and which reward engine launches.
+ * Stored names replace the earlier fixed ages `THREE_YEARS` and `SEVEN_YEARS`.
  */
-enum class AgeGroup {
-    THREE_YEARS,
-    SEVEN_YEARS,
+enum class AgeBand {
+    /** 3 to 5 years. */
+    THREE_TO_FIVE,
+
+    /** 6 to 8 years. */
+    SIX_TO_EIGHT,
 }
 
 /**
@@ -22,9 +26,9 @@ data class UiTokens(
 /**
  * Tokens for the selected age band.
  */
-fun tokensFor(age: AgeGroup): UiTokens =
+fun tokensFor(age: AgeBand): UiTokens =
     when (age) {
-        AgeGroup.THREE_YEARS ->
+        AgeBand.THREE_TO_FIVE ->
             UiTokens(
                 minButtonDp = 88,
                 titleSp = 34,
@@ -32,7 +36,7 @@ fun tokensFor(age: AgeGroup): UiTokens =
                 usesTextNavigation = false,
                 confirmsBeforeExit = false,
             )
-        AgeGroup.SEVEN_YEARS ->
+        AgeBand.SIX_TO_EIGHT ->
             UiTokens(
                 minButtonDp = 56,
                 titleSp = 26,

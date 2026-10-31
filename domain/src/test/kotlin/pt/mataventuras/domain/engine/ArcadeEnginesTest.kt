@@ -8,7 +8,7 @@ import org.junit.Test
 import pt.mataventuras.domain.math.WordSoup
 import pt.mataventuras.domain.math.WordSoupBuilder
 import pt.mataventuras.domain.math.WordSoupScanner
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.EngineKind
 
 class ArcadeEnginesTest {
@@ -228,12 +228,12 @@ class ArcadeEnginesTest {
 
     @Test
     fun catalogPicksAgeAppropriateGames() {
-        val three = RewardCatalog.gamesFor(AgeGroup.THREE_YEARS, EngineKind.TWO_D)
+        val three = RewardCatalog.gamesFor(AgeBand.THREE_TO_FIVE, EngineKind.TWO_D)
         assertTrue(RewardGame.RUNNER in three)
         assertTrue(RewardGame.CLIMB in three)
         assertFalse(RewardGame.KART in three)
-        assertEquals(listOf(RewardGame.KART), RewardCatalog.gamesFor(AgeGroup.SEVEN_YEARS, EngineKind.THREE_D))
-        val seven = RewardCatalog.gamesFor(AgeGroup.SEVEN_YEARS, EngineKind.TWO_D)
+        assertEquals(listOf(RewardGame.KART), RewardCatalog.gamesFor(AgeBand.SIX_TO_EIGHT, EngineKind.THREE_D))
+        val seven = RewardCatalog.gamesFor(AgeBand.SIX_TO_EIGHT, EngineKind.TWO_D)
         assertTrue(RewardGame.INVADERS in seven)
         assertEquals(EngineKind.THREE_D, RewardCatalog.engineKind(RewardGame.KART))
         assertEquals(EngineKind.TWO_D, RewardCatalog.engineKind(RewardGame.CHOMP))
@@ -247,9 +247,9 @@ class ArcadeEnginesTest {
         assertEquals("res://runner.tscn", RewardCatalog.packedScenePath("res://runner.tscn", EngineKind.TWO_D))
         assertEquals("res://kart.tscn", RewardCatalog.packedScenePath("res://boot.tscn", EngineKind.THREE_D))
         assertEquals("res://runner.tscn", RewardCatalog.packedScenePath("res://kart.tscn", EngineKind.TWO_D))
-        val picked = RewardCatalog.pick(AgeGroup.THREE_YEARS, EngineKind.TWO_D, Random(2))
+        val picked = RewardCatalog.pick(AgeBand.THREE_TO_FIVE, EngineKind.TWO_D, Random(2))
         assertTrue(picked in three)
-        assertTrue(RewardCatalog.pick(AgeGroup.SEVEN_YEARS, EngineKind.THREE_D, Random(0)) == RewardGame.KART)
+        assertTrue(RewardCatalog.pick(AgeBand.SIX_TO_EIGHT, EngineKind.THREE_D, Random(0)) == RewardGame.KART)
     }
 
     @Test

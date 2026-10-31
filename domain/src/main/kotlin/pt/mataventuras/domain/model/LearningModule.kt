@@ -1,41 +1,41 @@
 package pt.mataventuras.domain.model
 
 /**
- * Curriculum module. Age 3: counting, shapes, numbers. Age 7: arithmetic and logic.
+ * Curriculum module. A module can belong to more than one age band.
  */
-enum class LearningModule {
-    COUNTING,
-    SHAPES,
-    NUMBERS,
-    ADDITION,
-    SUBTRACTION,
-    MULTIPLICATION,
-    DIVISION,
-    LOGIC,
+enum class LearningModule(
+    val bands: Set<AgeBand>,
+) {
+    COUNTING(setOf(AgeBand.THREE_TO_FIVE)),
+    SHAPES(setOf(AgeBand.THREE_TO_FIVE)),
+    NUMBERS(setOf(AgeBand.THREE_TO_FIVE, AgeBand.SIX_TO_EIGHT)),
+    ADDITION(setOf(AgeBand.THREE_TO_FIVE, AgeBand.SIX_TO_EIGHT)),
+    SUBTRACTION(setOf(AgeBand.SIX_TO_EIGHT)),
+    MULTIPLICATION(setOf(AgeBand.SIX_TO_EIGHT)),
+    DIVISION(setOf(AgeBand.SIX_TO_EIGHT)),
+    LOGIC(setOf(AgeBand.THREE_TO_FIVE, AgeBand.SIX_TO_EIGHT)),
 }
 
 /**
- * Modules available for an age band.
+ * Modules available for an age band, in curriculum order.
  */
-fun modulesFor(age: AgeGroup): List<LearningModule> =
-    when (age) {
-        AgeGroup.THREE_YEARS ->
-            listOf(
-                LearningModule.COUNTING,
-                LearningModule.SHAPES,
-                LearningModule.NUMBERS,
-            )
-        AgeGroup.SEVEN_YEARS ->
-            listOf(
-                LearningModule.ADDITION,
-                LearningModule.SUBTRACTION,
-                LearningModule.MULTIPLICATION,
-                LearningModule.DIVISION,
-                LearningModule.LOGIC,
-            )
-    }
+fun modulesFor(age: AgeBand): List<LearningModule> = LearningModule.entries.filter { age in it.bands }
 
 /**
- * True for the age-7 arithmetic and logic modules.
+ * True for the harder arithmetic and logic boards.
+ * Shared modules such as [NUMBERS] stay on the younger board until the
+ * generator takes an [AgeBand].
  */
-fun LearningModule.isSevenYears(): Boolean = this in modulesFor(AgeGroup.SEVEN_YEARS)
+fun LearningModule.isSevenYears(): Boolean =
+    when (this) {
+        LearningModule.ADDITION,
+        LearningModule.SUBTRACTION,
+        LearningModule.MULTIPLICATION,
+        LearningModule.DIVISION,
+        LearningModule.LOGIC,
+        -> true
+        LearningModule.COUNTING,
+        LearningModule.SHAPES,
+        LearningModule.NUMBERS,
+        -> false
+    }

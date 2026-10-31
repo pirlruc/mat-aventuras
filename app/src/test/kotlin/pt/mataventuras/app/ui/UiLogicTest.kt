@@ -10,7 +10,7 @@ import pt.mataventuras.domain.math.GroupTokens
 import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
@@ -168,15 +168,15 @@ class UiLogicTest {
         assertEquals(android.view.HapticFeedbackConstants.CONTEXT_CLICK, UiLogic.answerHaptic(true, 29))
         assertEquals(android.view.HapticFeedbackConstants.LONG_PRESS, UiLogic.answerHaptic(false, 29))
         UiLogic.answerHaptic(true)
-        assertFalse(UiLogic.lessonFillsViewport(AgeGroup.THREE_YEARS))
-        assertTrue(UiLogic.lessonFillsViewport(AgeGroup.SEVEN_YEARS))
-        assertTrue(UiLogic.lessonScrolls(AgeGroup.THREE_YEARS, PlayKind.CHOICE))
-        assertFalse(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.CHOICE))
-        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.SUDOKU))
-        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.SOUP))
-        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.CIPHER))
-        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.PUZZLE))
-        assertTrue(UiLogic.lessonScrolls(AgeGroup.SEVEN_YEARS, PlayKind.GROUPS))
+        assertFalse(UiLogic.lessonFillsViewport(AgeBand.THREE_TO_FIVE))
+        assertTrue(UiLogic.lessonFillsViewport(AgeBand.SIX_TO_EIGHT))
+        assertTrue(UiLogic.lessonScrolls(AgeBand.THREE_TO_FIVE, PlayKind.CHOICE))
+        assertFalse(UiLogic.lessonScrolls(AgeBand.SIX_TO_EIGHT, PlayKind.CHOICE))
+        assertTrue(UiLogic.lessonScrolls(AgeBand.SIX_TO_EIGHT, PlayKind.SUDOKU))
+        assertTrue(UiLogic.lessonScrolls(AgeBand.SIX_TO_EIGHT, PlayKind.SOUP))
+        assertTrue(UiLogic.lessonScrolls(AgeBand.SIX_TO_EIGHT, PlayKind.CIPHER))
+        assertTrue(UiLogic.lessonScrolls(AgeBand.SIX_TO_EIGHT, PlayKind.PUZZLE))
+        assertTrue(UiLogic.lessonScrolls(AgeBand.SIX_TO_EIGHT, PlayKind.GROUPS))
         assertTrue(UiLogic.showsGroupsBoard(PlayKind.GROUPS))
         assertFalse(UiLogic.showsGroupsBoard(PlayKind.CHOICE))
         assertTrue(UiLogic.scrollsForBoard(PlayKind.GROUPS))
@@ -196,7 +196,7 @@ class UiLogicTest {
         assertEquals(VoiceScripts.ENTER_PIN, UiLogic.pinPrompt(false))
         assertTrue(UiLogic.waitingForProfile(null, null))
         val profile =
-            ChildProfile(1, "Ana", AgeGroup.THREE_YEARS, Mascot.HERO_PUP, AvatarCode.STARTER.name, 0, 0)
+            ChildProfile(1, "Ana", AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, AvatarCode.STARTER.name, 0, 0)
         assertTrue(UiLogic.waitingForProfile(profile, null))
         val summary =
             ParentSummary(1, 1_000, 1, 0, 1.0, emptyList(), emptyList())
@@ -218,8 +218,8 @@ class UiLogicTest {
     fun ageAndRewardCopy() {
         assertEquals("Amigo", UiLogic.fallbackChildName("  "))
         assertEquals("Rui", UiLogic.fallbackChildName(" Rui "))
-        assertEquals(64, UiLogic.mascotChipDp(AgeGroup.THREE_YEARS))
-        assertEquals(52, UiLogic.mascotChipDp(AgeGroup.SEVEN_YEARS))
+        assertEquals(64, UiLogic.mascotChipDp(AgeBand.THREE_TO_FIVE))
+        assertEquals(52, UiLogic.mascotChipDp(AgeBand.SIX_TO_EIGHT))
         assertEquals(168, UiLogic.AGE_BUTTON_SIDE_DP)
         assertEquals(1f, UiLogic.ageButtonAlpha(true), 0f)
         assertEquals(0.7f, UiLogic.ageButtonAlpha(false), 0f)
@@ -234,8 +234,8 @@ class UiLogicTest {
         assertEquals("👽", UiLogic.mascotGlyph(Mascot.MISCHIEVOUS_ALIEN))
         assertEquals("🧸", UiLogic.ageButtonEmoji(true))
         assertEquals("🚀", UiLogic.ageButtonEmoji(false))
-        assertTrue(UiLogic.usesIconNav(AgeGroup.THREE_YEARS))
-        assertFalse(UiLogic.usesIconNav(AgeGroup.SEVEN_YEARS))
+        assertTrue(UiLogic.usesIconNav(AgeBand.THREE_TO_FIVE))
+        assertFalse(UiLogic.usesIconNav(AgeBand.SIX_TO_EIGHT))
         assertTrue(UiLogic.badgeLine(true, BadgeCode.FIRST_STEPS).startsWith("★"))
         assertTrue(UiLogic.badgeLine(false, BadgeCode.FIRST_STEPS).startsWith("☆"))
         assertTrue(UiLogic.avatarLine(true, AvatarCode.RUNNER).startsWith("★"))
@@ -247,15 +247,15 @@ class UiLogicTest {
         assertFalse(UiLogic.shouldSpeak(true, " "))
         assertTrue(UiLogic.shouldSpeak(true, "Olá"))
         assertEquals("", EntryLogic.previewFor(null))
-        assertEquals(VoiceScripts.AGE_THREE_PREVIEW, EntryLogic.previewFor(AgeGroup.THREE_YEARS))
+        assertEquals(VoiceScripts.AGE_THREE_PREVIEW, EntryLogic.previewFor(AgeBand.THREE_TO_FIVE))
         val ana =
-            ChildProfile(1, "Ana", AgeGroup.THREE_YEARS, Mascot.HERO_PUP, AvatarCode.STARTER.name, 0, 0)
+            ChildProfile(1, "Ana", AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, AvatarCode.STARTER.name, 0, 0)
         assertFalse(EntryLogic.showsContinue(null))
         assertTrue(EntryLogic.showsContinue(ana))
         assertEquals("Continuar como Ana", EntryLogic.continueLabel(ana))
-        assertFalse(LessonFlow.shouldAskExitConfirm(AgeGroup.THREE_YEARS, false))
-        assertTrue(LessonFlow.shouldAskExitConfirm(AgeGroup.SEVEN_YEARS, false))
-        assertFalse(LessonFlow.shouldAskExitConfirm(AgeGroup.SEVEN_YEARS, true))
+        assertFalse(LessonFlow.shouldAskExitConfirm(AgeBand.THREE_TO_FIVE, false))
+        assertTrue(LessonFlow.shouldAskExitConfirm(AgeBand.SIX_TO_EIGHT, false))
+        assertFalse(LessonFlow.shouldAskExitConfirm(AgeBand.SIX_TO_EIGHT, true))
         assertEquals(VoiceScripts.LEAVE, LessonFlow.exitLabel(false))
         assertEquals(VoiceScripts.CONFIRM_LEAVE, LessonFlow.exitLabel(true))
         assertFalse(LessonFlow.showsStay(false))

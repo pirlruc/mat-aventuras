@@ -13,7 +13,7 @@ import androidx.room.RoomDatabase
         BadgeEntity::class,
         AvatarEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class MatAventurasDatabase : RoomDatabase() {

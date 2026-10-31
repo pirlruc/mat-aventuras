@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Replace the fixed ages with bands of 3–5 and 6–8 years. Modules can belong
+  to both bands. Existing profiles migrate from `THREE_YEARS` and
+  `SEVEN_YEARS` without deleting rows.
+- The name field accepts 24 characters, matching `ChildName`.
+
 ### Fixed
 
 - Type Godot pointer samples so a Dictionary value cannot drop a prize script.

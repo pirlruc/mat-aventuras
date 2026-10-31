@@ -6,7 +6,7 @@ import pt.mataventuras.data.local.AvatarEntity
 import pt.mataventuras.data.local.BadgeEntity
 import pt.mataventuras.data.local.ProfileEntity
 import pt.mataventuras.data.local.SessionEntity
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.LearningSession
@@ -19,7 +19,7 @@ class MappersTest {
             ChildProfile(
                 id = 3,
                 name = "Ana",
-                ageGroup = AgeGroup.SEVEN_YEARS,
+                ageGroup = AgeBand.SIX_TO_EIGHT,
                 favouriteMascot = Mascot.PINK_PIGLET,
                 avatarId = "STARTER",
                 points = 40,
@@ -43,7 +43,7 @@ class MappersTest {
     fun badgeAndAvatarMapToDomain() {
         assertEquals("STAR", BadgeEntity(1, 3, "STAR", 8).toDomain().code)
         assertEquals("CAPTAIN", AvatarEntity(1, 3, "CAPTAIN", 8).toDomain().avatarId)
-        val profile = ProfileEntity(1, "Rui", "THREE_YEARS", "unknown", "STARTER", 0, 1)
+        val profile = ProfileEntity(1, "Rui", "THREE_TO_FIVE", "unknown", "STARTER", 0, 1)
         assertEquals(Mascot.SPEEDY_HEDGEHOG, profile.toDomain().favouriteMascot)
     }
 }

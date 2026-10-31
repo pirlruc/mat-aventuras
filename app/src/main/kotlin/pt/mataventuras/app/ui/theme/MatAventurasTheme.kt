@@ -7,12 +7,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.UiTokens
 import pt.mataventuras.domain.model.tokensFor
 
 /** Composition local for age-adaptive spacing and type. */
-val LocalUiTokens = staticCompositionLocalOf { tokensFor(AgeGroup.THREE_YEARS) }
+val LocalUiTokens = staticCompositionLocalOf { tokensFor(AgeBand.THREE_TO_FIVE) }
 
 private val Blue = Color(0xFF1565C0)
 private val Orange = Color(0xFFFB8C00)
@@ -24,11 +24,11 @@ private val Sky = Color(0xFFE3F2FD)
  */
 @Composable
 fun MatAventurasTheme(
-    ageGroup: AgeGroup,
+    ageGroup: AgeBand,
     content: @Composable () -> Unit,
 ) {
     val tokens = tokensFor(ageGroup)
-    val background = if (ageGroup == AgeGroup.THREE_YEARS) Cream else Sky
+    val background = if (ageGroup == AgeBand.THREE_TO_FIVE) Cream else Sky
     CompositionLocalProvider(
         LocalUiTokens provides tokens,
     ) {

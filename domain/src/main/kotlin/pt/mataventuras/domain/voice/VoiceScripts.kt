@@ -1,6 +1,6 @@
 package pt.mataventuras.domain.voice
 
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.Mascot
 
 /**
@@ -10,10 +10,10 @@ object VoiceScripts {
     const val APP_TITLE: String = "Mat Aventuras"
     const val APP_TAGLINE: String = "Números, formas e jogos."
     const val APP_DESCRIPTION: String =
-        "Uma aventura de matemática para os 3 e os 7 anos. Tudo fica neste aparelho."
+        "Uma aventura de matemática para os 3 a 5 e os 6 a 8 anos. Tudo fica neste aparelho."
     const val AGE_SELECTION: String = "Olá! Escolhe a tua idade."
-    const val THREE_YEARS: String = "Três anos"
-    const val SEVEN_YEARS: String = "Sete anos"
+    const val THREE_TO_FIVE: String = "3 a 5 anos"
+    const val SIX_TO_EIGHT: String = "6 a 8 anos"
     const val WELL_DONE: String = "Muito bem!"
     const val TRY_AGAIN: String = "Tenta outra vez."
     const val LETS_PLAY: String = "Vamos jogar um prémio!"
@@ -56,31 +56,31 @@ object VoiceScripts {
      */
     fun greeting(
         mascot: Mascot,
-        age: AgeGroup,
+        age: AgeBand,
     ): String {
         val name = mascot.displayName
         return when (age) {
-            AgeGroup.THREE_YEARS -> "Olá! Eu sou o $name. Vamos brincar com números?"
-            AgeGroup.SEVEN_YEARS -> "Olá, eu sou o $name. Pronto para um desafio de matemática?"
+            AgeBand.THREE_TO_FIVE -> "Olá! Eu sou o $name. Vamos brincar com números?"
+            AgeBand.SIX_TO_EIGHT -> "Olá, eu sou o $name. Pronto para um desafio de matemática?"
         }
     }
 
     /**
      * Exit confirmation, age 7 only.
      */
-    fun confirmExit(age: AgeGroup): String? =
+    fun confirmExit(age: AgeBand): String? =
         when (age) {
-            AgeGroup.THREE_YEARS -> null
-            AgeGroup.SEVEN_YEARS -> "Queres sair deste desafio?"
+            AgeBand.THREE_TO_FIVE -> null
+            AgeBand.SIX_TO_EIGHT -> "Queres sair deste desafio?"
         }
 
     /**
      * Short curriculum + reward blurb for the selected age band.
      */
-    fun agePreview(age: AgeGroup): String =
+    fun agePreview(age: AgeBand): String =
         when (age) {
-            AgeGroup.THREE_YEARS -> AGE_THREE_PREVIEW
-            AgeGroup.SEVEN_YEARS -> AGE_SEVEN_PREVIEW
+            AgeBand.THREE_TO_FIVE -> AGE_THREE_PREVIEW
+            AgeBand.SIX_TO_EIGHT -> AGE_SEVEN_PREVIEW
         }
 
     /**

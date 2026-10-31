@@ -16,7 +16,7 @@ import pt.mataventuras.app.ui.lesson.LessonScreen
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.rewards.LeaderboardAndRewardsScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.Mascot
@@ -36,13 +36,13 @@ private sealed interface Destination {
 fun NavGraph(
     container: AppContainer,
     onSpeak: (String) -> Unit,
-    onReward: (AgeGroup, Mascot, String) -> Unit,
+    onReward: (AgeBand, Mascot, String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var destination by remember { mutableStateOf<Destination>(Destination.Selection) }
     var profile by remember { mutableStateOf<ChildProfile?>(null) }
     var continueProfile by remember { mutableStateOf<ChildProfile?>(null) }
-    val ageGroup = profile?.ageGroup ?: AgeGroup.THREE_YEARS
+    val ageGroup = profile?.ageGroup ?: AgeBand.THREE_TO_FIVE
 
     LaunchedEffect(Unit) {
         continueProfile = ProfileResume.continueCandidate(container.lastProfile, container.repository)

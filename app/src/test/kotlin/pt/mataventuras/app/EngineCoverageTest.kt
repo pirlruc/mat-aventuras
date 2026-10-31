@@ -31,7 +31,7 @@ import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.PlatformerWorld
 import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.engine.RivalRacer
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.plugin.RunnerPluginActivity
 
@@ -58,7 +58,7 @@ class EngineCoverageTest {
         val intent =
             EngineLauncher.intentFor(
                 ctx,
-                AgeGroup.SEVEN_YEARS,
+                AgeBand.SIX_TO_EIGHT,
                 Mascot.HERO_PUP,
                 "Ana",
                 game = RewardGame.INVADERS,
@@ -83,7 +83,7 @@ class EngineCoverageTest {
                 val intent =
                     EngineLauncher.intentFor(
                         ctx,
-                        AgeGroup.SEVEN_YEARS,
+                        AgeBand.SIX_TO_EIGHT,
                         Mascot.HERO_PUP,
                         "Ana",
                         game = game,

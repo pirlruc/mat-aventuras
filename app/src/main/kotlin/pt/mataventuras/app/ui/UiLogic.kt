@@ -10,7 +10,7 @@ import pt.mataventuras.domain.math.GroupTokens
 import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildName
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
@@ -69,14 +69,14 @@ internal object UiLogic {
     /**
      * Age-7 lessons fill the viewport instead of packing against the top.
      */
-    fun lessonFillsViewport(age: AgeGroup): Boolean = age == AgeGroup.SEVEN_YEARS
+    fun lessonFillsViewport(age: AgeBand): Boolean = age == AgeBand.SIX_TO_EIGHT
 
     /**
      * Sudoku, soup, cipher, and puzzle boards are taller than a choice row, so
      * they scroll even when [lessonFillsViewport] is true. Keeps Sair on screen.
      */
     fun lessonScrolls(
-        age: AgeGroup,
+        age: AgeBand,
         kind: PlayKind,
     ): Boolean =
         !lessonFillsViewport(age) || scrollsForBoard(kind)
@@ -433,7 +433,7 @@ internal object UiLogic {
     /**
      * Mascot chip size in dp.
      */
-    fun mascotChipDp(age: AgeGroup): Int = if (age == AgeGroup.THREE_YEARS) 64 else 52
+    fun mascotChipDp(age: AgeBand): Int = if (age == AgeBand.THREE_TO_FIVE) 64 else 52
 
     /**
      * Age-button side in dp. Both bands share a side so the chips match.
@@ -475,7 +475,7 @@ internal object UiLogic {
     /**
      * Age 3 uses icon nav; age 7 uses labelled buttons.
      */
-    fun usesIconNav(age: AgeGroup): Boolean = age == AgeGroup.THREE_YEARS
+    fun usesIconNav(age: AgeBand): Boolean = age == AgeBand.THREE_TO_FIVE
 
     /**
      * Badge collection row.

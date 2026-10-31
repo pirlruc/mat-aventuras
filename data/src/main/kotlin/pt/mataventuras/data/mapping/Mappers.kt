@@ -4,7 +4,7 @@ import pt.mataventuras.data.local.AvatarEntity
 import pt.mataventuras.data.local.BadgeEntity
 import pt.mataventuras.data.local.ProfileEntity
 import pt.mataventuras.data.local.SessionEntity
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.LearningSession
@@ -16,7 +16,7 @@ import pt.mataventuras.domain.model.UnlockedBadge
 fun ProfileEntity.toDomain(): ChildProfile = ChildProfile(
     id = id,
     name = name,
-    ageGroup = AgeGroup.valueOf(ageGroup),
+    ageGroup = AgeBand.valueOf(ageGroup),
     favouriteMascot = Mascot.fromCode(mascotCode),
     avatarId = avatarId,
     points = points,
