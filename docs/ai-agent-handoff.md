@@ -2,7 +2,7 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-10-30
+**Last updated:** 2026-10-31
 **Last agent focus:** companion pins at guardrails 1.13.1 and scaffold 1.10.2
 
 ---
@@ -34,7 +34,8 @@ equals the recorded sha.
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
-| commondevops | `.github/workflows/shared-ci.yml` | tag `5.6.2`, peeled `b85f95bb` |
+| commondevops | `.github/workflows/shared-ci.yml` | tag `5.7.0`, peeled `01d993bc` |
+| androiddevops | `.github/workflows/ci.yml` | tag `1.0.1`, peeled `b56948f2` |
 | pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.3.1`, peeled `55f4e52f` |
 | ci-lint image | `scripts/check-ci-docker.sh` | `sha256:f9001c4c` |
 
@@ -106,18 +107,15 @@ bash scripts/check-ci-local.sh
   header. `verify-coverage.py` and `verify-privacy-manifest.py` parse XML
   with defusedxml. `verify-coverage.py` fails if the overlay is below the
   submodule org defaults when both exist.
-- `.github/workflows/shared-ci.yml` calls commondevops `5.6.2` at peeled SHA
-  `b85f95bbac8ba7d82eb90d1d84d1b8d1e8590a12` with `COMMONDEVOPS_READ_TOKEN`
-  as `checkout_token`. `uses:` cannot take a PAT. When the ops repo is
-  private again, this repo still needs Actions access to read the workflow
-  file. Gitleaks, Semgrep (`p/kotlin` plus `.semgrep.yml`), Grype, actionlint,
-  shellcheck, and zizmor live only in those reusable jobs. Keep the token-free
-  Gradle, license, CodeQL, MobSF, and APK-bill jobs in `ci.yml` and
-  `hardening.yml`. Do not gate them on `github.actor == 'dependabot[bot]'`.
-  `scripts/check-ci-docker.sh` runs the host-missing linters in
-  `ghcr.io/pirlruc/ci-lint` at `sha256:f9001c4c`. Scorecard is advisory
-  (`blocking: false`, `publish_results: false`) so it does not need
-  repository settings.
+- `.github/workflows/shared-ci.yml` calls commondevops `5.7.0` at peeled SHA
+  `01d993bc72eebc8806ae85f9459c4f3d6dd3415e`. `uses:` cannot take a PAT. When
+  the ops repo is private again, this repo still needs Actions access to read
+  the workflow file. Scanner jobs pull private `ci-lint` and `ci-supply-chain`
+  (this repo has Actions read). Gradle, CodeQL, MobSF, and the APK bill call
+  androiddevops `1.0.1` (`b56948f24666d00384bd516a2b3c4eb8eb6c5938`) from
+  `ci.yml`. They skip a pull request that does not touch app, data, domain,
+  gradle, or scripts. Do not gate them on `github.actor == 'dependabot[bot]'`.
+  Scorecard is advisory (`blocking: false`, `publish_results: false`).
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
   can still gate `:domain`. ktlint and detekt are plugins on `:domain` only,
   so Android sources are not statically analyzed even on the SDK job until
@@ -224,6 +222,6 @@ bash scripts/check-ci-local.sh
 3. MAT-005-T2/T3 and MAT-006-T3 stay open: minified prize on a device, narrower Kover excludes, CodeQL compile, APK bill.
 4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
 5. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again.
-6. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. PDO-TOOL-001 is fixed in pydevops `3.3.1`, but the reusable workflow pulls `ghcr.io/pirlruc/ci-lint` and `ci-python` and this repo's token gets `manifest unknown`. Leave `PYTHON_QUALITY_ENABLED` unset until those packages are visible. Shared-ci jobs that need a scanner image pass the public `ghcr.io/catthehacker/ubuntu:act-24.04` digest. `install_runner_packages` stays false, and the jobs do not pass `COMMONDEVOPS_READ_TOKEN`. Do not pin `main`.
+6. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. PDO-TOOL-001 is fixed in pydevops `3.3.1`. This repo has Actions read on `ci-lint` and `ci-python`, so the job is no longer skipped. `install_runner_packages` stays false. Do not pin `main`.
 
-*Last updated: 2026-10-30 (tag 0.1.0 and companion review issues)*
+*Last updated: 2026-10-31 (androiddevops 1.0.1 callers; commondevops 5.7.0; python-quality on)*

@@ -1,5 +1,5 @@
-# Instrumented tests on an emulator. Schedule and manual only, so pull
-# requests do not spend the minutes on every push.
+# Instrumented tests. Schedule and manual only, so pull requests do not
+# spend the minutes. The runner is androiddevops 1.0.1.
 name: emulator
 
 on:
@@ -7,29 +7,18 @@ on:
     - cron: "30 5 1 * *"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   connected:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: gradle
-
-      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
-
-      - uses: ReactiveCircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
-        with:
-          api-level: 36
-          target: google_apis
-          arch: x86_64
-          script: ./gradlew --no-daemon :data:connectedDebugAndroidTest :app:connectedDebugAndroidTest
+    permissions:
+      contents: read
+    uses: pirlruc/androiddevops/.github/workflows/android-emulator.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    with:
+      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+      api_level: "36"
+      target: google_apis
+      arch: x86_64
+      script: ./gradlew --no-daemon :data:connectedDebugAndroidTest :app:connectedDebugAndroidTest
+    secrets:
+      checkout_token: ${{ github.token }}

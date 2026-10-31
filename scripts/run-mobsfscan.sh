@@ -4,22 +4,23 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="1.0.0"
+LOCK_SHA="b56948f24666d00384bd516a2b3c4eb8eb6c5938"
 VENV="${TMPDIR:-/tmp}/mat-aventuras-mobsfscan-${VERSION}"
 OUT="${MOBSF_SARIF:-$ROOT/app/build/reports/mobsfscan.sarif}"
 mkdir -p "$(dirname "$OUT")"
 
 install_mobsfscan() {
   if python3 -m venv "$VENV" >/dev/null 2>&1; then
-    "$VENV/bin/pip" install --disable-pip-version-check --quiet "mobsfscan==${VERSION}"
+    curl -fsSL \
+      -o "${VENV}/requirements-mobsfscan.txt" \
+      "https://raw.githubusercontent.com/pirlruc/androiddevops/${LOCK_SHA}/scripts/requirements-mobsfscan.txt"
+    "$VENV/bin/pip" install --disable-pip-version-check --require-hashes \
+      -r "${VENV}/requirements-mobsfscan.txt"
     echo "$VENV/bin/mobsfscan"
     return
   fi
-  python3 -m pip install --user --disable-pip-version-check --quiet "mobsfscan==${VERSION}"
-  if command -v mobsfscan >/dev/null 2>&1; then
-    command -v mobsfscan
-    return
-  fi
-  echo "$HOME/.local/bin/mobsfscan"
+  echo "error: python3-venv is required so mobsfscan can be hash-pinned" >&2
+  exit 1
 }
 
 if [[ -x "$VENV/bin/mobsfscan" ]]; then

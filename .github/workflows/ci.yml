@@ -1,7 +1,7 @@
-# Quality, tests, docs, security (CI-006 / CI-009–012). Action pins are SHAs (CI-001).
-# GUARDRAILS_READ_TOKEN inits docs/guardrails. Push to main fails closed without
-# it. Other events skip and keep config/kotlin.thresholds.yml (CI-024).
-# commondevops callers live in shared-ci.yml (COMMONDEVOPS_READ_TOKEN).
+# Quality and Android builds. Heavy jobs skip a pull request that does not
+# touch the app, the domain, Gradle, or scripts. The gate job still runs, so a
+# docs-only pull request is not blocked on a skipped Gradle build.
+# Android jobs call androiddevops 1.0.1 (CI-018).
 name: ci
 
 on:
@@ -9,7 +9,7 @@ on:
     branches: [main]
   pull_request:
   schedule:
-    - cron: "17 4 1,15 * *" # twice monthly; gap stays inside security_rescan_interval_days (CI-029)
+    - cron: "17 4 1,15 * *"
   workflow_dispatch:
 
 concurrency:
@@ -20,29 +20,47 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.set.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Detect code changes
+        id: set
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          code=true
+          if [[ "${EVENT}" == "pull_request" ]]; then
+            code=false
+            git fetch --depth=1 origin "${BASE}"
+            pattern='^(app|data|domain|gradle|scripts)/|^(build|settings)\.gradle\.kts$|^gradle\.properties$|^libs/'
+            if git diff --name-only "origin/${BASE}...HEAD" | grep -Eq "${pattern}"; then
+              code=true
+            fi
+          fi
+          echo "code=${code}" >> "${GITHUB_OUTPUT}"
+
   quality:
-    runs-on: ubuntu-latest
+    needs: changes
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Checkout guardrails submodule
-        env:
-          GUARDRAILS_READ_TOKEN: ${{ secrets.GUARDRAILS_READ_TOKEN }}
-        run: bash scripts/checkout-guardrails.sh
-
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: gradle
-
       - name: Python tools
         run: |
           python3 -m venv .ci-venv
-          .ci-venv/bin/pip install -q pyyaml defusedxml
+          .ci-venv/bin/pip install --require-hashes -r requirements-ci.txt
 
       - name: Parse YAML and issue manifest
         run: |
@@ -53,8 +71,6 @@ jobs:
             docs/companion-pins.yml \
             .github/dependabot.yml \
             .github/workflows/ci.yml \
-            .github/workflows/hardening.yml \
-            .github/workflows/codeql.yml \
             .github/workflows/shared-ci.yml \
             .github/workflows/python-quality.yml \
             .github/workflows/emulator.yml \
@@ -63,11 +79,8 @@ jobs:
           .ci-venv/bin/python scripts/verify-companion-pins.py
 
       - name: Godot headless import
+        if: needs.changes.outputs.code == 'true'
         run: bash scripts/check-godot.sh
-
-      - name: Domain static analysis
-        run: |
-          ./gradlew --no-daemon :domain:ktlintCheck :domain:detekt
 
       - name: Public type KDoc (KT-DOC-001)
         run: python3 scripts/verify-kdoc.py
@@ -75,65 +88,102 @@ jobs:
       - name: Privacy manifest (backup / isolation)
         run: .ci-venv/bin/python scripts/verify-privacy-manifest.py
 
-  test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
+      - name: License allow/deny (SC-LIC-001)
+        run: python3 scripts/verify-licenses.py
 
-      - name: Checkout guardrails submodule
-        env:
-          GUARDRAILS_READ_TOKEN: ${{ secrets.GUARDRAILS_READ_TOKEN }}
-        run: bash scripts/checkout-guardrails.sh
+  android:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    permissions:
+      contents: read
+    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    with:
+      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+      gradle_tasks: >-
+        :domain:ktlintCheck :domain:detekt :domain:test :domain:koverXmlReport :domain:koverVerify
+        :data:ktlintCheck :data:detekt :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug
+        :app:ktlintCheck :app:detekt :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerifyDebug
+        :app:lintDebug
+      pre_command: bash scripts/checkout-guardrails.sh
+      post_command: >-
+        python3 -m venv .ci-venv &&
+        .ci-venv/bin/pip install --require-hashes -r requirements-ci.txt &&
+        .ci-venv/bin/python scripts/verify-coverage.py
+    secrets:
+      checkout_token: ${{ github.token }}
+      command_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
 
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: gradle
+  codeql:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    with:
+      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+      upload: never
+      build_command: >-
+        ./gradlew --no-daemon :domain:compileKotlin :data:compileDebugKotlin :app:compileDebugKotlin
+    secrets:
+      checkout_token: ${{ github.token }}
 
-      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+  mobsf:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    permissions:
+      contents: read
+    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    with:
+      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    secrets:
+      checkout_token: ${{ github.token }}
 
-      - name: Domain tests
-        run: |
-          ./gradlew --no-daemon :domain:test :domain:koverXmlReport :domain:koverVerify
+  sbom:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    permissions:
+      contents: read
+    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    with:
+      scripts_ref: b56948f24666d00384bd516a2b3c4eb8eb6c5938
+    secrets:
+      checkout_token: ${{ github.token }}
 
-      - name: Android unit tests, coverage, and lint (KT-TEST-002, KT-BUILD-002)
-        run: |
-          ./gradlew --no-daemon \
-            :data:ktlintCheck :data:detekt \
-            :app:ktlintCheck :app:detekt \
-            :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug \
-            :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerifyDebug \
-            :app:lintDebug
-
-      - name: Coverage thresholds (CI-022)
-        run: |
-          python3 -m venv .ci-venv
-          .ci-venv/bin/pip install -q pyyaml defusedxml
-          .ci-venv/bin/python scripts/verify-coverage.py
-
-  docs:
-    runs-on: ubuntu-latest
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Lint relative markdown links
-        run: python3 scripts/lint-doc-links.py --root .
-
-  security:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Dependency review
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
-          persist-credentials: false
-          fetch-depth: 0
+          fail-on-severity: high
+          comment-summary-in-pr: false
 
-      - name: License allow/deny (SC-LIC-001)
-        run: python3 scripts/verify-licenses.py
+  gate:
+    if: always()
+    needs: [changes, quality, android, codeql, mobsf, sbom, dependency-review]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Fail if a job failed
+        env:
+          RESULTS: ${{ toJson(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          needs = json.loads(os.environ["RESULTS"])
+          bad = [
+              name
+              for name, info in needs.items()
+              if info.get("result") not in ("success", "skipped")
+          ]
+          if bad:
+              print("failed:", ", ".join(sorted(bad)))
+              sys.exit(1)
+          print("ok")
+          PY

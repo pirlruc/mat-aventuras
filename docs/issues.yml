@@ -938,3 +938,24 @@ milestones:
               - Breakout with letters
               - Simple tower defence
               - Endless runner with math gates
+
+      - id: MAT-013
+        status: open
+        title: Fewer Actions minutes on pull requests
+        decision: >-
+          In the context of a public Android app, facing a full Gradle, CodeQL,
+          and APK bill on every pull request, we decided to call androiddevops
+          and skip those jobs when the pull request does not touch code, to
+          achieve a shorter check list, accepting that a docs-only pull request
+          does not rebuild the APK.
+        acceptance_criteria:
+          - Gradle, CodeQL, MobSF, and the APK bill are androiddevops callers
+          - A docs-only pull request skips those jobs and the gate still passes
+          - python-quality runs against ci-lint and ci-python
+        tasks:
+          - id: MAT-013-T1
+            status: done
+            title: Call androiddevops and skip heavy jobs on docs-only pulls
+            verification:
+              - ci.yml calls androiddevops 1.0.1
+              - shared-ci.yml calls commondevops 5.7.0 with ci-lint
