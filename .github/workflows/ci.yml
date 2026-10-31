@@ -61,6 +61,9 @@ jobs:
           .ci-venv/bin/python scripts/validate-issues.py docs/issues.yml
           .ci-venv/bin/python scripts/verify-companion-pins.py
 
+      - name: Godot headless import
+        run: bash scripts/check-godot.sh
+
       - name: Domain static analysis
         run: |
           ./gradlew --no-daemon :domain:ktlintCheck :domain:detekt

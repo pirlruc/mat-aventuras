@@ -95,12 +95,13 @@ func _input(event: InputEvent) -> void:
 	var sample := Host.read_pointer(event)
 	if sample.is_empty():
 		return
+	var pos: Vector2 = sample.pos
 	if sample.down:
-		_steer_at(sample.pos, true)
+		_steer_at(pos, true)
 	elif sample.up:
 		steer = 0.0
 	elif sample.move:
-		_steer_at(sample.pos, false)
+		_steer_at(pos, false)
 
 
 func _steer_at(pos: Vector2, arm_boost: bool) -> void:

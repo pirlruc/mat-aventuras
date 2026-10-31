@@ -194,8 +194,10 @@ func _input(event: InputEvent) -> void:
 	var sample := Host.read_pointer(event)
 	if sample.is_empty():
 		return
+	var pos: Vector2 = sample.pos
+	var rel: Vector2 = sample.rel
 	finger_down = sample.down or sample.move
-	finger_x = Host.normalized_x(self, sample.pos)
+	finger_x = Host.normalized_x(self, pos)
 	if sample.down:
 		move_x = Host.axis_from_normalized_x(finger_x)
 		flick_x = 0.0
@@ -204,8 +206,8 @@ func _input(event: InputEvent) -> void:
 		move_x = 0.0
 	elif sample.move:
 		move_x = Host.axis_from_normalized_x(finger_x)
-		flick_x += sample.rel.x
-		flick_y += sample.rel.y
+		flick_x += rel.x
+		flick_y += rel.y
 		if Host.is_jump_flick(flick_x, flick_y):
 			jumping = true
 

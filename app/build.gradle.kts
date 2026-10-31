@@ -26,7 +26,7 @@ android {
     androidResources {
         noCompress += listOf("gd", "tscn", "godot", "cfg", "uid", "import")
         ignoreAssetsPattern =
-            "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
+            "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!<dir>godot"
     }
     buildTypes {
         release {

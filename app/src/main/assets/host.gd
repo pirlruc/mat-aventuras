@@ -78,7 +78,22 @@ func make_hud(node: Node) -> Label:
 	var label := Label.new()
 	skin_hud(label, node)
 	layer.add_child(label)
+	_add_exit(layer, node)
 	return label
+
+
+func _add_exit(layer: CanvasLayer, node: Node) -> void:
+	var button := Button.new()
+	var u := unit(node)
+	button.text = "Sair"
+	button.custom_minimum_size = Vector2(u * 0.18, u * 0.09)
+	button.position = Vector2(view_size(node).x - button.custom_minimum_size.x - u * 0.03, u * 0.02)
+	button.pressed.connect(_exit_prize)
+	layer.add_child(button)
+
+
+func _exit_prize() -> void:
+	finish(false, false)
 
 
 ## Pointer sample shared by prize scenes.

@@ -17,8 +17,6 @@ internal object GodotEmbed {
     private const val ATTACH_RETRY_MS: Long = 1_200L
     private const val ATTACH_FORCE_MS: Long = 4_800L
 
-    @Volatile
-    private var restartedOnce: Boolean = false
 
     /**
      * Replaces the Activity content with a Godot fragment running [scene].
@@ -56,7 +54,7 @@ internal object GodotEmbed {
      */
     fun restartHost(activity: IsolatedEngineActivity) {
         if (!GodotRuntime.shouldRestartHost(
-                alreadyRestarted = restartedOnce,
+                alreadyRestarted = activity.godotRestarted,
                 finishing = activity.isFinishing,
                 destroyed = activity.isDestroyed,
                 fromRelaunch = activity.isGodotRelaunch(),
@@ -65,7 +63,7 @@ internal object GodotEmbed {
             return
         }
         if (!activity.requestEngineRestart()) return
-        restartedOnce = true
+        activity.godotRestarted = true
         if (!GodotRuntime.shouldEmbed()) return
         val view = activity.window?.decorView
         if (view != null) {

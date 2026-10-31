@@ -29,7 +29,9 @@ func _process(_delta: float) -> void:
 
 
 func _load_reward() -> void:
-	var path := "res://kart.tscn"
+	# 2D is the safe default. The 3D process always has the plugin singleton
+	# and rewardScene() returns kart.tscn there.
+	var path := "res://runner.tscn"
 	if Engine.has_singleton("MatAventuras"):
 		var next := str(Engine.get_singleton("MatAventuras").rewardScene())
 		if not next.is_empty():

@@ -56,4 +56,5 @@ if [[ -f .github/scaffold/scripts/issues-sync.py ]]; then
   python3 .github/scaffold/scripts/issues-sync.py --yaml docs/issues.yml --validate-only
 fi
 
+bash scripts/check-godot.sh
 bash scripts/ci-local.sh

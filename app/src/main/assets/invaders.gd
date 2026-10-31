@@ -36,7 +36,8 @@ func _input(event: InputEvent) -> void:
 	var sample := Host.read_pointer(event)
 	if sample.is_empty():
 		return
-	var nx := clampf(Host.normalized_x(self, sample.pos), 0.08, 0.92)
+	var pos: Vector2 = sample.pos
+	var nx := clampf(Host.normalized_x(self, pos), 0.08, 0.92)
 	if sample.down:
 		ship_x = nx
 		fire = true

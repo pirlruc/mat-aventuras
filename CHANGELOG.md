@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Type Godot pointer samples so a Dictionary value cannot drop a prize script.
+- Default the boot scene to the 2D runner when the engine plugin is absent.
+- Give every Godot prize a Sair control that settles the reward as not won.
+- Keep the GLES restart flag on the Activity instead of the process.
+- Cap the child-name and mascot extras read by the engine.
+
 ### Changed
 
 - Add an emulator job (`workflow_dispatch` and a monthly schedule) and
