@@ -38,6 +38,7 @@ internal object NativeKartHost {
      * Starts the 2.5D dirt circuit. [showUi] is false under Robolectric so the
      * Compose frame clock does not keep Espresso busy.
      */
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     fun attach(
         activity: IsolatedEngineActivity,
         showUi: Boolean = GodotRuntime.shouldEmbed(),
@@ -88,7 +89,7 @@ internal object NativeKartHost {
                                         if (!change.pressed) {
                                             loop.handleTouch(nx, MotionEvent.ACTION_UP)
                                             change.consume()
-                                            break
+                                            return@awaitEachGesture
                                         }
                                         val next = change.position.x / size.width.coerceAtLeast(1).toFloat()
                                         loop.handleTouch(next, MotionEvent.ACTION_MOVE)

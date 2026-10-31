@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kover)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -28,7 +30,7 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -98,6 +100,16 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt.yml"))
+    source.setFrom("src/main/kotlin")
 }
 
 kover {

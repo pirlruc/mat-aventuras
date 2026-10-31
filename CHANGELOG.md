@@ -9,9 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Add an emulator job (`workflow_dispatch` and a monthly schedule) and
+  device smoke tests for Room and the Godot plugin processes.
+- Apply ktlint and detekt to `:app` and `:data`. Compose functions are
+  ignored by the complexity and length rules; the canvas hosts keep a
+  local suppression until they are split.
+- Parent PIN storage uses `MasterKey.Builder` (`security-crypto` `1.1.0-alpha06`).
+- Enable R8 on the release variant and keep the Godot JNI types.
+- Drop the static-analysis, complexity, and `MissingSuperCall` deviations.
+  `KT-TEST-002` and `KT-DOC-001` remain.
 - Pin guardrails `1.13.1`, github-scaffold `1.10.2`, and methodologies `1.9.2`.
 - Call commondevops `5.6.2` (pins verify, advisory Scorecard, markdownlint)
-  and pydevops `python-quality` `3.3.1` with `installable_app: false`.
+  on a public Ubuntu image, because `ci-lint` is not visible to this repo.
+  pydevops `python-quality` `3.3.1` stays skipped until that image pull works.
 - Drop in-repo copies of gitleaks, Semgrep, Grype, actionlint, shellcheck,
   and zizmor. Those run through the reusable workflows. Host-missing linters
   use `scripts/check-ci-docker.sh`.

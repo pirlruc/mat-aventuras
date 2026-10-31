@@ -92,16 +92,23 @@ object EngineLauncher {
         context: Context,
         data: Intent?,
     ): Intent? {
-        if (data == null) return null
-        if (!data.getBooleanExtra(RESULT_RESTART, false)) return null
-        val className = data.getStringExtra(EXTRA_ENGINE_CLASS)?.trim()?.takeIf { it.isNotBlank() } ?: return null
-        if (!EnginePluginContract.isAllowedEngineClass(className)) return null
+        val source = data ?: return null
+        val className = restartClassName(source) ?: return null
         return Intent().setClassName(context.packageName, className).apply {
-            putExtra(EXTRA_MASCOT, data.getStringExtra(EXTRA_MASCOT).orEmpty())
-            putExtra(EXTRA_NAME, data.getStringExtra(EXTRA_NAME).orEmpty())
-            putExtra(EnginePluginContract.EXTRA_SCENE, data.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty())
+            putExtra(EXTRA_MASCOT, source.getStringExtra(EXTRA_MASCOT).orEmpty())
+            putExtra(EXTRA_NAME, source.getStringExtra(EXTRA_NAME).orEmpty())
+            putExtra(
+                EnginePluginContract.EXTRA_SCENE,
+                source.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty(),
+            )
             putExtra(EXTRA_GODOT_RELAUNCH, true)
         }
+    }
+
+    private fun restartClassName(data: Intent): String? {
+        if (!data.getBooleanExtra(RESULT_RESTART, false)) return null
+        val className = data.getStringExtra(EXTRA_ENGINE_CLASS)?.trim()?.takeIf { it.isNotBlank() } ?: return null
+        return className.takeIf { EnginePluginContract.isAllowedEngineClass(it) }
     }
 
     /**

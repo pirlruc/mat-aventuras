@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,8 +64,12 @@ fun ParentDashboard(
             settingPin = !container.pinRepository.isSet()
             message = UiLogic.pinPrompt(settingPin)
             onSpeak(message)
-        } catch (error: Exception) {
-            if (error is kotlin.coroutines.cancellation.CancellationException) throw error
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: IllegalStateException) {
+            settingPin = false
+            message = VoiceScripts.TRY_AGAIN
+        } catch (_: IllegalArgumentException) {
             settingPin = false
             message = VoiceScripts.TRY_AGAIN
         }
@@ -77,7 +82,11 @@ fun ParentDashboard(
                 .padding(24.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(VoiceScripts.PARENT_DASHBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text(
+                VoiceScripts.PARENT_DASHBOARD,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+            )
             Spacer(Modifier.height(12.dp))
             Text(message)
             Spacer(Modifier.height(12.dp))
@@ -106,8 +115,11 @@ fun ParentDashboard(
                                     result.speak?.let(onSpeak)
                                 }
                             }
-                        } catch (error: Exception) {
-                            if (error is kotlin.coroutines.cancellation.CancellationException) throw error
+                        } catch (error: CancellationException) {
+                            throw error
+                        } catch (_: IllegalStateException) {
+                            message = VoiceScripts.TRY_AGAIN
+                        } catch (_: IllegalArgumentException) {
                             message = VoiceScripts.TRY_AGAIN
                         } finally {
                             pinBusy = false
@@ -137,7 +149,11 @@ fun ParentDashboard(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(VoiceScripts.PARENT_DASHBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(
+            VoiceScripts.PARENT_DASHBOARD,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
         Text(VoiceScripts.STAYS_ON_DEVICE, style = MaterialTheme.typography.bodyMedium)
         if (UiLogic.waitingForProfile(profile, data)) {
             Text("Escolhe um perfil de criança primeiro.")

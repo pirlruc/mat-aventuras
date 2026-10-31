@@ -55,7 +55,7 @@ class AnswerCuePlayer(
 
         internal fun createGenerator(): ToneGenerator? =
             try {
-                ToneGenerator(AudioManager.STREAM_MUSIC, UiLogic.answerVolumePercent())
+                ToneGenerator(AudioManager.STREAM_MUSIC, UiLogic.ANSWER_VOLUME_PERCENT)
             } catch (_: RuntimeException) {
                 null
             }

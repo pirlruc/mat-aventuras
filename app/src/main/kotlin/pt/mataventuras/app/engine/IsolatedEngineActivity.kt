@@ -93,16 +93,18 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
         code: Int,
         result: Intent,
     ): Boolean {
-        synchronized(rewardLock) {
-            if (rewardSettled) return false
-            if (isDestroyed) return false
-            if (isFinishing) return false
-            rewardSettled = true
-        }
+        if (!claimRewardResult()) return false
         setResult(code, result)
         finish()
         return true
     }
+
+    private fun claimRewardResult(): Boolean =
+        synchronized(rewardLock) {
+            val blocked = rewardSettled || isDestroyed || isFinishing
+            if (!blocked) rewardSettled = true
+            !blocked
+        }
 
     /**
      * [completeReward] posted to the UI thread (Godot callbacks arrive on the render thread).

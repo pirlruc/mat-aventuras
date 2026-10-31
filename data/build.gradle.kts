@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kover)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -32,6 +34,12 @@ androidComponents {
     }
 }
 
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt.yml"))
+    source.setFrom("src/main/kotlin")
+}
+
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
     // Keep Java *_Impl so Kover filters and existing tests stay valid.
@@ -53,6 +61,10 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.kotlinx.coroutines.android)
 }
 
 kover {

@@ -29,17 +29,21 @@ internal object GodotEmbed {
         activity: IsolatedEngineActivity,
         scene: String,
     ) {
-        if (activity.isFinishing || activity.isDestroyed) return
-        if (activity.findViewById<View>(R.id.godot_fragment_container) == null) {
-            activity.setContentView(R.layout.godot_host)
-        }
-        val container = activity.findViewById<View>(R.id.godot_fragment_container) ?: return
+        val container = hostContainer(activity) ?: return
         if (alreadyAttached(activity)) return
         if (GodotRuntime.isSurfaceReady(container.width, container.height)) {
             commitFragment(activity, scene)
-            return
+        } else {
+            waitThenAttach(activity, container, scene)
         }
-        waitThenAttach(activity, container, scene)
+    }
+
+    private fun hostContainer(activity: IsolatedEngineActivity): View? {
+        if (activity.isFinishing || activity.isDestroyed) return null
+        if (activity.findViewById<View>(R.id.godot_fragment_container) == null) {
+            activity.setContentView(R.layout.godot_host)
+        }
+        return activity.findViewById(R.id.godot_fragment_container)
     }
 
     /**

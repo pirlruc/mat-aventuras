@@ -3,7 +3,9 @@ package pt.mataventuras.data.pin
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
+import java.io.IOException
+import java.security.GeneralSecurityException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -145,7 +147,13 @@ internal fun pinPreferences(
 ): SharedPreferences =
     try {
         encrypted(context, storeName)
-    } catch (error: Exception) {
+    } catch (error: GeneralSecurityException) {
+        if (!allowPlaintextFallback) throw error
+        fallback(context, storeName)
+    } catch (error: IllegalStateException) {
+        if (!allowPlaintextFallback) throw error
+        fallback(context, storeName)
+    } catch (error: IOException) {
         if (!allowPlaintextFallback) throw error
         fallback(context, storeName)
     }
@@ -154,11 +162,14 @@ internal fun encryptedPinPreferences(
     context: Context,
     storeName: String,
 ): SharedPreferences {
-    val masterKey = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    val masterKey =
+        MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
     return EncryptedSharedPreferences.create(
+        context,
         storeName,
         masterKey,
-        context,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
