@@ -44,10 +44,12 @@ object VoiceScripts {
     const val YOUR_NAME: String = "Como te chamas?"
     const val CHOOSE_FRIEND: String = "Escolhe o teu amigo:"
     const val AGE_THREE_PREVIEW: String =
-        "Contar, formas e números. Sudoku, sopa, puzzle e códigos. Prémio: plataforma, labirinto ou a subir letras!"
+        "Contar, formas, números, memória e letras. Prémio: plataforma, labirinto ou a subir letras!"
     const val AGE_SEVEN_PREVIEW: String =
-        "Somar, subtrair, multiplicar, dividir e lógica. " +
-            "Jogos do sapo, das filas e das cruzes. Prémio: corrida, invasores ou labirinto!"
+        "Somar, subtrair, multiplicar, dividir, lógica, memória e palavras. Prémio: corrida, invasores ou labirinto!"
+    const val MEMORY_YOUNG: String = "Encontra os pares iguais."
+    const val MEMORY_OLDER: String = "Encontra os pares."
+    const val MEMORY_SPOKEN: String = "Vira duas cartas que fazem par."
     const val REWARD_FINISHED: String = "Boa! Ganhaste um prémio. Vamos continuar."
     const val REWARD_RETURN: String = "Boa! Vamos continuar."
 
@@ -73,6 +75,11 @@ object VoiceScripts {
             AgeBand.THREE_TO_FIVE -> null
             AgeBand.SIX_TO_EIGHT -> "Queres sair deste desafio?"
         }
+
+    /**
+     * Spoken prompt for a word with one letter hidden.
+     */
+    fun missingLetter(word: String): String = "Qual é a letra que falta em $word?"
 
     /**
      * Short curriculum + reward blurb for the selected age band.

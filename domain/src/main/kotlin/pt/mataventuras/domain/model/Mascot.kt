@@ -33,5 +33,6 @@ fun mascotFor(module: LearningModule): Mascot =
         LearningModule.NUMBERS -> Mascot.HERO_PUP
         LearningModule.ADDITION, LearningModule.SUBTRACTION -> Mascot.BRAVE_PLUMBER
         LearningModule.MULTIPLICATION, LearningModule.DIVISION -> Mascot.MISCHIEVOUS_ALIEN
-        LearningModule.LOGIC -> Mascot.HERO_PUP
+        LearningModule.LOGIC, LearningModule.WORDS -> Mascot.HERO_PUP
+        LearningModule.MEMORY, LearningModule.LETTERS -> Mascot.PINK_PIGLET
     }

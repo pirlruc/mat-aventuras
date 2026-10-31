@@ -14,6 +14,9 @@ enum class LearningModule(
     MULTIPLICATION(setOf(AgeBand.SIX_TO_EIGHT)),
     DIVISION(setOf(AgeBand.SIX_TO_EIGHT)),
     LOGIC(setOf(AgeBand.THREE_TO_FIVE, AgeBand.SIX_TO_EIGHT)),
+    MEMORY(setOf(AgeBand.THREE_TO_FIVE, AgeBand.SIX_TO_EIGHT)),
+    LETTERS(setOf(AgeBand.THREE_TO_FIVE, AgeBand.SIX_TO_EIGHT)),
+    WORDS(setOf(AgeBand.SIX_TO_EIGHT)),
 }
 
 /**
@@ -33,9 +36,12 @@ fun LearningModule.isSevenYears(): Boolean =
         LearningModule.MULTIPLICATION,
         LearningModule.DIVISION,
         LearningModule.LOGIC,
+        LearningModule.WORDS,
         -> true
         LearningModule.COUNTING,
         LearningModule.SHAPES,
         LearningModule.NUMBERS,
+        LearningModule.MEMORY,
+        LearningModule.LETTERS,
         -> false
     }
