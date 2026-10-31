@@ -1,6 +1,6 @@
 # Tooling image for local Android builds. Not a published product image.
 # eclipse-temurin:17-jdk-jammy
-FROM eclipse-temurin:17-jdk-jammy@sha256:81336a07f69ac361c7f278183b195e32037ebdb532684996806265a3b47ef516
+FROM eclipse-temurin:22-jdk-jammy@sha256:d8e6ba486df17bf758888d2b1b608133d1eedca8daf69d3fc6bf78d8be81e07e
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
