@@ -1,6 +1,6 @@
 package pt.mataventuras.app.ui
 
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.tokensFor
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -22,7 +22,7 @@ internal object EntryLogic {
     /**
      * Curriculum blurb under the chosen age.
      */
-    fun previewFor(age: AgeGroup?): String = age?.let { VoiceScripts.agePreview(it) }.orEmpty()
+    fun previewFor(age: AgeBand?): String = age?.let { VoiceScripts.agePreview(it) }.orEmpty()
 }
 
 /**
@@ -33,7 +33,7 @@ internal object LessonFlow {
      * First tap on age 7 asks; a second tap (or any tap on age 3) leaves.
      */
     fun shouldAskExitConfirm(
-        age: AgeGroup,
+        age: AgeBand,
         confirming: Boolean,
     ): Boolean = tokensFor(age).confirmsBeforeExit && !confirming
 

@@ -21,7 +21,7 @@ import pt.mataventuras.app.engine.NativeKartHost
 import pt.mataventuras.app.engine.Platformer2dActivity
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.engine.RewardGame
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.plugin.KartPluginActivity
@@ -98,7 +98,7 @@ class GodotPluginHostTest {
         val kartIntent =
             EngineLauncher.intentFor(
                 ctx,
-                AgeGroup.SEVEN_YEARS,
+                AgeBand.SIX_TO_EIGHT,
                 Mascot.MISCHIEVOUS_ALIEN,
                 "Rui",
                 pt.mataventuras.domain.model.EngineKind.THREE_D,
@@ -114,7 +114,7 @@ class GodotPluginHostTest {
         destroy(kartController)
 
         val runnerIntent =
-            EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.HERO_PUP, "Ana", game = RewardGame.RUNNER)
+            EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana", game = RewardGame.RUNNER)
         assertEquals(EnginePluginContract.PLUGIN_RUNNER_CLASS, runnerIntent.component!!.className)
         val runnerController =
             Robolectric.buildActivity(RunnerPluginActivity::class.java, runnerIntent).setup()
@@ -130,7 +130,7 @@ class GodotPluginHostTest {
         val sevenPlatform =
             EngineLauncher.intentFor(
                 ctx,
-                AgeGroup.SEVEN_YEARS,
+                AgeBand.SIX_TO_EIGHT,
                 Mascot.HERO_PUP,
                 "Rui",
                 pt.mataventuras.domain.model.EngineKind.TWO_D,
@@ -146,7 +146,7 @@ class GodotPluginHostTest {
                 KartPluginActivity::class.java,
                 EngineLauncher.intentFor(
                     ctx,
-                    AgeGroup.SEVEN_YEARS,
+                    AgeBand.SIX_TO_EIGHT,
                     Mascot.BRAVE_PLUMBER,
                     "Rui",
                     pt.mataventuras.domain.model.EngineKind.THREE_D,
@@ -163,7 +163,7 @@ class GodotPluginHostTest {
         val runnerController =
             Robolectric.buildActivity(
                 RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, "Ana", game = RewardGame.RUNNER),
+                EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG, "Ana", game = RewardGame.RUNNER),
             ).setup()
         val runner = runnerController.get()
         var runnerScene = ""
@@ -178,7 +178,7 @@ class GodotPluginHostTest {
                 RunnerPluginActivity::class.java,
                 EngineLauncher.intentFor(
                     ctx,
-                    AgeGroup.THREE_YEARS,
+                    AgeBand.THREE_TO_FIVE,
                     Mascot.HERO_PUP,
                     "Ana",
                     game = RewardGame.CLIMB,
@@ -194,7 +194,7 @@ class GodotPluginHostTest {
                 RunnerPluginActivity::class.java,
                 EngineLauncher.intentFor(
                     ctx,
-                    AgeGroup.SEVEN_YEARS,
+                    AgeBand.SIX_TO_EIGHT,
                     Mascot.MISCHIEVOUS_ALIEN,
                     "Rui",
                     pt.mataventuras.domain.model.EngineKind.TWO_D,
@@ -209,7 +209,7 @@ class GodotPluginHostTest {
                 RunnerPluginActivity::class.java,
                 EngineLauncher.intentFor(
                     ctx,
-                    AgeGroup.THREE_YEARS,
+                    AgeBand.THREE_TO_FIVE,
                     Mascot.PINK_PIGLET,
                     "Eva",
                     game = RewardGame.CHOMP,
@@ -225,7 +225,7 @@ class GodotPluginHostTest {
         val kartIntent =
             EngineLauncher.intentFor(
                 ctx,
-                AgeGroup.SEVEN_YEARS,
+                AgeBand.SIX_TO_EIGHT,
                 Mascot.MISCHIEVOUS_ALIEN,
                 "Rui",
                 pt.mataventuras.domain.model.EngineKind.THREE_D,
@@ -270,7 +270,7 @@ class GodotPluginHostTest {
                 KartPluginActivity::class.java,
                 EngineLauncher.intentFor(
                     ctx,
-                    AgeGroup.SEVEN_YEARS,
+                    AgeBand.SIX_TO_EIGHT,
                     Mascot.BRAVE_PLUMBER,
                     "Rui",
                     pt.mataventuras.domain.model.EngineKind.THREE_D,

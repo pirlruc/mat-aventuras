@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.LearningSession
@@ -128,7 +128,7 @@ class RewardsEngineTest {
     ) = ChildProfile(
         id = id,
         name = name,
-        ageGroup = AgeGroup.SEVEN_YEARS,
+        ageGroup = AgeBand.SIX_TO_EIGHT,
         favouriteMascot = Mascot.SPEEDY_HEDGEHOG,
         avatarId = AvatarCode.STARTER.name,
         points = points,

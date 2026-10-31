@@ -29,7 +29,7 @@ import pt.mataventuras.app.ui.lesson.RewardRecorder
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.rewards.LeaderboardAndRewardsScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.LearningSession
@@ -46,7 +46,7 @@ class ParentAndLessonLogicTest {
     @Test
     fun recorderWritesSessionAndFirstStepsBadge() = runTest {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
-        val id = app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+        val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
         val profile = app.container.repository.getProfile(id)!!
         LessonRecorder.persist(
             container = app.container,
@@ -94,7 +94,7 @@ class ParentAndLessonLogicTest {
         val profile =
             kotlinx.coroutines.runBlocking {
                 app.container.pinRepository.clear()
-                val id = app.container.repository.createProfile("Ana", AgeGroup.SEVEN_YEARS, Mascot.HERO_PUP)
+                val id = app.container.repository.createProfile("Ana", AgeBand.SIX_TO_EIGHT, Mascot.HERO_PUP)
                 app.container.repository.getProfile(id)!!
             }
         compose.setContent {
@@ -133,7 +133,7 @@ class ParentAndLessonLogicTest {
         val profile =
             kotlinx.coroutines.runBlocking {
                 app.container.pinRepository.clear()
-                val id = app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+                val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
                 app.container.repository.saveSession(
                     LearningSession(0, id, LearningModule.ADDITION, 1, 6, 90_000, 1),
                 )
@@ -195,12 +195,12 @@ class ParentAndLessonLogicTest {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         val profile =
             kotlinx.coroutines.runBlocking {
-                val id = app.container.repository.createProfile("Ana", AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG)
+                val id = app.container.repository.createProfile("Ana", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
                 app.container.repository.getProfile(id)!!
             }
         var rewards = 0
         compose.setContent {
-            MatAventurasTheme(AgeGroup.THREE_YEARS) {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
                 LessonScreen(
                     container = app.container,
                     profile = profile,
@@ -229,11 +229,11 @@ class ParentAndLessonLogicTest {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         val profile =
             kotlinx.coroutines.runBlocking {
-                val id = app.container.repository.createProfile("Ana", AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG)
+                val id = app.container.repository.createProfile("Ana", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
                 app.container.repository.getProfile(id)!!
             }
         compose.setContent {
-            MatAventurasTheme(AgeGroup.THREE_YEARS) {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
                 LessonScreen(
                     container = app.container,
                     profile = profile,
@@ -256,10 +256,10 @@ class ParentAndLessonLogicTest {
     @Test
     fun sevenYearHomeShowsLabelledButtons() {
         val profile =
-            ChildProfile(2, "Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER, AvatarCode.STARTER.name, 12, 0)
+            ChildProfile(2, "Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER, AvatarCode.STARTER.name, 12, 0)
         var opened: LearningModule? = null
         compose.setContent {
-            MatAventurasTheme(AgeGroup.SEVEN_YEARS) {
+            MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
                 HomeScreen(
                     profile = profile,
                     onSpeak = {},
@@ -281,12 +281,12 @@ class ParentAndLessonLogicTest {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         val profile =
             kotlinx.coroutines.runBlocking {
-                val id = app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+                val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
                 app.container.repository.getProfile(id)!!
             }
         var left = false
         compose.setContent {
-            MatAventurasTheme(AgeGroup.SEVEN_YEARS) {
+            MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
                 LessonScreen(
                     container = app.container,
                     profile = profile,
@@ -317,7 +317,7 @@ class ParentAndLessonLogicTest {
     @Test
     fun rewardRecorderAwardsPointsOnlyWhenFinished() = runTest {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
-        val id = app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+        val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
         val start = app.container.repository.getProfile(id)!!
         app.container.repository.updateProfile(start.copy(points = 40))
         app.container.lastProfile.save(id)
@@ -355,11 +355,11 @@ class ParentAndLessonLogicTest {
             app.container.lastProfile,
             app.container.repository,
             "Ana",
-            AgeGroup.THREE_YEARS,
+            AgeBand.THREE_TO_FIVE,
             Mascot.SPEEDY_HEDGEHOG,
         )!!
         val second =
-            app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+            app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
         app.container.lastProfile.save(first.id)
         val stored =
             ProfileResume.continueCandidate(app.container.lastProfile, app.container.repository)
@@ -377,12 +377,12 @@ class ParentAndLessonLogicTest {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         val profile =
             kotlinx.coroutines.runBlocking {
-                val id = app.container.repository.createProfile("Rui", AgeGroup.SEVEN_YEARS, Mascot.BRAVE_PLUMBER)
+                val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
                 app.container.repository.unlockBadge(id, "FIRST_STEPS")
                 app.container.repository.getProfile(id)!!
             }
         compose.setContent {
-            MatAventurasTheme(AgeGroup.SEVEN_YEARS) {
+            MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
                 LeaderboardAndRewardsScreen(app.container, profile) {}
             }
         }

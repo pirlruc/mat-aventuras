@@ -7,7 +7,7 @@ import pt.mataventuras.data.local.BadgeEntity
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.mapping.toDomain
 import pt.mataventuras.data.mapping.toEntity
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildName
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningSession
@@ -40,7 +40,7 @@ class LocalRepository(
         database.avatarDao().observeFor(profileId).map { list -> list.map { it.toDomain() } }
 
     /** Creates a profile and grants the starter avatar. */
-    suspend fun createProfile(name: String, ageGroup: AgeGroup, mascot: Mascot): Long {
+    suspend fun createProfile(name: String, ageGroup: AgeBand, mascot: Mascot): Long {
         val nowMs = now()
         val id = database.profileDao().insert(
             ChildProfile(

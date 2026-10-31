@@ -45,7 +45,8 @@ import androidx.compose.ui.unit.sp
 import pt.mataventuras.app.R
 import pt.mataventuras.app.ui.EntryLogic
 import pt.mataventuras.app.ui.UiLogic
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
+import pt.mataventuras.domain.model.ChildName
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.tokensFor
@@ -57,11 +58,11 @@ import pt.mataventuras.domain.voice.VoiceScripts
 @Composable
 fun AgeSelectionScreen(
     onSpeak: (String) -> Unit,
-    onConfirm: (AgeGroup, String, Mascot) -> Unit,
+    onConfirm: (AgeBand, String, Mascot) -> Unit,
     lastProfile: ChildProfile? = null,
     onContinueLast: () -> Unit = {},
 ) {
-    var ageGroup by remember { mutableStateOf<AgeGroup?>(null) }
+    var ageGroup by remember { mutableStateOf<AgeBand?>(null) }
     var name by remember { mutableStateOf("") }
     var mascot by remember { mutableStateOf(Mascot.SPEEDY_HEDGEHOG) }
     LaunchedEffect(Unit) { onSpeak(VoiceScripts.AGE_SELECTION) }
@@ -126,23 +127,23 @@ fun AgeSelectionScreen(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             AgeButton(
-                label = VoiceScripts.THREE_YEARS,
-                selected = ageGroup == AgeGroup.THREE_YEARS,
+                label = VoiceScripts.THREE_TO_FIVE,
+                selected = ageGroup == AgeBand.THREE_TO_FIVE,
                 color = Color(0xFF42A5F5),
                 huge = true,
                 onClick = {
-                    ageGroup = AgeGroup.THREE_YEARS
-                    onSpeak("Três anos. Vamos brincar!")
+                    ageGroup = AgeBand.THREE_TO_FIVE
+                    onSpeak("3 a 5 anos. Vamos brincar!")
                 },
             )
             AgeButton(
-                label = VoiceScripts.SEVEN_YEARS,
-                selected = ageGroup == AgeGroup.SEVEN_YEARS,
+                label = VoiceScripts.SIX_TO_EIGHT,
+                selected = ageGroup == AgeBand.SIX_TO_EIGHT,
                 color = Color(0xFF66BB6A),
                 huge = false,
                 onClick = {
-                    ageGroup = AgeGroup.SEVEN_YEARS
-                    onSpeak("Sete anos. Pronto para desafios?")
+                    ageGroup = AgeBand.SIX_TO_EIGHT
+                    onSpeak("6 a 8 anos. Pronto para desafios?")
                 },
             )
         }
@@ -160,7 +161,7 @@ fun AgeSelectionScreen(
             val tokens = tokensFor(ageGroup!!)
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it.take(16) },
+                onValueChange = { name = it.take(ChildName.MAX_LENGTH) },
                 label = { Text(VoiceScripts.YOUR_NAME) },
                 textStyle = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.bodySp.sp),
                 modifier = Modifier.fillMaxWidth(),

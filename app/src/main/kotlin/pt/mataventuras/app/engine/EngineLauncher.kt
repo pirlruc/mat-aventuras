@@ -6,7 +6,7 @@ import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.engine.EnginePluginResolver
 import pt.mataventuras.domain.engine.RewardCatalog
 import pt.mataventuras.domain.engine.RewardGame
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.pickRewardKind
@@ -130,7 +130,7 @@ object EngineLauncher {
      */
     fun intentFor(
         context: Context,
-        ageGroup: AgeGroup,
+        ageGroup: AgeBand,
         mascot: Mascot,
         name: String,
         kind: EngineKind = pickRewardKind(ageGroup),

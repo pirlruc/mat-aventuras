@@ -20,7 +20,7 @@ import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.rewards.LeaderboardAndRewardsScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.app.ui.theme.titleSpSize
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.tokensFor
 import pt.mataventuras.domain.voice.VoiceScripts
 
@@ -37,7 +37,7 @@ class NavAndParentTest {
         compose.setContent {
             NavGraph(container = app.container, onSpeak = {}, onReward = { _, _, _ -> })
         }
-        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.THREE_TO_FIVE).performScrollTo().performClick()
         compose.onNodeWithText("Como te chamas?").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Como te chamas?").performTextInput("Ana")
         compose.onNodeWithText("Vamos começar!").performScrollTo().performClick()
@@ -68,7 +68,7 @@ class NavAndParentTest {
     fun leaderboardRendersPortugueseCopy() {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         compose.setContent {
-            MatAventurasTheme(AgeGroup.SEVEN_YEARS) {
+            MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
                 LeaderboardAndRewardsScreen(app.container, null) {}
             }
         }
@@ -88,9 +88,9 @@ class NavAndParentTest {
 
     @Test
     fun themeTokensAndMainActivity() {
-        val three = tokensFor(AgeGroup.THREE_YEARS)
+        val three = tokensFor(AgeBand.THREE_TO_FIVE)
         assert(three.titleSpSize.value > three.bodySp.toFloat())
-        val seven = tokensFor(AgeGroup.SEVEN_YEARS)
+        val seven = tokensFor(AgeBand.SIX_TO_EIGHT)
         assert(seven.minButtonDp < three.minButtonDp)
         val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
         val activity = controller.get()

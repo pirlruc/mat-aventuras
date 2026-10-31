@@ -2,7 +2,7 @@ package pt.mataventuras.app.ui
 
 import pt.mataventuras.data.repository.LocalRepository
 import pt.mataventuras.data.session.LastProfileStore
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.Mascot
 
@@ -29,7 +29,7 @@ internal object ProfileResume {
         store: LastProfileStore,
         repository: LocalRepository,
         name: String,
-        ageGroup: AgeGroup,
+        ageGroup: AgeBand,
         mascot: Mascot,
     ): ChildProfile? {
         val id = repository.createProfile(name, ageGroup, mascot)

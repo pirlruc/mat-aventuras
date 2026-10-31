@@ -6,7 +6,7 @@ package pt.mataventuras.domain.model
 data class ChildProfile(
     val id: Long,
     val name: String,
-    val ageGroup: AgeGroup,
+    val ageGroup: AgeBand,
     val favouriteMascot: Mascot,
     val avatarId: String,
     val points: Int,

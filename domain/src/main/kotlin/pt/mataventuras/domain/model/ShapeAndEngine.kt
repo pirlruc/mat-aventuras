@@ -24,20 +24,20 @@ enum class EngineKind {
 /**
  * Default reward engine for an age band (kart at seven, platformer at three).
  */
-fun engineKindFor(age: AgeGroup): EngineKind =
+fun engineKindFor(age: AgeBand): EngineKind =
     when (age) {
-        AgeGroup.THREE_YEARS -> EngineKind.TWO_D
-        AgeGroup.SEVEN_YEARS -> EngineKind.THREE_D
+        AgeBand.THREE_TO_FIVE -> EngineKind.TWO_D
+        AgeBand.SIX_TO_EIGHT -> EngineKind.THREE_D
     }
 
 /**
  * Engine launched for one reward. Age 7 picks the platformer or the kart at random.
  */
 fun pickRewardKind(
-    age: AgeGroup,
+    age: AgeBand,
     random: Random = Random.Default,
 ): EngineKind =
     when (age) {
-        AgeGroup.THREE_YEARS -> EngineKind.TWO_D
-        AgeGroup.SEVEN_YEARS -> if (random.nextBoolean()) EngineKind.TWO_D else EngineKind.THREE_D
+        AgeBand.THREE_TO_FIVE -> EngineKind.TWO_D
+        AgeBand.SIX_TO_EIGHT -> if (random.nextBoolean()) EngineKind.TWO_D else EngineKind.THREE_D
     }

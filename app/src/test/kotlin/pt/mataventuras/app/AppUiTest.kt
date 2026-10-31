@@ -40,7 +40,7 @@ import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.engine.PlatformerWorld
 import pt.mataventuras.domain.engine.RewardGame
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.progress.AvatarCode
@@ -54,11 +54,11 @@ class AppUiTest {
     @Test
     fun engineLauncherPicksIsolatedProcessActivities() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
-        val two = EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, "Ana")
+        val two = EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG, "Ana")
         val three =
             EngineLauncher.intentFor(
                 ctx,
-                AgeGroup.SEVEN_YEARS,
+                AgeBand.SIX_TO_EIGHT,
                 Mascot.BRAVE_PLUMBER,
                 "Rui",
                 pt.mataventuras.domain.model.EngineKind.THREE_D,
@@ -66,7 +66,7 @@ class AppUiTest {
         val sevenRunner =
             EngineLauncher.intentFor(
                 ctx,
-                AgeGroup.SEVEN_YEARS,
+                AgeBand.SIX_TO_EIGHT,
                 Mascot.BRAVE_PLUMBER,
                 "Rui",
                 pt.mataventuras.domain.model.EngineKind.TWO_D,
@@ -102,7 +102,7 @@ class AppUiTest {
         val pluginKart =
             EngineLauncher.intentFor(
                 ctx,
-                AgeGroup.SEVEN_YEARS,
+                AgeBand.SIX_TO_EIGHT,
                 Mascot.BRAVE_PLUMBER,
                 "Rui",
                 pt.mataventuras.domain.model.EngineKind.THREE_D,
@@ -114,7 +114,7 @@ class AppUiTest {
             pluginKart.component!!.className,
         )
         val pluginRunner =
-            EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, "Ana") { className ->
+            EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG, "Ana") { className ->
                 className == pt.mataventuras.domain.engine.EnginePluginContract.PLUGIN_RUNNER_CLASS
             }
         assertEquals(
@@ -188,7 +188,7 @@ class AppUiTest {
         val nativeFallback =
             EngineLauncher.intentFor(
                 ctx,
-                AgeGroup.SEVEN_YEARS,
+                AgeBand.SIX_TO_EIGHT,
                 Mascot.BRAVE_PLUMBER,
                 "Rui",
                 pt.mataventuras.domain.model.EngineKind.TWO_D,
@@ -211,10 +211,10 @@ class AppUiTest {
         }
         compose.onNodeWithText(VoiceScripts.APP_TITLE).assertIsDisplayed()
         compose.onNodeWithText(VoiceScripts.AGE_SELECTION).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.THREE_TO_FIVE).performScrollTo().performClick()
         compose.onNodeWithText(VoiceScripts.AGE_THREE_PREVIEW).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Como te chamas?").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText(VoiceScripts.SEVEN_YEARS).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.SIX_TO_EIGHT).performScrollTo().performClick()
         compose.onNodeWithText(VoiceScripts.AGE_SEVEN_PREVIEW).performScrollTo().assertIsDisplayed()
     }
 
@@ -222,7 +222,7 @@ class AppUiTest {
     fun ageSelectionContinuesLastProfile() {
         var continued = false
         val last =
-            ChildProfile(4, "Ana", AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, AvatarCode.STARTER.name, 0, 0)
+            ChildProfile(4, "Ana", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG, AvatarCode.STARTER.name, 0, 0)
         compose.setContent {
             AgeSelectionScreen(
                 onSpeak = {},
@@ -245,7 +245,7 @@ class AppUiTest {
                 mascot = friend
             })
         }
-        compose.onNodeWithText(VoiceScripts.THREE_YEARS).performScrollTo().performClick()
+        compose.onNodeWithText(VoiceScripts.THREE_TO_FIVE).performScrollTo().performClick()
         compose.onNodeWithContentDescription("Cão Herói").performScrollTo().performClick()
         compose.onNodeWithText("Vamos começar!").performScrollTo().performClick()
         assertEquals("Amigo", name)
@@ -255,9 +255,9 @@ class AppUiTest {
     @Test
     fun homeScreenShowsModulesForThreeYearOlds() {
         val profile =
-            ChildProfile(1, "Ana", AgeGroup.THREE_YEARS, Mascot.SPEEDY_HEDGEHOG, AvatarCode.STARTER.name, 0, 0)
+            ChildProfile(1, "Ana", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG, AvatarCode.STARTER.name, 0, 0)
         compose.setContent {
-            MatAventurasTheme(AgeGroup.THREE_YEARS) {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
                 HomeScreen(profile, onSpeak = {}, onModule = {}, onLeaderboard = {}, onParents = {})
             }
         }
@@ -293,7 +293,7 @@ class AppUiTest {
         val twoController =
             Robolectric.buildActivity(
                 Platformer2dActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.HERO_PUP, "Ana"),
+                EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana"),
             ).setup()
         val two = twoController.get()
         assertTrue(two.hasWindowFocus() || two.window != null)
@@ -331,7 +331,7 @@ class AppUiTest {
         val cancelledController =
             Robolectric.buildActivity(
                 Platformer2dActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeGroup.THREE_YEARS, Mascot.HERO_PUP, "Ana"),
+                EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana"),
             ).setup()
         cancelledController.get().completeReward(ok = false)
         cancelledController.pause().stop().destroy()
@@ -341,7 +341,7 @@ class AppUiTest {
                 Kart3dActivity::class.java,
                 EngineLauncher.intentFor(
                     ctx,
-                    AgeGroup.SEVEN_YEARS,
+                    AgeBand.SIX_TO_EIGHT,
                     Mascot.MISCHIEVOUS_ALIEN,
                     "Rui",
                     pt.mataventuras.domain.model.EngineKind.THREE_D,

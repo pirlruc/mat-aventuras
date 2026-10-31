@@ -8,8 +8,8 @@ import org.junit.Test
 class ChildProfileTest {
     @Test
     fun threeYearOldTokensAreLarger() {
-        val three = tokensFor(AgeGroup.THREE_YEARS)
-        val seven = tokensFor(AgeGroup.SEVEN_YEARS)
+        val three = tokensFor(AgeBand.THREE_TO_FIVE)
+        val seven = tokensFor(AgeBand.SIX_TO_EIGHT)
         assertTrue(three.minButtonDp > seven.minButtonDp)
         assertFalse(three.usesTextNavigation)
         assertTrue(seven.usesTextNavigation)
@@ -36,26 +36,26 @@ class ChildProfileTest {
     }
 
     @Test
-    fun modulesPerAgeGroup() {
-        assertEquals(3, modulesFor(AgeGroup.THREE_YEARS).size)
-        assertEquals(5, modulesFor(AgeGroup.SEVEN_YEARS).size)
+    fun modulesPerAgeBand() {
+        assertEquals(5, modulesFor(AgeBand.THREE_TO_FIVE).size)
+        assertEquals(6, modulesFor(AgeBand.SIX_TO_EIGHT).size)
         assertTrue(LearningModule.ADDITION.isSevenYears())
         assertTrue(LearningModule.DIVISION.isSevenYears())
         assertFalse(LearningModule.COUNTING.isSevenYears())
-        assertTrue(LearningModule.COUNTING in modulesFor(AgeGroup.THREE_YEARS))
-        assertTrue(LearningModule.MULTIPLICATION in modulesFor(AgeGroup.SEVEN_YEARS))
-        assertTrue(LearningModule.DIVISION in modulesFor(AgeGroup.SEVEN_YEARS))
+        assertTrue(LearningModule.COUNTING in modulesFor(AgeBand.THREE_TO_FIVE))
+        assertTrue(LearningModule.MULTIPLICATION in modulesFor(AgeBand.SIX_TO_EIGHT))
+        assertTrue(LearningModule.DIVISION in modulesFor(AgeBand.SIX_TO_EIGHT))
     }
 
     @Test
-    fun engineKindPerAgeGroup() {
-        assertEquals(EngineKind.TWO_D, engineKindFor(AgeGroup.THREE_YEARS))
-        assertEquals(EngineKind.THREE_D, engineKindFor(AgeGroup.SEVEN_YEARS))
-        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeGroup.THREE_YEARS))
-        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeGroup.THREE_YEARS, kotlin.random.Random(0)))
-        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeGroup.THREE_YEARS, kotlin.random.Random(1)))
+    fun engineKindPerAgeBand() {
+        assertEquals(EngineKind.TWO_D, engineKindFor(AgeBand.THREE_TO_FIVE))
+        assertEquals(EngineKind.THREE_D, engineKindFor(AgeBand.SIX_TO_EIGHT))
+        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeBand.THREE_TO_FIVE))
+        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeBand.THREE_TO_FIVE, kotlin.random.Random(0)))
+        assertEquals(EngineKind.TWO_D, pickRewardKind(AgeBand.THREE_TO_FIVE, kotlin.random.Random(1)))
         val seven =
-            (0..40).map { pickRewardKind(AgeGroup.SEVEN_YEARS, kotlin.random.Random(it)) }.toSet()
+            (0..40).map { pickRewardKind(AgeBand.SIX_TO_EIGHT, kotlin.random.Random(it)) }.toSet()
         assertTrue(EngineKind.TWO_D in seven)
         assertTrue(EngineKind.THREE_D in seven)
     }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import pt.mataventuras.app.engine.GodotRuntime
+import pt.mataventuras.data.local.MIGRATION_1_2
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.repository.LocalRepository
@@ -32,7 +33,8 @@ class AppContainer(
             context.applicationContext,
             MatAventurasDatabase::class.java,
             "mat_aventuras.db",
-        ).apply { if (roomAllowsMainThread(processFingerprint())) allowMainThreadQueries() }
+        ).addMigrations(MIGRATION_1_2)
+            .apply { if (roomAllowsMainThread(processFingerprint())) allowMainThreadQueries() }
             .build()
 
     /** Profile and session repository. */

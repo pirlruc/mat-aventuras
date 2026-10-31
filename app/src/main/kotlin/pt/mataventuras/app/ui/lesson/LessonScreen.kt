@@ -63,7 +63,7 @@ import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.domain.math.Exercise
 import pt.mataventuras.domain.math.SudokuPlay
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
@@ -78,7 +78,7 @@ fun LessonScreen(
     profile: ChildProfile,
     module: LearningModule,
     onSpeak: (String) -> Unit,
-    onReward: (AgeGroup) -> Unit,
+    onReward: (AgeBand) -> Unit,
     onExit: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -306,7 +306,7 @@ private fun LessonPlayColumn(
 
 @Composable
 private fun LessonExitBar(
-    ageGroup: AgeGroup,
+    ageGroup: AgeBand,
     confirming: Boolean,
     onSpeak: (String) -> Unit,
     onConfirm: () -> Unit,

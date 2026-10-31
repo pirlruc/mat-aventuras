@@ -1,7 +1,7 @@
 package pt.mataventuras.domain.engine
 
 import kotlin.random.Random
-import pt.mataventuras.domain.model.AgeGroup
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.EngineKind
 
 /**
@@ -45,16 +45,21 @@ object RewardCatalog {
      * Games that fit [age] on [kind]'s process.
      */
     fun gamesFor(
-        age: AgeGroup,
+        age: AgeBand,
         kind: EngineKind,
     ): List<RewardGame> =
         when (kind) {
             EngineKind.THREE_D -> listOf(RewardGame.KART)
             EngineKind.TWO_D ->
-                if (age == AgeGroup.THREE_YEARS) {
+                if (age == AgeBand.THREE_TO_FIVE) {
                     listOf(RewardGame.RUNNER, RewardGame.CLIMB, RewardGame.CHOMP)
                 } else {
-                    listOf(RewardGame.RUNNER, RewardGame.INVADERS, RewardGame.CHOMP, RewardGame.CLIMB)
+                    listOf(
+                        RewardGame.RUNNER,
+                        RewardGame.INVADERS,
+                        RewardGame.CHOMP,
+                        RewardGame.CLIMB,
+                    )
                 }
         }
 
@@ -62,7 +67,7 @@ object RewardCatalog {
      * One game from [gamesFor].
      */
     fun pick(
-        age: AgeGroup,
+        age: AgeBand,
         kind: EngineKind,
         random: Random = Random.Default,
     ): RewardGame {
