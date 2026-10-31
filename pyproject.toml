@@ -28,3 +28,6 @@ testpaths = ["tests"]
 
 [tool.mypy]
 exclude = ["\\.venv", "docs/guardrails", "\\.github/scaffold"]
+
+[tool.interrogate]
+exclude = ["docs/guardrails", ".github/scaffold", ".devops", "build"]

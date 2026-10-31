@@ -1,0 +1,9 @@
+{
+  "ignore": [
+    "**/docs/guardrails/**",
+    "**/.github/scaffold/**",
+    "**/.devops/**",
+    "**/build/**",
+    "**/.gradle/**"
+  ]
+}
