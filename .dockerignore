@@ -1,0 +1,9 @@
+.git
+.github
+.gradle
+.ci-tools
+.ci-venv
+**/.gradle
+**/build
+docs
+*.md

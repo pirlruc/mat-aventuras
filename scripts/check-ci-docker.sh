@@ -17,13 +17,13 @@ ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 IMAGE="${MAT_CI_IMAGE:-ghcr.io/pirlruc/ci-lint@sha256:f9001c4c8726f72107545094237d4fc0592baca023cfa299a532634666d88111}"
 
 if [ -z "${MAT_DOCKER_STEPS:-}" ]; then
-	echo "MAT_DOCKER_STEPS is required (e.g. shellcheck yamllint zizmor gitleaks)" >&2
-	exit 1
+    echo "MAT_DOCKER_STEPS is required (e.g. shellcheck yamllint zizmor gitleaks)" >&2
+    exit 1
 fi
 
 if ! command -v docker >/dev/null 2>&1; then
-	echo "docker is required for host-unavailable CI checks" >&2
-	exit 1
+    echo "docker is required for host-unavailable CI checks" >&2
+    exit 1
 fi
 
 echo "==> Pulling ${IMAGE}"
@@ -31,12 +31,12 @@ docker pull "${IMAGE}"
 
 echo "==> Running in Docker: ${MAT_DOCKER_STEPS}"
 docker run --rm \
-	-v "${ROOT}:/workspace:ro" \
-	-w /workspace \
-	-e "MAT_DOCKER_STEPS=${MAT_DOCKER_STEPS}" \
-	--entrypoint sh \
-	"${IMAGE}" \
-	-c '
+    -v "${ROOT}:/workspace:ro" \
+    -w /workspace \
+    -e "MAT_DOCKER_STEPS=${MAT_DOCKER_STEPS}" \
+    --entrypoint sh \
+    "${IMAGE}" \
+    -c '
     set -eu
     run_step() {
       case "$1" in

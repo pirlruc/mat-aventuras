@@ -261,7 +261,7 @@ modules. CodeQL compile and the APK bill are the androiddevops callers in
 ### Shared CI jobs
 
 `.github/workflows/shared-ci.yml` calls commondevops at peeled commit
-`01d993bc72eebc8806ae85f9459c4f3d6dd3415e` (annotated tag `5.7.0`). `uses:`
+`cb34967f230a0d4841ae1efc2c98e745bd8726a7` (annotated tag `5.8.0`). `uses:`
 and `scripts_ref` are that same SHA (CI-018 / CI-034). A `uses:` line cannot
 carry a PAT. When an ops repo is private, this public repo still needs
 Actions access to read the workflow file. Once androiddevops is private, a
@@ -270,8 +270,8 @@ public caller cannot use those workflows and must vendor the pinned file.
 `ci.yml` always runs `quality`. A `changes` job skips Gradle, CodeQL, MobSF,
 and the APK bill on a pull request that does not touch `app/`, `data/`,
 `domain/`, `gradle/`, or `scripts/`. `gate` treats a skipped job as success.
-Those four jobs call androiddevops `1.0.2`
-(`6146c3b38d8915e92742a2a4eef6bd276047ac91`) and pass
+Those four jobs call androiddevops `1.1.0`
+(`bca85a8216e4e94fde2f9b54ff8d65a87af07949`) and pass
 `secrets.GITHUB_TOKEN` as `checkout_token`. Fork pull requests skip the
 reusable jobs that need a secret.
 
@@ -285,7 +285,7 @@ reusable jobs that need a secret.
 | commondevops `common-pins-verify` | Called. `scripts/check-submodule-pins.sh` asserts the gitlinks. |
 | commondevops `common-scorecard` | Called with `blocking: false` and `publish_results: false`. |
 | commondevops `common-release` | Called from `release.yml` after `android-release-apk`. The release artifact is `android-release-apk`. Signing secrets are optional. |
-| androiddevops | `android-gradle-ci`, `android-codeql`, `android-mobsf`, `android-apk-sbom`, and `android-release-apk`, tag `1.0.2`. |
+| androiddevops | `android-gradle-ci`, `android-codeql`, `android-mobsf`, `android-apk-sbom`, and `android-release-apk`, tag `1.1.0`. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
 | pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `7ebee303030c09ce8f52e99660691e4c4b41238f` (annotated tag `3.3.10`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. |

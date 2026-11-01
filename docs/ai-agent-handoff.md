@@ -34,8 +34,8 @@ equals the recorded sha.
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.2.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
-| commondevops | `.github/workflows/shared-ci.yml` | tag `5.7.0`, peeled `01d993bc` |
-| androiddevops | `.github/workflows/ci.yml` | tag `1.0.2`, peeled `6146c3b3` |
+| commondevops | `.github/workflows/shared-ci.yml` | tag `5.8.0`, peeled `cb34967f` |
+| androiddevops | `.github/workflows/ci.yml` | tag `1.1.0`, peeled `bca85a82` |
 | pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.3.10`, peeled `7ebee303` |
 | ci-lint image | `scripts/check-ci-docker.sh` | `sha256:f9001c4c` |
 
@@ -116,12 +116,12 @@ bash scripts/check-ci-local.sh
   header. `verify-coverage.py` and `verify-privacy-manifest.py` parse XML
   with defusedxml. `verify-coverage.py` fails if the overlay is below the
   submodule org defaults when both exist.
-- `.github/workflows/shared-ci.yml` calls commondevops `5.7.0` at peeled SHA
-  `01d993bc72eebc8806ae85f9459c4f3d6dd3415e`. `uses:` cannot take a PAT. When
+- `.github/workflows/shared-ci.yml` calls commondevops `5.8.0` at peeled SHA
+  `cb34967f230a0d4841ae1efc2c98e745bd8726a7`. `uses:` cannot take a PAT. When
   the ops repo is private again, this repo still needs Actions access to read
   the workflow file. Scanner jobs pull private `ci-lint` and `ci-supply-chain`
   (this repo has Actions read). Gradle, CodeQL, MobSF, and the APK bill call
-  androiddevops `1.0.2` (`6146c3b38d8915e92742a2a4eef6bd276047ac91`) from
+  androiddevops `1.1.0` (`bca85a8216e4e94fde2f9b54ff8d65a87af07949`) from
   `ci.yml`. They skip a pull request that does not touch app, data, domain,
   gradle, or scripts. Do not gate them on `github.actor == 'dependabot[bot]'`.
   Scorecard is advisory (`blocking: false`, `publish_results: false`).
@@ -245,4 +245,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, the two python-quality job names, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011, MAT-006, and MAT-013 stay open.
 
-*Last updated: 2026-11-01 (dependency refresh: AGP 9.5.0, Kotlin 2.4.21, Gradle 9.8.2, Godot 4.7.2, ktlint 14).*
+*Last updated: 2026-11-01 (CI pins commondevops 5.8.0 and androiddevops 1.1.0; scorecard and the APK bill skip most pull requests).*

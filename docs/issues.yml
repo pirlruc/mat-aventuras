@@ -1213,8 +1213,8 @@ milestones:
             status: done
             title: Call androiddevops and skip heavy jobs on docs-only pulls
             verification:
-              - ci.yml calls androiddevops 1.0.2
-              - shared-ci.yml calls commondevops 5.7.0 with ci-lint
+              - ci.yml calls androiddevops 1.1.0
+              - shared-ci.yml calls commondevops 5.8.0 with ci-lint
           - id: MAT-013-T2
             status: open
             title: Skip scorecard on pull requests and the bill when Gradle did not change

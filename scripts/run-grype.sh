@@ -9,22 +9,22 @@ mkdir -p "$WORKDIR"
 GRYPE="$WORKDIR/grype"
 
 install_grype() {
-  local url="https://github.com/anchore/grype/releases/download/v${VERSION}/grype_${VERSION}_linux_amd64.tar.gz"
-  curl -fsSL -o "$WORKDIR/grype.tgz" "$url"
-  tar -xzf "$WORKDIR/grype.tgz" -C "$WORKDIR" grype
-  chmod +x "$GRYPE"
+    local url="https://github.com/anchore/grype/releases/download/v${VERSION}/grype_${VERSION}_linux_amd64.tar.gz"
+    curl -fsSL -o "$WORKDIR/grype.tgz" "$url"
+    tar -xzf "$WORKDIR/grype.tgz" -C "$WORKDIR" grype
+    chmod +x "$GRYPE"
 }
 
 if [[ ! -x "$GRYPE" ]]; then
-  if command -v grype >/dev/null 2>&1; then
-    GRYPE="$(command -v grype)"
-  else
-    install_grype
-  fi
+    if command -v grype >/dev/null 2>&1; then
+        GRYPE="$(command -v grype)"
+    else
+        install_grype
+    fi
 fi
 if [[ ! -x "$GRYPE" ]]; then
-  echo "error: grype not installed at $GRYPE (CI-035)" >&2
-  exit 1
+    echo "error: grype not installed at $GRYPE (CI-035)" >&2
+    exit 1
 fi
 
 cd "$ROOT"
@@ -32,9 +32,9 @@ cd "$ROOT"
 # Catalog Gradle manifests. Skip CI venvs, build trees, and git metadata so
 # runner Python (semgrep/mobsfscan) is not treated as product dependencies.
 "$GRYPE" dir:"$ROOT" \
-  --fail-on high \
-  --only-fixed=false \
-  --exclude '**/.ci-venv/**' \
-  --exclude '**/build/**' \
-  --exclude '**/.gradle/**' \
-  --exclude '**/.git/**'
+    --fail-on high \
+    --only-fixed=false \
+    --exclude '**/.ci-venv/**' \
+    --exclude '**/build/**' \
+    --exclude '**/.gradle/**' \
+    --exclude '**/.git/**'
