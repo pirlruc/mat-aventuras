@@ -230,6 +230,7 @@ small board on both bands.
   Task id and a deterministic reproduction, then delete the skip.
 - No `Thread.sleep` in `:domain` tests. Time is injected.
 - Retrying a red test in CI without a root-cause Task is not allowed.
+- A major behaviour change adds or updates the automated tests for that behaviour.
 
 ## Guardrails
 
@@ -310,6 +311,10 @@ Issue sync (write token):
 ```bash
 python3 .github/scaffold/scripts/issues-sync.py --repo pirlruc/mat-aventuras --yaml docs/issues.yml --dry-run
 ```
+
+## Attack surface
+
+The app has no network attacker: the merged manifest has no `INTERNET` permission. The cases this review treats as in scope are a shared or stolen device, guessing the parent PIN, installing a replaced APK, and extracting data from a backup. Backup and device transfer are disabled. Update this section when that behaviour changes.
 
 ## Security review (ANDROID-SEC-002)
 

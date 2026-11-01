@@ -30,11 +30,17 @@ Use the latest release on
 [GitHub Releases](https://github.com/pirlruc/mat-aventuras/releases/latest).
 Download `app-release.apk` and the matching `app-release.apk.sha256`.
 
-Check the file before you install it:
+Check the file before you install it. `apksigner` is in the Android SDK
+build-tools.
 
 ```bash
 sha256sum -c app-release.apk.sha256
+apksigner verify --print-certs app-release.apk
 ```
+
+`sha256sum` checks that the APK matches the published checksum.
+`apksigner` checks the signature and prints the signer certificate.
+The SHA-256 fingerprint of that certificate is not listed here yet.
 
 The app is not on a store. Android will ask you to allow an install from
 your browser or the Files app:
@@ -84,6 +90,13 @@ echo "sdk.dir=/path/to/Android/Sdk" > local.properties
 
 The APK is `app/build/outputs/apk/debug/app-debug.apk`.
 
+## Dependencies
+
+Direct libraries are pinned in `gradle/libs.versions.toml`. Gradle resolves
+them at build time. Dependabot opens update pull requests. Security updates
+are not delayed. Other updates wait 7 days. `dependency-review` and
+`supply-chain` must pass before a change is merged.
+
 ## For contributors
 
 Open a [GitHub issue](https://github.com/pirlruc/mat-aventuras/issues) for a
@@ -92,6 +105,7 @@ and docs are in English. What the child sees and hears stays Portuguese from
 Portugal.
 
 - [Architecture](docs/architecture.md)
+- [Maintainers](docs/MAINTAINERS.md)
 - [Decision log](https://github.com/pirlruc/mat-aventuras/issues?q=label%3Aepic)
 
 ## License
