@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -121,15 +122,7 @@ internal object NativeKartHost {
                                 }
                             },
                 ) {
-                    drawRect(Color(OffroadScene.skyArgb(circuit)))
-                    OffroadScene.fill(spans, state, circuit, mascot, size.width, size.height)
-                    spans.forEach { span ->
-                        drawRect(
-                            Color(span.argb),
-                            topLeft = Offset(span.x, span.y),
-                            size = Size(span.w, span.h),
-                        )
-                    }
+                    paintKartCourse(spans, state, circuit, mascot)
                 }
                 val hud = KartHud.raceOverlay(state, circuit.length)
                 Text(
@@ -155,4 +148,21 @@ internal object NativeKartHost {
      */
     fun hudLines(loop: OffroadRacerLoop): Pair<String, String> =
         KartHud.raceOverlay(loop.state, loop.circuit.length)
+}
+
+internal fun DrawScope.paintKartCourse(
+    spans: MutableList<OffroadSpan>,
+    state: pt.mataventuras.domain.engine.OffroadState,
+    circuit: OffroadCircuit,
+    mascot: Mascot,
+) {
+    drawRect(Color(OffroadScene.skyArgb(circuit)))
+    OffroadScene.fill(spans, state, circuit, mascot, size.width, size.height)
+    spans.forEach { span ->
+        drawRect(
+            Color(span.argb),
+            topLeft = Offset(span.x, span.y),
+            size = Size(span.w, span.h),
+        )
+    }
 }

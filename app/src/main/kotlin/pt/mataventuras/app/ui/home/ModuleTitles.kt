@@ -28,7 +28,7 @@ internal object ModuleTitles {
             else -> null
         }
 
-    private fun laterNoun(module: LearningModule): String =
+    internal fun laterNoun(module: LearningModule): String =
         when (module) {
             LearningModule.MULTIPLICATION -> "Multiplicar"
             LearningModule.DIVISION -> "Dividir"

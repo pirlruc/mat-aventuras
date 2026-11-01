@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -136,20 +137,7 @@ internal object NativeRunnerHost {
                                 }
                             },
                 ) {
-                    drawRect(Color(level.skyArgb))
-                    drawRect(
-                        Color(level.skyBandArgb),
-                        topLeft = Offset(0f, size.height * 0.45f),
-                        size = Size(size.width, size.height * 0.3f),
-                    )
-                    PlatformerScene.fillTiles(tiles, state, mascot, size.width, size.height, level)
-                    tiles.forEach { tile ->
-                        drawRect(
-                            Color(tile.argb),
-                            topLeft = Offset(tile.x, tile.y),
-                            size = Size(tile.w, tile.h),
-                        )
-                    }
+                    paintRunnerCourse(tiles, state, mascot, level)
                 }
                 Text(
                     text = "${VoiceScripts.JUMP_HINT}\nMoedas ${state.rings}/${state.ringsTarget}",
@@ -162,5 +150,27 @@ internal object NativeRunnerHost {
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
+    }
+}
+
+internal fun DrawScope.paintRunnerCourse(
+    tiles: MutableList<PlatformerRect>,
+    state: pt.mataventuras.domain.engine.Platformer2dState,
+    mascot: Mascot,
+    level: pt.mataventuras.domain.engine.PlatformerLevel,
+) {
+    drawRect(Color(level.skyArgb))
+    drawRect(
+        Color(level.skyBandArgb),
+        topLeft = Offset(0f, size.height * 0.45f),
+        size = Size(size.width, size.height * 0.3f),
+    )
+    PlatformerScene.fillTiles(tiles, state, mascot, size.width, size.height, level)
+    tiles.forEach { tile ->
+        drawRect(
+            Color(tile.argb),
+            topLeft = Offset(tile.x, tile.y),
+            size = Size(tile.w, tile.h),
+        )
     }
 }

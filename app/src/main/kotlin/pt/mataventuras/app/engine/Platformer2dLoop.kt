@@ -22,7 +22,7 @@ internal class Platformer2dLoop(
 
     /** Latest simulation snapshot. */
     var state: Platformer2dState = engine.initial(ringsTarget = ringsTarget)
-        private set
+        internal set
 
     private val ticker = RewardTicker(nowNs)
 

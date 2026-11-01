@@ -41,6 +41,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.pointerInput
@@ -67,6 +68,7 @@ import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.domain.math.Exercise
+import pt.mataventuras.domain.math.SudokuBoardState
 import pt.mataventuras.domain.math.SudokuPlay
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
@@ -169,19 +171,14 @@ fun LessonScreen(
         }
         pickLock.set(false)
     }
-    val onPick: (Int) -> Unit = handler@{ index ->
-        if (!fillSudoku) {
-            noteAttempt(exercise.isCorrect(index), true)
-            return@handler
-        }
-        val token = exercise.options.getOrNull(index) ?: return@handler
-        val step = SudokuPlay.place(sudoku, token, exercise.play.solution)
-        if (!step.correct) {
-            noteAttempt(false, false)
-            return@handler
-        }
-        sudoku = step.state
-        if (step.solved) noteAttempt(true, true)
+    val onPick: (Int) -> Unit = { index ->
+        sudoku = scoreSudokuPick(
+            fillSudoku = fillSudoku,
+            exercise = exercise,
+            sudoku = sudoku,
+            index = index,
+            onAttempt = noteAttempt,
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -537,19 +534,7 @@ private fun SoupBoard(
     val foundCells = found.flatMap { paths.getOrElse(it) { emptyList() } }.toSet()
     val cellDp = UiLogic.playCellHeightDp(columns, age)
     val onGesture: (List<Int>) -> Unit = { path ->
-        val match = UiLogic.soupMatchedPath(path, paths, found)
-        if (match != null) {
-            val next = found + match
-            found = next
-            if (next.size >= paths.size) onPick(paths[match].first())
-        } else {
-            val kind = UiLogic.soupReleaseKind(path, paths, found)
-            if (UiLogic.soupKeepsBoard(kind, paths.size)) {
-                onMissKeep()
-            } else {
-                UiLogic.soupPickIndex(path, paths, found, cells.size)?.let(onPick)
-            }
-        }
+        found = resolveSoupGesture(path, paths, found, cells.size, onPick, onMissKeep)
     }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -610,6 +595,57 @@ private fun RowScope.SoupCell(
     ) {
         GridCellFace(module = module, cell = cell)
     }
+}
+
+internal fun scoreSudokuPick(
+    fillSudoku: Boolean,
+    exercise: Exercise,
+    sudoku: SudokuBoardState,
+    index: Int,
+    onAttempt: (Boolean, Boolean) -> Unit,
+): SudokuBoardState {
+    val token = exercise.options.getOrNull(index)
+    val step = if (fillSudoku && token != null) SudokuPlay.place(sudoku, token, exercise.play.solution) else null
+    val next =
+        when {
+            !fillSudoku -> {
+                onAttempt(exercise.isCorrect(index), true)
+                sudoku
+            }
+            token == null || step == null -> sudoku
+            !step.correct -> {
+                onAttempt(false, false)
+                sudoku
+            }
+            else -> {
+                if (step.solved) onAttempt(true, true)
+                step.state
+            }
+        }
+    return next
+}
+
+internal fun resolveSoupGesture(
+    path: List<Int>,
+    paths: List<List<Int>>,
+    found: Set<Int>,
+    cellCount: Int,
+    onPick: (Int) -> Unit,
+    onMissKeep: () -> Unit,
+): Set<Int> {
+    val match = UiLogic.soupMatchedPath(path, paths, found)
+    if (match != null) {
+        val next = found + match
+        if (next.size >= paths.size) onPick(paths[match].first())
+        return next
+    }
+    val kind = UiLogic.soupReleaseKind(path, paths, found)
+    if (UiLogic.soupKeepsBoard(kind, paths.size)) {
+        onMissKeep()
+    } else {
+        UiLogic.soupPickIndex(path, paths, found, cellCount)?.let(onPick)
+    }
+    return found
 }
 
 private suspend fun AwaitPointerEventScope.collectSoupPath(
@@ -780,61 +816,69 @@ private fun NumberHero(value: Int) {
 @Composable
 private fun DotStrip(count: Int) {
     Canvas(modifier = Modifier.size(72.dp, 36.dp)) {
-        UiLogic.starCenters(count, size.minDimension).forEach { (cx, cy) ->
-            drawCircle(Color(0xFFFFC107), radius = 7f, center = Offset(cx, cy))
-        }
+        paintCountDots(count)
+    }
+}
+
+internal fun DrawScope.paintCountDots(count: Int) {
+    UiLogic.starCenters(count, size.minDimension).forEach { (cx, cy) ->
+        drawCircle(Color(0xFFFFC107), radius = 7f, center = Offset(cx, cy))
     }
 }
 
 @Composable
 private fun ShapeGlyph(shape: GeometricShape) {
     Canvas(modifier = Modifier.size(48.dp)) {
-        val cx = size.width / 2f
-        val cy = size.height / 2f
-        val radius = size.minDimension / 2.4f
-        val color = Color(0xFF1565C0)
-        when (shape) {
-            GeometricShape.CIRCLE -> drawCircle(color, radius = radius, center = Offset(cx, cy))
-            GeometricShape.SQUARE -> {
-                val side = radius * 1.6f
-                drawRect(
-                    color,
-                    topLeft = Offset(cx - side / 2f, cy - side / 2f),
-                    size = Size(side, side),
-                )
-            }
-            GeometricShape.RECTANGLE -> {
-                val width = radius * 2.1f
-                val height = radius * 1.2f
-                drawRect(
-                    color,
-                    topLeft = Offset(cx - width / 2f, cy - height / 2f),
-                    size = Size(width, height),
-                )
-            }
-            GeometricShape.TRIANGLE -> {
-                val pts = UiLogic.triangleVertices(cx, cy, radius)
-                drawPath(
-                    Path().apply {
-                        moveTo(pts[0].first, pts[0].second)
-                        lineTo(pts[1].first, pts[1].second)
-                        lineTo(pts[2].first, pts[2].second)
-                        close()
-                    },
-                    color,
-                )
-            }
-            GeometricShape.STAR -> {
-                val pts = UiLogic.starVertices(cx, cy, radius)
-                drawPath(
-                    Path().apply {
-                        moveTo(pts[0].first, pts[0].second)
-                        pts.drop(1).forEach { lineTo(it.first, it.second) }
-                        close()
-                    },
-                    color,
-                )
-            }
+        paintShapeGlyph(shape)
+    }
+}
+
+internal fun DrawScope.paintShapeGlyph(shape: GeometricShape) {
+    val cx = size.width / 2f
+    val cy = size.height / 2f
+    val radius = size.minDimension / 2.4f
+    val color = Color(0xFF1565C0)
+    when (shape) {
+        GeometricShape.CIRCLE -> drawCircle(color, radius = radius, center = Offset(cx, cy))
+        GeometricShape.SQUARE -> {
+            val side = radius * 1.6f
+            drawRect(
+                color,
+                topLeft = Offset(cx - side / 2f, cy - side / 2f),
+                size = Size(side, side),
+            )
+        }
+        GeometricShape.RECTANGLE -> {
+            val width = radius * 2.1f
+            val height = radius * 1.2f
+            drawRect(
+                color,
+                topLeft = Offset(cx - width / 2f, cy - height / 2f),
+                size = Size(width, height),
+            )
+        }
+        GeometricShape.TRIANGLE -> {
+            val pts = UiLogic.triangleVertices(cx, cy, radius)
+            drawPath(
+                Path().apply {
+                    moveTo(pts[0].first, pts[0].second)
+                    lineTo(pts[1].first, pts[1].second)
+                    lineTo(pts[2].first, pts[2].second)
+                    close()
+                },
+                color,
+            )
+        }
+        GeometricShape.STAR -> {
+            val pts = UiLogic.starVertices(cx, cy, radius)
+            drawPath(
+                Path().apply {
+                    moveTo(pts[0].first, pts[0].second)
+                    pts.drop(1).forEach { lineTo(it.first, it.second) }
+                    close()
+                },
+                color,
+            )
         }
     }
 }
@@ -851,8 +895,12 @@ internal fun CappedScale(content: @Composable () -> Unit) {
 @Composable
 private fun StarGrid(count: Int) {
     Canvas(modifier = Modifier.size(220.dp)) {
-        UiLogic.starCenters(count, size.minDimension).forEach { (cx, cy) ->
-            drawCircle(Color(0xFFFFC107), radius = 16f, center = Offset(cx, cy))
-        }
+        paintStarDots(count)
+    }
+}
+
+internal fun DrawScope.paintStarDots(count: Int) {
+    UiLogic.starCenters(count, size.minDimension).forEach { (cx, cy) ->
+        drawCircle(Color(0xFFFFC107), radius = 16f, center = Offset(cx, cy))
     }
 }
