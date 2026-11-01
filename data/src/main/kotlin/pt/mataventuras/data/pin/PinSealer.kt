@@ -97,10 +97,11 @@ internal fun secretKey(
 ): SecretKey = existing ?: generate()
 
 internal fun keySpec(): KeyGenParameterSpec =
-    KeyGenParameterSpec.Builder(
-        "mat_aventuras_pin_aes",
-        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
-    ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+    KeyGenParameterSpec
+        .Builder(
+            "mat_aventuras_pin_aes",
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+        ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
         .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
         .setKeySize(256)
         .build()

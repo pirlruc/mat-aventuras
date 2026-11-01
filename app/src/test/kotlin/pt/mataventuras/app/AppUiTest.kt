@@ -33,8 +33,8 @@ import pt.mataventuras.app.engine.Platformer2dLoop
 import pt.mataventuras.app.engine.PlatformerRect
 import pt.mataventuras.app.engine.PlatformerScene
 import pt.mataventuras.app.speech.SpeechEngine
-import pt.mataventuras.app.ui.age.AgeSelectionScreen
 import pt.mataventuras.app.ui.RewardReturn
+import pt.mataventuras.app.ui.age.AgeSelectionScreen
 import pt.mataventuras.app.ui.home.HomeScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.domain.engine.OffroadCircuit
@@ -162,13 +162,15 @@ class AppUiTest {
         assertNull(
             EngineLauncher.relaunchIntent(
                 ctx,
-                android.content.Intent()
+                android.content
+                    .Intent()
                     .putExtra(EngineLauncher.RESULT_RESTART, true)
                     .putExtra(EngineLauncher.EXTRA_ENGINE_CLASS, "  "),
             ),
         )
         val namelessRestart =
-            android.content.Intent()
+            android.content
+                .Intent()
                 .putExtra(EngineLauncher.RESULT_RESTART, true)
                 .putExtra(
                     EngineLauncher.EXTRA_ENGINE_CLASS,
@@ -180,7 +182,8 @@ class AppUiTest {
         assertNull(
             EngineLauncher.relaunchIntent(
                 ctx,
-                android.content.Intent()
+                android.content
+                    .Intent()
                     .putExtra(EngineLauncher.RESULT_RESTART, true)
                     .putExtra(EngineLauncher.EXTRA_ENGINE_CLASS, "pt.mataventuras.app.MainActivity"),
             ),
@@ -291,10 +294,11 @@ class AppUiTest {
     fun rewardActivitiesStart() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val twoController =
-            Robolectric.buildActivity(
-                Platformer2dActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana"),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    Platformer2dActivity::class.java,
+                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana"),
+                ).setup()
         val two = twoController.get()
         assertTrue(two.hasWindowFocus() || two.window != null)
         two.loop.moveX = 1f
@@ -329,24 +333,26 @@ class AppUiTest {
         two.completeReward(ok = true)
         twoController.pause().stop().destroy()
         val cancelledController =
-            Robolectric.buildActivity(
-                Platformer2dActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana"),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    Platformer2dActivity::class.java,
+                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana"),
+                ).setup()
         cancelledController.get().completeReward(ok = false)
         cancelledController.pause().stop().destroy()
 
         val threeController =
-            Robolectric.buildActivity(
-                Kart3dActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.SIX_TO_EIGHT,
-                    Mascot.MISCHIEVOUS_ALIEN,
-                    "Rui",
-                    pt.mataventuras.domain.model.EngineKind.THREE_D,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    Kart3dActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.SIX_TO_EIGHT,
+                        Mascot.MISCHIEVOUS_ALIEN,
+                        "Rui",
+                        pt.mataventuras.domain.model.EngineKind.THREE_D,
+                    ),
+                ).setup()
         val three = threeController.get()
         assertTrue(three.window != null)
         three.session.handleTouch(0.1f, MotionEvent.ACTION_DOWN)
@@ -379,10 +385,11 @@ class AppUiTest {
         threeController.pause().stop().destroy()
 
         val fallbackController =
-            Robolectric.buildActivity(
-                Kart3dActivity::class.java,
-                android.content.Intent(ctx, Kart3dActivity::class.java),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    Kart3dActivity::class.java,
+                    android.content.Intent(ctx, Kart3dActivity::class.java),
+                ).setup()
         val fallback = fallbackController.get()
         assertTrue(fallback.window != null)
         fallback.closeFinished()
@@ -451,16 +458,28 @@ class AppUiTest {
         val hud = NativeKartHost.hudLines(loop)
         assertTrue(hud.first.startsWith("Volta"))
         assertTrue(hud.second.contains("Arcos") || hud.second.contains("Lugar"))
-        val invaders = InvadersLoop(nowNs = { ns += 40_000_000L; ns })
+        val invaders =
+            InvadersLoop(nowNs = {
+                ns += 40_000_000L
+                ns
+            })
         invaders.moveX = -1f
         invaders.fire = true
         repeat(20) { invaders.tick() }
         assertTrue(invaders.state.shipX <= 0.5f)
-        val chomp = ChompLoop(nowNs = { ns += 80_000_000L; ns })
+        val chomp =
+            ChompLoop(nowNs = {
+                ns += 80_000_000L
+                ns
+            })
         chomp.dirX = 1
         repeat(8) { chomp.tick() }
         assertTrue(chomp.state.px >= 1)
-        val climb = ClimbLoop(nowNs = { ns += 40_000_000L; ns })
+        val climb =
+            ClimbLoop(nowNs = {
+                ns += 40_000_000L
+                ns
+            })
         climb.moveX = 1f
         climb.jumping = true
         repeat(12) { climb.tick() }

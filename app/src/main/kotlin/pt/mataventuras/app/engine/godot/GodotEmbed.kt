@@ -18,7 +18,6 @@ internal object GodotEmbed {
     private const val ATTACH_RETRY_MS: Long = 1_200L
     private const val ATTACH_FORCE_MS: Long = 4_800L
 
-
     /**
      * Replaces the Activity content with a Godot fragment running [scene].
      * Waits until the host FrameLayout has a real size so GLES does not

@@ -6,9 +6,9 @@ import android.speech.tts.TextToSpeech
 import android.view.HapticFeedbackConstants
 import kotlin.math.cos
 import kotlin.math.sin
+import pt.mataventuras.app.ui.home.ModuleTitles
 import pt.mataventuras.domain.math.GroupTokens
 import pt.mataventuras.domain.math.PlayBoard
-import pt.mataventuras.app.ui.home.ModuleTitles
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
 import pt.mataventuras.domain.model.AgeBand
@@ -64,8 +64,11 @@ internal object UiLogic {
     /**
      * Counting and number options also show a dot strip.
      */
-    fun showsDotStrip(module: LearningModule): Boolean =
-        module == LearningModule.COUNTING || module == LearningModule.NUMBERS
+    fun showsDotStrip(module: LearningModule): Boolean {
+        val counting = module == LearningModule.COUNTING
+        val numbers = module == LearningModule.NUMBERS
+        return counting || numbers
+    }
 
     /**
      * Age-7 lessons fill the viewport instead of packing against the top.
@@ -79,14 +82,12 @@ internal object UiLogic {
     fun lessonScrolls(
         age: AgeBand,
         kind: PlayKind,
-    ): Boolean =
-        !lessonFillsViewport(age) || scrollsForBoard(kind)
+    ): Boolean = !lessonFillsViewport(age) || scrollsForBoard(kind)
 
     /**
      * Shape for an option label, or null when the label is not a shape name.
      */
-    fun shapeKind(option: String): GeometricShape? =
-        GeometricShape.entries.firstOrNull { it.displayName == option }
+    fun shapeKind(option: String): GeometricShape? = GeometricShape.entries.firstOrNull { it.displayName == option }
 
     /**
      * Numeric option value, or null when the label is not a number.
@@ -182,8 +183,7 @@ internal object UiLogic {
     /**
      * Kept counters stay green. Crossed counters are the ones that left.
      */
-    fun groupTokenArgb(cell: String): Long =
-        if (cell == GroupTokens.REMOVED) 0xFFFFCDD2 else 0xFFC8E6C9
+    fun groupTokenArgb(cell: String): Long = if (cell == GroupTokens.REMOVED) 0xFFFFCDD2 else 0xFFC8E6C9
 
     /**
      * Boards taller than a choice row scroll so Sair stays on screen.
@@ -225,8 +225,11 @@ internal object UiLogic {
     /**
      * Soup cells are the answers; other kinds keep a palette.
      */
-    fun showsOptionPalette(kind: PlayKind): Boolean =
-        kind != PlayKind.SOUP && kind != PlayKind.MEMORY && kind != PlayKind.WORD_COMPLETE
+    fun showsOptionPalette(kind: PlayKind): Boolean {
+        if (kind == PlayKind.SOUP) return false
+        if (kind == PlayKind.MEMORY) return false
+        return kind != PlayKind.WORD_COMPLETE
+    }
 
     /**
      * Pair grid. Taps are not a single correct option.
@@ -333,8 +336,7 @@ internal object UiLogic {
     /**
      * Caption under the flash glyph. Same pt-PT lines TTS already speaks.
      */
-    fun answerFlashCaption(correct: Boolean): String =
-        if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN
+    fun answerFlashCaption(correct: Boolean): String = if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN
 
     /**
      * Solid colour for the flash glyph.
@@ -485,8 +487,7 @@ internal object UiLogic {
     /**
      * Prompt above the PIN fields.
      */
-    fun pinPrompt(settingPin: Boolean): String =
-        if (settingPin) VoiceScripts.SET_PIN else VoiceScripts.ENTER_PIN
+    fun pinPrompt(settingPin: Boolean): String = if (settingPin) VoiceScripts.SET_PIN else VoiceScripts.ENTER_PIN
 
     /**
      * True when the unlocked dashboard has nothing to summarise.
@@ -584,8 +585,10 @@ internal object UiLogic {
     /**
      * TTS language is usable.
      */
-    fun languageSupported(result: Int): Boolean =
-        result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED
+    fun languageSupported(result: Int): Boolean {
+        if (result == TextToSpeech.LANG_MISSING_DATA) return false
+        return result != TextToSpeech.LANG_NOT_SUPPORTED
+    }
 
     /**
      * Speak only when ready and the line is non-blank.
@@ -642,14 +645,23 @@ internal object UiLogic {
     /**
      * Slot index along one axis of a gapped grid, or null in the padding.
      */
-    private fun soupRows(columns: Int, cellCount: Int): Int =
-        if (columns > 0 && cellCount > 0) boardRowCount(cellCount, columns) else 0
+    private fun soupRows(
+        columns: Int,
+        cellCount: Int,
+    ): Int = if (columns > 0 && cellCount > 0) boardRowCount(cellCount, columns) else 0
 
-    private fun soupCell(count: Int, span: Float, gap: Float): Float =
-        if (count > 0 && span > 0f) (span - gap * (count - 1)) / count else 0f
+    private fun soupCell(
+        count: Int,
+        span: Float,
+        gap: Float,
+    ): Float = if (count > 0 && span > 0f) (span - gap * (count - 1)) / count else 0f
 
-    internal fun soupSlotOrNull(cell: Float, offset: Float, gap: Float, count: Int): Int? =
-        if (cell > 0f && count > 0) soupSlot(offset, cell, gap, count) else null
+    internal fun soupSlotOrNull(
+        cell: Float,
+        offset: Float,
+        gap: Float,
+        count: Int,
+    ): Int? = if (cell > 0f && count > 0) soupSlot(offset, cell, gap, count) else null
 
     fun soupSlot(
         offset: Float,

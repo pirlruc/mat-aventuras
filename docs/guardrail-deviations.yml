@@ -23,6 +23,16 @@ deviations:
     owner: pirlruc
     review: 2026-12-31
 
+  - id: SC-DEP-003
+    epic: MAT-013
+    why: >-
+      Dependabot ignores major updates of the eclipse-temurin devcontainer
+      base. The Android jobs use Temurin 17, which is the current LTS, and a
+      major tag would move that image off 17. Minor and patch updates still
+      open. This is not a lowered number.
+    owner: pirlruc
+    review: 2026-12-31
+
   - id: KT-DOC-001
     epic: MAT-006
     why: >-

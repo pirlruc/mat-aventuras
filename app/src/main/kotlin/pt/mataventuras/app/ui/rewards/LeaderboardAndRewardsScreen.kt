@@ -62,10 +62,11 @@ fun LeaderboardAndRewardsScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(VoiceScripts.LEADERBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
@@ -79,10 +80,11 @@ fun LeaderboardAndRewardsScreen(
                 ) {
                     Text("${row.rank}º", fontWeight = FontWeight.Black)
                     Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(row.mascot.primaryArgb)),
+                        modifier =
+                            Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color(row.mascot.primaryArgb)),
                     )
                     Column(Modifier.weight(1f)) {
                         Text(row.name, fontWeight = FontWeight.Bold)

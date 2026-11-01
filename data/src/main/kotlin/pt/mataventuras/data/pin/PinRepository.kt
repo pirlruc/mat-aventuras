@@ -118,7 +118,8 @@ class PinRepository(
                 state.iterations.toString(),
             ).joinToString(separator = "\n")
         val ok =
-            prefs.edit()
+            prefs
+                .edit()
                 .putString(KEY_RECORD, sealer.seal(payload))
                 .remove(KEY_HASH)
                 .remove(KEY_SALT)

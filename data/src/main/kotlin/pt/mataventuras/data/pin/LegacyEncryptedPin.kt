@@ -24,8 +24,7 @@ internal object LegacyEncryptedPin {
     private const val MASTER: String = "android-keystore://_androidx_security_master_key_"
     private const val NULL_VALUE: String = "__NULL__"
 
-    fun hasKeyset(prefs: SharedPreferences): Boolean =
-        prefs.contains(KEY_KEYSET) && prefs.contains(VALUE_KEYSET)
+    fun hasKeyset(prefs: SharedPreferences): Boolean = prefs.contains(KEY_KEYSET) && prefs.contains(VALUE_KEYSET)
 
     fun read(
         context: Context,
@@ -85,7 +84,8 @@ internal object LegacyEncryptedPin {
         context: Context,
         alias: String,
         fileName: String,
-    ) = AndroidKeysetManager.Builder()
+    ) = AndroidKeysetManager
+        .Builder()
         .withSharedPref(context, alias, fileName)
         .withMasterKeyUri(MASTER)
         .build()

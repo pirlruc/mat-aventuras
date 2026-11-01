@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Android Gradle Plugin 9.5.0, Kotlin 2.4.21, Gradle 9.8.2, and Godot 4.7.2.
+  The devcontainer stays on Temurin 17.
 - The install notes name 0.2.0, the dependency bill, vibration, a
   Portuguese voice, and how to clear a forgotten PIN.
 

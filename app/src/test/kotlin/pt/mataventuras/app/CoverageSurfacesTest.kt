@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
+import kotlin.random.Random
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,7 +30,6 @@ import pt.mataventuras.app.ui.navigation.NavGraph
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.engine.PlatformerWorld
-import kotlin.random.Random
 import pt.mataventuras.domain.math.ExerciseGenerator
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.LearningModule

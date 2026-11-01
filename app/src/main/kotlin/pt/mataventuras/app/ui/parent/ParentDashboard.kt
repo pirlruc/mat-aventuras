@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,9 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.di.AppContainer
+import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.parent.ParentSummary
 import pt.mataventuras.domain.parent.PinGate
@@ -77,9 +77,10 @@ fun ParentDashboard(
 
     if (!unlocked) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
@@ -143,10 +144,11 @@ fun ParentDashboard(
 
     val data = summary
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
@@ -179,7 +181,11 @@ fun ParentDashboard(
 }
 
 @Composable
-private fun PinField(label: String, value: String, onChange: (String) -> Unit) {
+private fun PinField(
+    label: String,
+    value: String,
+    onChange: (String) -> Unit,
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
@@ -215,7 +221,10 @@ private fun PrizeLimitRow(
 }
 
 @Composable
-private fun MetricCard(title: String, value: String) {
+private fun MetricCard(
+    title: String,
+    value: String,
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -226,4 +235,3 @@ private fun MetricCard(title: String, value: String) {
         }
     }
 }
-

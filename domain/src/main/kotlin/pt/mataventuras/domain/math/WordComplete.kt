@@ -21,7 +21,12 @@ class WordComplete(
         val hole = if (module == LearningModule.WORDS || level >= 2) entry.hole else 0
         val answer = entry.word[hole].toString()
         val shown = entry.word.replaceRange(hole, hole + 1, "_")
-        val distractors = ('a'..'z').map { it.toString() }.filter { it != answer.lowercase() }.shuffled(random).take(3)
+        val distractors =
+            ('a'..'z')
+                .map { it.toString() }
+                .filter { it != answer.lowercase() }
+                .shuffled(random)
+                .take(3)
         val options = (distractors + answer.lowercase()).shuffled(random)
         return Exercise(
             module = module,

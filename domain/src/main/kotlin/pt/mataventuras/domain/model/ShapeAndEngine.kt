@@ -5,7 +5,9 @@ import kotlin.random.Random
 /**
  * Shape used in age-3 exercises. [displayName] is pt-PT UI copy; colour and silhouette travel together.
  */
-enum class GeometricShape(val displayName: String) {
+enum class GeometricShape(
+    val displayName: String,
+) {
     CIRCLE("círculo"),
     SQUARE("quadrado"),
     TRIANGLE("triângulo"),

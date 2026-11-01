@@ -34,16 +34,17 @@ class PrizeBootTest {
     fun overlayRetriesThenOpensTheCanvasHost() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val controller =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.THREE_TO_FIVE,
-                    Mascot.SPEEDY_HEDGEHOG,
-                    "Ana",
-                    game = RewardGame.RUNNER,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.THREE_TO_FIVE,
+                        Mascot.SPEEDY_HEDGEHOG,
+                        "Ana",
+                        game = RewardGame.RUNNER,
+                    ),
+                ).setup()
         val activity = controller.get()
         assertTrue(GodotBridge.youngBand(activity))
         assertEquals("♥♥♥", GodotBridge.livesLine(activity, 3, 3))
@@ -82,10 +83,11 @@ class PrizeBootTest {
     fun secondShowReusesTheOverlay() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val controller =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana", game = RewardGame.CLIMB),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana", game = RewardGame.CLIMB),
+                ).setup()
         val activity = controller.get()
         PrizeBoot.ready(activity)
         PrizeBoot.keepAboveEngine(activity)
@@ -106,30 +108,32 @@ class PrizeBootTest {
     fun olderBandKeepsTheVidasLine() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val controller =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.SIX_TO_EIGHT,
-                    Mascot.HERO_PUP,
-                    "Rui",
-                    game = RewardGame.INVADERS,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.SIX_TO_EIGHT,
+                        Mascot.HERO_PUP,
+                        "Rui",
+                        game = RewardGame.INVADERS,
+                    ),
+                ).setup()
         val activity = controller.get()
         assertFalse(GodotBridge.youngBand(activity))
         assertEquals("Vidas 1/5", GodotBridge.livesLine(activity, 1, 5))
         val kart =
-            Robolectric.buildActivity(
-                pt.mataventuras.plugin.KartPluginActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.SIX_TO_EIGHT,
-                    Mascot.BRAVE_PLUMBER,
-                    "Rui",
-                    pt.mataventuras.domain.model.EngineKind.THREE_D,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    pt.mataventuras.plugin.KartPluginActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.SIX_TO_EIGHT,
+                        Mascot.BRAVE_PLUMBER,
+                        "Rui",
+                        pt.mataventuras.domain.model.EngineKind.THREE_D,
+                    ),
+                ).setup()
         kart.get().acceptRelaunch(kart.get().intent)
         assertNotNull(kart.get().nativeSession)
         kart.destroy()
@@ -140,10 +144,11 @@ class PrizeBootTest {
     fun destroyDropsDelayedAttach() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val controller =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.PINK_PIGLET, "Eva", game = RewardGame.CHOMP),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.PINK_PIGLET, "Eva", game = RewardGame.CHOMP),
+                ).setup()
         val activity = controller.get()
         val view = View(activity)
         var ran = false

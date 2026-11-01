@@ -39,6 +39,8 @@ class NavAndParentTest {
         compose.setContent {
             NavGraph(container = app.container, onSpeak = {}, onReward = { _, _, _ -> })
         }
+        app.container.publishProfile(1L)
+        compose.waitForIdle()
         compose.onNodeWithText(VoiceScripts.THREE_TO_FIVE).performScrollTo().performClick()
         compose.onNodeWithText("Como te chamas?").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Como te chamas?").performTextInput("Ana")
@@ -65,6 +67,16 @@ class NavAndParentTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }
+        app.container.database.clearAllTables()
+        app.container.publishProfile(1L)
+        compose.waitForIdle()
+        compose.onNodeWithText("Contar com o Ouriço Veloz").performScrollTo().performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithTag("correct-answer")[0].performClick()
+        compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performClick()
     }
 
     @Test
@@ -95,6 +107,10 @@ class NavAndParentTest {
         assert(three.titleSpSize.value > three.bodySp.toFloat())
         val seven = tokensFor(AgeBand.SIX_TO_EIGHT)
         assert(seven.minButtonDp < three.minButtonDp)
+        val cold = Robolectric.buildActivity(MainActivity::class.java).get()
+        val stop = MainActivity::class.java.getDeclaredMethod("onStop")
+        stop.isAccessible = true
+        stop.invoke(cold)
         val controller = Robolectric.buildActivity(MainActivity::class.java).setup()
         val activity = controller.get()
         activity.onEngineResult(
@@ -111,7 +127,8 @@ class NavAndParentTest {
         )
         activity.onEngineResult(
             android.app.Activity.RESULT_OK,
-            android.content.Intent()
+            android.content
+                .Intent()
                 .putExtra(pt.mataventuras.app.engine.EngineLauncher.RESULT_RESTART, true)
                 .putExtra(
                     pt.mataventuras.app.engine.EngineLauncher.EXTRA_ENGINE_CLASS,

@@ -43,8 +43,7 @@ internal object LessonFlow {
     /**
      * Exit button label (pt-PT).
      */
-    fun exitLabel(confirming: Boolean): String =
-        if (confirming) VoiceScripts.CONFIRM_LEAVE else VoiceScripts.LEAVE
+    fun exitLabel(confirming: Boolean): String = if (confirming) VoiceScripts.CONFIRM_LEAVE else VoiceScripts.LEAVE
 
     /**
      * True when the stay button is visible.

@@ -46,12 +46,13 @@ internal fun MemoryBoard(
                     val open = index in face.matched || index in face.up
                     Button(
                         onClick = { face = face.reveal(exercise.play, index) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(64.dp)
-                            .semantics(mergeDescendants = true) {
-                                contentDescription = if (open) label else "carta fechada"
-                            },
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .height(64.dp)
+                                .semantics(mergeDescendants = true) {
+                                    contentDescription = if (open) label else "carta fechada"
+                                },
                     ) {
                         Text(if (open) label else "?", fontWeight = FontWeight.Bold)
                     }

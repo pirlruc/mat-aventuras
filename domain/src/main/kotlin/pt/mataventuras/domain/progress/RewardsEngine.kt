@@ -5,7 +5,10 @@ import pt.mataventuras.domain.model.AgeBand
 /**
  * Digital badge catalogue. Codes are stable Room keys. [title]/[description] are pt-PT UI copy.
  */
-enum class BadgeCode(val title: String, val description: String) {
+enum class BadgeCode(
+    val title: String,
+    val description: String,
+) {
     FIRST_STEPS("Primeiros passos", "Completaste a primeira sessão."),
     STAR_COUNTER("Contador de estrelas", "Acertaste 10 contagens."),
     SHAPE_MASTER("Mestre das formas", "Acertaste 10 formas."),
@@ -17,7 +20,10 @@ enum class BadgeCode(val title: String, val description: String) {
 /**
  * Unlockable avatars. `STARTER` is always available. [title] is pt-PT UI copy.
  */
-enum class AvatarCode(val title: String, val minPoints: Int) {
+enum class AvatarCode(
+    val title: String,
+    val minPoints: Int,
+) {
     STARTER("Explorador", 0),
     RUNNER("Corredor", 50),
     ASTRONAUT("Astronauta", 150),

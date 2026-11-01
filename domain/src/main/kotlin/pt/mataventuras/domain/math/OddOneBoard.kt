@@ -16,7 +16,13 @@ class OddOneBoard(
     fun make(): Exercise {
         val row = rows[random.nextInt(rows.size)]
         val options = row.shuffled(random)
-        val odd = row.groupingBy { it }.eachCount().entries.first { it.value == 1 }.key
+        val odd =
+            row
+                .groupingBy { it }
+                .eachCount()
+                .entries
+                .first { it.value == 1 }
+                .key
         return Exercise(
             module = LearningModule.ODD_ONE,
             prompt = VoiceScripts.ODD_ONE_PROMPT,

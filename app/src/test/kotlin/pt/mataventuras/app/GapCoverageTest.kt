@@ -1,11 +1,13 @@
 package pt.mataventuras.app
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -16,6 +18,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -29,8 +32,12 @@ import pt.mataventuras.app.engine.NativeKartHost
 import pt.mataventuras.app.engine.NativeRunnerHost
 import pt.mataventuras.app.engine.OffroadRacerLoop
 import pt.mataventuras.app.engine.Platformer2dLoop
+import pt.mataventuras.app.prize.BalloonPopScreen
 import pt.mataventuras.app.ui.home.HomeScreen
 import pt.mataventuras.app.ui.lesson.LessonScreen
+import pt.mataventuras.app.ui.lesson.paintCountDots
+import pt.mataventuras.app.ui.lesson.paintShapeGlyph
+import pt.mataventuras.app.ui.lesson.paintStarDots
 import pt.mataventuras.app.ui.navigation.NavGraph
 import pt.mataventuras.app.ui.navigation.RouteMemory
 import pt.mataventuras.app.ui.parent.ParentDashboard
@@ -254,6 +261,7 @@ class GapCoverageTest {
         compose.activity.onBackPressedDispatcher.onBackPressed()
         compose.onNodeWithTag("kart-course").performTouchInput {
             down(center)
+            down(1, centerRight)
             moveBy(Offset(30f, 0f))
             up()
         }
@@ -277,6 +285,7 @@ class GapCoverageTest {
         compose.activity.onBackPressedDispatcher.onBackPressed()
         compose.onNodeWithTag("runner-course").performTouchInput {
             down(center)
+            down(1, centerRight)
             moveBy(Offset(8f, -70f))
             up()
         }
@@ -287,8 +296,15 @@ class GapCoverageTest {
     private fun play(exercise: Exercise) {
         when (exercise.play.kind) {
             PlayKind.SOUP -> {
+                compose
+                    .onAllNodes(
+                        androidx.compose.ui.test
+                            .hasTestTag("correct-answer"),
+                    )[0]
+                    .performClick()
                 compose.onNodeWithTag("soup-board").performTouchInput {
                     down(topLeft + Offset(6f, 6f))
+                    down(1, topLeft + Offset(20f, 20f))
                     moveBy(Offset(48f, 0f))
                     up()
                 }
@@ -324,15 +340,121 @@ class GapCoverageTest {
                 }
             }
             else -> {
-                if (compose.onAllNodes(androidx.compose.ui.test.hasTestTag("correct-answer")).fetchSemanticsNodes().isNotEmpty()) {
-                    if (compose.onAllNodes(androidx.compose.ui.test.hasTestTag("distractor")).fetchSemanticsNodes().isNotEmpty()) {
-                        compose.onAllNodes(androidx.compose.ui.test.hasTestTag("distractor"))[0].performClick()
+                if (compose
+                        .onAllNodes(
+                            androidx.compose.ui.test
+                                .hasTestTag("correct-answer"),
+                        ).fetchSemanticsNodes()
+                        .isNotEmpty()
+                ) {
+                    if (compose
+                            .onAllNodes(
+                                androidx.compose.ui.test
+                                    .hasTestTag("distractor"),
+                            ).fetchSemanticsNodes()
+                            .isNotEmpty()
+                    ) {
+                        compose
+                            .onAllNodes(
+                                androidx.compose.ui.test
+                                    .hasTestTag("distractor"),
+                            )[0]
+                            .performClick()
                     }
-                    compose.onAllNodes(androidx.compose.ui.test.hasTestTag("correct-answer"))[0].performClick()
+                    compose
+                        .onAllNodes(
+                            androidx.compose.ui.test
+                                .hasTestTag("correct-answer"),
+                        )[0]
+                        .performClick()
                 }
             }
         }
         compose.waitForIdle()
+    }
+
+    @Test
+    fun emptyDotCanvasCoversZeroCounts() {
+        compose.setContent {
+            Canvas(Modifier.size(32.dp)) {
+                paintCountDots(0)
+                paintStarDots(0)
+                pt.mataventuras.domain.model.GeometricShape.entries
+                    .forEach { paintShapeGlyph(it) }
+            }
+        }
+        compose.waitForIdle()
+        val fingerprint = android.os.Build::class.java.getDeclaredField("FINGERPRINT")
+        fingerprint.isAccessible = true
+        val previous = fingerprint.get(null)
+        fingerprint.set(null, "generic")
+        try {
+            pt.mataventuras.app.di
+                .AppContainer(ApplicationProvider.getApplicationContext())
+        } catch (_: Exception) {
+            // Non-Robolectric fingerprints fail closed on the Android Keystore.
+        } finally {
+            fingerprint.set(null, previous)
+        }
+    }
+
+    @Test
+    fun missingProfileAnswerAndNullParentStillRender() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        runBlocking { app.container.pinRepository.clear() }
+        val profile = stored(app, "Nuno", AgeBand.SIX_TO_EIGHT)
+        var mode by mutableIntStateOf(0)
+        compose.setContent {
+            key(mode) {
+                when (mode) {
+                    0 ->
+                        LessonScreen(
+                            container = app.container,
+                            profile = profile,
+                            module = LearningModule.COUNTING,
+                            onSpeak = {},
+                            onReward = {},
+                            onExit = {},
+                        )
+                    1 -> ParentDashboard(app.container, null, onSpeak = {}, onBack = {})
+                    else -> BalloonPopScreen(kotlin.random.Random(1)) {}
+                }
+            }
+        }
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText(VoiceScripts.LEAVE).fetchSemanticsNodes().isNotEmpty()
+        }
+        app.container.database.clearAllTables()
+        app.container.publishProfile(profile.id)
+        compose
+            .onAllNodes(
+                androidx.compose.ui.test
+                    .hasTestTag("correct-answer"),
+            )[0]
+            .performClick()
+        compose.activity.onBackPressedDispatcher.onBackPressed()
+        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performClick()
+        org.robolectric.util.ReflectionHelpers
+            .setStaticField(android.os.Build::class.java, "FINGERPRINT", null)
+        pt.mataventuras.app.engine.GodotRuntime
+            .shouldEmbed()
+        org.robolectric.util.ReflectionHelpers.setStaticField(
+            android.os.Build::class.java,
+            "FINGERPRINT",
+            "robolectric",
+        )
+
+        mode = 1
+        compose.onNodeWithText("PIN").performClick().performTextInput("1234")
+        compose.onNodeWithText("Confirmar PIN").performClick().performTextInput("1234")
+        compose.onNodeWithText("Guardar PIN").performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Escolhe um perfil de criança primeiro.").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        mode = 2
+        compose.onNodeWithTag("balloon-0").performClick()
+        compose.onNodeWithTag("balloon-1").performClick()
     }
 
     private fun stored(
@@ -377,12 +499,13 @@ class GapCoverageTest {
                 exercise(
                     LearningModule.NUMBERS,
                     listOf("4", "9"),
-                    play = PlayBoard(
-                        kind = PlayKind.SUDOKU,
-                        cells = listOf("1", "", "2", "3"),
-                        columns = 2,
-                        solution = listOf("1", "4", "2", "3"),
-                    ),
+                    play =
+                        PlayBoard(
+                            kind = PlayKind.SUDOKU,
+                            cells = listOf("1", "", "2", "3"),
+                            columns = 2,
+                            solution = listOf("1", "4", "2", "3"),
+                        ),
                 ),
                 older = true,
             ),
@@ -390,23 +513,25 @@ class GapCoverageTest {
                 exercise(
                     LearningModule.COUNTING,
                     listOf("1", "2", "3", "4"),
-                    play = PlayBoard(
-                        kind = PlayKind.SUDOKU,
-                        cells = listOf("1", "2", "3", "4"),
-                        columns = 2,
-                    ),
+                    play =
+                        PlayBoard(
+                            kind = PlayKind.SUDOKU,
+                            cells = listOf("1", "2", "3", "4"),
+                            columns = 2,
+                        ),
                 ),
             ),
             LessonStep(
                 exercise(
                     LearningModule.LOGIC,
                     listOf("0", "1", "2", "3"),
-                    play = PlayBoard(
-                        kind = PlayKind.SOUP,
-                        cells = listOf("A", "B", "C", "D"),
-                        columns = 2,
-                        wordPaths = listOf(listOf(0, 1), listOf(2, 3)),
-                    ),
+                    play =
+                        PlayBoard(
+                            kind = PlayKind.SOUP,
+                            cells = listOf("A", "B", "C", "D"),
+                            columns = 2,
+                            wordPaths = listOf(listOf(0, 1), listOf(2, 3)),
+                        ),
                 ),
                 older = true,
             ),
@@ -438,12 +563,13 @@ class GapCoverageTest {
                 exercise(
                     LearningModule.MEMORY,
                     listOf("ok"),
-                    play = PlayBoard(
-                        kind = PlayKind.MEMORY,
-                        cells = listOf("Sol", "Sol"),
-                        columns = 2,
-                        solution = listOf("a", "a"),
-                    ),
+                    play =
+                        PlayBoard(
+                            kind = PlayKind.MEMORY,
+                            cells = listOf("Sol", "Sol"),
+                            columns = 2,
+                            solution = listOf("a", "a"),
+                        ),
                 ),
             ),
             LessonStep(

@@ -30,11 +30,12 @@ class AppContainer(
 ) {
     /** Room database for this process. */
     val database: MatAventurasDatabase =
-        Room.databaseBuilder(
-            context.applicationContext,
-            MatAventurasDatabase::class.java,
-            "mat_aventuras.db",
-        ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+        Room
+            .databaseBuilder(
+                context.applicationContext,
+                MatAventurasDatabase::class.java,
+                "mat_aventuras.db",
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .apply { if (roomAllowsMainThread(processFingerprint())) allowMainThreadQueries() }
             .build()
 
@@ -77,13 +78,11 @@ class AppContainer(
 /**
  * Production uses 600k PBKDF2 iterations. Robolectric tests use 1k so PIN UI stays fast.
  */
-internal fun pinPolicyForProcess(): PinPolicy =
-    PinPolicy(iterations = pinIterationsFor(processFingerprint()))
+internal fun pinPolicyForProcess(): PinPolicy = PinPolicy(iterations = pinIterationsFor(processFingerprint()))
 
 internal fun pinIterationsFor(fingerprint: String): Int =
     if (GodotRuntime.isRobolectricFingerprint(fingerprint)) 1_000 else PinPolicy.ITERATIONS
 
-internal fun roomAllowsMainThread(fingerprint: String): Boolean =
-    GodotRuntime.isRobolectricFingerprint(fingerprint)
+internal fun roomAllowsMainThread(fingerprint: String): Boolean = GodotRuntime.isRobolectricFingerprint(fingerprint)
 
 internal fun processFingerprint(): String = Build.FINGERPRINT ?: ""

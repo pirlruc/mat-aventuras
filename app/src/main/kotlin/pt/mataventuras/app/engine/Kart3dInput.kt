@@ -29,6 +29,5 @@ object Kart3dInput {
     /**
      * Finger up or cancel clears steering.
      */
-    fun releasesSteer(action: Int): Boolean =
-        action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL
+    fun releasesSteer(action: Int): Boolean = action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL
 }

@@ -15,7 +15,14 @@ class MemoryAndWordsTest {
         val exercise = MemoryBoards(Random(1)).make(LearningModule.MEMORY, 0, AgeBand.THREE_TO_FIVE)
         assertEquals(3, exercise.play.columns)
         assertEquals(6, exercise.play.cells.size)
-        assertEquals(exercise.play.cells.groupingBy { it }.eachCount().values.toSet(), setOf(2))
+        assertEquals(
+            exercise.play.cells
+                .groupingBy { it }
+                .eachCount()
+                .values
+                .toSet(),
+            setOf(2),
+        )
     }
 
     @Test
@@ -33,12 +40,24 @@ class MemoryAndWordsTest {
     fun wordCompleteHidesOneLetter() {
         val exercise = WordComplete(Random(3)).make(LearningModule.WORDS, 2)
         assertEquals(PlayKind.WORD_COMPLETE, exercise.play.kind)
-        assertTrue(exercise.play.cells.single().contains("_"))
+        assertTrue(
+            exercise.play.cells
+                .single()
+                .contains("_"),
+        )
         assertTrue(exercise.isCorrect(exercise.correctIndex))
         val firstLetter = WordComplete(Random(1)).make(LearningModule.LETTERS, 0)
-        assertTrue(firstLetter.play.cells.single().startsWith("_"))
+        assertTrue(
+            firstLetter.play.cells
+                .single()
+                .startsWith("_"),
+        )
         val later = WordComplete(Random(4)).make(LearningModule.COUNTING, 2)
-        assertTrue(later.play.cells.single().contains("_"))
+        assertTrue(
+            later.play.cells
+                .single()
+                .contains("_"),
+        )
         repeat(8) { seed ->
             WordComplete(Random(seed)).make(LearningModule.WORDS, 0)
         }

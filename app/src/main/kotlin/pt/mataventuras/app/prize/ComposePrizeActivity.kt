@@ -49,11 +49,15 @@ class ComposePrizeActivity : ComponentActivity() {
 /**
  * Unknown extras stay on the balloon prize.
  */
-internal fun prizeFrom(extra: String?): ComposePrize =
-    ComposePrize.entries.firstOrNull { it.name == extra } ?: ComposePrize.BALLOONS
+internal fun prizeFrom(extra: String?): ComposePrize {
+    val match = ComposePrize.entries.firstOrNull { it.name == extra }
+    return match ?: ComposePrize.BALLOONS
+}
 
 /**
  * Theme band for [prize].
  */
-internal fun ageFor(prize: ComposePrize): AgeBand =
-    if (prize == ComposePrize.BALLOONS) AgeBand.THREE_TO_FIVE else AgeBand.SIX_TO_EIGHT
+internal fun ageFor(prize: ComposePrize): AgeBand {
+    if (prize == ComposePrize.BALLOONS) return AgeBand.THREE_TO_FIVE
+    return AgeBand.SIX_TO_EIGHT
+}

@@ -1,11 +1,11 @@
 #!/bin/sh
 # Import the Godot project and fail when a script does not parse.
-# Godot 4.7.1 official editor, cached under .ci-tools (gitignored).
+# Godot 4.7.2 official editor, cached under .ci-tools (gitignored).
 set -eu
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ASSETS="${ROOT}/app/src/main/assets"
-VERSION="4.7.1-stable"
+VERSION="4.7.2-stable"
 BIN_NAME="Godot_v${VERSION}_linux.x86_64"
 CACHE="${ROOT}/.ci-tools/godot"
 BIN="${CACHE}/${BIN_NAME}"

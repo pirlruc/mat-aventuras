@@ -31,7 +31,7 @@ equals the recorded sha.
 | methodologies | annotated tag in docs | `1.9.2` |
 | guardrails | submodule SHA `docs/guardrails/` | `1945211a` (tag `1.13.1`) |
 | github-scaffold | submodule SHA `.github/scaffold/` | `c8eddcfb` (tag `1.10.2`) |
-| Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.1.stable` |
+| Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.2.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
 | commondevops | `.github/workflows/shared-ci.yml` | tag `5.7.0`, peeled `01d993bc` |
@@ -98,6 +98,13 @@ bash scripts/check-ci-local.sh
 
 ## Known pitfalls
 
+- ktlint 14 flags `@Composable` PascalCase names. `.editorconfig` sets
+  `ktlint_function_naming_ignore_when_annotated_with = Composable`. ktlint
+  joins an expression body that fits its own line length, and detekt's
+  `MaxLineLength` is 120. A body that would exceed 120 characters has to be
+  a block, or the next `ktlintFormat` puts it back on one line. The
+  devcontainer stays on Temurin 17. Dependabot ignores Temurin semver-major
+  under the SC-DEP-003 deviation on MAT-013.
 - `scripts/checkout-guardrails.sh` inits `docs/guardrails` with
   `GUARDRAILS_READ_TOKEN` (full clone; a shallow fetch of the pinned commit
   fails). Push to `main` fails closed without the token. Other events skip
@@ -236,4 +243,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, the two python-quality job names, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011, MAT-006, and MAT-013 stay open.
 
-*Last updated: 2026-11-01 (round 3: MAT-014 and MAT-015 authored; public docs cleaned).*
+*Last updated: 2026-11-01 (dependency refresh: AGP 9.5.0, Kotlin 2.4.21, Gradle 9.8.2, Godot 4.7.2, ktlint 14).*

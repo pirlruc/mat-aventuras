@@ -13,55 +13,57 @@ import pt.mataventuras.domain.model.UnlockedAvatar
 import pt.mataventuras.domain.model.UnlockedBadge
 
 /** Maps a stored profile row to the domain model. */
-fun ProfileEntity.toDomain(): ChildProfile = ChildProfile(
-    id = id,
-    name = name,
-    ageGroup = AgeBand.valueOf(ageGroup),
-    favouriteMascot = Mascot.fromCode(mascotCode),
-    avatarId = avatarId,
-    points = points,
-    createdAtEpochMs = createdAtEpochMs,
-    prizeLimitSeconds = prizeLimitSeconds,
-)
+fun ProfileEntity.toDomain(): ChildProfile =
+    ChildProfile(
+        id = id,
+        name = name,
+        ageGroup = AgeBand.valueOf(ageGroup),
+        favouriteMascot = Mascot.fromCode(mascotCode),
+        avatarId = avatarId,
+        points = points,
+        createdAtEpochMs = createdAtEpochMs,
+        prizeLimitSeconds = prizeLimitSeconds,
+    )
 
 /** Maps a domain profile to a Room row. */
-fun ChildProfile.toEntity(): ProfileEntity = ProfileEntity(
-    id = id,
-    name = name,
-    ageGroup = ageGroup.name,
-    mascotCode = favouriteMascot.code,
-    avatarId = avatarId,
-    points = points,
-    createdAtEpochMs = createdAtEpochMs,
-    prizeLimitSeconds = prizeLimitSeconds,
-)
+fun ChildProfile.toEntity(): ProfileEntity =
+    ProfileEntity(
+        id = id,
+        name = name,
+        ageGroup = ageGroup.name,
+        mascotCode = favouriteMascot.code,
+        avatarId = avatarId,
+        points = points,
+        createdAtEpochMs = createdAtEpochMs,
+        prizeLimitSeconds = prizeLimitSeconds,
+    )
 
 /** Maps a stored session row to the domain model. */
-fun SessionEntity.toDomain(): LearningSession = LearningSession(
-    id = id,
-    profileId = profileId,
-    module = LearningModule.valueOf(module),
-    hits = hits,
-    misses = misses,
-    durationMs = durationMs,
-    startedAtEpochMs = startedAtEpochMs,
-)
+fun SessionEntity.toDomain(): LearningSession =
+    LearningSession(
+        id = id,
+        profileId = profileId,
+        module = LearningModule.valueOf(module),
+        hits = hits,
+        misses = misses,
+        durationMs = durationMs,
+        startedAtEpochMs = startedAtEpochMs,
+    )
 
 /** Maps a domain session to a Room row. */
-fun LearningSession.toEntity(): SessionEntity = SessionEntity(
-    id = id,
-    profileId = profileId,
-    module = module.name,
-    hits = hits,
-    misses = misses,
-    durationMs = durationMs,
-    startedAtEpochMs = startedAtEpochMs,
-)
+fun LearningSession.toEntity(): SessionEntity =
+    SessionEntity(
+        id = id,
+        profileId = profileId,
+        module = module.name,
+        hits = hits,
+        misses = misses,
+        durationMs = durationMs,
+        startedAtEpochMs = startedAtEpochMs,
+    )
 
 /** Maps a badge row to the domain model. */
-fun BadgeEntity.toDomain(): UnlockedBadge =
-    UnlockedBadge(code = code, unlockedAtEpochMs = unlockedAtEpochMs)
+fun BadgeEntity.toDomain(): UnlockedBadge = UnlockedBadge(code = code, unlockedAtEpochMs = unlockedAtEpochMs)
 
 /** Maps an avatar row to the domain model. */
-fun AvatarEntity.toDomain(): UnlockedAvatar =
-    UnlockedAvatar(avatarId = avatarId, unlockedAtEpochMs = unlockedAtEpochMs)
+fun AvatarEntity.toDomain(): UnlockedAvatar = UnlockedAvatar(avatarId = avatarId, unlockedAtEpochMs = unlockedAtEpochMs)

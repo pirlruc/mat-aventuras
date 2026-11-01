@@ -50,10 +50,11 @@ fun HomeScreen(
         onSpeak(VoiceScripts.greeting(profile.favouriteMascot, profile.ageGroup))
     }
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Olá, ${profile.name}!", fontSize = tokens.titleSpSize, fontWeight = FontWeight.ExtraBold)
@@ -66,9 +67,10 @@ fun HomeScreen(
                     onSpeak("Vamos com o ${mascot.displayName}!")
                     onModule(module)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(tokens.minButtonDp.dp + 24.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(tokens.minButtonDp.dp + 24.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(mascot.primaryArgb)),
             ) {
                 Text(ModuleTitles.of(module, mascot), fontWeight = FontWeight.Bold)
@@ -80,17 +82,19 @@ fun HomeScreen(
                     onClick = {
                         HomeNav.announceAndGo(onSpeak, VoiceScripts.LEADERBOARD, onLeaderboard)
                     },
-                    modifier = Modifier
-                        .height(64.dp)
-                        .semantics(mergeDescendants = true) { contentDescription = VoiceScripts.LEADERBOARD },
+                    modifier =
+                        Modifier
+                            .height(64.dp)
+                            .semantics(mergeDescendants = true) { contentDescription = VoiceScripts.LEADERBOARD },
                 ) { Text("★") }
                 Button(
                     onClick = {
                         HomeNav.announceAndGo(onSpeak, VoiceScripts.PARENT_DASHBOARD, onParents)
                     },
-                    modifier = Modifier
-                        .height(64.dp)
-                        .semantics(mergeDescendants = true) { contentDescription = VoiceScripts.PARENT_DASHBOARD },
+                    modifier =
+                        Modifier
+                            .height(64.dp)
+                            .semantics(mergeDescendants = true) { contentDescription = VoiceScripts.PARENT_DASHBOARD },
                 ) { Text("\uD83D\uDD12") }
             }
         } else {

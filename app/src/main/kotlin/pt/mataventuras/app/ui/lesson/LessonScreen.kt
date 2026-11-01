@@ -4,9 +4,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -45,24 +45,24 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
@@ -172,21 +172,23 @@ fun LessonScreen(
         pickLock.set(false)
     }
     val onPick: (Int) -> Unit = { index ->
-        sudoku = scoreSudokuPick(
-            fillSudoku = fillSudoku,
-            exercise = exercise,
-            sudoku = sudoku,
-            index = index,
-            onAttempt = noteAttempt,
-        )
+        sudoku =
+            scoreSudokuPick(
+                fillSudoku = fillSudoku,
+                exercise = exercise,
+                sudoku = sudoku,
+                index = index,
+                onAttempt = noteAttempt,
+            )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             LessonPlayColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                 exercise = exercise,
                 module = module,
                 hits = hits,
@@ -244,18 +246,20 @@ private fun LessonPlayColumn(
 ) {
     val tokens = LocalUiTokens.current
     Column(
-        modifier = modifier
-            .then(if (scrolls) Modifier.verticalScroll(scrollState) else Modifier)
-            .padding(20.dp),
+        modifier =
+            modifier
+                .then(if (scrolls) Modifier.verticalScroll(scrollState) else Modifier)
+                .padding(20.dp),
         verticalArrangement = if (scrolls) Arrangement.spacedBy(12.dp) else Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Button(
             onClick = { onSpeak(exercise.spoken) },
-            modifier = Modifier
-                .height(64.dp)
-                .semantics(mergeDescendants = true) { contentDescription = "Ouvir outra vez" },
+            modifier =
+                Modifier
+                    .height(64.dp)
+                    .semantics(mergeDescendants = true) { contentDescription = "Ouvir outra vez" },
         ) { Text("Ouvir") }
         Text(
             UiLogic.prizeStarLine(streak),
@@ -316,30 +320,33 @@ private fun LessonPlayColumn(
             GroupsBoard(exercise, age)
         }
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(if (fillViewport && !scrolls) Modifier.weight(1f) else Modifier),
-            verticalArrangement = if (fillViewport && !scrolls) {
-                Arrangement.SpaceEvenly
-            } else {
-                Arrangement.spacedBy(12.dp)
-            },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .then(if (fillViewport && !scrolls) Modifier.weight(1f) else Modifier),
+            verticalArrangement =
+                if (fillViewport && !scrolls) {
+                    Arrangement.SpaceEvenly
+                } else {
+                    Arrangement.spacedBy(12.dp)
+                },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (UiLogic.showsOptionPalette(exercise.play.kind)) {
                 exercise.options.forEachIndexed { index, text ->
                     Button(
                         onClick = { onPick(index) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp)
-                            .semantics(mergeDescendants = true) { contentDescription = text }
-                            .testTag(
-                                UiLogic.optionAnswerTag(
-                                    correct = exercise.isCorrect(index),
-                                    fillEveryBlank = fillEveryBlank,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp)
+                                .semantics(mergeDescendants = true) { contentDescription = text }
+                                .testTag(
+                                    UiLogic.optionAnswerTag(
+                                        correct = exercise.isCorrect(index),
+                                        fillEveryBlank = fillEveryBlank,
+                                    ),
                                 ),
-                            ),
                     ) {
                         VisualOption(module = module, text = text)
                     }
@@ -360,9 +367,10 @@ private fun LessonExitBar(
     onLeave: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Button(
@@ -374,9 +382,10 @@ private fun LessonExitBar(
                     onLeave()
                 }
             },
-            modifier = Modifier.semantics(mergeDescendants = true) {
-                contentDescription = LessonFlow.exitLabel(confirming)
-            },
+            modifier =
+                Modifier.semantics(mergeDescendants = true) {
+                    contentDescription = LessonFlow.exitLabel(confirming)
+                },
         ) { Text(LessonFlow.exitLabel(confirming)) }
         if (LessonFlow.showsStay(confirming)) {
             Button(onClick = onStay) { Text(VoiceScripts.STAY) }
@@ -426,27 +435,29 @@ private fun AnswerFlash(
     val color = Color(UiLogic.answerFlashArgb(correct, gentle))
     val scale = UiLogic.answerFlashScale(fade)
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(UiLogic.answerFlashScrimArgb(correct, gentle)).copy(alpha = fade * 0.55f))
-            .testTag("answer-flash"),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color(UiLogic.answerFlashScrimArgb(correct, gentle)).copy(alpha = fade * 0.55f))
+                .testTag("answer-flash"),
         contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.graphicsLayer {
-                this.alpha = fade
-                scaleX = scale
-                scaleY = scale
-            },
+            modifier =
+                Modifier.graphicsLayer {
+                    this.alpha = fade
+                    scaleX = scale
+                    scaleY = scale
+                },
         ) {
             CappedScale {
-            Text(
-                UiLogic.answerFlashGlyph(correct, gentle, mascot),
-                fontSize = 96.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = color,
-            )
+                Text(
+                    UiLogic.answerFlashGlyph(correct, gentle, mascot),
+                    fontSize = 96.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = color,
+                )
             }
             Text(
                 UiLogic.answerFlashCaption(correct),
@@ -473,39 +484,40 @@ private fun SudokuBoard(
     val boxW = UiLogic.sudokuBoxWidth(columns)
     val boxH = UiLogic.sudokuBoxHeight(columns)
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFF0D47A1))
-            .padding(6.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF0D47A1))
+                .padding(6.dp),
     ) {
         shown.chunked(columns).forEachIndexed { row, rowCells ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = UiLogic.sudokuGapDp(row, boxH).dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = UiLogic.sudokuGapDp(row, boxH).dp),
             ) {
                 rowCells.forEachIndexed { col, cell ->
                     val index = row * columns + col
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(cellDp.dp)
-                            .padding(start = UiLogic.sudokuGapDp(col, boxW).dp)
-                            .background(
-                                Color(
-                                    UiLogic.sudokuCellArgb(
-                                        cell,
-                                        focused = index == focus,
-                                        fillEveryBlank = fillEveryBlank,
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .height(cellDp.dp)
+                                .padding(start = UiLogic.sudokuGapDp(col, boxW).dp)
+                                .background(
+                                    Color(
+                                        UiLogic.sudokuCellArgb(
+                                            cell,
+                                            focused = index == focus,
+                                            fillEveryBlank = fillEveryBlank,
+                                        ),
                                     ),
-                                ),
-                            )
-                            .semantics(mergeDescendants = true) {
-                                contentDescription = if (cell.isBlank()) "casa vazia" else cell
-                            }
-                            .testTag("board-cell-$index")
-                            .then(sudokuFocusModifier(fillEveryBlank, cell) { onFocus(index) }),
+                                ).semantics(mergeDescendants = true) {
+                                    contentDescription = if (cell.isBlank()) "casa vazia" else cell
+                                }.testTag("board-cell-$index")
+                                .then(sudokuFocusModifier(fillEveryBlank, cell) { onFocus(index) }),
                     ) {
                         GridCellFace(
                             module = exercise.module,
@@ -538,19 +550,21 @@ private fun SoupBoard(
     }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag("soup-board")
-            .pointerInput(exercise.prompt, columns, cells.size, found) {
-                awaitEachGesture {
-                    val gap = 8.dp.toPx()
-                    val path = collectSoupPath(columns, cells.size, gap, size.width.toFloat(), size.height.toFloat()) {
-                        selected = it
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .testTag("soup-board")
+                .pointerInput(exercise.prompt, columns, cells.size, found) {
+                    awaitEachGesture {
+                        val gap = 8.dp.toPx()
+                        val path =
+                            collectSoupPath(columns, cells.size, gap, size.width.toFloat(), size.height.toFloat()) {
+                                selected = it
+                            }
+                        onGesture(path)
+                        selected = emptyList()
                     }
-                    onGesture(path)
-                    selected = emptyList()
-                }
-            },
+                },
     ) {
         cells.chunked(columns).forEachIndexed { row, rowCells ->
             Row(
@@ -586,12 +600,18 @@ private fun RowScope.SoupCell(
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .weight(1f)
-            .height(heightDp.dp)
-            .background(Color(UiLogic.soupSelectedArgb(selected, found)))
-            .testTag(UiLogic.answerTag(correct))
-            .semantics { onClick { onTap(); true } },
+        modifier =
+            Modifier
+                .weight(1f)
+                .height(heightDp.dp)
+                .background(Color(UiLogic.soupSelectedArgb(selected, found)))
+                .testTag(UiLogic.answerTag(correct))
+                .semantics {
+                    onClick {
+                        onTap()
+                        true
+                    }
+                },
     ) {
         GridCellFace(module = module, cell = cell)
     }
@@ -655,9 +675,10 @@ private suspend fun AwaitPointerEventScope.collectSoupPath(
     onPath: (List<Int>) -> Unit,
 ): List<Int> {
     val down = awaitFirstDown()
-    var path = listOfNotNull(
-        UiLogic.soupIndexAt(down.position.x, down.position.y, width, height, columns, cellCount, gapPx),
-    )
+    var path =
+        listOfNotNull(
+            UiLogic.soupIndexAt(down.position.x, down.position.y, width, height, columns, cellCount, gapPx),
+        )
     onPath(path)
     while (true) {
         val event = awaitPointerEvent()
@@ -666,19 +687,20 @@ private suspend fun AwaitPointerEventScope.collectSoupPath(
             change.consume()
             return path
         }
-        path = extendSoup(
-            path,
-            UiLogic.soupIndexAt(
-                change.position.x,
-                change.position.y,
-                width,
-                height,
+        path =
+            extendSoup(
+                path,
+                UiLogic.soupIndexAt(
+                    change.position.x,
+                    change.position.y,
+                    width,
+                    height,
+                    columns,
+                    cellCount,
+                    gapPx,
+                ),
                 columns,
-                cellCount,
-                gapPx,
-            ),
-            columns,
-        )
+            )
         onPath(path)
         change.consume()
     }
@@ -713,9 +735,10 @@ private fun GroupsBoard(
                 row.forEach { cell ->
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(cellDp.dp)
-                            .background(Color(UiLogic.groupTokenArgb(cell))),
+                        modifier =
+                            Modifier
+                                .size(cellDp.dp)
+                                .background(Color(UiLogic.groupTokenArgb(cell))),
                     ) {
                         Text(cell, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                     }
@@ -741,10 +764,11 @@ private fun PuzzleFrame(
                     Button(
                         onClick = {},
                         enabled = false,
-                        colors = ButtonDefaults.buttonColors(
-                            disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
-                            disabledContentColor = Color(0xFF0D47A1),
-                        ),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
+                                disabledContentColor = Color(0xFF0D47A1),
+                            ),
                         modifier = Modifier.size(cellDp.dp),
                     ) {
                         GridCellFace(module = exercise.module, cell = cell)

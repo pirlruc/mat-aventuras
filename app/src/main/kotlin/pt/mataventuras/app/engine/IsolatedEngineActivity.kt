@@ -48,8 +48,10 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     /**
      * Mascot extra, or empty when the host omitted it.
      */
-    internal fun mascotCode(): String =
-        intent.getStringExtra(EnginePluginContract.EXTRA_MASCOT).orEmpty().take(MASCOT_EXTRA_MAX)
+    internal fun mascotCode(): String {
+        val extra = intent.getStringExtra(EnginePluginContract.EXTRA_MASCOT)
+        return extra.orEmpty().take(MASCOT_EXTRA_MAX)
+    }
 
     /**
      * Child display name extra, capped and stripped of control characters.
@@ -64,14 +66,12 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     /**
      * Reward scene extra, or empty when the host omitted it.
      */
-    internal fun sceneCode(): String =
-        intent.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty()
+    internal fun sceneCode(): String = intent.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty()
 
     /**
      * Age-band extra. Empty when the host omitted it.
      */
-    internal fun ageCode(): String =
-        intent.getStringExtra(EnginePluginContract.EXTRA_AGE).orEmpty()
+    internal fun ageCode(): String = intent.getStringExtra(EnginePluginContract.EXTRA_AGE).orEmpty()
 
     /**
      * Resolves the mascot for tinting; unknown codes fall back to the hedgehog.
@@ -86,8 +86,7 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     /**
      * True when the Compose host already relaunched this Activity after GLES setup.
      */
-    internal fun isGodotRelaunch(): Boolean =
-        intent.getBooleanExtra(EngineLauncher.EXTRA_GODOT_RELAUNCH, false)
+    internal fun isGodotRelaunch(): Boolean = intent.getBooleanExtra(EngineLauncher.EXTRA_GODOT_RELAUNCH, false)
 
     /**
      * Returns [EnginePluginContract.RESULT_FINISHED] and finishes this process's Activity.

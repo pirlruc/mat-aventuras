@@ -25,9 +25,10 @@ class MainActivity : ComponentActivity() {
     private lateinit var speech: SpeechEngine
     private var celebrateWin by mutableStateOf(false)
 
-    private val engineLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-    ) { result -> onEngineResult(result.resultCode, result.data) }
+    private val engineLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+        ) { result -> onEngineResult(result.resultCode, result.data) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

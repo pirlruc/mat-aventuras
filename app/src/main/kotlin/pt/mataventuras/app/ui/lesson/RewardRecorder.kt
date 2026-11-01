@@ -18,10 +18,11 @@ internal object RewardRecorder {
         if (delta == 0) return
         val id = container.lastProfile.read() ?: return
         val updated = container.repository.addPoints(id, delta) ?: return
-        container.rewards.newAvatars(
-            alreadyUnlocked = container.repository.avatarIds(id),
-            points = updated.points,
-        ).forEach { container.repository.unlockAvatar(id, it.name) }
+        container.rewards
+            .newAvatars(
+                alreadyUnlocked = container.repository.avatarIds(id),
+                points = updated.points,
+            ).forEach { container.repository.unlockAvatar(id, it.name) }
         container.publishProfile(id)
     }
 }

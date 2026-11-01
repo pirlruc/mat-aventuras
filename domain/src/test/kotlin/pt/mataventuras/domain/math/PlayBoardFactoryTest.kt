@@ -83,7 +83,10 @@ class PlayBoardFactoryTest {
         val numberPuzzle = factory.puzzle(LearningModule.ADDITION)
         val hole = numberPuzzle.play.cells.indexOf("?")
         val answer = numberPuzzle.options[numberPuzzle.correctIndex]
-        val filled = numberPuzzle.play.cells.mapIndexed { i, cell -> if (i == hole) answer else cell }.map { it.toInt() }
+        val filled =
+            numberPuzzle.play.cells
+                .mapIndexed { i, cell -> if (i == hole) answer else cell }
+                .map { it.toInt() }
         val step = filled[1] - filled[0]
         assertTrue(filled.indices.all { filled[it] == filled[0] + it * step })
 
@@ -211,7 +214,8 @@ class PlayBoardFactoryTest {
         assertTrue(mixed.spoken.contains("Quadrado"))
         assertEquals(5, factory.make(PlayKind.SOUP, LearningModule.SHAPES, 2).play.columns)
         val wide =
-            (0..80).map { ExerciseGenerator(Random(it)).generate(LearningModule.LOGIC, 3) }
+            (0..80)
+                .map { ExerciseGenerator(Random(it)).generate(LearningModule.LOGIC, 3) }
                 .filter { it.play.kind == PlayKind.SUDOKU }
         assertTrue(wide.any { it.play.columns == 6 })
         assertTrue(PlayKind.SUDOKU in PlayKinds.forModule(LearningModule.ADDITION))
@@ -248,8 +252,16 @@ class PlayBoardFactoryTest {
         val code = factory.cipher(LearningModule.DIVISION, 2)
         assertEquals(2, code.play.cells.size)
         assertTrue(code.prompt.contains("÷"))
-        val dividend = code.play.cells.first { it.startsWith("▲") }.substringAfter("=").toInt()
-        val divisor = code.play.cells.first { it.startsWith("●") }.substringAfter("=").toInt()
+        val dividend =
+            code.play.cells
+                .first { it.startsWith("▲") }
+                .substringAfter("=")
+                .toInt()
+        val divisor =
+            code.play.cells
+                .first { it.startsWith("●") }
+                .substringAfter("=")
+                .toInt()
         assertEquals(0, dividend % divisor)
         assertEquals((dividend / divisor).toString(), code.options[code.correctIndex])
     }
@@ -257,6 +269,8 @@ class PlayBoardFactoryTest {
     private fun filled(exercise: Exercise): List<Int> {
         val hole = exercise.play.cells.indexOf("?")
         val answer = exercise.options[exercise.correctIndex]
-        return exercise.play.cells.mapIndexed { i, cell -> if (i == hole) answer else cell }.map { it.toInt() }
+        return exercise.play.cells
+            .mapIndexed { i, cell -> if (i == hole) answer else cell }
+            .map { it.toInt() }
     }
 }

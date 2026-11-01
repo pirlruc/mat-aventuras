@@ -10,7 +10,10 @@ sealed class PinGateResult {
     data object Unlocked : PinGateResult()
 
     /** Stay on the PIN screen. [message] is pt-PT. */
-    data class Stay(val message: String, val speak: String?) : PinGateResult()
+    data class Stay(
+        val message: String,
+        val speak: String?,
+    ) : PinGateResult()
 }
 
 /**

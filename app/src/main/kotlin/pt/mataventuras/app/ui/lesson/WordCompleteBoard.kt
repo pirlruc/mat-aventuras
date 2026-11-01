@@ -25,7 +25,10 @@ internal fun WordCompleteBoard(
     exercise: Exercise,
     onPick: (Int) -> Unit,
 ) {
-    val shown = exercise.play.cells.firstOrNull().orEmpty()
+    val shown =
+        exercise.play.cells
+            .firstOrNull()
+            .orEmpty()
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         CappedScale {
             Text(
@@ -38,11 +41,12 @@ internal fun WordCompleteBoard(
         exercise.options.forEachIndexed { index, letter ->
             Button(
                 onClick = { onPick(index) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .semantics(mergeDescendants = true) { contentDescription = letter }
-                    .testTag(UiLogic.optionAnswerTag(exercise.isCorrect(index), false)),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .semantics(mergeDescendants = true) { contentDescription = letter }
+                        .testTag(UiLogic.optionAnswerTag(exercise.isCorrect(index), false)),
             ) {
                 Text(letter, fontWeight = FontWeight.Bold, fontSize = 28.sp)
             }

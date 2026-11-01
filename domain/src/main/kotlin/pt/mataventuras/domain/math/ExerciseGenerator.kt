@@ -68,7 +68,11 @@ open class ExerciseGenerator(
 
     internal fun shape(): Exercise {
         val target = GeometricShape.entries[random.nextInt(GeometricShape.entries.size)]
-        val others = GeometricShape.entries.filter { it != target }.shuffled(random).take(3)
+        val others =
+            GeometricShape.entries
+                .filter { it != target }
+                .shuffled(random)
+                .take(3)
         val options = (others + target).map { it.displayName }.shuffled(random)
         return Exercise(
             module = LearningModule.SHAPES,
@@ -93,9 +97,8 @@ open class ExerciseGenerator(
         )
     }
 
-    internal fun addition(age: AgeBand = AgeBand.SIX_TO_EIGHT): Exercise {
-        return if (random.nextBoolean()) additionSum(age) else missingAddend(age)
-    }
+    internal fun addition(age: AgeBand = AgeBand.SIX_TO_EIGHT): Exercise =
+        if (random.nextBoolean()) additionSum(age) else missingAddend(age)
 
     internal fun additionSum(age: AgeBand = AgeBand.SIX_TO_EIGHT): Exercise {
         val band = BandDifficulty.forAge(age)

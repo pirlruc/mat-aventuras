@@ -28,10 +28,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.engine.EngineInputMap
 import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.PlatformerWorld
+import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
@@ -80,76 +80,76 @@ internal object NativeRunnerHost {
         frameLimit: Int,
         onDone: (Boolean) -> Unit,
     ) {
-            var state by remember { mutableStateOf(loop.state) }
-            var done by remember { mutableStateOf(false) }
-            val tiles = remember { ArrayList<PlatformerRect>(64) }
-            LaunchedEffect(Unit) {
-                var frames = 0
-                while (runnerKeepsTicking(loop.state.finished, loop.state.alive, frames, frameLimit)) {
-                    withFrameNanos {
-                        loop.tick()
-                        state = loop.state
-                    }
-                    frames += 1
+        var state by remember { mutableStateOf(loop.state) }
+        var done by remember { mutableStateOf(false) }
+        val tiles = remember { ArrayList<PlatformerRect>(64) }
+        LaunchedEffect(Unit) {
+            var frames = 0
+            while (runnerKeepsTicking(loop.state.finished, loop.state.alive, frames, frameLimit)) {
+                withFrameNanos {
+                    loop.tick()
+                    state = loop.state
                 }
-                if (!done) {
-                    done = true
-                    onDone(loop.state.finished)
-                }
+                frames += 1
             }
-            BackHandler(enabled = !done) {
+            if (!done) {
                 done = true
-                onDone(false)
+                onDone(loop.state.finished)
             }
-            Box(modifier = Modifier.fillMaxSize()) {
-                Canvas(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .testTag("runner-course")
-                            .pointerInput(Unit) {
-                                awaitEachGesture {
-                                    val down = awaitFirstDown()
-                                    var lastX = down.position.x
-                                    var lastY = down.position.y
-                                    var flickX = 0f
-                                    var flickY = 0f
-                                    val width = size.width.coerceAtLeast(1).toFloat()
-                                    loop.moveX = EngineInputMap.runFromNormalizedX(down.position.x / width)
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                        if (!change.pressed) {
-                                            change.consume()
-                                            return@awaitEachGesture
-                                        }
-                                        val dx = change.position.x - lastX
-                                        val dy = change.position.y - lastY
-                                        lastX = change.position.x
-                                        lastY = change.position.y
-                                        flickX += dx
-                                        flickY += dy
-                                        loop.moveX = EngineInputMap.runFromNormalizedX(change.position.x / width)
-                                        noteRunnerJump(loop, flickX, flickY)
+        }
+        BackHandler(enabled = !done) {
+            done = true
+            onDone(false)
+        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            Canvas(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .testTag("runner-course")
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown()
+                                var lastX = down.position.x
+                                var lastY = down.position.y
+                                var flickX = 0f
+                                var flickY = 0f
+                                val width = size.width.coerceAtLeast(1).toFloat()
+                                loop.moveX = EngineInputMap.runFromNormalizedX(down.position.x / width)
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                    if (!change.pressed) {
                                         change.consume()
+                                        return@awaitEachGesture
                                     }
-                                    loop.moveX = 0f
+                                    val dx = change.position.x - lastX
+                                    val dy = change.position.y - lastY
+                                    lastX = change.position.x
+                                    lastY = change.position.y
+                                    flickX += dx
+                                    flickY += dy
+                                    loop.moveX = EngineInputMap.runFromNormalizedX(change.position.x / width)
+                                    noteRunnerJump(loop, flickX, flickY)
+                                    change.consume()
                                 }
-                            },
-                ) {
-                    paintRunnerCourse(tiles, state, mascot, level)
-                }
-                Text(
-                    text = "${VoiceScripts.JUMP_HINT}\nMoedas ${state.rings}/${state.ringsTarget}",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    modifier =
-                        Modifier
-                            .padding(16.dp)
-                            .background(Color(0x99000000), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                )
+                                loop.moveX = 0f
+                            }
+                        },
+            ) {
+                paintRunnerCourse(tiles, state, mascot, level)
             }
+            Text(
+                text = "${VoiceScripts.JUMP_HINT}\nMoedas ${state.rings}/${state.ringsTarget}",
+                color = Color.White,
+                fontSize = 22.sp,
+                modifier =
+                    Modifier
+                        .padding(16.dp)
+                        .background(Color(0x99000000), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+        }
     }
 }
 

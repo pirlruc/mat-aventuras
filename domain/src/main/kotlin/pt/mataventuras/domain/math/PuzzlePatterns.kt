@@ -19,7 +19,11 @@ object PuzzlePatterns {
         age: AgeBand = AgeBand.SIX_TO_EIGHT,
     ): List<String> {
         if (module == LearningModule.SHAPES) {
-            val glyphs = GeometricShape.entries.shuffled(random).take(2).map { it.displayName }
+            val glyphs =
+                GeometricShape.entries
+                    .shuffled(random)
+                    .take(2)
+                    .map { it.displayName }
             return List(n * n) { glyphs[it % glyphs.size] }
         }
         val spec = sequence(module, random, age)

@@ -16,7 +16,12 @@ class ClockBoard(
     fun make(): Exercise {
         val hour = 1 + random.nextInt(12)
         val correct = "$hour:00"
-        val others = (1..12).filter { it != hour }.shuffled(random).take(3).map { "$it:00" }
+        val others =
+            (1..12)
+                .filter { it != hour }
+                .shuffled(random)
+                .take(3)
+                .map { "$it:00" }
         val options = (others + correct).shuffled(random)
         return Exercise(
             module = LearningModule.CLOCK,
