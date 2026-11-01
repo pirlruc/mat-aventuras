@@ -1,10 +1,12 @@
 # Security policy
 
-## Reporting a vulnerability
+## Security contact
 
-Do not open a public issue for a vulnerability. Report it privately:
+Report a vulnerability privately. That form is the security contact:
 
 <https://github.com/pirlruc/mat-aventuras/security/advisories/new>
+
+Do not open a public issue for a vulnerability.
 
 Include the affected version or image digest and a way to reproduce it. You will get an acknowledgement within 7 days.
 

@@ -1,5 +1,7 @@
 # Mat Aventuras
 
+[![OpenSSF Baseline](https://www.bestpractices.dev/projects/16162/baseline)](https://www.bestpractices.dev/projects/16162)
+
 A game for children aged **3 to 5** and **6 to 8**. Counting, shapes, numbers,
 early arithmetic, memory, letters, and a few prize games. Everything the child
 sees and hears is **Portuguese from Portugal**. Profiles, scores, and the
@@ -83,6 +85,11 @@ echo "sdk.dir=/path/to/Android/Sdk" > local.properties
 The APK is `app/build/outputs/apk/debug/app-debug.apk`.
 
 ## For contributors
+
+Open a [GitHub issue](https://github.com/pirlruc/mat-aventuras/issues) for a
+bug or an idea. Propose a code change as a pull request. The app, comments,
+and docs are in English. What the child sees and hears stays Portuguese from
+Portugal.
 
 - [Architecture](docs/architecture.md)
 - [Decision log](https://github.com/pirlruc/mat-aventuras/issues?q=label%3Aepic)
