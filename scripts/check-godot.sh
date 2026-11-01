@@ -20,5 +20,18 @@ if [ ! -x "${BIN}" ]; then
 	rm -rf "${tmp}"
 fi
 
-"${BIN}" --headless --path "${ASSETS}" --import --quit
+# `--import` aborts on 4.7.2 because the editor singleton is null.
+# `--editor` scans every script but still exits 0 on a parse error,
+# so the log is what fails the check.
+log="$(mktemp)"
+"${BIN}" --headless --editor --path "${ASSETS}" --quit >"${log}" 2>&1 || {
+	cat "${log}"
+	rm -f "${log}"
+	exit 1
+}
+if grep -E 'SCRIPT ERROR:|Failed to load script' "${log}"; then
+	rm -f "${log}"
+	exit 1
+fi
+rm -f "${log}"
 echo "godot: project imported"
