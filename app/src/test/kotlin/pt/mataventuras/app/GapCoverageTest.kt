@@ -115,6 +115,18 @@ class GapCoverageTest {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         runBlocking { app.container.pinRepository.clear() }
         val profile = stored(app, "Ana", AgeBand.SIX_TO_EIGHT)
+        val missing =
+            RouteMemory(
+                SavedStateHandle(
+                    mapOf(RouteMemory.ROUTE to RouteMemory.HOME, RouteMemory.PROFILE to 999L),
+                ),
+            )
+        val parents =
+            RouteMemory(
+                SavedStateHandle(
+                    mapOf(RouteMemory.ROUTE to RouteMemory.PARENTS, RouteMemory.PROFILE to profile.id),
+                ),
+            )
         var mode by mutableIntStateOf(0)
         compose.setContent {
             key(mode) {
@@ -124,22 +136,14 @@ class GapCoverageTest {
                             container = app.container,
                             onSpeak = {},
                             onReward = { _, _, _ -> },
-                            memory = RouteMemory(
-                                SavedStateHandle(
-                                    mapOf(RouteMemory.ROUTE to RouteMemory.HOME, RouteMemory.PROFILE to 999L),
-                                ),
-                            ),
+                            memory = missing,
                         )
                     1 ->
                         NavGraph(
                             container = app.container,
                             onSpeak = {},
                             onReward = { _, _, _ -> },
-                            memory = RouteMemory(
-                                SavedStateHandle(
-                                    mapOf(RouteMemory.ROUTE to RouteMemory.PARENTS, RouteMemory.PROFILE to profile.id),
-                                ),
-                            ),
+                            memory = parents,
                         )
                     2 ->
                         MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
@@ -187,6 +191,16 @@ class GapCoverageTest {
     fun blankLessonAndHomeStayQuiet() {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         val young = stored(app, "Mara", AgeBand.THREE_TO_FIVE)
+        val lesson =
+            RouteMemory(
+                SavedStateHandle(
+                    mapOf(
+                        RouteMemory.ROUTE to RouteMemory.LESSON,
+                        RouteMemory.MODULE to LearningModule.COUNTING.name,
+                    ),
+                ),
+            )
+        val home = RouteMemory(SavedStateHandle(mapOf(RouteMemory.ROUTE to RouteMemory.HOME)))
         var mode by mutableIntStateOf(0)
         compose.setContent {
             key(mode) {
@@ -196,21 +210,14 @@ class GapCoverageTest {
                             container = app.container,
                             onSpeak = {},
                             onReward = { _, _, _ -> },
-                            memory = RouteMemory(
-                                SavedStateHandle(
-                                    mapOf(
-                                        RouteMemory.ROUTE to RouteMemory.LESSON,
-                                        RouteMemory.MODULE to LearningModule.COUNTING.name,
-                                    ),
-                                ),
-                            ),
+                            memory = lesson,
                         )
                     1 ->
                         NavGraph(
                             container = app.container,
                             onSpeak = {},
                             onReward = { _, _, _ -> },
-                            memory = RouteMemory(SavedStateHandle(mapOf(RouteMemory.ROUTE to RouteMemory.HOME))),
+                            memory = home,
                         )
                     else ->
                         HomeScreen(
