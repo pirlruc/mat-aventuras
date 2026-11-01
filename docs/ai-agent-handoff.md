@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** #114 merged. Release keystore is outside the repo (MAT-005-T11). 0.2.0 is not started.
+**Last agent focus:** `feature-release-0.2.0` sets `versionCode` 2 and `versionName` 0.2.0. The annotated tag and the signed APK follow the merge. Do not move `0.1.0`. MAT-005 stays open until that release exists.
 
 ---
 
@@ -50,7 +50,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-002 | done | Emulator job, Robolectric gates, lesson packs |
 | MAT-003 | done | Godot 4 plugin in `:engine2d` and `:engine3d` |
 | MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
-| MAT-005 | open | T1–T11 done. #113 merged the PIN and coverage work. T11 is the release keystore outside the repo; the four ANDROID_* secrets are set. Passwords are not in the repo. The epic stays open until 0.2.0 |
+| MAT-005 | open | T1–T11 done. The epic stays open until the 0.2.0 GitHub Release attaches the signed APK. `versionCode` is 2 on `feature-release-0.2.0` |
 | MAT-006 | open | T1–T3 done in #113. CodeQL and the APK bill reported no high or critical findings |
 | MAT-007 | done | `BandDifficulty` replaces `isSevenYears()`. Memory, word board, cell size, and pt-PT parent titles are on this branch |
 | MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
@@ -227,7 +227,7 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Tag `0.1.0` is on main. Do not move it. `release.yml` builds an APK through androiddevops `android-release-apk`, then calls common-release `5.7.0` with `release_artifact: android-release-apk`. The four ANDROID_* secrets are set. The keystore is outside the repo. The owner must back up the keystore and its password. Losing them means an installed app cannot be updated. Do not commit either file.
+1. `versionCode` 2 and `versionName` `0.2.0` are on `feature-release-0.2.0`. After that PR merges, tag annotated `0.2.0` on the merge commit and dispatch `release.yml`. Do not move `0.1.0`. The workflow builds an APK through androiddevops `android-release-apk`, then calls common-release `5.7.0` with `release_artifact: android-release-apk`. The four ANDROID_* secrets are set. The keystore is outside the repo. The owner must back up the keystore and its password. Losing them means an installed app cannot be updated. Do not commit either file.
 2. #113 merged the Keystore PIN, the 95 percent floors, and the minified-prize, CodeQL, and APK-bill proofs. MAT-005-T11 is done. The epic stays open until 0.2.0.
 3. [#114](https://github.com/pirlruc/mat-aventuras/pull/114) merged the MAT-011 subset. The epic stays open. `:app` Kover is 95.03% branch and 97.59% line. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the report. Do not mark MAT-011-T1 through T4 done.
 4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
@@ -237,4 +237,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset already requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, and the two python-quality job names. Reviews stay at 0. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed.
 9. bestpractices.dev is last, after 0.2.0 and the companion issues.
 
-*Last updated: 2026-11-01 (#114 merged; MAT-005-T11 keystore is outside the repo).*
+*Last updated: 2026-11-01 (`feature-release-0.2.0` bumps versionCode 2; tag after merge).*

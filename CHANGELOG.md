@@ -7,35 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- A speaker replay button, three stars toward the next prize, and a
-  parent-set prize time limit stored in Room schema 3.
-- Ages 3–5 confirm before leaving a lesson. A miss for that band keeps
-  the points and shows the mascot in amber.
+## [0.2.0] - 2026-11-01
 
 ### Fixed
 
-- Ages 3–5 stay on small numbers, sums up to 10, and short logic steps.
-  Ages 6–8 keep the wider ranges.
+- Ages 3–5 in 0.1.0 were given number ranges and sums meant for older
+  children. This release keeps that band on small numbers, sums up to 10,
+  and short logic steps. Ages 6–8 keep the wider ranges.
 - A memory round stays open until every pair is found. Ages 3–5 letters
   use a 2×3 board.
 - Word completion has its own board. Lesson cells stay at least 48 dp,
   and 64 dp for ages 3–5.
 - The parent dashboard names lessons in Portuguese.
 
+### Added
+
+- Ages 3–5: Qual é diferente, Grande e pequeno, and Padrões. Ages 6–8:
+  Que horas são and Euros e cêntimos.
+- Two prize games drawn in the app: numbered balloons to tap (ages 3–5)
+  and a snake that grows when the sum is right (ages 6–8).
+- A speaker replay button, three stars toward the next prize, and a
+  parent-set prize time limit of 1, 2, or 3 minutes (the default is 2).
+- Leaving a lesson asks "Sim, sair" on a second tap, for both bands. A
+  miss for ages 3–5 keeps the points and shows the mascot in amber.
+- A loading picture while a prize starts. If it does not start, the child
+  can try again or go back. A win shows "Ganhaste!". Ages 3–5 see hearts.
+  The kart has an Impulso button.
+
 ### Changed
 
-- The parent PIN record is sealed with a Keystore AES-GCM key. New hashes
-  use 600000 PBKDF2 iterations, and an older hash is replaced when the
-  correct PIN unlocks.
-- The README explains how to install the latest release on Android 8.0 or
-  newer, how to check the APK checksum, and where the parent PIN lives.
+- The parent PIN record is sealed with a key that stays on the device.
+  New hashes use 600000 iterations, and an older hash is replaced when
+  the correct PIN unlocks.
+- Install the signed `app-release.apk` from GitHub Releases and check
+  `app-release.apk.sha256` before you open it.
 - The security policy links to private vulnerability reports.
 - The architecture note maps the controls the app claims to OWASP MASVS.
-- Android CI calls androiddevops. A pull request that does not touch the app,
-  the domain, Gradle, or scripts skips Gradle, CodeQL, MobSF, and the APK bill.
-- The release workflow attaches the release APK and a SHA-256 checksum.
+- Android CI calls androiddevops. A pull request that does not change the
+  app skips Gradle, CodeQL, MobSF, and the APK bill.
 
 ## [0.1.0] - 2026-10-30
 

@@ -16,19 +16,22 @@ belong to both.
 
 | Band | Lessons | Prize games |
 | --- | --- | --- |
-| 3 a 5 anos | Contar, formas, números, somar, lógica, memória, letras | Plataforma, subir letras, labirinto |
-| 6 a 8 anos | Números, somar, subtrair, multiplicar, dividir, lógica, memória, letras, palavras | Those, plus invasores and the kart race |
+| 3 a 5 anos | Contar, formas, números, somar, lógica, memória, letras, Qual é diferente, Grande e pequeno, Padrões | Plataforma, subir letras, labirinto, balões |
+| 6 a 8 anos | Números, somar, subtrair, multiplicar, dividir, lógica, memória, letras, palavras, Que horas são, Euros e cêntimos | Those, plus invasores, the kart race, and the answer snake |
+
+Version 0.1.0 gave ages 3–5 number ranges meant for older children. 0.2.0
+keeps that band on small numbers and sums up to 10.
 
 ## Install
 
 Use the latest release on
 [GitHub Releases](https://github.com/pirlruc/mat-aventuras/releases/latest).
-Download `app-debug.apk` and the matching `app-debug.apk.sha256`.
+Download `app-release.apk` and the matching `app-release.apk.sha256`.
 
 Check the file before you install it:
 
 ```bash
-sha256sum -c app-debug.apk.sha256
+sha256sum -c app-release.apk.sha256
 ```
 
 The app is not on a store. Android will ask you to allow an install from
