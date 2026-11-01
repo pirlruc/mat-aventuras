@@ -40,7 +40,7 @@ apksigner verify --print-certs app-release.apk
 
 `sha256sum` checks that the APK matches the published checksum.
 `apksigner` checks the signature and prints the signer certificate.
-The SHA-256 fingerprint of that certificate is not listed here yet.
+The SHA-256 fingerprint of that certificate is `DB:C6:F8:DE:63:DE:E6:26:D8:F0:25:B3:78:BD:0C:67:F9:84:93:69:65:F5:BF:D1:B9:8A:4D:F6:59:5F:F6:40`.
 
 The app is not on a store. Android will ask you to allow an install from
 your browser or the Files app:
