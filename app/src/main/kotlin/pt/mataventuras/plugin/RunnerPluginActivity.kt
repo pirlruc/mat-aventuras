@@ -1,5 +1,6 @@
 package pt.mataventuras.plugin
 
+import android.content.Intent
 import android.os.Bundle
 import pt.mataventuras.app.engine.ChompLoop
 import pt.mataventuras.app.engine.ClimbLoop
@@ -29,6 +30,19 @@ class RunnerPluginActivity : IsolatedEngineActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        GodotRewardBinder.bindRunner(this)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        acceptRelaunch(intent)
+    }
+
+    /**
+     * Applies a new launch while this singleInstance activity is still up.
+     */
+    internal fun acceptRelaunch(intent: Intent) {
+        setIntent(intent)
         GodotRewardBinder.bindRunner(this)
     }
 }

@@ -1,6 +1,21 @@
 package pt.mataventuras.app.ui.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,7 +29,9 @@ import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.ProfileResume
 import pt.mataventuras.app.ui.age.AgeSelectionScreen
 import pt.mataventuras.app.ui.home.HomeScreen
+import pt.mataventuras.app.ui.lesson.CappedScale
 import pt.mataventuras.app.ui.lesson.LessonScreen
+import pt.mataventuras.domain.engine.PrizeHud
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.rewards.LeaderboardAndRewardsScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
@@ -33,6 +50,8 @@ internal fun NavGraph(
     onSpeak: (String) -> Unit,
     onReward: (AgeBand, Mascot, String) -> Unit,
     memory: RouteMemory = viewModel(),
+    celebrate: Boolean = false,
+    onDismissWin: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var destination by remember {
@@ -74,6 +93,7 @@ internal fun NavGraph(
     }
 
     MatAventurasTheme(ageGroup) {
+        Box(Modifier.fillMaxSize()) {
         when (val current = destination) {
             Destination.Selection -> AgeSelectionScreen(
                 onSpeak = onSpeak,
@@ -138,6 +158,34 @@ internal fun NavGraph(
                 onSpeak = onSpeak,
                 onBack = { destination = Destination.Home },
             )
+        }
+        if (celebrate) {
+            PrizeWinCard(onDismissWin)
+        }
+        }
+    }
+}
+
+@Composable
+private fun PrizeWinCard(onContinue: () -> Unit) {
+    CappedScale {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF1565C0))
+                    .semantics { contentDescription = PrizeHud.WIN_TITLE },
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(PrizeHud.WIN_TITLE, color = Color.White, fontSize = 48.sp)
+                Button(
+                    onClick = onContinue,
+                    modifier = Modifier.padding(top = 24.dp).height(64.dp),
+                ) {
+                    Text(PrizeHud.WIN_CONTINUE)
+                }
+            }
         }
     }
 }

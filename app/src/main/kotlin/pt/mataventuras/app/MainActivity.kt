@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,6 +22,7 @@ import pt.mataventuras.app.ui.navigation.NavGraph
  */
 class MainActivity : ComponentActivity() {
     private lateinit var speech: SpeechEngine
+    private var celebrateWin by mutableStateOf(false)
 
     private val engineLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -35,6 +39,8 @@ class MainActivity : ComponentActivity() {
                 onReward = { ageGroup, mascot, name ->
                     engineLauncher.launch(EngineLauncher.intentFor(this, ageGroup, mascot, name))
                 },
+                celebrate = celebrateWin,
+                onDismissWin = { celebrateWin = false },
             )
         }
     }
@@ -54,6 +60,7 @@ class MainActivity : ComponentActivity() {
             return
         }
         val finished = RewardReturn.onResult(resultCode, data, speech::speak)
+        if (finished) celebrateWin = true
         val app = application as MatAventurasApp
         lifecycleScope.launch(Dispatchers.IO) {
             RewardRecorder.apply(app.container, finished)

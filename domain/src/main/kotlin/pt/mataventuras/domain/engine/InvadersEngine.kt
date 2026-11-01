@@ -96,7 +96,7 @@ class InvadersEngine {
         }
         if (shotY < 0f) return state
         shotY -= 1.1f * dt
-        val miss = shotY < 0.06f
+        val miss = shotY < HIT_Y
         val hit = if (miss) -1 else hitAlien(state.aliens, state.alienOrigin, shotX, shotY)
         if (miss || hit < 0) {
             return if (miss) state.copy(shotX = -1f, shotY = -1f) else state.copy(shotX = shotX, shotY = shotY)
@@ -140,7 +140,7 @@ class InvadersEngine {
         }
         bombY += 0.45f * dt
         val gone = bombY > 0.95f
-        val hitShip = kotlin.math.abs(bombX - ship) < 0.07f && bombY > 0.84f
+        val hitShip = kotlin.math.abs(bombX - ship) < SHIP_HIT_X && bombY > 0.84f
         return when {
             gone -> state.copy(bombX = -1f, bombY = -1f)
             hitShip && state.invuln <= 0f -> takeHit(state)
@@ -178,7 +178,7 @@ class InvadersEngine {
             val row = i / COLUMNS
             val ax = origin + col * STEP
             val ay = TOP + row * STEP
-            if (kotlin.math.abs(ax - shotX) < 0.05f && kotlin.math.abs(ay - shotY) < 0.06f) {
+            if (kotlin.math.abs(ax - shotX) < HIT_X && kotlin.math.abs(ay - shotY) < HIT_Y) {
                 return 1 shl i
             }
         }
@@ -195,10 +195,13 @@ class InvadersEngine {
         /** Normalized y of the top row. */
         const val TOP: Float = 0.12f
 
-        const val FLEET: Int = 15
-        const val FULL_GRID: Int = (1 shl FLEET) - 1
-        const val LIVES_MAX: Int = 5
-        const val GRACE: Float = 1.8f
-        const val HIT_INVULN: Float = 1.4f
+        val FLEET: Int get() = PrizeTuning.rules.invaders.fleet
+        val FULL_GRID: Int get() = (1 shl FLEET) - 1
+        val LIVES_MAX: Int get() = PrizeTuning.rules.invaders.lives
+        val GRACE: Float get() = PrizeTuning.rules.invaders.grace
+        val HIT_INVULN: Float get() = PrizeTuning.rules.invaders.hitInvuln
+        val HIT_X: Float get() = PrizeTuning.rules.invaders.hitX
+        val HIT_Y: Float get() = PrizeTuning.rules.invaders.hitY
+        val SHIP_HIT_X: Float get() = PrizeTuning.rules.invaders.shipHitX
     }
 }

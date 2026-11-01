@@ -29,6 +29,12 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     /** GLES restart already requested by this Activity, not by the process. */
     internal var godotRestarted: Boolean = false
 
+    override fun onDestroy() {
+        EngineAttachRetries.cancel(this)
+        PrizeBoot.cancel(this)
+        super.onDestroy()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -60,6 +66,12 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
      */
     internal fun sceneCode(): String =
         intent.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty()
+
+    /**
+     * Age-band extra. Empty when the host omitted it.
+     */
+    internal fun ageCode(): String =
+        intent.getStringExtra(EnginePluginContract.EXTRA_AGE).orEmpty()
 
     /**
      * Resolves the mascot for tinting; unknown codes fall back to the hedgehog.
@@ -95,7 +107,7 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     internal fun requestEngineRestart(): Boolean =
         settleResult(
             RESULT_OK,
-            EngineLauncher.restartResultIntent(javaClass.name, mascotCode(), childName(), sceneCode()),
+            EngineLauncher.restartResultIntent(javaClass.name, mascotCode(), childName(), sceneCode(), ageCode()),
         )
 
     /**

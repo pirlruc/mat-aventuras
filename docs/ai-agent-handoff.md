@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** calmer controls (`feature-kids-ux`)
+**Last agent focus:** prize UX (`feature-prize-ux`)
 
 ---
 
@@ -50,11 +50,11 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-002 | done | Emulator job, Robolectric gates, lesson packs |
 | MAT-003 | done | Godot 4 plugin in `:engine2d` and `:engine3d` |
 | MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
-| MAT-005 | open | T4–T6 done. T1 shared simulation, T2 minified prize on a device, and T3 Kover excludes remain. T7–T11 are the keep rules, Keystore PIN, PBKDF2 rehash, `singleInstance` review, and release signing |
+| MAT-005 | open | T1 and T4–T6 done. Shared rules are `domain/src/main/resources/prize-tuning.json` (packaged as an asset). T2 minified prize, T3 Kover excludes, and T7–T11 remain |
 | MAT-006 | open | T1 and T2 done. T3 is the androiddevops CodeQL and APK-bill proof |
 | MAT-007 | done | `BandDifficulty` replaces `isSevenYears()`. Memory, word board, cell size, and pt-PT parent titles are on this branch |
 | MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
-| MAT-009 | open | T1 done. T2 prize UX and T3 cancel `GodotEmbed` retries remain |
+| MAT-009 | done | Loading overlay, timeout with Tentar outra vez / Voltar, Ganhaste card, icon HUD, kart boost button, and cancelled embed retries |
 | MAT-010 | done | Companion pins and reusable CI are on main |
 | MAT-011 | open | Backlog. PR7 takes only the five named lessons plus Rebentar balões and Cobra das respostas |
 | MAT-012 | done | Speaker, gentle miss, stars, home lock, exit confirm, saved route, and Room v3 prize limit |
@@ -206,17 +206,27 @@ bash scripts/check-ci-local.sh
   Chomp and climb use 3 lives with i-frames. Keep GDScript in sync with
   `:domain` engines.
 - `GodotEmbed.attach` waits for a >32 px host view (layout listener, then a
-  1.2 s sized retry). Only a 4.8 s last resort attaches anyway. Keep
-  `boot.gd`'s window-size wait; do not treat `onGodotForceQuit` as a GLES
-  restart (`onGodotRestartRequested` already does that). `Host.finish` lingers
-  1.6 s for prize banners via a `SceneTreeTimer` signal (callers do not
-  `await` it); boot errors pass `linger=false`.
+  1.2 s sized retry). Only a 4.8 s last resort attaches anyway. Both runnables
+  are tracked by `EngineAttachRetries` and removed in `onDestroy`. Do not call
+  `GodotEmbed` from that destroy path: loading the Godot fragment class pulls
+  in `libgodot_android`. Keep `boot.gd`'s window-size wait; do not treat
+  `onGodotForceQuit` as a GLES restart (`onGodotRestartRequested` already does
+  that). `Host.finish` lingers 1.6 s for prize banners via a `SceneTreeTimer`
+  signal (callers do not `await` it); boot errors pass `linger=false`.
+- Prize lives, speeds, and hit tests live only in
+  `domain/src/main/resources/prize-tuning.json`. The app asset source set
+  packages that file as `res://prize-tuning.json`. `Host.tune` reads it.
+  Domain engines read the classpath copy. Do not put the numbers back in
+  both GDScript and Kotlin. Ages 3–5 life text is `PrizeHud.livesLine`
+  (hearts). Kart boost is the Impulso button, not the centre tap. A win sets
+  `MainActivity.celebrateWin` and shows the Ganhaste card. Boot timeout is
+  12 s (`PrizeBoot`), then Tentar outra vez or Voltar to the Canvas host.
 
 ## Suggested next work
 
 1. Tag `0.1.0` is on main. Do not move it. `release.yml` builds an APK through androiddevops `android-release-apk`, then calls common-release `5.7.0` with `release_artifact: android-release-apk`. Signing secrets are not set. Do not generate the keystore until the step before the 0.2.0 release, and the owner must back it up.
-2. Next product branch is `feature-prize-ux` (MAT-009-T2, MAT-009-T3, MAT-005-T1): loading overlay, timeout fallback, Ganhaste card, icon HUD, kart boost, cancel GodotEmbed, shared prize-tuning.json.
-3. Then `feature-security-r8-coverage` (MAT-005-T2, T3, T7–T10, MAT-006-T3). MAT-011 stays open except the five lessons and two Compose prizes on `feature-new-lessons-prizes`.
+2. `feature-prize-ux` is the prize UX branch (MAT-009-T2, MAT-009-T3, MAT-005-T1). Next product branch is `feature-security-r8-coverage` (MAT-005-T2, T3, T7–T10, MAT-006-T3).
+3. MAT-011 stays open except the five lessons and two Compose prizes on `feature-new-lessons-prizes`.
 4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
 5. When androiddevops later becomes private, this public repo cannot call its workflows. Vendor the pinned workflow. Do not change visibility from an agent session. mat-aventuras stays public.
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review is issues-only, after 0.2.0, and dedupes this list.
@@ -224,4 +234,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset already requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, and the two python-quality job names. Reviews stay at 0. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed.
 9. bestpractices.dev is last, after 0.2.0 and the companion issues.
 
-*Last updated: 2026-11-01 (kids UX; androiddevops 1.0.2; pydevops 3.3.10; commondevops 5.7.0)*
+*Last updated: 2026-11-01 (prize UX; androiddevops 1.0.2; pydevops 3.3.10; commondevops 5.7.0)*

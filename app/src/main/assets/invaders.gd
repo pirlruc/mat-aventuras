@@ -1,33 +1,45 @@
 extends Node2D
 
-## Letter-ship invaders. Ends only after 5 lives or every ship is gone.
-const LIVES_MAX := 5
-const FLEET := 15
-const GRACE := 1.8
-const HIT_INVULN := 1.4
+## Letter-ship invaders. Ends only after the shared lives count or every ship is gone.
+var fleet := 0
+var lives_max := 0
+var hit_invuln := 0.0
+var hit_x := 0.0
+var hit_y := 0.0
+var ship_hit_x := 0.0
 
 var ship_x := 0.5
 var shot_x := -1.0
 var shot_y := -1.0
-var aliens := (1 << FLEET) - 1
+var aliens := 0
 var origin := 0.12
 var dir := 1.0
 var bomb_x := -1.0
 var bomb_y := -1.0
 var hits := 0
-var lives := LIVES_MAX
+var lives := 0
 var invuln := 0.0
-var grace := GRACE
+var grace := 0.0
 var finished := false
 var hud: Label
 var fire := false
 
 
 func _ready() -> void:
+	fleet = Host.tune_i("invaders", "fleet")
+	lives_max = Host.tune_i("invaders", "lives")
+	lives = lives_max
+	grace = Host.tune("invaders", "grace")
+	hit_invuln = Host.tune("invaders", "hitInvuln")
+	hit_x = Host.tune("invaders", "hitX")
+	hit_y = Host.tune("invaders", "hitY")
+	ship_hit_x = Host.tune("invaders", "shipHitX")
+	aliens = (1 << fleet) - 1
 	RenderingServer.set_default_clear_color(Color("0D1B3A"))
 	Host.fit_viewport(self)
 	hud = Host.make_hud(self)
 	_update_hud()
+	Host.mark_ready()
 
 
 func _input(event: InputEvent) -> void:
@@ -59,7 +71,7 @@ func _process(delta: float) -> void:
 			fire = false
 		if shot_y >= 0.0:
 			shot_y -= 1.1 * delta
-			if shot_y < 0.06:
+			if shot_y < hit_y:
 				shot_y = -1.0
 			else:
 				_try_hit()
@@ -88,14 +100,14 @@ func _step_bomb(delta: float) -> void:
 	bomb_y += 0.45 * delta
 	if bomb_y > 0.95:
 		bomb_y = -1.0
-	elif absf(bomb_x - ship_x) < 0.07 and bomb_y > 0.84 and invuln <= 0.0:
+	elif absf(bomb_x - ship_x) < ship_hit_x and bomb_y > 0.84 and invuln <= 0.0:
 		lives -= 1
-		invuln = HIT_INVULN
+		invuln = hit_invuln
 		bomb_y = -1.0
 
 
 func _bomber() -> Vector2:
-	for i in FLEET:
+	for i in fleet:
 		if aliens & (1 << i) == 0:
 			continue
 		var col := i % 5
@@ -105,14 +117,14 @@ func _bomber() -> Vector2:
 
 
 func _try_hit() -> void:
-	for i in FLEET:
+	for i in fleet:
 		if aliens & (1 << i) == 0:
 			continue
 		var col := i % 5
 		var row := i / 5
 		var ax := origin + float(col) * 0.12
 		var ay := 0.12 + float(row) * 0.12
-		if absf(ax - shot_x) < 0.05 and absf(ay - shot_y) < 0.06:
+		if absf(ax - shot_x) < hit_x and absf(ay - shot_y) < hit_y:
 			aliens &= ~(1 << i)
 			hits += 1
 			shot_y = -1.0
@@ -134,7 +146,7 @@ func _draw() -> void:
 	draw_rect(Rect2(0, size.y - ground_h, size.x, u * 0.012), Color("43A047"))
 	var aw := u * 0.07
 	var ah := u * 0.055
-	for i in FLEET:
+	for i in fleet:
 		if aliens & (1 << i) == 0:
 			continue
 		var col := i % 5
@@ -171,11 +183,17 @@ func _update_hud() -> void:
 	while v != 0:
 		left += v & 1
 		v >>= 1
-	if finished and left == 0:
-		hud.text = "Ganhaste!\nNaves %d/%d" % [FLEET, FLEET]
+	var life := Host.lives_text(lives, lives_max)
+	if Host.young():
+		if finished and left == 0:
+			hud.text = "🏁\n%s" % life
+		elif finished:
+			hud.text = "·\n%s" % life
+		else:
+			hud.text = "🚀 %d\n%s" % [hits, life]
+	elif finished and left == 0:
+		hud.text = "Ganhaste!\nNaves %d/%d" % [fleet, fleet]
 	elif finished:
-		hud.text = "Fim de jogo\nVidas 0/%d" % LIVES_MAX
+		hud.text = "Fim de jogo\n%s" % life
 	else:
-		hud.text = "Desliza para mover · toca para disparar\nNaves %d/%d\nVidas %d/%d" % [
-			hits, FLEET, lives, LIVES_MAX
-		]
+		hud.text = "Desliza para mover · toca para disparar\nNaves %d/%d\n%s" % [hits, fleet, life]

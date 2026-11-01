@@ -38,7 +38,7 @@ class ChompEngine {
             powerTimer = 0f,
             form = 0,
             lives = LIVES_MAX,
-            invuln = GRACE,
+            invuln = GRACE_TIME,
             alive = true,
             finished = false,
         )
@@ -116,7 +116,7 @@ class ChompEngine {
         return if (lives <= 0) {
             state.copy(lives = 0, alive = false)
         } else {
-            state.copy(lives = lives, invuln = GRACE, px = 1, py = 3)
+            state.copy(lives = lives, invuln = GRACE_TIME, px = 1, py = 3)
         }
     }
 
@@ -134,8 +134,8 @@ class ChompEngine {
         }
 
     private companion object {
-        const val LIVES_MAX: Int = 3
-        const val GRACE: Float = 1.6f
+        val LIVES_MAX: Int get() = PrizeTuning.rules.chomp.lives
+        val GRACE_TIME: Float get() = PrizeTuning.rules.chomp.grace
     }
 }
 

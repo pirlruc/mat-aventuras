@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +21,7 @@ import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.rewards.LeaderboardAndRewardsScreen
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.app.ui.theme.titleSpSize
+import pt.mataventuras.domain.engine.PrizeHud
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.tokensFor
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -123,5 +125,23 @@ class NavAndParentTest {
         controller.destroy()
         activity.onEngineResult(android.app.Activity.RESULT_OK, null)
         Robolectric.buildActivity(MainActivity::class.java).destroy()
+    }
+
+    @Test
+    fun winCardCoversTheScreenUntilContinue() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        var dismissed = false
+        compose.setContent {
+            NavGraph(
+                container = app.container,
+                onSpeak = {},
+                onReward = { _, _, _ -> },
+                celebrate = true,
+                onDismissWin = { dismissed = true },
+            )
+        }
+        compose.onNodeWithText(PrizeHud.WIN_TITLE).assertIsDisplayed()
+        compose.onNodeWithText(PrizeHud.WIN_CONTINUE).performClick()
+        assertTrue(dismissed)
     }
 }

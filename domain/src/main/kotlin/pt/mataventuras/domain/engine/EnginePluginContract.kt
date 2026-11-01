@@ -1,5 +1,6 @@
 package pt.mataventuras.domain.engine
 
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.EngineKind
 
 /**
@@ -23,6 +24,9 @@ object EnginePluginContract {
 
     /** Intent extra: reward mini-game name (`RUNNER`, `KART`, …). */
     const val EXTRA_SCENE: String = "scene"
+
+    /** Intent extra: [pt.mataventuras.domain.model.AgeBand] name. */
+    const val EXTRA_AGE: String = "age"
 
     /** Result extra: true when the reward level completed. */
     const val RESULT_FINISHED: String = "finished"
@@ -137,6 +141,16 @@ object EnginePluginContract {
         childName: String,
         game: RewardGame,
     ): Map<String, String> = launchExtras(mascotCode, childName) + (EXTRA_SCENE to game.name)
+
+    /**
+     * Launch extras including the age band so the prize HUD can stay icon-first.
+     */
+    fun launchExtras(
+        mascotCode: String,
+        childName: String,
+        game: RewardGame,
+        age: AgeBand,
+    ): Map<String, String> = launchExtras(mascotCode, childName, game) + (EXTRA_AGE to age.name)
 
     private val ALLOWED_ENGINE_CLASSES =
         setOf(

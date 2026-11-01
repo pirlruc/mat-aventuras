@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.EngineKind
 
 class EnginePluginContractTest {
@@ -49,6 +50,14 @@ class EnginePluginContractTest {
         assertEquals("Ana", extras[EnginePluginContract.EXTRA_NAME])
         val withScene = EnginePluginContract.launchExtras("hero_pup", "Ana", RewardGame.CLIMB)
         assertEquals("CLIMB", withScene[EnginePluginContract.EXTRA_SCENE])
+        val aged =
+            EnginePluginContract.launchExtras(
+                "hero_pup",
+                "Ana",
+                RewardGame.CLIMB,
+                AgeBand.THREE_TO_FIVE,
+            )
+        assertEquals(AgeBand.THREE_TO_FIVE.name, aged[EnginePluginContract.EXTRA_AGE])
         assertEquals("finished", EnginePluginContract.RESULT_FINISHED)
         assertEquals("restart", EnginePluginContract.RESULT_RESTART)
         assertEquals("godot", EnginePluginContract.ADOPTED_ENGINE)

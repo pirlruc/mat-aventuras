@@ -3,6 +3,7 @@ package pt.mataventuras.app.engine.godot
 import android.os.Bundle
 import android.view.View
 import pt.mataventuras.app.R
+import pt.mataventuras.app.engine.EngineAttachRetries
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.app.engine.IsolatedEngineActivity
 
@@ -137,12 +138,11 @@ internal object GodotEmbed {
             }
         container.addOnLayoutChangeListener(listener)
         val retry = Runnable { tryCommit(activity, container, scene, listener, force = false) }
+        val force = Runnable { tryCommit(activity, container, scene, listener, force = true) }
         container.post(retry)
         container.postDelayed(retry, ATTACH_RETRY_MS)
-        container.postDelayed(
-            { tryCommit(activity, container, scene, listener, force = true) },
-            ATTACH_FORCE_MS,
-        )
+        container.postDelayed(force, ATTACH_FORCE_MS)
+        EngineAttachRetries.track(activity, container, listener, retry, force)
     }
 
     private fun tryCommit(

@@ -41,7 +41,7 @@ class OffroadRacerEngine(
     /**
      * Kart on the start line, centred in the lane.
      */
-    fun initial(lapsTarget: Int = 3): OffroadState =
+    fun initial(lapsTarget: Int = PrizeTuning.rules.kart.laps): OffroadState =
         OffroadState(
             distance = 2f,
             lateral = 0f,
@@ -153,16 +153,16 @@ class OffroadRacerEngine(
             (current - delta).coerceAtLeast(target)
         }
 
-    /** Tuning for a short kids' dirt race. */
+    /** Tuning for a short kids' dirt race. Values live in prize-tuning.json. */
     companion object {
-        const val CRUISE: Float = 28f
-        const val BOOST: Float = 46f
-        const val OFF_ROAD: Float = 12f
-        const val ACCEL: Float = 22f
-        const val STEER: Float = 5.6f
-        const val DRIFT: Float = 0.006f
-        const val BOOST_SECONDS: Float = 1.15f
-        const val GATE_WINDOW: Float = 8f
+        val CRUISE: Float get() = PrizeTuning.rules.kart.cruise
+        val BOOST: Float get() = PrizeTuning.rules.kart.boost
+        val OFF_ROAD: Float get() = PrizeTuning.rules.kart.offRoad
+        val ACCEL: Float get() = PrizeTuning.rules.kart.accel
+        val STEER: Float get() = PrizeTuning.rules.kart.steer
+        val DRIFT: Float get() = PrizeTuning.rules.kart.drift
+        val BOOST_SECONDS: Float get() = PrizeTuning.rules.kart.boostSeconds
+        val GATE_WINDOW: Float get() = PrizeTuning.rules.course.gateWindow
         const val GATE_LATERAL: Float = 0.9f
     }
 }

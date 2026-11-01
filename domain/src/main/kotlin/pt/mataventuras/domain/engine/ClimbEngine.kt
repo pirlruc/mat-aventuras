@@ -72,7 +72,7 @@ class ClimbEngine {
         jumping: Boolean,
     ): ClimbState {
         val vy = if (jumping && state.onFloor) JUMP else state.vy + GRAVITY * dt
-        val x = (state.x + moveX.coerceIn(-1f, 1f) * 0.55f * dt).coerceIn(0.06f, 0.94f)
+        val x = (state.x + moveX.coerceIn(-1f, 1f) * MOVE * dt).coerceIn(0.06f, 0.94f)
         val y = state.y + vy * dt
         val landed = land(y, vy)
         return state.copy(x = x, y = landed.first, vy = landed.second, onFloor = landed.third)
@@ -83,7 +83,7 @@ class ClimbEngine {
         vy: Float,
     ): Triple<Float, Float, Boolean> {
         if (vy > 0f) return Triple(y, vy, false)
-        val floor = FLOORS.firstOrNull { y <= it && y >= it - 0.08f }
+        val floor = FLOORS.firstOrNull { y <= it && y >= it - NEAR }
         if (floor != null) return Triple(floor, 0f, true)
         val grounded = y <= FLOORS[0]
         return if (grounded) Triple(FLOORS[0], 0f, true) else Triple(y, vy, false)
@@ -115,8 +115,8 @@ class ClimbEngine {
     private fun strike(state: ClimbState): ClimbState {
         val floorY = FLOORS[state.barrelFloor.coerceIn(0, FLOORS.lastIndex)]
         val nearBarrel =
-            kotlin.math.abs(state.y - floorY) < 0.05f &&
-                kotlin.math.abs(state.x - state.barrelX) < 0.07f
+            kotlin.math.abs(state.y - floorY) < FLOOR_SNAP &&
+                kotlin.math.abs(state.x - state.barrelX) < BARREL_HIT_X
         if (state.invuln > 0f || !nearBarrel) return state
         if (state.form == 1) return state.copy(form = 0, invuln = HIT_INVULN)
         val lives = state.lives - 1
@@ -127,7 +127,7 @@ class ClimbEngine {
         state: ClimbState,
         x: Float,
         y: Float,
-    ): Boolean = kotlin.math.abs(state.x - x) < 0.08f && kotlin.math.abs(state.y - y) < 0.08f
+    ): Boolean = kotlin.math.abs(state.x - x) < NEAR && kotlin.math.abs(state.y - y) < NEAR
 
     internal companion object {
         val FLOORS: FloatArray = floatArrayOf(0.12f, 0.34f, 0.56f, 0.78f)
@@ -140,10 +140,14 @@ class ClimbEngine {
                 0.50f to 0.78f,
             )
         const val MUSHROOM_X: Float = 0.5f
-        const val JUMP: Float = 0.85f
-        const val GRAVITY: Float = -2.4f
-        const val BARREL_SPEED: Float = 0.35f
-        const val LIVES_MAX: Int = 3
-        const val HIT_INVULN: Float = 1.2f
+        val JUMP: Float get() = PrizeTuning.rules.climbMotion.jump
+        val GRAVITY: Float get() = PrizeTuning.rules.climbMotion.gravity
+        val MOVE: Float get() = PrizeTuning.rules.climbMotion.move
+        val BARREL_SPEED: Float get() = PrizeTuning.rules.climb.barrelSpeed
+        val LIVES_MAX: Int get() = PrizeTuning.rules.climb.lives
+        val HIT_INVULN: Float get() = PrizeTuning.rules.climb.hitInvuln
+        val NEAR: Float get() = PrizeTuning.rules.climb.near
+        val BARREL_HIT_X: Float get() = PrizeTuning.rules.climb.barrelHitX
+        val FLOOR_SNAP: Float get() = PrizeTuning.rules.climb.floorSnap
     }
 }

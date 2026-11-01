@@ -670,7 +670,7 @@ milestones:
           - CI-025
         tasks:
           - id: MAT-005-T1
-            status: open
+            status: done
             title: Share prize simulation between GDScript and domain engines
             instructions:
               files:
@@ -986,7 +986,7 @@ milestones:
               - Spoken lines live in VoiceScripts
 
       - id: MAT-009
-        status: open
+        status: done
         title: Godot prize reliability and prize UX
         decision: >-
           In the context of prize scenes that stay on the blue boot color,
@@ -1006,7 +1006,7 @@ milestones:
               - invaders, climb, runner, and kart assign Vector2 before use
               - boot.gd defaults to runner.tscn
           - id: MAT-009-T2
-            status: open
+            status: done
             title: Loading, failure, and result screens for a prize
             verification:
               - A mascot overlay shows while the engine starts
@@ -1014,7 +1014,7 @@ milestones:
               - A Ganhaste card replaces the spoken-only return
               - The 3–5 HUD is icon-first and kart boost is its own button
           - id: MAT-009-T3
-            status: open
+            status: done
             title: Cancel Godot embed retries when the host is destroyed
             instructions:
               files:
