@@ -17,6 +17,11 @@ enum class LearningModule(
     MEMORY(setOf(AgeBand.THREE_TO_FIVE, AgeBand.SIX_TO_EIGHT)),
     LETTERS(setOf(AgeBand.THREE_TO_FIVE, AgeBand.SIX_TO_EIGHT)),
     WORDS(setOf(AgeBand.SIX_TO_EIGHT)),
+    ODD_ONE(setOf(AgeBand.THREE_TO_FIVE)),
+    SIZE(setOf(AgeBand.THREE_TO_FIVE)),
+    PATTERNS(setOf(AgeBand.THREE_TO_FIVE)),
+    CLOCK(setOf(AgeBand.SIX_TO_EIGHT)),
+    MONEY(setOf(AgeBand.SIX_TO_EIGHT)),
 }
 
 /**

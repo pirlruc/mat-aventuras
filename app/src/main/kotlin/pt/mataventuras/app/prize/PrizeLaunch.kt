@@ -1,0 +1,38 @@
+package pt.mataventuras.app.prize
+
+import android.content.Context
+import android.content.Intent
+import pt.mataventuras.app.engine.EngineLauncher
+import pt.mataventuras.domain.engine.RewardCatalog
+import pt.mataventuras.domain.model.AgeBand
+import pt.mataventuras.domain.model.Mascot
+import pt.mataventuras.domain.prize.PrizeOffer
+import pt.mataventuras.domain.prize.PrizeOffers
+
+/**
+ * Reward intent. Compose prizes stay in this process. Godot prizes use the engine process.
+ */
+object PrizeLaunch {
+    /**
+     * Intent for the next prize. [offer] is injected in tests.
+     */
+    fun intent(
+        context: Context,
+        age: AgeBand,
+        mascot: Mascot,
+        name: String,
+        offer: PrizeOffer = PrizeOffers.pick(age),
+    ): Intent =
+        when (offer) {
+            is PrizeOffer.Godot ->
+                EngineLauncher.intentFor(
+                    context,
+                    age,
+                    mascot,
+                    name,
+                    kind = RewardCatalog.engineKind(offer.game),
+                    game = offer.game,
+                )
+            is PrizeOffer.Compose -> ComposePrizeActivity.intent(context, offer.prize)
+        }
+}

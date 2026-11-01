@@ -66,6 +66,12 @@
         </activity>
 
         <activity
+            android:name=".prize.ComposePrizeActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.MatAventuras.Game" />
+
+        <activity
             android:name=".engine.Platformer2dActivity"
             android:exported="false"
             android:launchMode="singleInstance"

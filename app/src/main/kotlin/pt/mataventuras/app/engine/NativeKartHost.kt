@@ -80,7 +80,7 @@ internal object NativeKartHost {
             val spans = remember { ArrayList<OffroadSpan>(96) }
             LaunchedEffect(Unit) {
                 var frames = 0
-                while (!loop.state.finished && frames < frameLimit) {
+                while (kartKeepsTicking(loop.state.finished, frames, frameLimit)) {
                     withFrameNanos {
                         loop.tick()
                         state = loop.state
@@ -149,6 +149,12 @@ internal object NativeKartHost {
     fun hudLines(loop: OffroadRacerLoop): Pair<String, String> =
         KartHud.raceOverlay(loop.state, loop.circuit.length)
 }
+
+internal fun kartKeepsTicking(
+    finished: Boolean,
+    frames: Int,
+    limit: Int,
+): Boolean = !finished && frames < limit
 
 internal fun DrawScope.paintKartCourse(
     spans: MutableList<OffroadSpan>,

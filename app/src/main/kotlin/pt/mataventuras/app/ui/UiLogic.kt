@@ -648,7 +648,7 @@ internal object UiLogic {
     private fun soupCell(count: Int, span: Float, gap: Float): Float =
         if (count > 0 && span > 0f) (span - gap * (count - 1)) / count else 0f
 
-    private fun soupSlotOrNull(cell: Float, offset: Float, gap: Float, count: Int): Int? =
+    internal fun soupSlotOrNull(cell: Float, offset: Float, gap: Float, count: Int): Int? =
         if (cell > 0f && count > 0) soupSlot(offset, cell, gap, count) else null
 
     fun soupSlot(
@@ -711,8 +711,17 @@ internal object UiLogic {
     ): SoupRelease {
         if (selected.isEmpty() || paths.isEmpty()) return SoupRelease.IGNORE
         if (soupMatchedPath(selected, paths, found) != null) return SoupRelease.HIT
-        val minLen = paths.filterIndexed { i, _ -> i !in found }.minOfOrNull { it.size } ?: 1
-        return if (selected.size < minLen) SoupRelease.IGNORE else SoupRelease.MISS
+        var minLen: Int? = null
+        var index = 0
+        while (index < paths.size) {
+            if (index !in found) {
+                val size = paths[index].size
+                if (minLen == null || size < minLen) minLen = size
+            }
+            index += 1
+        }
+        val needed = minLen ?: 1
+        return if (selected.size < needed) SoupRelease.IGNORE else SoupRelease.MISS
     }
 
     /**
@@ -748,14 +757,9 @@ internal object UiLogic {
         found: Set<Int>,
         cellCount: Int,
     ): Int? {
-        val kind = soupReleaseKind(selected, paths, found)
-        if (kind == SoupRelease.IGNORE) return null
+        if (soupReleaseKind(selected, paths, found) == SoupRelease.IGNORE) return null
         val hit = soupMatchedPath(selected, paths, found)
-        return if (kind == SoupRelease.HIT && hit != null) {
-            paths[hit].first()
-        } else {
-            soupMissIndex(paths.flatten(), cellCount)
-        }
+        return if (hit != null) paths[hit].first() else soupMissIndex(paths.flatten(), cellCount)
     }
 
     /**

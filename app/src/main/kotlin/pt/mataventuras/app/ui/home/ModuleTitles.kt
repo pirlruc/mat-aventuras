@@ -36,6 +36,16 @@ internal object ModuleTitles {
             LearningModule.MEMORY -> "Memória"
             LearningModule.LETTERS -> "Letras"
             LearningModule.WORDS -> "Palavras"
+            else -> addedNoun(module)
+        }
+
+    private fun addedNoun(module: LearningModule): String =
+        when (module) {
+            LearningModule.ODD_ONE -> "Qual é diferente"
+            LearningModule.SIZE -> "Grande e pequeno"
+            LearningModule.PATTERNS -> "Padrões"
+            LearningModule.CLOCK -> "Que horas são"
+            LearningModule.MONEY -> "Euros e cêntimos"
             else -> "Jogar"
         }
 }

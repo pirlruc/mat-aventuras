@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pt.mataventuras.app.engine.EngineLauncher
+import pt.mataventuras.app.prize.PrizeLaunch
 import pt.mataventuras.app.speech.SpeechEngine
 import pt.mataventuras.app.ui.RewardReturn
 import pt.mataventuras.app.ui.lesson.RewardRecorder
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
                 container = app.container,
                 onSpeak = { speech.speak(it) },
                 onReward = { ageGroup, mascot, name ->
-                    engineLauncher.launch(EngineLauncher.intentFor(this, ageGroup, mascot, name))
+                    engineLauncher.launch(PrizeLaunch.intent(this, ageGroup, mascot, name))
                 },
                 celebrate = celebrateWin,
                 onDismissWin = { celebrateWin = false },

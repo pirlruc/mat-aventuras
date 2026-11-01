@@ -41,6 +41,16 @@ open class ExerciseGenerator(
             LearningModule.MULTIPLICATION -> multiplication()
             LearningModule.DIVISION -> division()
             LearningModule.LOGIC -> logic(age)
+            else -> boardChoice(module)
+        }
+
+    private fun boardChoice(module: LearningModule): Exercise =
+        when (module) {
+            LearningModule.ODD_ONE -> OddOneBoard(random).make()
+            LearningModule.SIZE -> SizeBoard(random).make()
+            LearningModule.PATTERNS -> PatternBoard(random).make()
+            LearningModule.CLOCK -> ClockBoard(random).make()
+            LearningModule.MONEY -> MoneyBoard(random).make()
             else -> error("Board lessons are not choice questions.")
         }
 
