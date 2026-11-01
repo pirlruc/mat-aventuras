@@ -682,7 +682,7 @@ milestones:
               - KT-TEST-001
 
           - id: MAT-005-T2
-            status: open
+            status: done
             title: Enable R8 on the release APK without breaking Godot
             instructions:
               files:
@@ -695,7 +695,7 @@ milestones:
               - KT-PERF-001
 
           - id: MAT-005-T3
-            status: open
+            status: done
             title: Shrink app Kover exclusions to Godot JNI only
             instructions:
               files:
@@ -747,7 +747,7 @@ milestones:
               - CI-025
 
           - id: MAT-005-T7
-            status: open
+            status: done
             title: Narrow R8 keep rules to named members
             instructions:
               files:
@@ -759,7 +759,7 @@ milestones:
               - ANDROID-BUILD-003
 
           - id: MAT-005-T8
-            status: open
+            status: done
             title: Store the parent PIN with a Keystore AES-GCM key
             instructions:
               files:
@@ -773,7 +773,7 @@ milestones:
               - ANDROID-SEC-001
 
           - id: MAT-005-T9
-            status: open
+            status: done
             title: Raise PBKDF2 iterations and rehash on unlock
             instructions:
               files:
@@ -785,7 +785,7 @@ milestones:
               - KT-SEC-001
 
           - id: MAT-005-T10
-            status: open
+            status: done
             title: Review MainActivity singleInstance
             instructions:
               files:
@@ -887,7 +887,7 @@ milestones:
               - ANDROID-LINT-001
 
           - id: MAT-006-T3
-            status: open
+            status: done
             title: Prove CodeQL compile and the APK bill on an SDK host
             instructions:
               files:

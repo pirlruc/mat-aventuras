@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** security and coverage (`feature-security-r8-coverage`, not pushed)
+**Last agent focus:** security and coverage (`feature-security-r8-coverage`)
 
 ---
 
@@ -50,8 +50,8 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-002 | done | Emulator job, Robolectric gates, lesson packs |
 | MAT-003 | done | Godot 4 plugin in `:engine2d` and `:engine3d` |
 | MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
-| MAT-005 | open | T1 and T4–T6 done. Local `feature-security-r8-coverage` has the Keystore PIN, 600k PBKDF2, narrowed keep rules, and Compose BOM `2026.09.00` (`compileSdk` 37). T3 is blocked: with the screen classes measured, JaCoCo Kover is about 92% line and 87% branch. Do not push until both floors are 95. T2 still needs a minified prize on `mat_api36` |
-| MAT-006 | open | T1 and T2 done. T3 is the androiddevops CodeQL and APK-bill proof |
+| MAT-005 | open | T1–T10 done on `feature-security-r8-coverage`. T11 (release keystore outside the repo) stays open. `:app` Kover with `LessonScreenKt`, `NavGraphKt`, `NativeKartHost`, and `NativeRunnerHost` measured is 98.1% line and 95.1% branch. A minified release on `mat_api36` logged `MatPrize` for runner, climb, chomp, invaders, and kart |
+| MAT-006 | open | T1–T3 done. CodeQL CLI 2.27.0 (`java-security-and-quality`) and the debug APK CycloneDX/OSV bill both report zero high or critical findings. The epic stays open |
 | MAT-007 | done | `BandDifficulty` replaces `isSevenYears()`. Memory, word board, cell size, and pt-PT parent titles are on this branch |
 | MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
 | MAT-009 | done | Loading overlay, timeout with Tentar outra vez / Voltar, Ganhaste card, icon HUD, kart boost button, and cancelled embed retries |
@@ -119,9 +119,8 @@ bash scripts/check-ci-local.sh
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so a JDK-only
   run can still gate `:domain`. This host has the SDK. CI's `android` job
   runs ktlint, detekt, unit tests, Kover, and `:app:lintDebug` on all three
-  modules. CodeQL compile and the APK bill are still MAT-006-T3: prove the
-  androiddevops callers on an SDK host and keep the SARIF and OSV gates
-  green. With the SDK, coverage is required for all three modules.
+  modules. CodeQL CLI 2.27.0 and the debug APK bill were proved on this host
+  (zero high or critical). With the SDK, coverage is required for all three modules.
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
@@ -146,12 +145,10 @@ bash scripts/check-ci-local.sh
   Tests click those footer buttons without `performScrollTo` (they are not
   inside the scrollable play column). `LessonPlayColumn` / `LessonExitBar`
   keep Compose screens out of detekt `LongMethod`.
-- `:app` kover is 95% line and branch. New arcade/scene branches need tests
-  (`EngineCoverageTest`); do not exclude them to make the gate pass.
-  Measuring `LessonScreenKt`, `NavGraphKt`, `NativeKartHost`, and
-  `NativeRunnerHost` drops the module to about 92% line and 87% branch
-  even with `useJacoco()` (Compose compiler branches, kotlinx-kover #756).
-  Do not push `feature-security-r8-coverage` until both floors hold.
+- `:app` Kover uses JaCoCo (`kover { useJacoco() }`, kotlinx-kover #756).
+  `LessonScreenKt`, `NavGraphKt`, `NativeKartHost`, and `NativeRunnerHost`
+  stay in the report. The latest report is 98.1% line and 95.1% branch.
+  New arcade or lesson branches need tests. Do not exclude them to hold 95.
 - `OffroadScene.fill` clears the span list each call. Four gates put the first
   arch at 96 m, so `DRAW_AHEAD` must be greater than that (140 m) or spawn
   paints no posts. Near META, assert `BANNER_ARGB`, not `POST_ARGB`. Kart TTS
@@ -187,20 +184,22 @@ bash scripts/check-ci-local.sh
   and digit buttons use the `sudoku-digit` tag. Age 3 keeps an empty solution,
   one glowing question cell, and `correct-answer`. Extra blanks stay uniquely
   determined (`SudokuHoles.EXTRA_BLANK` is `·`; the question cell is `""`).
-- PIN prefs use `EncryptedSharedPreferences` on device. Keystore failures
-  fail closed. Robolectric sets `allowPlaintextFallback` and uses a distinct
-  `*_plain` prefs file — never mix encrypted XML with cleartext.
+- New parent PINs are sealed with a Keystore AES-GCM key (`PinSealer`).
+  An old EncryptedSharedPreferences keyset is read with Tink on the next
+  unlock. `security-crypto` is not a dependency. Keystore failures fail
+  closed. Robolectric uses 1000 PBKDF2 iterations; a device uses 600000
+  and rehashes an older hash on unlock.
 - `RewardCatalog.fromName` / `packedScenePath` reject cross-engine extras so
   a 2D process cannot load `kart.tscn` (or `boot.tscn`).
 - PIN unlock goes through `PinRepository.update` so lockout is not racy.
 - PIN digits are ASCII `0-9` only. `PinPolicy.derive` clears the password chars and the `PBEKeySpec`.
-- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is 3. `MIGRATION_1_2` rewrites `THREE_YEARS` and `SEVEN_YEARS`. `MIGRATION_2_3` adds `prizeLimitSeconds` (default 120). `security-crypto` is `1.1.0-alpha06` so `MasterKey.Builder` exists. `BandDifficulty.forAge` is the range switch. NUMBERS sudoku stays the small board on both bands. Do not bring back `isSevenYears()`.
+- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is 3. `MIGRATION_1_2` rewrites `THREE_YEARS` and `SEVEN_YEARS`. `MIGRATION_2_3` adds `prizeLimitSeconds` (default 120). `security-crypto` is gone. `BandDifficulty.forAge` is the range switch. NUMBERS sudoku stays the small board on both bands. Do not bring back `isSevenYears()`.
 - Prize GDScript pointer/HUD/steer helpers live on the `Host` autoload (`read_pointer`, `make_hud`, `axis_from_normalized_x`). Keep them aligned with `EngineInputMap` (dead-zone 0.14, jump flick 56 px).
 - Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
 - `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
 - Local secret scan: `git config core.hooksPath .githooks` runs `scripts/gitleaks-pre-commit.sh` (KT-SEC-003). CI still scans; the hook fails closed if `gitleaks` is missing.
 - Guardrails tag `1.13.1` (`1945211a`) and scaffold tag `1.10.2` (`c8eddcfb`) are the pins. KT-SEC-002 is semgrep `p/kotlin` on `common-secrets-sast`; KT-SEC-003 is gitleaks there too. KT-DOC-001 Dokka `doc_coverage` does not apply (no published API) and is recorded, not lowered. The one `@SuppressLint("MissingSuperCall")` is `RewardGodotFragment`: those JNI overrides must not call super. Guardrails 1.13.1 treats that as a platform contract, so the two suppression deviations can be dropped once the pin is on `main`. The 14-day number is not lowered. `scripts/verify-licenses.py` reads `license_deny_list` from the guardrails supply-chain thresholds (SC-LIC-001), including BUSL-1.1, Commons-Clause, and CC-BY-NC.
-- `:app` Kover still excludes Compose facades (`LessonScreenKt`, `NavGraphKt`, `@Composable`, `*Kt$*`), native Canvas hosts, and `engine.godot.*`. MAT-005-T3 removes the two hosts and the two screen facades once the 95 percent floor still holds. Room `*_Impl` and `BuildConfig` stay excluded as generated code. KT-TEST-002 names kotlinx.serialization generated members, not Room or the Godot JNI package. The deviation should shrink to the Godot JNI package.
+- `:app` Kover excludes `BuildConfig`, `*ComposableSingletons*`, and `pt.mataventuras.app.engine.godot.*`. The four screen classes are measured. KT-TEST-002 records the Godot JNI package. Floors stay 95. Do not add `key`, `org_default`, or `repo_value`.
 - Do not gate jobs on `github.actor == 'dependabot[bot]'` (zizmor `bot-conditions`). Dependabot updates use `cooldown.default-days: 7`. Workflow lint is zizmor inside `common-infra-lint` (and `scripts/check-ci-docker.sh` locally). There is no in-repo zizmor-action job.
 - CodeQL action `v4.38.1` commit is `1c5b675653bb5c22dbe9b12b556ec555138e09fd` (the tag object is not the commit). `upload: never` keeps `contents: read`. The compile step must stay manual (`build-mode: manual`). The APK SBOM is the debug runtime classpath (`scripts/gradle-to-cyclonedx.py` + osv-scanner `2.6.0`). Dex has no Maven coordinates, so scanning the APK file itself yields an empty bill. Community semgrep is `p/kotlin` beside `.semgrep.yml`, still semgrep `1.128.1`, and it runs after grype so `.ci-venv` is not scanned.
 - Do not merge `cursor/godot-black-screen-invaders-5d7b` or
@@ -229,8 +228,8 @@ bash scripts/check-ci-local.sh
 ## Suggested next work
 
 1. Tag `0.1.0` is on main. Do not move it. `release.yml` builds an APK through androiddevops `android-release-apk`, then calls common-release `5.7.0` with `release_artifact: android-release-apk`. Signing secrets are not set. Do not generate the keystore until the step before the 0.2.0 release, and the owner must back it up.
-2. `feature-prize-ux` is the prize UX branch (MAT-009-T2, MAT-009-T3, MAT-005-T1). Next product branch is `feature-security-r8-coverage` (MAT-005-T2, T3, T7–T10, MAT-006-T3).
-3. MAT-011 stays open except the five lessons and two Compose prizes on `feature-new-lessons-prizes`.
+2. `feature-security-r8-coverage` holds the Keystore PIN, the 95 percent floors with the four screen classes measured, and the minified-prize, CodeQL, and APK-bill proofs. MAT-005-T11 (release keystore) stays open until the step before the 0.2.0 release.
+3. Next product branch is `feature-new-lessons-prizes`. MAT-011 stays open except the five lessons and two Compose prizes.
 4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
 5. When androiddevops later becomes private, this public repo cannot call its workflows. Vendor the pinned workflow. Do not change visibility from an agent session. mat-aventuras stays public.
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review is issues-only, after 0.2.0, and dedupes this list.
@@ -238,4 +237,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset already requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, and the two python-quality job names. Reviews stay at 0. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed.
 9. bestpractices.dev is last, after 0.2.0 and the companion issues.
 
-*Last updated: 2026-11-01 (prize UX merged as #112; security branch is local and blocked on Kover 95).*
+*Last updated: 2026-11-01 (security branch: Kover 95 with the four screens measured; minified prizes, CodeQL, and the APK bill are green).*
