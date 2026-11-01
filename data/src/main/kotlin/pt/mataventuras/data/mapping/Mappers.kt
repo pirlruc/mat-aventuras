@@ -21,6 +21,7 @@ fun ProfileEntity.toDomain(): ChildProfile = ChildProfile(
     avatarId = avatarId,
     points = points,
     createdAtEpochMs = createdAtEpochMs,
+    prizeLimitSeconds = prizeLimitSeconds,
 )
 
 /** Maps a domain profile to a Room row. */
@@ -32,6 +33,7 @@ fun ChildProfile.toEntity(): ProfileEntity = ProfileEntity(
     avatarId = avatarId,
     points = points,
     createdAtEpochMs = createdAtEpochMs,
+    prizeLimitSeconds = prizeLimitSeconds,
 )
 
 /** Maps a stored session row to the domain model. */

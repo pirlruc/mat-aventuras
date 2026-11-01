@@ -1,5 +1,6 @@
 package pt.mataventuras.app.ui.lesson
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -25,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,8 +46,11 @@ import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,6 +106,20 @@ fun LessonScreen(
     var flashTick by remember { mutableIntStateOf(0) }
 
     DisposableEffect(cues) { onDispose { cues.release() } }
+    val leaveLesson: () -> Unit = {
+        scope.launch {
+            LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
+            onExit()
+        }
+    }
+    BackHandler {
+        if (LessonFlow.shouldAskExitConfirm(profile.ageGroup, confirmingExit)) {
+            confirmingExit = true
+            onSpeak(VoiceScripts.confirmExit(profile.ageGroup))
+        } else {
+            leaveLesson()
+        }
+    }
     RepeatPromptOnResume(spoken = exercise.spoken, onSpeak = onSpeak)
 
     LaunchedEffect(exercise.prompt) { onSpeak(exercise.spoken) }
@@ -122,9 +141,10 @@ fun LessonScreen(
         if (!pickLock.compareAndSet(false, true)) return@handler
         flashCorrect = correct
         flashTick += 1
-        cues.play(correct) { code -> view.performHapticFeedback(code) }
+        val gentle = !correct && profile.ageGroup == AgeBand.THREE_TO_FIVE
+        cues.play(correct, gentle) { code -> view.performHapticFeedback(code) }
         onSpeak(if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN)
-        val delta = container.rewards.pointsForAttempt(correct)
+        val delta = container.rewards.pointsForAttempt(correct, profile.ageGroup)
         points = container.rewards.applyPoints(points, delta)
         val ticket = pointsTicket.incrementAndGet()
         if (correct) {
@@ -184,6 +204,8 @@ fun LessonScreen(
                 fillEveryBlank = fillSudoku,
                 onBoardFocus = { index -> sudoku = SudokuPlay.focus(sudoku, index) },
                 age = profile.ageGroup,
+                streak = streak,
+                onSpeak = onSpeak,
             )
             LessonExitBar(
                 ageGroup = profile.ageGroup,
@@ -191,15 +213,15 @@ fun LessonScreen(
                 onSpeak = onSpeak,
                 onConfirm = { confirmingExit = true },
                 onStay = { confirmingExit = false },
-                onLeave = {
-                    scope.launch {
-                        LessonRecorder.persist(container, profile, module, hits, misses, startedAt)
-                        onExit()
-                    }
-                },
+                onLeave = leaveLesson,
             )
         }
-        AnswerFlash(correct = flashCorrect, tick = flashTick)
+        AnswerFlash(
+            correct = flashCorrect,
+            tick = flashTick,
+            gentle = !flashCorrect && profile.ageGroup == AgeBand.THREE_TO_FIVE,
+            mascot = profile.favouriteMascot.displayName,
+        )
     }
 }
 
@@ -220,6 +242,8 @@ private fun LessonPlayColumn(
     fillEveryBlank: Boolean,
     onBoardFocus: (Int) -> Unit,
     age: AgeBand,
+    streak: Int,
+    onSpeak: (String) -> Unit,
 ) {
     val tokens = LocalUiTokens.current
     Column(
@@ -230,6 +254,16 @@ private fun LessonPlayColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Button(
+            onClick = { onSpeak(exercise.spoken) },
+            modifier = Modifier
+                .height(64.dp)
+                .semantics(mergeDescendants = true) { contentDescription = "Ouvir outra vez" },
+        ) { Text("Ouvir") }
+        Text(
+            UiLogic.prizeStarLine(streak),
+            modifier = Modifier.semantics { contentDescription = "${UiLogic.prizeStars(streak)} de 3 estrelas" },
+        )
         if (UiLogic.showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {
             StarGrid(exercise.visualCount)
         }
@@ -241,13 +275,15 @@ private fun LessonPlayColumn(
         }
         UiLogic.targetShapeToDraw(module, exercise.targetShape, exercise.play.kind)?.let { ShapeGlyph(it) }
         if (UiLogic.showsSudokuGrid(exercise.play.kind)) {
-            Text(
-                UiLogic.sudokuBanner(exercise.play.kind) ?: "Sudoku",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF0D47A1),
-                modifier = Modifier.testTag("sudoku-banner"),
-            )
+            CappedScale {
+                Text(
+                    UiLogic.sudokuBanner(exercise.play.kind, age) ?: "Sudoku",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF0D47A1),
+                    modifier = Modifier.testTag("sudoku-banner"),
+                )
+            }
             SudokuBoard(
                 exercise = exercise,
                 cells = boardCells,
@@ -300,6 +336,7 @@ private fun LessonPlayColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp)
+                            .semantics(mergeDescendants = true) { contentDescription = text }
                             .testTag(
                                 UiLogic.optionAnswerTag(
                                     correct = exercise.isCorrect(index),
@@ -335,10 +372,13 @@ private fun LessonExitBar(
             onClick = {
                 if (LessonFlow.shouldAskExitConfirm(ageGroup, confirming)) {
                     onConfirm()
-                    VoiceScripts.confirmExit(ageGroup)?.let(onSpeak)
+                    onSpeak(VoiceScripts.confirmExit(ageGroup))
                 } else {
                     onLeave()
                 }
+            },
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = LessonFlow.exitLabel(confirming)
             },
         ) { Text(LessonFlow.exitLabel(confirming)) }
         if (LessonFlow.showsStay(confirming)) {
@@ -375,6 +415,8 @@ private fun RepeatPromptOnResume(
 private fun AnswerFlash(
     correct: Boolean,
     tick: Int,
+    gentle: Boolean,
+    mascot: String,
 ) {
     val alpha = remember { Animatable(0f) }
     LaunchedEffect(tick) {
@@ -384,12 +426,12 @@ private fun AnswerFlash(
     }
     val fade = alpha.value
     if (!UiLogic.showsAnswerFlash(fade)) return
-    val color = Color(UiLogic.answerFlashArgb(correct))
+    val color = Color(UiLogic.answerFlashArgb(correct, gentle))
     val scale = UiLogic.answerFlashScale(fade)
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(UiLogic.answerFlashScrimArgb(correct)).copy(alpha = fade * 0.55f))
+            .background(Color(UiLogic.answerFlashScrimArgb(correct, gentle)).copy(alpha = fade * 0.55f))
             .testTag("answer-flash"),
         contentAlignment = Alignment.Center,
     ) {
@@ -401,12 +443,14 @@ private fun AnswerFlash(
                 scaleY = scale
             },
         ) {
+            CappedScale {
             Text(
-                UiLogic.answerFlashGlyph(correct),
+                UiLogic.answerFlashGlyph(correct, gentle, mascot),
                 fontSize = 96.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = color,
             )
+            }
             Text(
                 UiLogic.answerFlashCaption(correct),
                 fontSize = 28.sp,
@@ -460,6 +504,9 @@ private fun SudokuBoard(
                                     ),
                                 ),
                             )
+                            .semantics(mergeDescendants = true) {
+                                contentDescription = if (cell.isBlank()) "casa vazia" else cell
+                            }
                             .testTag("board-cell-$index")
                             .then(sudokuFocusModifier(fillEveryBlank, cell) { onFocus(index) }),
                     ) {
@@ -788,6 +835,15 @@ private fun ShapeGlyph(shape: GeometricShape) {
                 )
             }
         }
+    }
+}
+
+@Composable
+internal fun CappedScale(content: @Composable () -> Unit) {
+    val current = LocalDensity.current
+    val scale = current.fontScale.coerceAtMost(UiLogic.MAX_FONT_SCALE)
+    CompositionLocalProvider(LocalDensity provides Density(current.density, scale)) {
+        content()
     }
 }
 

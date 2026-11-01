@@ -132,11 +132,11 @@ so physics is unit-tested without an emulator.
 All user data stays on the device. The app declares **no `INTERNET`
 permission**. No Retrofit, Firebase, or Play Games.
 
-### Room schema (`mat_aventuras.db`, version 2)
+### Room schema (`mat_aventuras.db`, version 3)
 
 | Table | Role |
 | --- | --- |
-| `profiles` | Child profile: name, `AgeBand`, mascot code, avatar, points |
+| `profiles` | Child profile: name, `AgeBand`, mascot code, avatar, points, prize time limit |
 | `sessions` | Lesson session: module, hits, misses, duration |
 | `badges` | Unique `(profileId, code)` badges |
 | `avatars` | Unique `(profileId, avatarId)` unlocks |
@@ -213,8 +213,8 @@ Finishing a reward Activity awards 15 bonus points on the last profile.
 | **3–5** | Counting 1–10 (`COUNTING`); shapes (`SHAPES`); digits and a small sudoku (`NUMBERS`); addition; sequences (`LOGIC`); memory; letters | 2D runner, letter-climb, or maze (`RunnerPluginActivity` in `:engine2d`) |
 | **6–8** | Numbers, addition, subtraction, multiplication, exact division, logic, memory, letters, and missing-letter words | Those 2D prizes, plus invaders, and the dirt race (`KartPluginActivity` in `:engine3d`) |
 
-Ages 6–8 confirm before leaving a lesson (`VoiceScripts.confirmExit`).
-Ages 3–5 leave on one tap. A finished reward returns `RESULT_FINISHED`;
+Both age bands confirm before leaving a lesson (`VoiceScripts.confirmExit`).
+Ages 3–5 see "Quadrado mágico" on the number square. A finished reward returns `RESULT_FINISHED`;
 the host speaks a pt-PT line and applies bonus points.
 
 `BandDifficulty.forAge` picks the ranges. Ages 3–5 stay on numbers 0–9,

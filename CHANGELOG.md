@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A speaker replay button, three stars toward the next prize, and a
+  parent-set prize time limit stored in Room schema 3.
+- Ages 3–5 confirm before leaving a lesson. A miss for that band keeps
+  the points and shows the mascot in amber.
+
 ### Fixed
 
 - Ages 3–5 stay on small numbers, sums up to 10, and short logic steps.

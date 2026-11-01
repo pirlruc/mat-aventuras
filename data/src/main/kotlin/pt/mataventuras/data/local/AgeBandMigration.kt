@@ -18,3 +18,16 @@ val MIGRATION_1_2: Migration =
             )
         }
     }
+
+/**
+ * Adds a parent-set prize length. Existing rows keep two minutes.
+ * No rows are deleted.
+ */
+val MIGRATION_2_3: Migration =
+    object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE profiles ADD COLUMN prizeLimitSeconds INTEGER NOT NULL DEFAULT 120",
+            )
+        }
+    }

@@ -114,7 +114,13 @@ internal object UiLogic {
     /**
      * Sudoku shows a titled board so it is not mistaken for a button row.
      */
-    fun sudokuBanner(kind: PlayKind): String? = if (kind == PlayKind.SUDOKU) "Sudoku" else null
+    fun sudokuBanner(
+        kind: PlayKind,
+        age: AgeBand = AgeBand.SIX_TO_EIGHT,
+    ): String? {
+        if (kind != PlayKind.SUDOKU) return null
+        return if (age == AgeBand.THREE_TO_FIVE) "Quadrado mágico" else "Sudoku"
+    }
 
     /**
      * Box width in cells for mini-sudoku grid lines.
@@ -314,7 +320,15 @@ internal object UiLogic {
     /**
      * Glyph on the correct/wrong flash (kids can read a tick or cross).
      */
-    fun answerFlashGlyph(correct: Boolean): String = if (correct) "✓" else "✗"
+    fun answerFlashGlyph(
+        correct: Boolean,
+        gentle: Boolean = false,
+        mascot: String = "",
+    ): String {
+        if (correct) return "✓"
+        if (gentle && mascot.isNotEmpty()) return mascot
+        return "✗"
+    }
 
     /**
      * Caption under the flash glyph. Same pt-PT lines TTS already speaks.
@@ -325,12 +339,26 @@ internal object UiLogic {
     /**
      * Solid colour for the flash glyph.
      */
-    fun answerFlashArgb(correct: Boolean): Long = if (correct) 0xFF2E7D32 else 0xFFC62828
+    fun answerFlashArgb(
+        correct: Boolean,
+        gentle: Boolean = false,
+    ): Long {
+        if (correct) return 0xFF2E7D32
+        if (gentle) return 0xFFF9A825
+        return 0xFFC62828
+    }
 
     /**
      * Scrim behind the flash so the board still peeks through.
      */
-    fun answerFlashScrimArgb(correct: Boolean): Long = if (correct) 0x882E7D32 else 0x88C62828
+    fun answerFlashScrimArgb(
+        correct: Boolean,
+        gentle: Boolean = false,
+    ): Long {
+        if (correct) return 0x882E7D32
+        if (gentle) return 0x88F9A825
+        return 0x88C62828
+    }
 
     /**
      * Flash length in milliseconds.
@@ -350,13 +378,48 @@ internal object UiLogic {
     /**
      * ToneGenerator programme: ack on a hit, nack on a miss.
      */
-    fun answerTone(correct: Boolean): Int =
-        if (correct) ToneGenerator.TONE_PROP_ACK else ToneGenerator.TONE_PROP_NACK
+    fun answerTone(
+        correct: Boolean,
+        gentle: Boolean = false,
+    ): Int {
+        if (correct) return ToneGenerator.TONE_PROP_ACK
+        if (gentle) return ToneGenerator.TONE_PROP_BEEP
+        return ToneGenerator.TONE_PROP_NACK
+    }
 
     /**
      * How long the chime plays.
      */
-    fun answerToneMs(correct: Boolean): Int = if (correct) 180 else 260
+    fun answerToneMs(
+        correct: Boolean,
+        gentle: Boolean = false,
+    ): Int {
+        if (correct) return 180
+        if (gentle) return 140
+        return 260
+    }
+
+    /**
+     * Filled stars toward the next prize. A finished set shows all three.
+     */
+    fun prizeStars(streak: Int): Int {
+        if (streak <= 0) return 0
+        val remainder = streak % 3
+        return if (remainder == 0) 3 else remainder
+    }
+
+    /**
+     * Three stars, filled up to [prizeStars].
+     */
+    fun prizeStarLine(streak: Int): String {
+        val filled = prizeStars(streak)
+        return "★".repeat(filled) + "☆".repeat(3 - filled)
+    }
+
+    /**
+     * Largest font scale applied to fixed-size lesson text.
+     */
+    const val MAX_FONT_SCALE: Float = 1.3f
 
     /**
      * STREAM_MUSIC volume for [ToneGenerator] (0..100).
@@ -412,7 +475,7 @@ internal object UiLogic {
     fun lessonScoreLine(
         hits: Int,
         points: Int,
-    ): String = "$hits certos · $points pts"
+    ): String = "$hits certos · $points pontos"
 
     /**
      * PIN submit button (pt-PT).
@@ -516,7 +579,7 @@ internal object UiLogic {
     fun avatarLine(
         owned: Boolean,
         code: AvatarCode,
-    ): String = if (owned) "★ ${code.title}" else "☆ ${code.title} (${code.minPoints} pts)"
+    ): String = if (owned) "★ ${code.title}" else "☆ ${code.title} (${code.minPoints} pontos)"
 
     /**
      * TTS language is usable.

@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -121,6 +122,8 @@ class ParentAndLessonLogicTest {
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+        compose.onNodeWithText("1 min").performScrollTo().performClick()
+        compose.waitForIdle()
         compose.onNodeWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
             .performScrollTo()
             .assertIsDisplayed()
@@ -274,6 +277,26 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText(VoiceScripts.PARENT_DASHBOARD).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Somar com o Canalizador Valente").performScrollTo().performClick()
         assertEquals(LearningModule.ADDITION, opened)
+    }
+
+    @Test
+    fun youngHomeLockOpensTheParentArea() {
+        val profile =
+            ChildProfile(2, "Rui", AgeBand.THREE_TO_FIVE, Mascot.BRAVE_PLUMBER, AvatarCode.STARTER.name, 12, 0)
+        var parents = false
+        compose.setContent {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
+                HomeScreen(
+                    profile = profile,
+                    onSpeak = {},
+                    onModule = {},
+                    onLeaderboard = {},
+                    onParents = { parents = true },
+                )
+            }
+        }
+        compose.onNodeWithContentDescription(VoiceScripts.PARENT_DASHBOARD).performScrollTo().performClick()
+        assertTrue(parents)
     }
 
     @Test

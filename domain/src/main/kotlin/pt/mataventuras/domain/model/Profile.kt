@@ -11,6 +11,7 @@ data class ChildProfile(
     val avatarId: String,
     val points: Int,
     val createdAtEpochMs: Long,
+    val prizeLimitSeconds: Int = 120,
 )
 
 /**
