@@ -14,13 +14,13 @@ class OffroadCircuit(
     private val widths: FloatArray = FloatArray(SEGMENT_COUNT) { 0.82f + rng.nextFloat() * 0.28f }
 
     /** Loop length in metres. */
-    val length: Float = LENGTH
+    val length: Float = PrizeTuning.rules.course.length
 
     /** 0..3 palette: meadow, desert, dusk, night. */
     val palette: Int = kotlin.math.abs(seed) % 4
 
     /** Checkpoints that count as gates. */
-    val gateCount: Int = GATE_COUNT
+    val gateCount: Int = PrizeTuning.rules.course.gates
 
     /**
      * Road curvature at [distance] (left negative).
@@ -55,8 +55,6 @@ class OffroadCircuit(
     }
 
     private companion object {
-        const val LENGTH: Float = 480f
         const val SEGMENT_COUNT: Int = 24
-        const val GATE_COUNT: Int = 4
     }
 }

@@ -1,6 +1,7 @@
 package pt.mataventuras.app.engine
 
 import pt.mataventuras.app.engine.godot.GodotEmbed
+import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.engine.RewardCatalog
 import pt.mataventuras.domain.engine.RewardGame
@@ -24,8 +25,11 @@ internal object GodotRewardBinder {
         onGodot: (IsolatedEngineActivity, String) -> Unit = GodotEmbed::attach,
     ) {
         if (embed) {
-            onGodot(activity, RewardCatalog.scenePath(RewardGame.KART))
+            beginGodot(activity, onGodot, RewardCatalog.scenePath(RewardGame.KART)) {
+                bindKart(activity, embed = false)
+            }
         } else {
+            PrizeBoot.cancel(activity)
             activity.nativeSession = NativeKartHost.attach(activity)
         }
     }
@@ -45,9 +49,42 @@ internal object GodotRewardBinder {
             )
         val scene = RewardCatalog.scenePath(game)
         if (embed) {
-            onGodot(activity, scene)
+            beginGodot(activity, onGodot, scene) {
+                bindRunner(activity, embed = false)
+            }
         } else {
+            PrizeBoot.cancel(activity)
             NativeRewardHost.attach(activity, game)
         }
+    }
+
+    private fun beginGodot(
+        activity: IsolatedEngineActivity,
+        onGodot: (IsolatedEngineActivity, String) -> Unit,
+        scene: String,
+        onCanvas: () -> Unit,
+    ) {
+        onGodot(activity, scene)
+        PrizeBoot.show(
+            activity,
+            UiLogic.mascotGlyph(activity.launchMascot()),
+            onRetry = {
+                onGodot(activity, scene)
+                PrizeBoot.markLoading(activity)
+                PrizeBoot.arm(activity)
+                PrizeBoot.keepAboveEngine(activity)
+            },
+            onBack = { openCanvas(activity, onCanvas) },
+        )
+        PrizeBoot.arm(activity)
+        PrizeBoot.keepAboveEngine(activity)
+    }
+
+    private fun openCanvas(
+        activity: IsolatedEngineActivity,
+        onCanvas: () -> Unit,
+    ) {
+        PrizeBoot.hide(activity)
+        onCanvas()
     }
 }

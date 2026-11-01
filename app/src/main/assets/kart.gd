@@ -1,18 +1,22 @@
 extends Node2D
 
 ## Age-7 Super Off Road-style 2.5D dirt circuit with rivals. HUD is pt-PT.
-const LAPS_TARGET := 3
-const GATES_TARGET := 4
-const LENGTH := 480.0
-const CRUISE := 28.0
-const BOOST_SPD := 46.0
 const STRIPS := 28
-const STEER_RATE := 5.6
 const DRAW_AHEAD := 140.0
+var laps_target := 0
+var gates_target := 0
+var track_length := 0.0
+var cruise := 0.0
+var boost_spd := 0.0
+var steer_rate := 0.0
+var off_road := 0.0
+var accel := 0.0
+var drift := 0.0
+var boost_seconds := 0.0
 
 var distance := 2.0
 var lateral := 0.0
-var speed := CRUISE
+var speed := 0.0
 var steer := 0.0
 var boosting := false
 var boost_timer := 0.0
@@ -38,6 +42,17 @@ var rival_colors: Array[Color] = [Color("E53935"), Color("1E88E5"), Color("8E24A
 
 
 func _ready() -> void:
+	laps_target = Host.tune_i("kart", "laps")
+	gates_target = Host.tune_i("course", "gates")
+	track_length = Host.tune("course", "length")
+	cruise = Host.tune("kart", "cruise")
+	boost_spd = Host.tune("kart", "boost")
+	steer_rate = Host.tune("kart", "steer")
+	off_road = Host.tune("kart", "offRoad")
+	accel = Host.tune("kart", "accel")
+	drift = Host.tune("kart", "drift")
+	boost_seconds = Host.tune("kart", "boostSeconds")
+	speed = cruise
 	track_seed = Time.get_ticks_msec()
 	palette = track_seed % 4
 	_roll_track()
@@ -49,10 +64,12 @@ func _ready() -> void:
 		Vector4(84.0, -0.08, 23.0, 0.0),
 	]
 	hud = Host.make_hud(self)
+	Host.add_boost(self, _arm_boost)
 	_update_hud(false)
 	RenderingServer.set_default_clear_color(pal_sky)
 	Host.fit_viewport(self)
 	queue_redraw()
+	Host.mark_ready()
 
 
 func _roll_track() -> void:
@@ -83,8 +100,8 @@ func _cache_palette() -> void:
 
 
 func _sample(values: Array[float], dist: float) -> float:
-	var wrapped := fposmod(dist, LENGTH)
-	var t := wrapped / LENGTH * values.size()
+	var wrapped := fposmod(dist, track_length)
+	var t := wrapped / track_length * values.size()
 	var i := int(t) % values.size()
 	var j := (i + 1) % values.size()
 	var f := t - int(t)
@@ -104,10 +121,12 @@ func _input(event: InputEvent) -> void:
 		_steer_at(pos, false)
 
 
-func _steer_at(pos: Vector2, arm_boost: bool) -> void:
+func _arm_boost() -> void:
+	boosting = true
+
+
+func _steer_at(pos: Vector2, _arm_boost: bool) -> void:
 	steer = Host.axis_from_normalized_x(Host.normalized_x(self, pos))
-	if steer == 0.0 and arm_boost:
-		boosting = true
 
 
 func _process(delta: float) -> void:
@@ -116,20 +135,20 @@ func _process(delta: float) -> void:
 	Host.fit_viewport(self)
 	delta = minf(delta, 0.05)
 	if boosting:
-		boost_timer = 1.15
+		boost_timer = boost_seconds
 	boosting = false
 	boost_timer = maxf(boost_timer - delta, 0.0)
 	var off := absf(lateral) > _sample(widths, distance)
-	var target := BOOST_SPD if boost_timer > 0.0 else (12.0 if off else CRUISE)
-	speed = move_toward(speed, target, 22.0 * delta)
+	var target := boost_spd if boost_timer > 0.0 else (off_road if off else cruise)
+	speed = move_toward(speed, target, accel * delta)
 	var curve := _sample(curves, distance)
-	lateral = clampf(lateral + steer * STEER_RATE * delta + curve * speed * 0.006 * delta, -1.35, 1.35)
+	lateral = clampf(lateral + steer * steer_rate * delta + curve * speed * drift * delta, -1.35, 1.35)
 	distance += speed * delta
-	if distance >= LENGTH:
-		distance -= LENGTH
+	if distance >= track_length:
+		distance -= track_length
 		lap += 1
 		gate_mask = 0
-		if lap >= LAPS_TARGET:
+		if lap >= laps_target:
 			_finish()
 			return
 	_step_rivals(delta)
@@ -143,29 +162,29 @@ func _step_rivals(delta: float) -> void:
 		var r := rivals[i]
 		var dist := r.x + r.z * delta
 		var laps := r.w
-		if dist >= LENGTH:
-			dist -= LENGTH
+		if dist >= track_length:
+			dist -= track_length
 			laps += 1.0
 		var weave := sin((dist + r.y) * 0.08) * 0.22
 		rivals[i] = Vector4(dist, clampf(weave, -0.55, 0.55), r.z, laps)
 
 
 func _collect_gates(off: bool) -> void:
-	for i in GATES_TARGET:
+	for i in gates_target:
 		var bit := 1 << i
 		if gate_mask & bit:
 			continue
-		var gate_at := LENGTH * float(i + 1) / float(GATES_TARGET + 1)
+		var gate_at := track_length * float(i + 1) / float(gates_target + 1)
 		if absf(distance - gate_at) <= 8.0 and not off:
 			gate_mask |= bit
-			gates = mini(gates + 1, GATES_TARGET)
+			gates = mini(gates + 1, gates_target)
 
 
 func _place() -> int:
-	var player := float(lap) * LENGTH + distance
+	var player := float(lap) * track_length + distance
 	var ahead := 0
 	for r in rivals:
-		if r.w * LENGTH + r.x > player:
+		if r.w * track_length + r.x > player:
 			ahead += 1
 	return ahead + 1
 
@@ -212,13 +231,13 @@ func _draw_strip(size: Vector2, horizon: float, ground: float, index: int) -> vo
 
 
 func _draw_arches(size: Vector2, horizon: float, ground: float) -> void:
-	for i in GATES_TARGET:
+	for i in gates_target:
 		if gate_mask & (1 << i):
 			continue
-		var gate_at := LENGTH * float(i + 1) / float(GATES_TARGET + 1)
+		var gate_at := track_length * float(i + 1) / float(gates_target + 1)
 		var ahead := gate_at - distance
 		if ahead < 0.0:
-			ahead += LENGTH
+			ahead += track_length
 		if ahead > DRAW_AHEAD:
 			continue
 		var t := clampf(ahead / DRAW_AHEAD, 0.0, 1.0)
@@ -241,7 +260,7 @@ func _draw_rivals(size: Vector2, horizon: float, ground: float) -> void:
 		var r := rivals[i]
 		var ahead := r.x - distance
 		if ahead < 0.0:
-			ahead += LENGTH
+			ahead += track_length
 		if ahead > DRAW_AHEAD or ahead < 4.0:
 			continue
 		var t := clampf(ahead / DRAW_AHEAD, 0.0, 1.0)
@@ -279,7 +298,7 @@ func _draw_kart(size: Vector2, ground: float) -> void:
 
 
 func _draw_meta(size: Vector2, horizon: float, ground: float) -> void:
-	var ahead := fposmod(LENGTH - distance, LENGTH)
+	var ahead := fposmod(track_length - distance, track_length)
 	if ahead > DRAW_AHEAD or ahead < 2.0:
 		return
 	var t := clampf(ahead / DRAW_AHEAD, 0.0, 1.0)
@@ -305,12 +324,12 @@ func _draw_bands(size: Vector2) -> void:
 
 func _update_hud(show_boost: bool) -> void:
 	Host.skin_hud(hud, self)
-	var shown := mini(lap + 1, LAPS_TARGET)
+	var shown := mini(lap + 1, laps_target)
 	var extra := "\nImpulso!" if show_boost else ""
 	if absf(lateral) > _sample(widths, distance):
 		extra = "\nVolta à pista!"
 	hud.text = "Esquerda · Impulso · Direita\nPassa por baixo da META\nVolta %d de %d\nLugar %d de %d\nArcos %d/%d%s" % [
-		shown, LAPS_TARGET, _place(), rivals.size() + 1, gates, GATES_TARGET, extra
+		shown, laps_target, _place(), rivals.size() + 1, gates, gates_target, extra
 	]
 
 

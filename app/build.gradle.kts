@@ -24,7 +24,7 @@ android {
     }
     // Godot stores project files (and optional hidden dirs) under assets/.
     androidResources {
-        noCompress += listOf("gd", "tscn", "godot", "cfg", "uid", "import")
+        noCompress += listOf("gd", "tscn", "godot", "cfg", "uid", "import", "json")
         ignoreAssetsPattern =
             "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!<dir>godot"
     }
@@ -43,6 +43,9 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    sourceSets.named("main") {
+        assets.srcDir(rootProject.file("domain/src/main/resources"))
     }
     packaging {
         resources {

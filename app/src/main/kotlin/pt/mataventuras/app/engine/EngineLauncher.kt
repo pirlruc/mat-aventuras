@@ -75,6 +75,7 @@ object EngineLauncher {
         mascotCode: String,
         childName: String,
         scene: String = "",
+        ageCode: String = "",
     ): Intent =
         Intent()
             .putExtra(RESULT_RESTART, true)
@@ -82,6 +83,7 @@ object EngineLauncher {
             .putExtra(EXTRA_MASCOT, mascotCode)
             .putExtra(EXTRA_NAME, childName)
             .putExtra(EnginePluginContract.EXTRA_SCENE, scene)
+            .putExtra(EnginePluginContract.EXTRA_AGE, ageCode)
 
     /**
      * Intent that relaunches the plugin Activity after a Godot GLES restart.
@@ -100,6 +102,10 @@ object EngineLauncher {
             putExtra(
                 EnginePluginContract.EXTRA_SCENE,
                 source.getStringExtra(EnginePluginContract.EXTRA_SCENE).orEmpty(),
+            )
+            putExtra(
+                EnginePluginContract.EXTRA_AGE,
+                source.getStringExtra(EnginePluginContract.EXTRA_AGE).orEmpty(),
             )
             putExtra(EXTRA_GODOT_RELAUNCH, true)
         }
@@ -142,7 +148,7 @@ object EngineLauncher {
         val className = EnginePluginResolver.classNameFor(kind, pluginPresent = { _ -> usingPlugin })
         val packed = if (usingPlugin) game else RewardCatalog.nativeFallback(kind)
         return Intent().setClassName(context.packageName, className).apply {
-            EnginePluginContract.launchExtras(mascot.code, name, packed).forEach { (key, value) ->
+            EnginePluginContract.launchExtras(mascot.code, name, packed, ageGroup).forEach { (key, value) ->
                 putExtra(key, value)
             }
         }

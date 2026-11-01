@@ -1,8 +1,15 @@
 extends Node2D
 
 ## Climb letter floors, jump barrels, mushroom grows the hero. HUD is pt-PT.
-const LIVES_MAX := 3
-const HIT_INVULN := 1.2
+var lives_max := 0
+var hit_invuln := 0.0
+var near := 0.0
+var barrel_speed := 0.0
+var barrel_hit_x := 0.0
+var floor_snap := 0.0
+var jump_v := 0.0
+var gravity := 0.0
+var move_speed := 0.0
 var x := 0.12
 var y := 0.12
 var vy := 0.0
@@ -11,7 +18,7 @@ var mask := 0
 var barrel_x := 0.9
 var barrel_floor := 3
 var form := 0
-var lives := LIVES_MAX
+var lives := 0
 var invuln := 0.0
 var finished := false
 var hud: Label
@@ -24,10 +31,21 @@ var letters := [Vector2(0.28, 0.12), Vector2(0.72, 0.34), Vector2(0.28, 0.56), V
 
 
 func _ready() -> void:
+	lives_max = Host.tune_i("climb", "lives")
+	hit_invuln = Host.tune("climb", "hitInvuln")
+	near = Host.tune("climb", "near")
+	barrel_speed = Host.tune("climb", "barrelSpeed")
+	barrel_hit_x = Host.tune("climb", "barrelHitX")
+	floor_snap = Host.tune("climb", "floorSnap")
+	jump_v = Host.tune("climbMotion", "jump")
+	gravity = Host.tune("climbMotion", "gravity")
+	move_speed = Host.tune("climbMotion", "move")
+	lives = lives_max
 	RenderingServer.set_default_clear_color(Color("4E342E"))
 	Host.fit_viewport(self)
 	hud = Host.make_hud(self)
 	_update_hud()
+	Host.mark_ready()
 
 
 func _input(event: InputEvent) -> void:
@@ -57,11 +75,11 @@ func _process(delta: float) -> void:
 	if not finished:
 		invuln = maxf(invuln - delta, 0.0)
 		if jumping and on_floor:
-			vy = 0.85
+			vy = jump_v
 			on_floor = false
 		jumping = false
-		vy += -2.4 * delta
-		x = clampf(x + move_x * 0.55 * delta, 0.06, 0.94)
+		vy += gravity * delta
+		x = clampf(x + move_x * move_speed * delta, 0.06, 0.94)
 		y += vy * delta
 		_land()
 		_collect()
@@ -69,20 +87,20 @@ func _process(delta: float) -> void:
 			finished = true
 			Host.finish(true)
 		else:
-			if absf(x - 0.5) < 0.08 and absf(y - 0.34) < 0.08:
+			if absf(x - 0.5) < near and absf(y - 0.34) < near:
 				form = 1
-			barrel_x += 0.35 * delta
+			barrel_x += barrel_speed * delta
 			if barrel_x > 0.94:
 				barrel_x = 0.08
 				barrel_floor = 3 if barrel_floor <= 0 else barrel_floor - 1
 			var floor_y := floors[clampi(barrel_floor, 0, floors.size() - 1)]
-			if invuln <= 0.0 and absf(y - floor_y) < 0.05 and absf(x - barrel_x) < 0.07:
+			if invuln <= 0.0 and absf(y - floor_y) < floor_snap and absf(x - barrel_x) < barrel_hit_x:
 				if form == 1:
 					form = 0
-					invuln = HIT_INVULN
+					invuln = hit_invuln
 				else:
 					lives -= 1
-					invuln = HIT_INVULN
+					invuln = hit_invuln
 			if lives <= 0:
 				finished = true
 				Host.finish(false)
@@ -95,7 +113,7 @@ func _land() -> void:
 	if vy > 0.0:
 		return
 	for floor_y in floors:
-		if y <= floor_y and y >= floor_y - 0.08:
+		if y <= floor_y and y >= floor_y - near:
 			y = floor_y
 			vy = 0.0
 			on_floor = true
@@ -112,7 +130,7 @@ func _collect() -> void:
 		if mask & bit:
 			continue
 		var spot: Vector2 = letters[i]
-		if absf(x - spot.x) < 0.08 and absf(y - spot.y) < 0.08:
+		if absf(x - spot.x) < near and absf(y - spot.y) < near:
 			mask |= bit
 
 
@@ -154,13 +172,21 @@ func _draw() -> void:
 func _update_hud() -> void:
 	Host.skin_hud(hud, self)
 	var extra := "\nCresceste!" if form == 1 else ""
-	if finished and _letter_count() >= 5:
+	var life := Host.lives_text(lives, lives_max)
+	if Host.young():
+		if finished and _letter_count() >= 5:
+			hud.text = "🏁\n%s" % life
+		elif finished:
+			hud.text = "·\n%s" % life
+		else:
+			hud.text = "🔤 %d\n%s" % [_letter_count(), life]
+	elif finished and _letter_count() >= 5:
 		hud.text = "Ganhaste!\nLetras 5/5"
 	elif finished:
-		hud.text = "Fim de jogo\nVidas 0/%d" % LIVES_MAX
+		hud.text = "Fim de jogo\n%s" % life
 	else:
-		hud.text = "Anda e desliza para cima para saltar\nLetras %d/5 · Vidas %d/%d%s" % [
-			_letter_count(), lives, LIVES_MAX, extra
+		hud.text = "Anda e desliza para cima para saltar\nLetras %d/5 · %s%s" % [
+			_letter_count(), life, extra
 		]
 
 

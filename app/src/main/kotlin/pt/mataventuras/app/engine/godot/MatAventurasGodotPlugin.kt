@@ -26,6 +26,20 @@ internal class MatAventurasGodotPlugin(
     fun childName(): String = GodotBridge.childName(host)
 
     @UsedByGodot
+    fun youngBand(): Boolean = GodotBridge.youngBand(host)
+
+    @UsedByGodot
+    fun livesLine(
+        current: Int,
+        maximum: Int,
+    ): String = GodotBridge.livesLine(host, current, maximum)
+
+    @UsedByGodot
+    fun prizeReady() {
+        GodotBridge.prizeReady(host)
+    }
+
+    @UsedByGodot
     fun rewardScene(): String {
         val kind = if (host is KartPluginActivity) EngineKind.THREE_D else EngineKind.TWO_D
         return GodotBridge.rewardScene(scene, kind)

@@ -1,11 +1,11 @@
 extends Node2D
 
 ## Age-3 side-scroller. Hold right/left to run; swipe up to jump. HUD is pt-PT.
-const COINS_TARGET := 9
 const GROUND_Y := 520.0
-const SPEED := 220.0
-const GRAVITY := 980.0
-const JUMP_V := -520.0
+var coins_target := 0
+var speed := 0.0
+var gravity := 0.0
+var jump_v := 0.0
 var x := 80.0
 var y := GROUND_Y
 var vy := 0.0
@@ -46,6 +46,10 @@ var flick_y := 0.0
 
 
 func _ready() -> void:
+	coins_target = Host.tune_i("runner", "coins")
+	speed = Host.tune("runner", "pixelSpeed")
+	gravity = Host.tune("runner", "pixelGravity")
+	jump_v = Host.tune("runner", "pixelJump")
 	theme = Time.get_ticks_msec() % 4
 	_cache_palette()
 	Host.fit_viewport(self)
@@ -68,6 +72,7 @@ func _ready() -> void:
 	_update_hud()
 	RenderingServer.set_default_clear_color(pal_sky)
 	_fit_world()
+	Host.mark_ready()
 
 
 func _cache_palette() -> void:
@@ -222,13 +227,13 @@ func _process(delta: float) -> void:
 	if star_timer <= 0.0 and form == 2:
 		form = 1
 	if jumping and on_ground:
-		vy = JUMP_V
+		vy = jump_v
 		on_ground = false
 	jumping = false
-	vy += GRAVITY * delta
+	vy += gravity * delta
 	y += vy * delta
 	if not in_pit_fall:
-		x += move_x * SPEED * delta
+		x += move_x * speed * delta
 	x = clampf(x, 80.0, 2000.0)
 	_land()
 	if y > 780.0:
@@ -335,9 +340,9 @@ func _collect_coins() -> void:
 		if absf(x - coin_xs[i]) < 28.0 and absf(y - GROUND_Y) < 90.0:
 			taken[i] = true
 			coin_nodes[i].visible = false
-			coins = mini(coins + 1, COINS_TARGET)
+			coins = mini(coins + 1, coins_target)
 			_update_hud()
-			if coins >= COINS_TARGET:
+			if coins >= coins_target:
 				finished = true
 				Host.finish(true)
 
@@ -383,4 +388,7 @@ func _update_hud() -> void:
 		extra = "\nEstrela!"
 	elif form == 1:
 		extra = "\nCresceste!"
-	hud.text = "Segura à direita para avançar\nDesliza para cima: saltar\nMoedas %d/%d%s" % [coins, COINS_TARGET, extra]
+	if Host.young():
+		hud.text = "🪙 %d\n%s" % [coins, extra]
+	else:
+		hud.text = "Segura à direita para avançar\nDesliza para cima: saltar\nMoedas %d/%d%s" % [coins, coins_target, extra]

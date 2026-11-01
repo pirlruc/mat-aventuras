@@ -27,15 +27,15 @@ data class Platformer2dState(
  */
 class Platformer2dEngine(
     private val groundY: Float = 0f,
-    private val gravity: Float = -48f,
-    private val jumpSpeed: Float = 22f,
-    private val speedX: Float = 8f,
+    private val gravity: Float = PrizeTuning.rules.runner.gravity,
+    private val jumpSpeed: Float = PrizeTuning.rules.runner.jumpSpeed,
+    private val speedX: Float = PrizeTuning.rules.runner.speedX,
     private val level: PlatformerLevel = PlatformerWorld.DEFAULT,
 ) {
     /**
      * Standing still on the ground.
      */
-    fun initial(ringsTarget: Int = 5): Platformer2dState =
+    fun initial(ringsTarget: Int = PrizeTuning.rules.runner.rings): Platformer2dState =
         Platformer2dState(
             x = 0f,
             y = groundY,

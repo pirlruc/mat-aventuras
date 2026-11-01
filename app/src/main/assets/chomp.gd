@@ -2,8 +2,8 @@ extends Node2D
 
 ## Letter maze: eat pellets, golden corners transform the hero. HUD is pt-PT.
 const SIZE := 5
-const LIVES_MAX := 3
-const GRACE := 1.6
+var lives_max := 0
+var grace_time := 0.0
 var px := 1
 var py := 3
 var gx := 3
@@ -13,8 +13,8 @@ var g2y := 1
 var pellets := 0
 var power := 0.0
 var form := 0
-var lives := LIVES_MAX
-var invuln := GRACE
+var lives := 0
+var invuln := 0.0
 var finished := false
 var hud: Label
 var acc := 0.0
@@ -23,11 +23,16 @@ var layout := PackedStringArray(["#####", "#...#", "#.#.#", "#...#", "#####"])
 
 
 func _ready() -> void:
+	lives_max = Host.tune_i("chomp", "lives")
+	grace_time = Host.tune("chomp", "grace")
+	lives = lives_max
+	invuln = grace_time
 	pellets = _mask()
 	RenderingServer.set_default_clear_color(Color("0D47A1"))
 	Host.fit_viewport(self)
 	hud = Host.make_hud(self)
 	_update_hud()
+	Host.mark_ready()
 
 
 func _mask() -> int:
@@ -113,7 +118,7 @@ func _hurt() -> void:
 		return
 	if (px == gx and py == gy) or (px == g2x and py == g2y):
 		lives -= 1
-		invuln = GRACE
+		invuln = grace_time
 		px = 1
 		py = 3
 
@@ -172,9 +177,17 @@ func _update_hud() -> void:
 	while v != 0:
 		left += v & 1
 		v >>= 1
-	if finished and left == 0:
+	var life := Host.lives_text(lives, lives_max)
+	if Host.young():
+		if finished and left == 0:
+			hud.text = "🏁\n%s" % life
+		elif finished:
+			hud.text = "·\n%s" % life
+		else:
+			hud.text = "● %d\n%s" % [left, life]
+	elif finished and left == 0:
 		hud.text = "Ganhaste!\nFaltam 0"
 	elif finished:
-		hud.text = "Fim de jogo\nVidas 0/%d" % LIVES_MAX
+		hud.text = "Fim de jogo\n%s" % life
 	else:
-		hud.text = "Desliza para o lado das bolinhas\nFaltam %d · Vidas %d/%d%s" % [left, lives, LIVES_MAX, extra]
+		hud.text = "Desliza para o lado das bolinhas\nFaltam %d · %s%s" % [left, life, extra]

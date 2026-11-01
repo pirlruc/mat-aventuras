@@ -1,0 +1,53 @@
+{
+  "invaders": {
+    "lives": 5,
+    "fleet": 15,
+    "grace": 1.8,
+    "hitInvuln": 1.4,
+    "hitX": 0.05,
+    "hitY": 0.06,
+    "shipHitX": 0.07
+  },
+  "chomp": {
+    "lives": 3,
+    "grace": 1.6
+  },
+  "climb": {
+    "lives": 3,
+    "hitInvuln": 1.2,
+    "near": 0.08,
+    "barrelSpeed": 0.35,
+    "barrelHitX": 0.07,
+    "floorSnap": 0.05
+  },
+  "climbMotion": {
+    "jump": 0.85,
+    "gravity": -2.4,
+    "move": 0.55
+  },
+  "runner": {
+    "speedX": 8.0,
+    "gravity": -48.0,
+    "jumpSpeed": 22.0,
+    "rings": 5,
+    "pixelSpeed": 220.0,
+    "pixelGravity": 980.0,
+    "pixelJump": -520.0,
+    "coins": 9
+  },
+  "kart": {
+    "cruise": 28.0,
+    "boost": 46.0,
+    "offRoad": 12.0,
+    "accel": 22.0,
+    "steer": 5.6,
+    "drift": 0.006,
+    "boostSeconds": 1.15,
+    "laps": 3
+  },
+  "course": {
+    "gates": 4,
+    "length": 480.0,
+    "gateWindow": 8.0
+  }
+}

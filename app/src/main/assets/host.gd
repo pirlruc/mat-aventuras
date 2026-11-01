@@ -8,11 +8,62 @@ var plugin: Object
 var settling := false
 var fitted := Vector2.ZERO
 var _end_timer: SceneTreeTimer
+var _tune: Dictionary = {}
+var _hud_layer: CanvasLayer
 
 
 func _ready() -> void:
+	_read_tuning()
 	if Engine.has_singleton("MatAventuras"):
 		plugin = Engine.get_singleton("MatAventuras")
+
+
+func _read_tuning() -> void:
+	if not FileAccess.file_exists("res://prize-tuning.json"):
+		push_error("prize-tuning.json missing")
+		return
+	var file := FileAccess.open("res://prize-tuning.json", FileAccess.READ)
+	if file == null:
+		return
+	var text := file.get_as_text()
+	file.close()
+	var parsed: Variant = JSON.parse_string(text)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return
+	_tune = parsed
+
+
+func tune(game: String, key: String) -> float:
+	var block: Variant = _tune.get(game, {})
+	if typeof(block) != TYPE_DICTIONARY:
+		return 0.0
+	var table: Dictionary = block as Dictionary
+	if not table.has(key):
+		return 0.0
+	var raw: Variant = table[key]
+	return float(raw)
+
+
+func tune_i(game: String, key: String) -> int:
+	return int(round(tune(game, key)))
+
+
+func young() -> bool:
+	if plugin != null and plugin.has_method("youngBand"):
+		return bool(plugin.youngBand())
+	return false
+
+
+func lives_text(current: int, maximum: int) -> String:
+	if plugin != null and plugin.has_method("livesLine"):
+		return str(plugin.livesLine(current, maximum))
+	return "Vidas %d/%d" % [current, maximum]
+
+
+func mark_ready() -> void:
+	print("MatPrize ready")
+	if plugin != null and plugin.has_method("prizeReady"):
+		plugin.prizeReady()
 
 
 func mascot_code() -> String:
@@ -74,12 +125,27 @@ func unit(node: Node) -> float:
 ## CanvasLayer plus a skinned pt-PT label. Prize scenes share this instead of copying it.
 func make_hud(node: Node) -> Label:
 	var layer := CanvasLayer.new()
+	_hud_layer = layer
 	node.add_child(layer)
 	var label := Label.new()
 	skin_hud(label, node)
 	layer.add_child(label)
 	_add_exit(layer, node)
 	return label
+
+
+func add_boost(node: Node, callback: Callable) -> void:
+	if _hud_layer == null:
+		return
+	var button := Button.new()
+	var u := unit(node)
+	var side := maxf(64.0, u * 0.16)
+	button.text = "Impulso"
+	button.custom_minimum_size = Vector2(side, side)
+	var size := view_size(node)
+	button.position = Vector2(size.x * 0.5 - side * 0.5, size.y - side - u * 0.03)
+	button.pressed.connect(callback)
+	_hud_layer.add_child(button)
 
 
 func _add_exit(layer: CanvasLayer, node: Node) -> void:
