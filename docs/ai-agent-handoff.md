@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** new lessons and Compose prizes (`feature-new-lessons-prizes`)
+**Last agent focus:** #114 merged. Release keystore is outside the repo (MAT-005-T11). 0.2.0 is not started.
 
 ---
 
@@ -50,13 +50,13 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-002 | done | Emulator job, Robolectric gates, lesson packs |
 | MAT-003 | done | Godot 4 plugin in `:engine2d` and `:engine3d` |
 | MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
-| MAT-005 | open | T1–T10 done. Merged in #113. T11 (release keystore outside the repo) stays open |
+| MAT-005 | open | T1–T11 done. #113 merged the PIN and coverage work. T11 is the release keystore outside the repo; the four ANDROID_* secrets are set. Passwords are not in the repo. The epic stays open until 0.2.0 |
 | MAT-006 | open | T1–T3 done in #113. CodeQL and the APK bill reported no high or critical findings |
 | MAT-007 | done | `BandDifficulty` replaces `isSevenYears()`. Memory, word board, cell size, and pt-PT parent titles are on this branch |
 | MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
 | MAT-009 | done | Loading overlay, timeout with Tentar outra vez / Voltar, Ganhaste card, icon HUD, kart boost button, and cancelled embed retries |
 | MAT-010 | done | Companion pins and reusable CI are on main |
-| MAT-011 | open | This branch adds Qual é diferente, Grande e pequeno, Padrões, Que horas são, Euros e cêntimos, Rebentar balões, and Cobra das respostas. The epic stays open. The other lesson and prize ideas stay in the tasks |
+| MAT-011 | open | #114 merged the five lessons and two Compose prizes. The epic stays open. The other lesson and prize ideas stay in the tasks |
 | MAT-012 | done | Speaker, gentle miss, stars, home lock, exit confirm, saved route, and Room v3 prize limit |
 | MAT-013 | open | GitHub #82. T1 (#83) done. Epic stays open |
 
@@ -227,9 +227,9 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Tag `0.1.0` is on main. Do not move it. `release.yml` builds an APK through androiddevops `android-release-apk`, then calls common-release `5.7.0` with `release_artifact: android-release-apk`. Signing secrets are not set. Do not generate the keystore until the step before the 0.2.0 release, and the owner must back it up.
-2. #113 merged the Keystore PIN, the 95 percent floors, and the minified-prize, CodeQL, and APK-bill proofs. MAT-005-T11 stays open until the step before the 0.2.0 release.
-3. [#114](https://github.com/pirlruc/mat-aventuras/pull/114) is the MAT-011 subset. The epic stays open. `:app` Kover on this branch is 95.03% branch and 97.59% line. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the report. Do not mark MAT-011-T1 through T4 done.
+1. Tag `0.1.0` is on main. Do not move it. `release.yml` builds an APK through androiddevops `android-release-apk`, then calls common-release `5.7.0` with `release_artifact: android-release-apk`. The four ANDROID_* secrets are set. The keystore is outside the repo. The owner must back up the keystore and its password. Losing them means an installed app cannot be updated. Do not commit either file.
+2. #113 merged the Keystore PIN, the 95 percent floors, and the minified-prize, CodeQL, and APK-bill proofs. MAT-005-T11 is done. The epic stays open until 0.2.0.
+3. [#114](https://github.com/pirlruc/mat-aventuras/pull/114) merged the MAT-011 subset. The epic stays open. `:app` Kover is 95.03% branch and 97.59% line. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the report. Do not mark MAT-011-T1 through T4 done.
 4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
 5. When androiddevops later becomes private, this public repo cannot call its workflows. Vendor the pinned workflow. Do not change visibility from an agent session. mat-aventuras stays public.
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review is issues-only, after 0.2.0, and dedupes this list.
@@ -237,4 +237,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset already requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, and the two python-quality job names. Reviews stay at 0. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed.
 9. bestpractices.dev is last, after 0.2.0 and the companion issues.
 
-*Last updated: 2026-11-01 (#114 holds the 95 percent floors; MAT-011 stays open).*
+*Last updated: 2026-11-01 (#114 merged; MAT-005-T11 keystore is outside the repo).*

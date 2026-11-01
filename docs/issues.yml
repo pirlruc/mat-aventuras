@@ -797,7 +797,7 @@ milestones:
               - ANDROID-SEC-002
 
           - id: MAT-005-T11
-            status: open
+            status: done
             title: Sign the release APK with a keystore kept outside the repo
             instructions:
               files:
