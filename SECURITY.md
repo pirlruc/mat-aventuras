@@ -8,7 +8,7 @@ Report a vulnerability privately. That form is the security contact:
 
 Do not open a public issue for a vulnerability.
 
-Include the affected version or image digest and a way to reproduce it. You will get an acknowledgement within 7 days.
+Include the affected version (for example `0.2.0`) and a way to reproduce it. You will get an acknowledgement within 7 days.
 
 ## Supported versions
 
@@ -34,4 +34,4 @@ A semgrep finding from the required `secrets-sast` job blocks the merge. A suppr
 
 ## What this covers
 
-This repository's code, published images, and reusable workflows. A finding in a third-party base image is in scope when this repository publishes that base as part of its own image.
+This repository's code and the published release APKs, including their checksums and the dependency bill.

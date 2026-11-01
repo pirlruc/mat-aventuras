@@ -2,7 +2,9 @@
 
 [![OpenSSF Baseline](https://www.bestpractices.dev/projects/16162/baseline)](https://www.bestpractices.dev/projects/16162)
 
-A game for children aged **3 to 5** and **6 to 8**. Counting, shapes, numbers,
+Offline Portuguese math and literacy game for Android, for children aged 3 to 8.
+
+Counting, shapes, numbers,
 early arithmetic, memory, letters, and a few prize games. Everything the child
 sees and hears is **Portuguese from Portugal**. Profiles, scores, and the
 parent PIN stay on the phone or tablet.
@@ -26,9 +28,11 @@ keeps that band on small numbers and sums up to 10.
 
 ## Install
 
-Use the latest release on
+Install **0.2.0** `app-release.apk` from
 [GitHub Releases](https://github.com/pirlruc/mat-aventuras/releases/latest).
-Download `app-release.apk` and the matching `app-release.apk.sha256`.
+That file is signed. Do not use the 0.1.0 debug APK for daily use.
+Also download `app-release.apk.sha256` and `app-release.cdx.json` (the
+dependency bill).
 
 Check the file before you install it. `apksigner` is in the Android SDK
 build-tools.
@@ -60,11 +64,16 @@ a PIN of four numbers. Later visits ask for that PIN. Five wrong attempts
 pause the check for a minute.
 
 The parent area shows sessions, points, and badges for the children on this
-device. It does not send them anywhere.
+device. It does not send them anywhere. There is no PIN recovery. Clearing
+the app's storage, or uninstalling it, deletes the profiles and the PIN.
+
+A parent can set how long a prize lasts: 1, 2, or 3 minutes. The default is
+2 minutes.
 
 ## Privacy
 
-- No account, no advert, and no internet permission.
+- No account, no advert, and no internet permission. The only permission is vibration, used by the prize games.
+- The child hears Portuguese from Portugal. Install a Portuguese (Portugal) text-to-speech voice in the device settings if the prompts are silent.
 - The parent PIN is stored as a hash, never as the four digits.
 - Android backup and device-to-device transfer are off, so a profile is not
   copied to another tablet.
@@ -88,14 +97,18 @@ echo "sdk.dir=/path/to/Android/Sdk" > local.properties
 ./gradlew :app:assembleDebug
 ```
 
-The APK is `app/build/outputs/apk/debug/app-debug.apk`.
+The APK is `app/build/outputs/apk/debug/app-debug.apk`. A signed release APK
+comes only from GitHub Releases.
 
-## Dependencies
+## Problems?
 
-Direct libraries are pinned in `gradle/libs.versions.toml`. Gradle resolves
-them at build time. Dependabot opens update pull requests. Security updates
-are not delayed. Other updates wait 7 days. `dependency-review` and
-`supply-chain` must pass before a change is merged.
+If a lesson or a prize misbehaves, open a
+[GitHub issue](https://github.com/pirlruc/mat-aventuras/issues). For a
+security problem, use the private form in [SECURITY.md](SECURITY.md).
+
+To remove the app: **Settings → Apps → Mat Aventuras → Uninstall**.
+**Storage → Clear storage** resets the profiles and the parent PIN without
+uninstalling.
 
 ## For contributors
 
