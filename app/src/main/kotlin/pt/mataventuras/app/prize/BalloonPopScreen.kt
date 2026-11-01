@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import kotlin.random.Random
 import pt.mataventuras.domain.prize.BalloonPop
+import pt.mataventuras.domain.prize.BalloonRound
 
 /**
  * Ages 3–5. Tap the balloon named by the prompt. Nothing else moves it.
@@ -26,13 +27,19 @@ fun BalloonPopScreen(
         Text(round.prompt)
         round.labels.forEachIndexed { index, label ->
             Button(
-                onClick = {
-                    if (BalloonPop.popped(round, index)) onFinished()
-                },
+                onClick = { finishIfPopped(round, index, onFinished) },
                 modifier = Modifier.testTag("balloon-$index"),
             ) {
                 Text(label)
             }
         }
     }
+}
+
+internal fun finishIfPopped(
+    round: BalloonRound,
+    index: Int,
+    onFinished: () -> Unit,
+) {
+    if (BalloonPop.popped(round, index)) onFinished()
 }

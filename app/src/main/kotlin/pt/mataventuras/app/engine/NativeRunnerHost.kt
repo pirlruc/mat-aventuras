@@ -85,7 +85,7 @@ internal object NativeRunnerHost {
             val tiles = remember { ArrayList<PlatformerRect>(64) }
             LaunchedEffect(Unit) {
                 var frames = 0
-                while (!loop.state.finished && loop.state.alive && frames < frameLimit) {
+                while (runnerKeepsTicking(loop.state.finished, loop.state.alive, frames, frameLimit)) {
                     withFrameNanos {
                         loop.tick()
                         state = loop.state
@@ -130,7 +130,7 @@ internal object NativeRunnerHost {
                                         flickX += dx
                                         flickY += dy
                                         loop.moveX = EngineInputMap.runFromNormalizedX(change.position.x / width)
-                                        if (EngineInputMap.isJumpFlick(flickX, flickY)) loop.jumping = true
+                                        noteRunnerJump(loop, flickX, flickY)
                                         change.consume()
                                     }
                                     loop.moveX = 0f
@@ -151,6 +151,21 @@ internal object NativeRunnerHost {
                 )
             }
     }
+}
+
+internal fun runnerKeepsTicking(
+    finished: Boolean,
+    alive: Boolean,
+    frames: Int,
+    limit: Int,
+): Boolean = !finished && alive && frames < limit
+
+internal fun noteRunnerJump(
+    loop: Platformer2dLoop,
+    flickX: Float,
+    flickY: Float,
+) {
+    if (EngineInputMap.isJumpFlick(flickX, flickY)) loop.jumping = true
 }
 
 internal fun DrawScope.paintRunnerCourse(

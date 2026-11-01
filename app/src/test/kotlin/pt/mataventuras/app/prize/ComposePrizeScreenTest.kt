@@ -40,7 +40,7 @@ class ComposePrizeScreenTest {
         val round = BalloonPop.round(Random(1))
         var finished = 0
         compose.setContent {
-            BalloonPopScreen(Random(1)) { finished += 1 }
+            PrizeScreen(ComposePrize.BALLOONS, Random(1)) { finished += 1 }
         }
         val wrong = (round.labels.indexOf(round.target) + 1) % round.labels.size
         compose.onNodeWithTag("balloon-$wrong").performClick()
@@ -54,7 +54,7 @@ class ComposePrizeScreenTest {
         val first = AnswerSnake.round(Random(2))
         var finished = 0
         compose.setContent {
-            AnswerSnakeScreen(Random(2)) { finished += 1 }
+            PrizeScreen(ComposePrize.SNAKE, Random(2)) { finished += 1 }
         }
         val wrong = (first.correct + 1) % first.options.size
         compose.onNodeWithTag("snake-$wrong").performClick()
@@ -66,6 +66,7 @@ class ComposePrizeScreenTest {
             round = AnswerSnake.bite(round, round.correct, mirror)
         }
         assertEquals(1, finished)
+        compose.onNodeWithText(pt.mataventuras.domain.voice.VoiceScripts.SNAKE_DONE).assertExists()
     }
 
     @Test

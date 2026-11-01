@@ -274,7 +274,7 @@ private fun LessonPlayColumn(
         if (UiLogic.showsSudokuGrid(exercise.play.kind)) {
             CappedScale {
                 Text(
-                    UiLogic.sudokuBanner(exercise.play.kind, age) ?: "Sudoku",
+                    sudokuTitle(exercise.play.kind, age),
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF0D47A1),
@@ -468,8 +468,8 @@ private fun SudokuBoard(
     age: AgeBand,
 ) {
     val columns = exercise.play.columns.coerceAtLeast(1)
-    val shown = cells.ifEmpty { exercise.options }
-    val cellDp = UiLogic.playCellHeightDp(columns, age) + if (age == AgeBand.THREE_TO_FIVE) 0 else 8
+    val shown = shownSudokuCells(cells, exercise.options)
+    val cellDp = UiLogic.playCellHeightDp(columns, age) + sudokuExtraHeight(age)
     val boxW = UiLogic.sudokuBoxWidth(columns)
     val boxH = UiLogic.sudokuBoxHeight(columns)
     Column(
@@ -527,11 +527,11 @@ private fun SoupBoard(
     age: AgeBand,
 ) {
     val columns = exercise.play.columns.coerceAtLeast(1)
-    val cells = exercise.play.cells.ifEmpty { exercise.options }
+    val cells = soupBoardCells(exercise.play.cells, exercise.options)
     val paths = exercise.play.soupPaths()
     var selected by remember(exercise.prompt) { mutableStateOf(emptyList<Int>()) }
     var found by remember(exercise.prompt) { mutableStateOf(emptySet<Int>()) }
-    val foundCells = found.flatMap { paths.getOrElse(it) { emptyList() } }.toSet()
+    val foundCells = foundSoupCells(found, paths)
     val cellDp = UiLogic.playCellHeightDp(columns, age)
     val onGesture: (List<Int>) -> Unit = { path ->
         found = resolveSoupGesture(path, paths, found, cells.size, onPick, onMissKeep)
@@ -606,23 +606,21 @@ internal fun scoreSudokuPick(
 ): SudokuBoardState {
     val token = exercise.options.getOrNull(index)
     val step = if (fillSudoku && token != null) SudokuPlay.place(sudoku, token, exercise.play.solution) else null
-    val next =
-        when {
-            !fillSudoku -> {
-                onAttempt(exercise.isCorrect(index), true)
-                sudoku
-            }
-            token == null || step == null -> sudoku
-            !step.correct -> {
-                onAttempt(false, false)
-                sudoku
-            }
-            else -> {
-                if (step.solved) onAttempt(true, true)
-                step.state
-            }
+    return when {
+        !fillSudoku -> {
+            onAttempt(exercise.isCorrect(index), true)
+            sudoku
         }
-    return next
+        step == null -> sudoku
+        !step.correct -> {
+            onAttempt(false, false)
+            sudoku
+        }
+        else -> {
+            if (step.solved) onAttempt(true, true)
+            step.state
+        }
+    }
 }
 
 internal fun resolveSoupGesture(
@@ -668,19 +666,20 @@ private suspend fun AwaitPointerEventScope.collectSoupPath(
             change.consume()
             return path
         }
-        val next = UiLogic.soupIndexAt(
-            change.position.x,
-            change.position.y,
-            width,
-            height,
+        path = extendSoup(
+            path,
+            UiLogic.soupIndexAt(
+                change.position.x,
+                change.position.y,
+                width,
+                height,
+                columns,
+                cellCount,
+                gapPx,
+            ),
             columns,
-            cellCount,
-            gapPx,
         )
-        if (next != null) {
-            path = UiLogic.soupExtendPath(path, next, columns)
-            onPath(path)
-        }
+        onPath(path)
         change.consume()
     }
     return path
@@ -731,7 +730,7 @@ private fun PuzzleFrame(
     exercise: Exercise,
     age: AgeBand,
 ) {
-    val cells = exercise.play.cells.ifEmpty { listOf("1", "2", "3", "?") }
+    val cells = puzzleCells(exercise.play.cells)
     val columns = exercise.play.columns.coerceAtLeast(2)
     val cellDp = UiLogic.playCellHeightDp(columns, age)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -789,7 +788,7 @@ private fun VisualOption(
     text: String,
 ) {
     val shape = if (UiLogic.showsShapeGlyph(module)) UiLogic.shapeKind(text) else null
-    val dots = if (UiLogic.showsDotStrip(module)) UiLogic.optionInt(text) ?: 0 else 0
+    val dots = visualDotCount(module, text)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),

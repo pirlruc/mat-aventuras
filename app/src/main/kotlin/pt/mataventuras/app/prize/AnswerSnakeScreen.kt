@@ -30,7 +30,8 @@ fun AnswerSnakeScreen(
             Button(
                 onClick = {
                     val next = AnswerSnake.bite(round, index, random)
-                    if (AnswerSnake.full(next)) onFinished() else round = next
+                    round = next
+                    if (AnswerSnake.full(next)) onFinished()
                 },
                 modifier = Modifier.testTag("snake-$index"),
             ) {
