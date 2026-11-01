@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** Round 3 starts with the manifest and the public docs. MAT-014 and MAT-015 are open. Approving reviews stay at 0. androiddevops stays public.
+**Last agent focus:** MAT-014 is on main (pull request #144). MAT-011 and MAT-015 stay open. Approving reviews stay at 0. androiddevops stays public.
 
 ---
 
@@ -247,4 +247,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, the two python-quality job names, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 and MAT-006 stay open. MAT-013 is done. python-quality still runs on every pull request until the owner approves a ruleset edit.
 
-*Last updated: 2026-11-01 (MAT-013 is closed; the defect branch adds the prize limit, the clock face, and the parent PIN reset).*
+*Last updated: 2026-11-01 (MAT-014 is closed after pull request #144; MAT-011 and MAT-015 stay open).*
