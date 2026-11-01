@@ -277,6 +277,7 @@ class GodotPluginHostTest {
         val controller = Robolectric.buildActivity(KartPluginActivity::class.java, kartIntent).setup()
         val kart = controller.get()
         assertFalse(kart.isGodotRelaunch())
+        kart.intent.putExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT, "90")
         assertTrue(kart.requestEngineRestart())
         assertTrue(kart.isRewardSettled())
         assertTrue(kart.isFinishing)

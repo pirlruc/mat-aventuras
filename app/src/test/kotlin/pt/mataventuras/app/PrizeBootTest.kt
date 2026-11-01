@@ -167,4 +167,35 @@ class PrizeBootTest {
         EngineAttachRetries.cancel(activity)
         PrizeBoot.cancel(activity)
     }
+
+    @Test
+    fun aClearedHostDoesNotTimeOutTheOverlay() {
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val controller =
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana", game = RewardGame.RUNNER),
+                ).setup()
+        val activity = controller.get()
+        PrizeBoot.show(activity, "🐶", onRetry = {}, onBack = {})
+        PrizeBoot.arm(activity)
+        val hostsField = PrizeBoot::class.java.getDeclaredField("hosts")
+        hostsField.isAccessible = true
+        @Suppress("UNCHECKED_CAST")
+        val hosts = hostsField.get(PrizeBoot) as MutableMap<Int, java.lang.ref.WeakReference<android.app.Activity>>
+        val timersField = PrizeBoot::class.java.getDeclaredField("timers")
+        timersField.isAccessible = true
+        val timers = timersField.get(PrizeBoot) as Map<*, *>
+        hosts.clear()
+        (timers.values.first() as Runnable).run()
+        val status = activity.window.decorView.findViewWithTag<TextView>("prize-boot-status")
+        assertEquals(PrizeHud.LOADING_LINE, status.text.toString())
+        PrizeBoot.arm(activity)
+        hosts[System.identityHashCode(activity)] = java.lang.ref.WeakReference(null)
+        (timers.values.first() as Runnable).run()
+        assertEquals(PrizeHud.LOADING_LINE, status.text.toString())
+        PrizeBoot.cancel(activity)
+        controller.destroy()
+    }
 }

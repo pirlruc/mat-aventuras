@@ -29,6 +29,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.app.prize.PrizeLimit
 import pt.mataventuras.domain.engine.KartHud
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.model.Mascot
@@ -48,6 +49,7 @@ internal object NativeKartHost {
         showUi: Boolean = GodotRuntime.shouldEmbed(),
         frameLimit: Int = Int.MAX_VALUE,
     ): OffroadRacerLoop {
+        PrizeLimit.arm(activity)
         val seed = kotlin.math.abs(activity.mascotCode().hashCode() * 31 + activity.childName().hashCode())
         val circuit = OffroadCircuit(if (seed == 0) 7 else seed)
         val loop = OffroadRacerLoop(circuit = circuit)

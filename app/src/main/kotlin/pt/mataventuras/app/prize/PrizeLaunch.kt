@@ -22,6 +22,7 @@ object PrizeLaunch {
         mascot: Mascot,
         name: String,
         offer: PrizeOffer = PrizeOffers.pick(age),
+        limitSeconds: Int = 0,
     ): Intent =
         when (offer) {
             is PrizeOffer.Godot ->
@@ -32,7 +33,8 @@ object PrizeLaunch {
                     name,
                     kind = RewardCatalog.engineKind(offer.game),
                     game = offer.game,
+                    limitSeconds = limitSeconds,
                 )
-            is PrizeOffer.Compose -> ComposePrizeActivity.intent(context, offer.prize)
+            is PrizeOffer.Compose -> ComposePrizeActivity.intent(context, offer.prize, limitSeconds = limitSeconds)
         }
 }

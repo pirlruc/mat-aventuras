@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
+import pt.mataventuras.app.prize.PrizeLimit
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.model.ChildName
 import pt.mataventuras.domain.model.Mascot
@@ -32,12 +33,14 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     override fun onDestroy() {
         EngineAttachRetries.cancel(this)
         PrizeBoot.cancel(this)
+        PrizeLimit.cancel(this)
         super.onDestroy()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        PrizeLimit.arm(this)
     }
 
     /**
@@ -106,7 +109,14 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     internal fun requestEngineRestart(): Boolean =
         settleResult(
             RESULT_OK,
-            EngineLauncher.restartResultIntent(javaClass.name, mascotCode(), childName(), sceneCode(), ageCode()),
+            EngineLauncher.restartResultIntent(
+                javaClass.name,
+                mascotCode(),
+                childName(),
+                sceneCode(),
+                ageCode(),
+                intent.getStringExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT).orEmpty(),
+            ),
         )
 
     /**

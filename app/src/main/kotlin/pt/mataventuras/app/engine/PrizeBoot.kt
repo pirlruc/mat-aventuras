@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import java.lang.ref.WeakReference
 import pt.mataventuras.domain.engine.PrizeHud
 
 /**
@@ -29,6 +30,7 @@ internal object PrizeBoot {
 
     private val main = Handler(Looper.getMainLooper())
     private val timers = HashMap<Int, Runnable>()
+    private val hosts = HashMap<Int, WeakReference<Activity>>()
     private val ready = HashSet<Int>()
 
     /**
@@ -74,11 +76,12 @@ internal object PrizeBoot {
      */
     fun arm(activity: Activity) {
         val id = System.identityHashCode(activity)
+        hosts[id] = WeakReference(activity)
         timers.remove(id)?.let { main.removeCallbacks(it) }
         val tick =
             Runnable {
                 timers.remove(id)
-                timedOut(activity)
+                hosts.remove(id)?.get()?.let { timedOut(it) }
             }
         timers[id] = tick
         main.postDelayed(tick, TIMEOUT_MS)
@@ -123,6 +126,7 @@ internal object PrizeBoot {
      */
     fun cancel(activity: Activity) {
         val id = System.identityHashCode(activity)
+        hosts.remove(id)
         timers.remove(id)?.let { main.removeCallbacks(it) }
         ready.remove(id)
     }

@@ -252,7 +252,7 @@ internal object UiLogic {
     /**
      * Test tag for a tappable answer.
      */
-    fun answerTag(correct: Boolean): String = if (correct) "correct-answer" else "distractor"
+    fun answerTag(correct: Boolean): String = debugAnswerTag(correct, debugAnswerTags)
 
     /**
      * Age-7 sudoku fills every blank, so no single button is the whole answer.

@@ -37,7 +37,7 @@ class NavAndParentTest {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         kotlinx.coroutines.runBlocking { app.container.pinRepository.clear() }
         compose.setContent {
-            NavGraph(container = app.container, onSpeak = {}, onReward = { _, _, _ -> })
+            NavGraph(container = app.container, onSpeak = {}, onReward = { _, _, _, _ -> })
         }
         app.container.publishProfile(1L)
         compose.waitForIdle()
@@ -152,7 +152,7 @@ class NavAndParentTest {
             NavGraph(
                 container = app.container,
                 onSpeak = {},
-                onReward = { _, _, _ -> },
+                onReward = { _, _, _, _ -> },
                 celebrate = true,
                 onDismissWin = { dismissed = true },
             )

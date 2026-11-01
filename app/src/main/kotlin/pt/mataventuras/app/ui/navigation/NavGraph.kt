@@ -47,7 +47,7 @@ import pt.mataventuras.domain.model.Mascot
 internal fun NavGraph(
     container: AppContainer,
     onSpeak: (String) -> Unit,
-    onReward: (AgeBand, Mascot, String) -> Unit,
+    onReward: (AgeBand, Mascot, String, Int) -> Unit,
     memory: RouteMemory = viewModel(),
     celebrate: Boolean = false,
     onDismissWin: () -> Unit = {},
@@ -140,7 +140,9 @@ internal fun NavGraph(
                             profile = p,
                             module = current.module,
                             onSpeak = onSpeak,
-                            onReward = { age -> onReward(age, p.favouriteMascot, p.name) },
+                            onReward = { age ->
+                                onReward(age, p.favouriteMascot, p.name, p.prizeLimitSeconds)
+                            },
                             onExit = {
                                 scope.launch {
                                     profile = container.repository.getProfile(p.id) ?: p

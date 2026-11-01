@@ -45,11 +45,17 @@ object PrizeOffers {
         random: Random = Random.Default,
     ): PrizeOffer {
         val godot = RewardCatalog.gamesFor(age, EngineKind.TWO_D).map { PrizeOffer.Godot(it) }
+        val kart =
+            if (age == AgeBand.SIX_TO_EIGHT) {
+                RewardCatalog.gamesFor(age, EngineKind.THREE_D).map { PrizeOffer.Godot(it) }
+            } else {
+                emptyList()
+            }
         val compose =
             PrizeOffer.Compose(
                 if (age == AgeBand.THREE_TO_FIVE) ComposePrize.BALLOONS else ComposePrize.SNAKE,
             )
-        val offers = godot + compose
+        val offers = godot + kart + compose
         return offers[random.nextInt(offers.size)]
     }
 }

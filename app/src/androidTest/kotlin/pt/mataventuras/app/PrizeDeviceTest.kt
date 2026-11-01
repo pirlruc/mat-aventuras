@@ -1,6 +1,8 @@
 package pt.mataventuras.app
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.FileInputStream
@@ -31,10 +33,12 @@ class PrizeDeviceTest {
             stopEngines()
             shell("logcat -c")
             launch(prize)
-            Thread.sleep(8_000)
-            shell("screencap -p /sdcard/Download/mat-prize-${prize.name}.png")
-            val log = shell("logcat -d")
-            assertTrue("${prize.name}\n${log.takeLast(800)}", log.contains("MatPrize"))
+            val log = waitForHost(prize.name)
+            assertTrue(
+                "${prize.name} did not log the boot overlay",
+                log.contains("MatPrize ready") || log.contains("boot-timeout"),
+            )
+            assertRendered(capture(), prize.name)
         }
     }
 
@@ -57,6 +61,48 @@ class PrizeDeviceTest {
                 .putExtra("name", "Ana")
                 .putExtra("age", prize.age),
         )
+    }
+
+    private fun waitForHost(name: String): String {
+        val deadline = System.currentTimeMillis() + 45_000L
+        var log = ""
+        while (System.currentTimeMillis() < deadline) {
+            log = shell("logcat -d -s MatPrize:I AndroidRuntime:E")
+            if (log.contains("MatPrize ready") || log.contains("boot-timeout")) return log
+            Thread.sleep(400)
+        }
+        org.junit.Assert.fail("$name never logged the boot overlay\n${log.takeLast(1_200)}")
+        return log
+    }
+
+    private fun capture(): Bitmap? {
+        val descriptor =
+            InstrumentationRegistry
+                .getInstrumentation()
+                .uiAutomation
+                .executeShellCommand("screencap -p")
+        return FileInputStream(descriptor.fileDescriptor).use { BitmapFactory.decodeStream(it) }
+    }
+
+    private fun assertRendered(
+        bitmap: Bitmap?,
+        name: String,
+    ) {
+        assertTrue("$name screenshot missing", bitmap != null && bitmap.width > 32 && bitmap.height > 32)
+        val frame = bitmap ?: return
+        val colors = HashSet<Int>()
+        val stepX = (frame.width / 8).coerceAtLeast(1)
+        val stepY = (frame.height / 8).coerceAtLeast(1)
+        var y = 0
+        while (y < frame.height) {
+            var x = 0
+            while (x < frame.width) {
+                colors += frame.getPixel(x, y)
+                x += stepX
+            }
+            y += stepY
+        }
+        assertTrue("$name frame is a flat colour", colors.size > 1)
     }
 
     private fun shell(command: String): String {

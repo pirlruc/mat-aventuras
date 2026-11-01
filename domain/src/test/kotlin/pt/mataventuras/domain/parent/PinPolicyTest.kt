@@ -44,6 +44,29 @@ class PinPolicyTest {
     }
 
     @Test
+    fun forwardWallClockDoesNotEndTheElapsedLock() {
+        val elapsed = mutableListOf(5_000L)
+        val wall = mutableListOf(1_000_000L)
+        val locked =
+            PinPolicy(
+                random = SecureRandom.getInstance("SHA1PRNG").apply { setSeed(7) },
+                now = { wall.last() },
+                elapsed = { elapsed.last() },
+                iterations = 1_000,
+            )
+        var state = locked.create("1234")
+        repeat(PinPolicy.MAX_FAILURES) {
+            state = locked.attempt(state, "9999").second
+        }
+        wall += wall.last() + PinPolicy.LOCKOUT_MS + 5_000L
+        val (result, _) = locked.attempt(state, "1234")
+        assertTrue(result is PinResult.Locked)
+        elapsed += state.lockedUntilElapsedMs
+        val (open, _) = locked.attempt(state, "1234")
+        assertEquals(PinResult.Correct, open)
+    }
+
+    @Test
     fun invalidFormatIsRejected() {
         assertFalse(policy.isValidFormat("12"))
         assertFalse(policy.isValidFormat("abcd"))

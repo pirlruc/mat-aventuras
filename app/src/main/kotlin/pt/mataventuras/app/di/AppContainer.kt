@@ -2,6 +2,7 @@ package pt.mataventuras.app.di
 
 import android.content.Context
 import android.os.Build
+import android.os.SystemClock
 import androidx.room.Room
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,8 +27,21 @@ import pt.mataventuras.domain.progress.RewardsEngine
 class AppContainer(
     context: Context,
     val pinPolicy: PinPolicy = pinPolicyForProcess(),
-    var generator: ExerciseGenerator = ExerciseGenerator(),
+    generator: ExerciseGenerator = ExerciseGenerator(),
 ) {
+    private var exerciseGenerator: ExerciseGenerator = generator
+
+    /** Lesson generator. Tests replace it with [useGenerator]. */
+    val generator: ExerciseGenerator
+        get() = exerciseGenerator
+
+    /**
+     * Swaps the lesson generator. Production never calls this.
+     */
+    internal fun useGenerator(next: ExerciseGenerator) {
+        exerciseGenerator = next
+    }
+
     /** Room database for this process. */
     val database: MatAventurasDatabase =
         Room
@@ -78,7 +92,11 @@ class AppContainer(
 /**
  * Production uses 600k PBKDF2 iterations. Robolectric tests use 1k so PIN UI stays fast.
  */
-internal fun pinPolicyForProcess(): PinPolicy = PinPolicy(iterations = pinIterationsFor(processFingerprint()))
+internal fun pinPolicyForProcess(): PinPolicy =
+    PinPolicy(
+        iterations = pinIterationsFor(processFingerprint()),
+        elapsed = { SystemClock.elapsedRealtime() },
+    )
 
 internal fun pinIterationsFor(fingerprint: String): Int =
     if (GodotRuntime.isRobolectricFingerprint(fingerprint)) 1_000 else PinPolicy.ITERATIONS

@@ -5,12 +5,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.mascotFor
 import pt.mataventuras.domain.prize.AnswerSnake
 import pt.mataventuras.domain.prize.BalloonPop
 import pt.mataventuras.domain.prize.ComposePrize
+import pt.mataventuras.domain.prize.PrizeClock
 import pt.mataventuras.domain.prize.PrizeOffer
 import pt.mataventuras.domain.prize.PrizeOffers
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -33,13 +35,19 @@ class NewLessonBoardsTest {
     @Test
     fun olderBoardsReadTheClockAndThePrice() {
         val clock = ClockBoard(Random(3)).make()
-        assertTrue(clock.prompt.startsWith("Que horas são?"))
+        assertEquals("Que horas são?", clock.prompt)
+        assertFalse(clock.prompt.any { it.isDigit() })
         assertTrue(clock.isCorrect(clock.correctIndex))
         val money = MoneyBoard(Random(4))
         val exercise = money.make()
         assertEquals(money.price(1, 10), "1,10 €")
         assertTrue(exercise.prompt.contains("€"))
         assertTrue(exercise.isCorrect(exercise.correctIndex))
+        repeat(30) { seed ->
+            val round = MoneyBoard(Random(seed)).make()
+            assertEquals(4, round.options.size)
+            assertEquals(round.options.size, round.options.toSet().size)
+        }
         assertEquals(MascotCheck.CLOCK, mascotFor(LearningModule.CLOCK))
         assertEquals(MascotCheck.MONEY, mascotFor(LearningModule.MONEY))
         assertEquals(MascotCheck.ODD, mascotFor(LearningModule.ODD_ONE))
@@ -72,6 +80,18 @@ class NewLessonBoardsTest {
         assertTrue(older.any { it is PrizeOffer.Compose && it.prize == ComposePrize.SNAKE })
         assertTrue(older.any { it is PrizeOffer.Godot })
         assertFalse(young.any { it is PrizeOffer.Compose && it.prize == ComposePrize.SNAKE })
+        val wide = (0 until 80).map { PrizeOffers.pick(AgeBand.SIX_TO_EIGHT, Random(it)) }
+        assertTrue(wide.any { it is PrizeOffer.Godot && it.game == RewardGame.KART })
+        assertFalse(
+            (0 until 40).any { seed ->
+                val offer = PrizeOffers.pick(AgeBand.THREE_TO_FIVE, Random(seed))
+                offer is PrizeOffer.Godot && offer.game == RewardGame.KART
+            },
+        )
+        val deadline = PrizeClock.deadlineMs(1_000L, 120)
+        assertFalse(PrizeClock.expired(1_000L, deadline, 120))
+        assertTrue(PrizeClock.expired(deadline, deadline, 120))
+        assertTrue(wordDistractorLetters.containsAll(listOf("ã", "ç", "é")))
     }
 
     private fun forcedSmall(): Random =

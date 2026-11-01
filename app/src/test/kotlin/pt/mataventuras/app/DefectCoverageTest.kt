@@ -1,0 +1,345 @@
+package pt.mataventuras.app
+
+import android.os.Looper
+import android.view.View
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.test.core.app.ApplicationProvider
+import java.util.concurrent.TimeUnit
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.Robolectric
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
+import pt.mataventuras.app.engine.EngineLauncher
+import pt.mataventuras.app.prize.ComposePrizeActivity
+import pt.mataventuras.app.prize.PrizeLimit
+import pt.mataventuras.app.ui.debugAnswerTag
+import pt.mataventuras.app.ui.lesson.ClockFace
+import pt.mataventuras.app.ui.lesson.LessonScreen
+import pt.mataventuras.app.ui.lesson.SizeMark
+import pt.mataventuras.app.ui.lesson.clockHour
+import pt.mataventuras.app.ui.parent.ParentDashboard
+import pt.mataventuras.app.ui.parent.ParentKeyReset
+import pt.mataventuras.app.ui.theme.MatAventurasTheme
+import pt.mataventuras.data.pin.PinKeyException
+import pt.mataventuras.domain.engine.EnginePluginContract
+import pt.mataventuras.domain.model.AgeBand
+import pt.mataventuras.domain.model.ChildProfile
+import pt.mataventuras.domain.model.LearningModule
+import pt.mataventuras.domain.model.Mascot
+import pt.mataventuras.domain.prize.ComposePrize
+import pt.mataventuras.domain.voice.VoiceScripts
+import pt.mataventuras.plugin.RunnerPluginActivity
+
+@RunWith(RobolectricTestRunner::class)
+class DefectCoverageTest {
+    @get:Rule
+    val compose = createComposeRule()
+
+    @Test
+    fun clockFaceAndSizeMarkDrawWithoutTheAnswerWord() {
+        assertEquals(3, clockHour("3:00"))
+        assertEquals(12, clockHour("nope"))
+        assertEquals(1, clockHour("0:00"))
+        compose.setContent {
+            ClockFace(3)
+            SizeMark("Grande")
+            SizeMark("Pequeno")
+        }
+        compose.onNodeWithTag("clock-face").assertExists()
+        compose.onNodeWithContentDescription("Grande").assertExists()
+        compose.onNodeWithContentDescription("Pequeno").assertExists()
+    }
+
+    @Test
+    fun answerTagHidesTheCorrectOptionOutsideDebug() {
+        assertEquals("correct-answer", debugAnswerTag(correct = true, debug = true))
+        assertEquals("answer", debugAnswerTag(correct = true, debug = false))
+        assertEquals("distractor", debugAnswerTag(correct = false, debug = true))
+    }
+
+    @Test
+    fun prizeLimitFinishesTheComposePrizeAndTheCanvasHost() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val composeIntent = ComposePrizeActivity.intent(context, ComposePrize.BALLOONS, seed = 1L, limitSeconds = 1)
+        val composeHost = Robolectric.buildActivity(ComposePrizeActivity::class.java, composeIntent).setup()
+        shadowOf(Looper.getMainLooper()).idleFor(1200, TimeUnit.MILLISECONDS)
+        assertTrue(composeHost.get().isFinishing || composeHost.get().isDestroyed)
+
+        val engine =
+            EngineLauncher.intentFor(
+                context,
+                AgeBand.THREE_TO_FIVE,
+                Mascot.SPEEDY_HEDGEHOG,
+                "Ana",
+                limitSeconds = 1,
+            )
+        assertEquals("1", engine.getStringExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT))
+        val runner = Robolectric.buildActivity(RunnerPluginActivity::class.java, engine).setup()
+        PrizeLimit.arm(runner.get())
+        shadowOf(Looper.getMainLooper()).idleFor(1200, TimeUnit.MILLISECONDS)
+        assertTrue(runner.get().isFinishing || runner.get().isDestroyed)
+        PrizeLimit.cancel(runner.get())
+    }
+
+    @Test
+    fun keyResetNeedsTheHoldAndTheSum() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        var reset = 0
+        var left = 0
+        compose.setContent {
+            ParentKeyReset(app.container, onBack = { left += 1 }, holdMs = 0, onReset = { reset += 1 })
+        }
+        compose.onNodeWithText("Segurar para repor").performTouchInput {
+            down(center)
+            up()
+        }
+        compose.onNodeWithText("Quanto é 6 + 7?").assertExists()
+        compose.onNodeWithText("Resposta").performTextInput("ab")
+        compose.onNodeWithText("Repor").performClick()
+        assertEquals(0, reset)
+        assertEquals(0, reset)
+        compose.onNodeWithText("Resposta").performTextInput("13")
+        compose.onNodeWithText("Repor").performClick()
+        compose.waitUntil(8_000) { reset == 1 }
+        compose.onNodeWithText("Voltar").performClick()
+        assertEquals(1, left)
+        assertFalse(reset == 0)
+    }
+
+    @Test
+    fun parentDashboardWithoutAnActivitySkipsTheSecureFlag() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        compose.setContent {
+            CompositionLocalProvider(LocalView provides View(app)) {
+                ParentDashboard(app.container, null, onSpeak = {}, onBack = {})
+            }
+        }
+        compose.onNodeWithText(VoiceScripts.PARENT_DASHBOARD).assertIsDisplayed()
+    }
+
+    @Test
+    fun aShortHoldDoesNotOpenTheResetSum() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        compose.setContent {
+            ParentKeyReset(app.container, onBack = {}, holdMs = 60_000, onReset = {})
+        }
+        compose.onNodeWithText("Segurar para repor").performTouchInput {
+            down(center)
+            up()
+        }
+        assertTrue(compose.onAllNodesWithText("Quanto é 6 + 7?").fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    fun unlockedDashboardWithoutAChildAsksForAProfile() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        kotlinx.coroutines.runBlocking {
+            app.container.pinRepository.clear()
+            app.container.pinRepository.save(app.container.pinPolicy.create("4242"))
+        }
+        compose.setContent {
+            ParentDashboard(app.container, null, onSpeak = {}, onBack = {})
+        }
+        compose.onNodeWithText("PIN").performTextInput("4242")
+        compose.onNodeWithText("Entrar").performClick()
+        compose.waitUntil(8_000) {
+            compose
+                .onAllNodesWithText("Escolhe um perfil de criança primeiro.")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
+    @Test
+    fun debugAnswerFlagFollowsRobolectricOrTheDebuggableBit() {
+        assertEquals("", fingerprintOrEmpty(null))
+        assertEquals("robolectric", fingerprintOrEmpty("robolectric"))
+        assertTrue(debugAnswersFor("robolectric", 0))
+        assertTrue(debugAnswersFor("other", android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE))
+        assertFalse(debugAnswersFor("other", 0))
+    }
+
+    @Test
+    fun aMissingPrizeLimitDoesNotFinishTheHost() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val intent =
+            ComposePrizeActivity.intent(context, ComposePrize.SNAKE, seed = 2L)
+        val host = Robolectric.buildActivity(ComposePrizeActivity::class.java, intent).setup()
+        PrizeLimit.arm(host.get())
+        PrizeLimit.cancel(host.get())
+        shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS)
+        assertFalse(host.get().isFinishing)
+    }
+
+    @Test
+    fun unreadablePinOffersTheReset() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        app.container.pinRepository.failNextRead(PinKeyException(IllegalStateException("gone")))
+        val profile =
+            ChildProfile(
+                id = 1L,
+                name = "Ana",
+                ageGroup = AgeBand.SIX_TO_EIGHT,
+                favouriteMascot = Mascot.HERO_PUP,
+                avatarId = "hero_pup",
+                points = 0,
+                createdAtEpochMs = 0L,
+            )
+        compose.setContent {
+            ParentDashboard(app.container, profile, onSpeak = {}, onBack = {})
+        }
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Segurar para repor").fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    fun clockAndSizeLessonsShowAPictureInsteadOfTheWord() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val older =
+            kotlinx.coroutines.runBlocking {
+                val id = app.container.repository.createProfile("Ana", AgeBand.SIX_TO_EIGHT, Mascot.HERO_PUP)
+                app.container.repository.getProfile(id)!!
+            }
+        compose.setContent {
+            MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
+                LessonScreen(app.container, older, LearningModule.CLOCK, {}, {}, {})
+            }
+        }
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithTag("clock-face").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(VoiceScripts.CLOCK_ASK).assertIsDisplayed()
+    }
+
+    @Test
+    fun sizeLessonShowsCirclesInsteadOfTheWords() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val younger =
+            kotlinx.coroutines.runBlocking {
+                val id = app.container.repository.createProfile("Rui", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
+                app.container.repository.getProfile(id)!!
+            }
+        compose.setContent {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
+                LessonScreen(app.container, younger, LearningModule.SIZE, {}, {}, {})
+            }
+        }
+        assertTrue(compose.onAllNodesWithContentDescription("Grande").fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithContentDescription("Pequeno").fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun prizeLimitIgnoresAnEarlyTickAFinishedHostAndAClearedReference() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val intent = ComposePrizeActivity.intent(context, ComposePrize.BALLOONS, limitSeconds = 30)
+        assertFalse(intent.hasExtra(ComposePrizeActivity.SEED))
+        val host = Robolectric.buildActivity(ComposePrizeActivity::class.java, intent).setup()
+        PrizeLimit.arm(host.get())
+        PrizeLimit.arm(host.get())
+        val tick = pendingPrizeTick()
+        tick.run()
+        assertFalse(host.get().isFinishing)
+        PrizeLimit.arm(host.get())
+        forgetPrizeHosts()
+        pendingPrizeTick().run()
+        PrizeLimit.cancel(host.get())
+
+        val now = android.os.SystemClock.elapsedRealtime()
+        PrizeLimit.stopIfDue(null, now, 1)
+        PrizeLimit.stopIfDue(host.get(), now + 60_000, 30)
+        assertFalse(host.get().isFinishing)
+        host.get().finish()
+        PrizeLimit.stopIfDue(host.get(), now, 1)
+
+        val destroyed = ComposePrizeActivity.intent(context, ComposePrize.SNAKE, seed = 3L, limitSeconds = 1)
+        val gone = Robolectric.buildActivity(ComposePrizeActivity::class.java, destroyed).setup()
+        gone.destroy()
+        PrizeLimit.stopIfDue(gone.get(), now, 1)
+        val engine =
+            EngineLauncher.intentFor(
+                context,
+                AgeBand.SIX_TO_EIGHT,
+                Mascot.HERO_PUP,
+                "Ana",
+                limitSeconds = 1,
+            )
+        val runner = Robolectric.buildActivity(RunnerPluginActivity::class.java, engine).setup()
+        PrizeLimit.stopIfDue(runner.get(), now, 1)
+        assertTrue(runner.get().isFinishing || runner.get().isDestroyed)
+    }
+
+    @Test
+    fun plainPinReadFailuresStayOnTheGate() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        kotlinx.coroutines.runBlocking {
+            app.container.pinRepository.clear()
+            app.container.pinRepository.save(app.container.pinPolicy.create("1234"))
+        }
+        app.container.pinRepository.failNextRead(IllegalStateException("torn"))
+        compose.setContent {
+            ParentDashboard(app.container, null, onSpeak = {}, onBack = {})
+        }
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText(VoiceScripts.TRY_AGAIN).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    fun submitFailuresEitherRetryOrOfferAReset() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        kotlinx.coroutines.runBlocking {
+            app.container.pinRepository.clear()
+            app.container.pinRepository.save(app.container.pinPolicy.create("1234"))
+        }
+        compose.setContent {
+            ParentDashboard(app.container, null, onSpeak = {}, onBack = {})
+        }
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Entrar").fetchSemanticsNodes().isNotEmpty()
+        }
+        app.container.pinRepository.failNextRead(IllegalArgumentException("no"))
+        compose.onNodeWithText("PIN").performTextInput("1234")
+        compose.onNodeWithText("Entrar").performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText(VoiceScripts.TRY_AGAIN).fetchSemanticsNodes().isNotEmpty()
+        }
+        app.container.pinRepository.failNextRead(PinKeyException(IllegalStateException("later")))
+        compose.onNodeWithText("Entrar").performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Segurar para repor").fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+}
+
+private fun pendingPrizeTick(): Runnable {
+    val field = PrizeLimit::class.java.getDeclaredField("timers")
+    field.isAccessible = true
+    val timers = field.get(PrizeLimit) as Map<*, *>
+    return timers.values.filterIsInstance<Runnable>().first()
+}
+
+private fun forgetPrizeHosts() {
+    val field = PrizeLimit::class.java.getDeclaredField("hosts")
+    field.isAccessible = true
+    @Suppress("UNCHECKED_CAST")
+    val hosts = field.get(PrizeLimit) as MutableMap<Int, java.lang.ref.WeakReference<*>>
+    hosts.clear()
+}

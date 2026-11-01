@@ -76,6 +76,7 @@ object EngineLauncher {
         childName: String,
         scene: String = "",
         ageCode: String = "",
+        limitSeconds: String = "",
     ): Intent =
         Intent()
             .putExtra(RESULT_RESTART, true)
@@ -84,6 +85,7 @@ object EngineLauncher {
             .putExtra(EXTRA_NAME, childName)
             .putExtra(EnginePluginContract.EXTRA_SCENE, scene)
             .putExtra(EnginePluginContract.EXTRA_AGE, ageCode)
+            .putExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT, limitSeconds)
 
     /**
      * Intent that relaunches the plugin Activity after a Godot GLES restart.
@@ -106,6 +108,10 @@ object EngineLauncher {
             putExtra(
                 EnginePluginContract.EXTRA_AGE,
                 source.getStringExtra(EnginePluginContract.EXTRA_AGE).orEmpty(),
+            )
+            putExtra(
+                EnginePluginContract.EXTRA_PRIZE_LIMIT,
+                source.getStringExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT).orEmpty(),
             )
             putExtra(EXTRA_GODOT_RELAUNCH, true)
         }
@@ -141,6 +147,7 @@ object EngineLauncher {
         name: String,
         kind: EngineKind = pickRewardKind(ageGroup),
         game: RewardGame = RewardCatalog.pick(ageGroup, kind),
+        limitSeconds: Int = 0,
         pluginPresent: (String) -> Boolean = { isClassPresent(it) },
     ): Intent {
         val pluginClass = EnginePluginContract.pluginClassName(kind)
@@ -148,9 +155,8 @@ object EngineLauncher {
         val className = EnginePluginResolver.classNameFor(kind, pluginPresent = { _ -> usingPlugin })
         val packed = if (usingPlugin) game else RewardCatalog.nativeFallback(kind)
         return Intent().setClassName(context.packageName, className).apply {
-            EnginePluginContract.launchExtras(mascot.code, name, packed, ageGroup).forEach { (key, value) ->
-                putExtra(key, value)
-            }
+            val extras = EnginePluginContract.launchExtras(mascot.code, name, packed, ageGroup, limitSeconds)
+            extras.forEach { (key, value) -> putExtra(key, value) }
         }
     }
 }

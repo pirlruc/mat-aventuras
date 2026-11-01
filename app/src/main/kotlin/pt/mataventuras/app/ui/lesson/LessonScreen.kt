@@ -332,6 +332,9 @@ private fun LessonPlayColumn(
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            if (module == LearningModule.CLOCK) {
+                ClockFace(clockHour(exercise.options.getOrNull(exercise.correctIndex).orEmpty()))
+            }
             if (UiLogic.showsOptionPalette(exercise.play.kind)) {
                 exercise.options.forEachIndexed { index, text ->
                     Button(
@@ -811,6 +814,10 @@ private fun VisualOption(
     module: LearningModule,
     text: String,
 ) {
+    if (module == LearningModule.SIZE) {
+        SizeMark(text)
+        return
+    }
     val shape = if (UiLogic.showsShapeGlyph(module)) UiLogic.shapeKind(text) else null
     val dots = visualDotCount(module, text)
     Row(
