@@ -8,26 +8,30 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import pt.mataventuras.domain.math.Exercise
-import pt.mataventuras.domain.math.MemoryBoards
-import kotlin.random.Random
+import pt.mataventuras.domain.math.MemoryFace
 
 /**
- * Two taps that share a pair key count as a correct answer.
+ * Every pair stays open. The lesson advances only when the board is finished.
  */
 @Composable
 internal fun MemoryBoard(
     exercise: Exercise,
     onPick: (Int) -> Unit,
 ) {
-    val boards = remember { MemoryBoards(Random(1)) }
-    var first by remember(exercise) { mutableStateOf<Int?>(null) }
+    var face by remember(exercise) { mutableStateOf(MemoryFace()) }
+    val solved = face.solved(exercise.play.cells.size)
+    LaunchedEffect(solved) {
+        if (solved) onPick(exercise.correctIndex)
+    }
     val columns = exercise.play.columns.coerceAtLeast(1)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         exercise.play.cells.chunked(columns).forEachIndexed { row, labels ->
@@ -37,21 +41,12 @@ internal fun MemoryBoard(
             ) {
                 labels.forEachIndexed { column, label ->
                     val index = row * columns + column
+                    val open = index in face.matched || index in face.up
                     Button(
-                        onClick = {
-                            val opened = first
-                            if (opened == null) {
-                                first = index
-                            } else {
-                                val matched = boards.isPair(exercise.play, opened, index)
-                                first = null
-                                val wrong = (exercise.correctIndex + 1) % exercise.options.size
-                                onPick(if (matched) exercise.correctIndex else wrong)
-                            }
-                        },
+                        onClick = { face = face.reveal(exercise.play, index) },
                         modifier = Modifier.weight(1f).height(64.dp),
                     ) {
-                        Text(if (first == index) label else "?")
+                        Text(if (open) label else "?", fontWeight = FontWeight.Bold)
                     }
                 }
             }

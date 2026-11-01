@@ -5,14 +5,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.LearningModule
-import pt.mataventuras.domain.model.isSevenYears
 import pt.mataventuras.domain.model.mascotFor
 
 class MemoryAndWordsTest {
     @Test
     fun youngMemoryIsThreeIdenticalPairs() {
-        val exercise = MemoryBoards(Random(1)).make(LearningModule.MEMORY, 0)
+        val exercise = MemoryBoards(Random(1)).make(LearningModule.MEMORY, 0, AgeBand.THREE_TO_FIVE)
         assertEquals(3, exercise.play.columns)
         assertEquals(6, exercise.play.cells.size)
         assertEquals(exercise.play.cells.groupingBy { it }.eachCount().values.toSet(), setOf(2))
@@ -61,9 +61,11 @@ class MemoryAndWordsTest {
 
     @Test
     fun newModulesHaveAHostAndAreNotChoiceQuestions() {
-        assertFalse(LearningModule.MEMORY.isSevenYears())
-        assertFalse(LearningModule.LETTERS.isSevenYears())
-        assertTrue(LearningModule.WORDS.isSevenYears())
+        assertTrue(AgeBand.THREE_TO_FIVE in LearningModule.LETTERS.bands)
+        assertFalse(AgeBand.THREE_TO_FIVE in LearningModule.WORDS.bands)
+        val youngLetters = MemoryBoards(Random(4)).make(LearningModule.LETTERS, 0, AgeBand.THREE_TO_FIVE)
+        assertEquals(3, youngLetters.play.columns)
+        assertEquals(6, youngLetters.play.cells.size)
         assertTrue(mascotFor(LearningModule.MEMORY) == mascotFor(LearningModule.LETTERS))
         assertTrue(mascotFor(LearningModule.WORDS) != mascotFor(LearningModule.MEMORY))
         assertEquals(listOf(PlayKind.MEMORY), PlayKinds.forModule(LearningModule.MEMORY))
@@ -71,5 +73,32 @@ class MemoryAndWordsTest {
         org.junit.Assert.assertThrows(IllegalStateException::class.java) {
             ExerciseGenerator(Random(1)).choice(LearningModule.MEMORY)
         }
+    }
+
+    @Test
+    fun memoryFaceKeepsMatchesAndIgnoresARepeat() {
+        val play = MemoryBoards(Random(1)).make(LearningModule.MEMORY, 0, AgeBand.THREE_TO_FIVE).play
+        val first = 0
+        val partner = play.solution.indices.first { it != first && play.solution[it] == play.solution[first] }
+        val other = play.solution.indices.first { play.solution[it] != play.solution[first] }
+        val opened = MemoryFace().reveal(play, first)
+        assertEquals(listOf(first), opened.reveal(play, first).up)
+        val mismatch = opened.reveal(play, other)
+        assertEquals(listOf(first, other), mismatch.up)
+        val cleared = mismatch.reveal(play, partner)
+        assertEquals(listOf(partner), cleared.up)
+        assertEquals(cleared, cleared.reveal(play, -1))
+        assertEquals(cleared, cleared.reveal(play, partner))
+        var solved = MemoryFace()
+        play.solution.withIndex().groupBy { it.value }.values.forEach { group ->
+            solved = solved.reveal(play, group[0].index).reveal(play, group[1].index)
+        }
+        assertTrue(solved.solved(play.cells.size))
+        assertFalse(solved.solved(0))
+        assertEquals(solved, solved.reveal(play, first))
+        MemoryBoards(Random(1)).make(LearningModule.MEMORY, -1, AgeBand.THREE_TO_FIVE)
+        assertFalse(usesOlderBoard(LearningModule.ADDITION, AgeBand.THREE_TO_FIVE))
+        assertTrue(usesOlderBoard(LearningModule.ADDITION, AgeBand.SIX_TO_EIGHT))
+        assertFalse(usesOlderBoard(LearningModule.NUMBERS, AgeBand.SIX_TO_EIGHT))
     }
 }

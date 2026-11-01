@@ -1,9 +1,9 @@
 package pt.mataventuras.domain.math
 
 import kotlin.random.Random
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
-import pt.mataventuras.domain.model.isSevenYears
 
 /**
  * Builds interactive boards. Prompt text is pt-PT UI copy.
@@ -20,14 +20,15 @@ class PlayBoardFactory(
         kind: PlayKind,
         module: LearningModule,
         level: Int = 0,
+        age: AgeBand = AgeBand.SIX_TO_EIGHT,
     ): Exercise =
         when (kind) {
-            PlayKind.SUDOKU -> sudoku(module, level)
+            PlayKind.SUDOKU -> sudoku(module, level, age)
             PlayKind.SOUP -> soup(module, level)
-            PlayKind.PUZZLE -> puzzle(module, level)
+            PlayKind.PUZZLE -> puzzle(module, level, age)
             PlayKind.CIPHER -> cipher(module, level)
             PlayKind.GROUPS -> GroupBoards(random, numericOptions).make(module, level)
-            PlayKind.MEMORY -> MemoryBoards(random).make(module, level)
+            PlayKind.MEMORY -> MemoryBoards(random).make(module, level, age)
             PlayKind.WORD_COMPLETE -> WordComplete(random).make(module, level)
             PlayKind.CHOICE -> error("CHOICE is built by ExerciseGenerator.")
         }
@@ -35,11 +36,12 @@ class PlayBoardFactory(
     internal fun sudoku(
         module: LearningModule,
         level: Int = 0,
+        age: AgeBand = AgeBand.SIX_TO_EIGHT,
     ): Exercise =
         if (module == LearningModule.SHAPES) {
             shapeSudoku(level)
         } else {
-            numberSudoku(module, level)
+            numberSudoku(module, level, age)
         }
 
     internal fun soup(
@@ -55,10 +57,11 @@ class PlayBoardFactory(
     internal fun puzzle(
         module: LearningModule,
         level: Int = 0,
+        age: AgeBand = AgeBand.SIX_TO_EIGHT,
     ): Exercise {
-        val n = if (module.isSevenYears() || level >= 2) 3 else 2
+        val n = if (usesOlderBoard(module, age) || level >= 2) 3 else 2
         val hole = random.nextInt(n * n)
-        val full = PuzzlePatterns.cells(module, n, random)
+        val full = PuzzlePatterns.cells(module, n, random, age)
         val piece = full[hole]
         val cells = full.mapIndexed { i, value -> if (i == hole) "?" else value }
         val others = numericOrShapes(piece)
@@ -108,8 +111,9 @@ class PlayBoardFactory(
     private fun numberSudoku(
         module: LearningModule,
         level: Int,
+        age: AgeBand,
     ): Exercise {
-        val seven = module.isSevenYears()
+        val seven = usesOlderBoard(module, age)
         val n = if (level >= 2 && seven) 6 else 4
         val full = SudokuGrids.filled(n, random)
         val hole = random.nextInt(full.size)

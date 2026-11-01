@@ -109,7 +109,8 @@ class UiLogicTest {
         assertEquals(72, UiLogic.playCellHeightDp(2))
         assertEquals(56, UiLogic.playCellHeightDp(4))
         assertEquals(52, UiLogic.playCellHeightDp(5))
-        assertEquals(44, UiLogic.playCellHeightDp(6))
+        assertEquals(48, UiLogic.playCellHeightDp(6))
+        assertEquals(64, UiLogic.playCellHeightDp(6, pt.mataventuras.domain.model.AgeBand.THREE_TO_FIVE))
         assertTrue(UiLogic.shouldAcceptAnswer(false))
         assertFalse(UiLogic.shouldAcceptAnswer(true))
         assertTrue(UiLogic.shouldRepeatSpokenPrompt(true))
@@ -204,12 +205,12 @@ class UiLogicTest {
         assertTrue(UiLogic.waitingForProfile(null, summary))
         val module =
             ModulePerformance(LearningModule.ADDITION, 1, 6, 0.14, 90_000)
-        assertTrue(UiLogic.modulePerformanceLine(module).contains("addition"))
+        assertTrue(UiLogic.modulePerformanceLine(module).contains("Somar"))
         assertEquals(
             listOf("Nenhum módulo abaixo de 70% com amostra suficiente."),
             UiLogic.needsWorkLines(emptyList()),
         )
-        assertEquals(listOf("• counting"), UiLogic.needsWorkLines(listOf(LearningModule.COUNTING)))
+        assertEquals(listOf("• Contar"), UiLogic.needsWorkLines(listOf(LearningModule.COUNTING)))
         assertEquals("1m 30s", UiLogic.formatDuration(90_000))
         assertEquals("0m 0s", UiLogic.formatDuration(0))
     }

@@ -82,7 +82,7 @@ fun LessonScreen(
     onExit: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var exercise by remember { mutableStateOf(container.generator.generate(module, 0)) }
+    var exercise by remember { mutableStateOf(container.generator.generate(module, 0, profile.ageGroup)) }
     var hits by remember { mutableIntStateOf(0) }
     var misses by remember { mutableIntStateOf(0) }
     var streak by remember { mutableIntStateOf(0) }
@@ -145,7 +145,7 @@ fun LessonScreen(
                 onSpeak(VoiceScripts.LETS_PLAY)
                 onReward(profile.ageGroup)
             }
-            exercise = container.generator.generate(module, UiLogic.lessonLevel(hits))
+            exercise = container.generator.generate(module, UiLogic.lessonLevel(hits), profile.ageGroup)
         }
         pickLock.set(false)
     }
@@ -183,6 +183,7 @@ fun LessonScreen(
                 boardFocus = if (fillSudoku) sudoku.focus else -1,
                 fillEveryBlank = fillSudoku,
                 onBoardFocus = { index -> sudoku = SudokuPlay.focus(sudoku, index) },
+                age = profile.ageGroup,
             )
             LessonExitBar(
                 ageGroup = profile.ageGroup,
@@ -218,6 +219,7 @@ private fun LessonPlayColumn(
     boardFocus: Int,
     fillEveryBlank: Boolean,
     onBoardFocus: (Int) -> Unit,
+    age: AgeBand,
 ) {
     val tokens = LocalUiTokens.current
     Column(
@@ -230,6 +232,9 @@ private fun LessonPlayColumn(
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         if (UiLogic.showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {
             StarGrid(exercise.visualCount)
+        }
+        if (UiLogic.showsSumDots(module, exercise.visualCount)) {
+            DotStrip(exercise.visualCount)
         }
         if (UiLogic.showsNumberHero(module, exercise.play.kind)) {
             NumberHero(exercise.visualCount)
@@ -249,19 +254,23 @@ private fun LessonPlayColumn(
                 focus = boardFocus,
                 fillEveryBlank = fillEveryBlank,
                 onFocus = onBoardFocus,
+                age = age,
             )
         }
         if (UiLogic.showsSoupBoard(exercise.play.kind)) {
-            SoupBoard(exercise = exercise, onPick = onPick, onMissKeep = onMissKeep)
+            SoupBoard(exercise = exercise, onPick = onPick, onMissKeep = onMissKeep, age = age)
         }
         if (UiLogic.showsCipherLegend(exercise.play.kind)) {
             CipherPanel(exercise)
         }
         if (UiLogic.showsPuzzleFrame(exercise.play.kind)) {
-            PuzzleFrame(exercise)
+            PuzzleFrame(exercise, age)
         }
         if (UiLogic.showsMemoryBoard(exercise.play.kind)) {
             MemoryBoard(exercise, onPick)
+        }
+        if (UiLogic.showsWordBoard(exercise.play.kind)) {
+            WordCompleteBoard(exercise, onPick)
         }
         if (UiLogic.showsGroupsBoard(exercise.play.kind)) {
             Text(
@@ -271,7 +280,7 @@ private fun LessonPlayColumn(
                 color = Color(0xFF1B5E20),
                 modifier = Modifier.testTag("groups-banner"),
             )
-            GroupsBoard(exercise)
+            GroupsBoard(exercise, age)
         }
         Column(
             modifier = Modifier
@@ -415,10 +424,11 @@ private fun SudokuBoard(
     focus: Int,
     fillEveryBlank: Boolean,
     onFocus: (Int) -> Unit,
+    age: AgeBand,
 ) {
     val columns = exercise.play.columns.coerceAtLeast(1)
     val shown = cells.ifEmpty { exercise.options }
-    val cellDp = UiLogic.playCellHeightDp(columns) + 8
+    val cellDp = UiLogic.playCellHeightDp(columns, age) + if (age == AgeBand.THREE_TO_FIVE) 0 else 8
     val boxW = UiLogic.sudokuBoxWidth(columns)
     val boxH = UiLogic.sudokuBoxHeight(columns)
     Column(
@@ -470,6 +480,7 @@ private fun SoupBoard(
     exercise: Exercise,
     onPick: (Int) -> Unit,
     onMissKeep: () -> Unit,
+    age: AgeBand,
 ) {
     val columns = exercise.play.columns.coerceAtLeast(1)
     val cells = exercise.play.cells.ifEmpty { exercise.options }
@@ -477,7 +488,7 @@ private fun SoupBoard(
     var selected by remember(exercise.prompt) { mutableStateOf(emptyList<Int>()) }
     var found by remember(exercise.prompt) { mutableStateOf(emptySet<Int>()) }
     val foundCells = found.flatMap { paths.getOrElse(it) { emptyList() } }.toSet()
-    val cellDp = UiLogic.playCellHeightDp(columns)
+    val cellDp = UiLogic.playCellHeightDp(columns, age)
     val onGesture: (List<Int>) -> Unit = { path ->
         val match = UiLogic.soupMatchedPath(path, paths, found)
         if (match != null) {
@@ -607,9 +618,12 @@ private fun CipherPanel(exercise: Exercise) {
 }
 
 @Composable
-private fun GroupsBoard(exercise: Exercise) {
+private fun GroupsBoard(
+    exercise: Exercise,
+    age: AgeBand,
+) {
     val columns = exercise.play.columns.coerceAtLeast(1)
-    val cellDp = UiLogic.playCellHeightDp(columns)
+    val cellDp = UiLogic.playCellHeightDp(columns, age)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         exercise.play.cells.chunked(columns).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -629,10 +643,13 @@ private fun GroupsBoard(exercise: Exercise) {
 }
 
 @Composable
-private fun PuzzleFrame(exercise: Exercise) {
+private fun PuzzleFrame(
+    exercise: Exercise,
+    age: AgeBand,
+) {
     val cells = exercise.play.cells.ifEmpty { listOf("1", "2", "3", "?") }
     val columns = exercise.play.columns.coerceAtLeast(2)
-    val cellDp = UiLogic.playCellHeightDp(columns)
+    val cellDp = UiLogic.playCellHeightDp(columns, age)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         cells.chunked(columns).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
