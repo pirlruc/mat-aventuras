@@ -1,7 +1,7 @@
 # Quality and Android builds. Heavy jobs skip a pull request that does not
 # touch the app, the domain, Gradle, or scripts. The gate job still runs, so a
 # docs-only pull request is not blocked on a skipped Gradle build.
-# Android jobs call androiddevops 1.0.2 (CI-018).
+# Android jobs call androiddevops 1.1.0 (CI-018).
 name: ci
 
 on:
@@ -25,6 +25,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       code: ${{ steps.set.outputs.code }}
+      deps: ${{ steps.set.outputs.deps }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -38,15 +39,22 @@ jobs:
         run: |
           set -euo pipefail
           code=true
+          deps=true
           if [[ "${EVENT}" == "pull_request" ]]; then
             code=false
+            deps=false
             git fetch --depth=1 origin "${BASE}"
+            names="$(git diff --name-only "origin/${BASE}...HEAD")"
             pattern='^(app|data|domain|gradle|scripts)/|^(build|settings)\.gradle\.kts$|^gradle\.properties$|^libs/'
-            if git diff --name-only "origin/${BASE}...HEAD" | grep -Eq "${pattern}"; then
+            if grep -Eq "${pattern}" <<<"${names}"; then
               code=true
+            fi
+            if grep -Eq '^gradle/|libs\.versions\.toml' <<<"${names}"; then
+              deps=true
             fi
           fi
           echo "code=${code}" >> "${GITHUB_OUTPUT}"
+          echo "deps=${deps}" >> "${GITHUB_OUTPUT}"
 
   quality:
     needs: changes
@@ -62,19 +70,8 @@ jobs:
           python3 -m venv .ci-venv
           .ci-venv/bin/pip install --require-hashes -r requirements-ci.txt
 
-      - name: Parse YAML and issue manifest
+      - name: Issue manifest and companion pins
         run: |
-          .ci-venv/bin/python scripts/validate-yaml.py \
-            docs/issues.yml \
-            docs/guardrail-deviations.yml \
-            docs/issues-sync-targets.yml \
-            docs/companion-pins.yml \
-            .github/dependabot.yml \
-            .github/workflows/ci.yml \
-            .github/workflows/shared-ci.yml \
-            .github/workflows/python-quality.yml \
-            .github/workflows/emulator.yml \
-            .github/workflows/release.yml
           .ci-venv/bin/python scripts/validate-issues.py docs/issues.yml
           .ci-venv/bin/python scripts/verify-companion-pins.py
 
@@ -96,9 +93,9 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
+    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
     with:
-      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
+      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
       gradle_tasks: >-
         :domain:ktlintCheck :domain:detekt :domain:test :domain:koverXmlReport :domain:koverVerify
         :data:ktlintCheck :data:detekt :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug
@@ -119,9 +116,9 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
+    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
     with:
-      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
+      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
       upload: never
       build_command: >-
         ./gradlew --no-daemon :domain:compileKotlin :data:compileDebugKotlin :app:compileDebugKotlin
@@ -133,20 +130,20 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
+    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
     with:
-      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
+      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
   sbom:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: github.event_name != 'pull_request' || needs.changes.outputs.deps == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
+    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
     with:
-      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
+      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
 

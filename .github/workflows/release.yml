@@ -1,6 +1,7 @@
-# Builds a release APK, then publishes the GitHub Release for an annotated
-# tag that already exists. common-release 5.7.0 attaches the APK and a
-# .sha256. Signing secrets are optional; an empty keystore builds unsigned.
+# Builds a release APK and its CycloneDX bill, then publishes the GitHub
+# Release for an annotated tag that already exists. common-release 5.8.0
+# attaches every file in the artifact, writes a .sha256 for each, and
+# signs those blobs. The release job uses the release environment.
 name: release
 
 on:
@@ -17,9 +18,9 @@ jobs:
   apk:
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-release-apk.yml@6146c3b38d8915e92742a2a4eef6bd276047ac91
+    uses: pirlruc/androiddevops/.github/workflows/android-release-apk.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
     with:
-      scripts_ref: 6146c3b38d8915e92742a2a4eef6bd276047ac91
+      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
       keystore_base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -32,9 +33,12 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: pirlruc/commondevops/.github/workflows/common-release.yml@01d993bc72eebc8806ae85f9459c4f3d6dd3415e
+      attestations: write
+    uses: pirlruc/commondevops/.github/workflows/common-release.yml@cb34967f230a0d4841ae1efc2c98e745bd8726a7
     with:
       tag: ${{ inputs.tag }}
       release_artifact: android-release-apk
+      sign: true
+      environment: release
     secrets:
       release_token: ${{ secrets.RELEASE_TOKEN }}

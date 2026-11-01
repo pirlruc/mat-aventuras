@@ -9,14 +9,14 @@ DEST="${ROOT}/.ci-tools"
 BIN="${DEST}/actionlint"
 
 if [[ ! -x "${BIN}" ]]; then
-  mkdir -p "${DEST}"
-  tmp="$(mktemp)"
-  curl -fsSL -o "${tmp}" \
-    "https://github.com/rhysd/actionlint/releases/download/v${VER}/actionlint_${VER}_linux_amd64.tar.gz"
-  echo "${SHA256}  ${tmp}" | sha256sum -c -
-  tar -xzf "${tmp}" -C "${DEST}" actionlint
-  rm -f "${tmp}"
-  chmod +x "${BIN}"
+    mkdir -p "${DEST}"
+    tmp="$(mktemp)"
+    curl -fsSL -o "${tmp}" \
+        "https://github.com/rhysd/actionlint/releases/download/v${VER}/actionlint_${VER}_linux_amd64.tar.gz"
+    echo "${SHA256}  ${tmp}" | sha256sum -c -
+    tar -xzf "${tmp}" -C "${DEST}" actionlint
+    rm -f "${tmp}"
+    chmod +x "${BIN}"
 fi
 
 cd "${ROOT}"
