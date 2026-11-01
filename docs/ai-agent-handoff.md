@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-10-31
-**Last agent focus:** companion pins at guardrails 1.13.1 and scaffold 1.10.2
+**Last updated:** 2026-11-01
+**Last agent focus:** manifest reconciliation and user-facing docs (`feature-manifest-docs`)
 
 ---
 
@@ -46,17 +46,19 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 
 | Epic | Status | Notes |
 | --- | --- | --- |
-| MAT-001 | open in GitHub until human sync; tasks done in tree | Compose host, local Room, isolated engines |
-| MAT-002 | open | T4 and T5 done in tree; T1 emulator CI remains |
-| MAT-003 | open in GitHub until human sync; tasks done in tree | Godot 4 plugin; T5 arcade lives/HUD done in tree |
-| MAT-004 | open | T4–T7 done in tree. MasterKey (T8) is in the working tree; Room migration is still PR4 |
-| MAT-005 | open | T4–T6 done. T1 shared simulation remains. Release `isMinifyEnabled` is true; device proof of a minified prize is still T2. T3 still shrinks Kover excludes |
-| MAT-006 | open | T1 and T2 done. T3 CodeQL compile and the APK bill are still open |
-| MAT-007 | open | Bands and Room v2 are on main. T2 per-band difficulty tables are still open |
-| MAT-008 | open | Memory and word-completion boards are on main (PR #63) |
-| MAT-009 | open | Headless import and typed scripts are on main. T2 prize UX is still open |
-| MAT-010 | open | Companion pins and reusable CI are on main |
-| MAT-011 | open | Backlog only. Do not implement these games in 0.1.0 |
+| MAT-001 | done | Compose host, local Room, isolated engines |
+| MAT-002 | done | Emulator job, Robolectric gates, lesson packs |
+| MAT-003 | done | Godot 4 plugin in `:engine2d` and `:engine3d` |
+| MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
+| MAT-005 | open | T4–T6 done. T1 shared simulation, T2 minified prize on a device, and T3 Kover excludes remain. T7–T11 are the keep rules, Keystore PIN, PBKDF2 rehash, `singleInstance` review, and release signing |
+| MAT-006 | open | T1 and T2 done. T3 is the androiddevops CodeQL and APK-bill proof |
+| MAT-007 | open | Bands and Room v2 are on main. T2–T6 are per-band ranges, parent titles, cell size, the word board, and memory |
+| MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
+| MAT-009 | open | T1 done. T2 prize UX and T3 cancel `GodotEmbed` retries remain |
+| MAT-010 | done | Companion pins and reusable CI are on main |
+| MAT-011 | open | Backlog. PR7 takes only the five named lessons plus Rebentar balões and Cobra das respostas |
+| MAT-012 | open | GitHub #99. Kids UX: speaker, gentle miss, stars, home icons, 3–5 exit, back stack, Room v3 prize time limit. Tasks #100–#108 |
+| MAT-013 | open | GitHub #82. T1 (#83) done. Epic stays open |
 
 `docs/guardrail-deviations.yml` now has two entries, neither of which lowers a number:
 Kover exclusions beyond kotlinx.serialization (KT-TEST-002; floors stay 95),
@@ -75,13 +77,11 @@ python3 .github/scaffold/scripts/issues-sync.py --repo pirlruc/mat-aventuras --y
 ```
 
 Do not git-merge `cursor/godot-black-screen-*`; those branches were deleted after
-the lives/HUD port landed on `main` via PR #10. PR #11 recorded MAT-003-T5 as
-done in `docs/issues.yml`. MAT-004-T7 paints invaders, chomp, and climb on
-`ArcadeBoardView` (domain tests cover `ArcadeScene`). `:app` Robolectric proof
-is CI. This host has the Android SDK at `~/Android/Sdk` and Java at
-`/opt/android-studio/jbr`. MAT-006 is GitHub #19 (tasks #20, #21, #22). MAT-002-T1 is #23.
-`docs/issues.yml`
-already contains those ids; after merge, sync so the manifest owns the bodies.
+the lives/HUD port landed on `main` via PR #10. MAT-004-T7 paints invaders,
+chomp, and climb on `ArcadeBoardView`. This host has the Android SDK at
+`~/Android/Sdk` (`ANDROID_HOME`) and Java at `/opt/android-studio/jbr`
+(`JAVA_HOME`). `python3 -m venv` fails here; use `uv`. The AVD name is
+`mat_api36`. Do not apt-install. MAT-006 is GitHub #19 (tasks #20, #21, #22).
 
 ## Commands
 
@@ -116,14 +116,12 @@ bash scripts/check-ci-local.sh
   `ci.yml`. They skip a pull request that does not touch app, data, domain,
   gradle, or scripts. Do not gate them on `github.actor == 'dependabot[bot]'`.
   Scorecard is advisory (`blocking: false`, `publish_results: false`).
-- `:app` / `:data` are skipped when `ANDROID_HOME` is unset so JDK-only CI
-  can still gate `:domain`. ktlint and detekt are plugins on `:domain` only,
-  so Android sources are not statically analyzed even on the SDK job until
-  MAT-006-T1. The CI `test` job does install the SDK and runs `:data`/`:app`
-  unit tests, Kover, and `:app:lintDebug`. This VM has no SDK, so those
-  tasks were not executed here (MAT-006-T2). CodeQL compile and the APK bill
-  have the same limit (MAT-006-T3). With the SDK, coverage is required for
-  all three modules.
+- `:app` / `:data` are skipped when `ANDROID_HOME` is unset so a JDK-only
+  run can still gate `:domain`. This host has the SDK. CI's `android` job
+  runs ktlint, detekt, unit tests, Kover, and `:app:lintDebug` on all three
+  modules. CodeQL compile and the APK bill are still MAT-006-T3: prove the
+  androiddevops callers on an SDK host and keep the SARIF and OSV gates
+  green. With the SDK, coverage is required for all three modules.
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
@@ -143,7 +141,6 @@ bash scripts/check-ci-local.sh
   reward class names only.
 - Compose `pointerInput` `size` is `IntSize` (`width: Int`). Use
   `size.width.coerceAtLeast(1).toFloat()`, not `coerceAtLeast(1f)`.
-  `:app` is not compiled on this VM (`ANDROID_HOME` unset); CI catches it.
 - Age-7 choice lessons fill the viewport; sudoku/soup/cipher/puzzle scroll, and
   Sair/Ficar sit in a footer so the confirm-leave buttons stay on screen.
   Tests click those footer buttons without `performScrollTo` (they are not
@@ -199,7 +196,7 @@ bash scripts/check-ci-local.sh
 - `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
 - Local secret scan: `git config core.hooksPath .githooks` runs `scripts/gitleaks-pre-commit.sh` (KT-SEC-003). CI still scans; the hook fails closed if `gitleaks` is missing.
 - Guardrails tag `1.13.1` (`1945211a`) and scaffold tag `1.10.2` (`c8eddcfb`) are the pins. KT-SEC-002 is semgrep `p/kotlin` on `common-secrets-sast`; KT-SEC-003 is gitleaks there too. KT-DOC-001 Dokka `doc_coverage` does not apply (no published API) and is recorded, not lowered. The one `@SuppressLint("MissingSuperCall")` is `RewardGodotFragment`: those JNI overrides must not call super. Guardrails 1.13.1 treats that as a platform contract, so the two suppression deviations can be dropped once the pin is on `main`. The 14-day number is not lowered. `scripts/verify-licenses.py` reads `license_deny_list` from the guardrails supply-chain thresholds (SC-LIC-001), including BUSL-1.1, Commons-Clause, and CC-BY-NC.
-- `:app` Kover still excludes Compose facades (`LessonScreenKt`, `NavGraphKt`, `@Composable`, `*Kt$*`), native Canvas hosts, and `engine.godot.*`. MAT-005-T3 wants the first two hosts and the two screen facades measured. This VM has no Android SDK, so those excludes stayed. Room `*_Impl` and `BuildConfig` stay excluded as generated code. KT-TEST-002 names kotlinx.serialization generated members, not Room or the Godot JNI package.
+- `:app` Kover still excludes Compose facades (`LessonScreenKt`, `NavGraphKt`, `@Composable`, `*Kt$*`), native Canvas hosts, and `engine.godot.*`. MAT-005-T3 removes the two hosts and the two screen facades once the 95 percent floor still holds. Room `*_Impl` and `BuildConfig` stay excluded as generated code. KT-TEST-002 names kotlinx.serialization generated members, not Room or the Godot JNI package. The deviation should shrink to the Godot JNI package.
 - Do not gate jobs on `github.actor == 'dependabot[bot]'` (zizmor `bot-conditions`). Dependabot updates use `cooldown.default-days: 7`. Workflow lint is zizmor inside `common-infra-lint` (and `scripts/check-ci-docker.sh` locally). There is no in-repo zizmor-action job.
 - CodeQL action `v4.38.1` commit is `1c5b675653bb5c22dbe9b12b556ec555138e09fd` (the tag object is not the commit). `upload: never` keeps `contents: read`. The compile step must stay manual (`build-mode: manual`). The APK SBOM is the debug runtime classpath (`scripts/gradle-to-cyclonedx.py` + osv-scanner `2.6.0`). Dex has no Maven coordinates, so scanning the APK file itself yields an empty bill. Community semgrep is `p/kotlin` beside `.semgrep.yml`, still semgrep `1.128.1`, and it runs after grype so `.ci-venv` is not scanned.
 - Do not merge `cursor/godot-black-screen-invaders-5d7b` or
@@ -217,11 +214,14 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Tag `0.1.0` is on main and the debug APK is on the GitHub Release. Do not move that tag. `.github/workflows/release.yml` calls common-release and does not build an APK.
-2. MAT-009-T2: prize loading, failure, and result screens. MAT-007-T2: per-band difficulty tables.
-3. MAT-005-T2/T3 and MAT-006-T3 stay open: minified prize on a device, narrower Kover excludes, CodeQL compile, APK bill.
+1. Tag `0.1.0` is on main. Do not move it. `release.yml` builds an APK through androiddevops `android-release-apk`, then calls common-release `5.7.0` with `release_artifact: android-release-apk`. Signing secrets are not set. Do not generate the keystore until the step before the 0.2.0 release, and the owner must back it up.
+2. Next product branch is `feature-band-difficulty` (MAT-007-T2 through T6): `BandDifficulty`, remove `isSevenYears()`, the 3–5 regression, memory, `WordCompleteBoard`, 48/64 dp cells, pt-PT parent titles, `strings.xml`.
+3. Then `feature-kids-ux` (MAT-012), `feature-prize-ux` (MAT-009-T2, MAT-009-T3, MAT-005-T1), and `feature-security-r8-coverage` (MAT-005-T2, T3, T7–T10, MAT-006-T3). MAT-011 stays open except the five lessons and two Compose prizes on `feature-new-lessons-prizes`.
 4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
-5. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again.
-6. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. PDO-TOOL-001 is fixed in pydevops `3.3.1`. Callers pin `3.3.10`, which runs the containers as root, skips mypy when `installable_app` is false, reads pip-audit 2.10's dependencies object, and runs the quality report as a module. This repo has Actions read on `ci-lint` and `ci-python`, so the job is no longer skipped. `install_runner_packages` stays false. Do not pin `main`.
+5. When androiddevops later becomes private, this public repo cannot call its workflows. Vendor the pinned workflow. Do not change visibility from an agent session. mat-aventuras stays public.
+6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review is issues-only, after 0.2.0, and dedupes this list.
+7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. Callers pin `3.3.10`, which runs the containers as root, skips mypy when `installable_app` is false, reads pip-audit 2.10's dependencies object, and runs the quality report as a module. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. It is not behind `PYTHON_QUALITY_ENABLED`. `install_runner_packages` stays false. Do not pin `main`. Do not move pydevops 3.3.1 through 3.3.10. Leave pydevops `feature-cmn-551` alone.
+8. The main ruleset already requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, and the two python-quality job names. Reviews stay at 0. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed.
+9. bestpractices.dev is last, after 0.2.0 and the companion issues.
 
-*Last updated: 2026-10-31 (androiddevops 1.0.2; pydevops 3.3.10; commondevops 5.7.0)*
+*Last updated: 2026-11-01 (manifest and user docs; androiddevops 1.0.2; pydevops 3.3.10; commondevops 5.7.0)*

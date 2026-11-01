@@ -10,10 +10,10 @@
 
 milestones:
   - name: Phase 1 — Foundation
-    status: open
+    status: done
     epics:
       - id: MAT-001
-        status: open
+        status: done
         title: Native Compose host with isolated 2D/3D reward engines
         overview:
           problem: >-
@@ -163,10 +163,10 @@ milestones:
               - KT-API-004
 
   - name: Phase 2 — Learning content
-    status: open
+    status: done
     epics:
       - id: MAT-002
-        status: open
+        status: done
         title: Richer lesson packs and Android module coverage
         overview:
           problem: >-
@@ -275,7 +275,7 @@ milestones:
     status: open
     epics:
       - id: MAT-003
-        status: open
+        status: done
         title: Isolated Godot 4 reward engine
         overview:
           problem: >-
@@ -407,7 +407,7 @@ milestones:
               - KT-API-004
 
       - id: MAT-004
-        status: open
+        status: done
         title: Remaining Kotlin and CI guardrail gates
         overview:
           problem: >-
@@ -561,7 +561,7 @@ milestones:
               - KT-TEST-001
 
           - id: MAT-004-T8
-            status: open
+            status: done
             title: Replace deprecated MasterKeys and migrate Room without wipes
             instructions:
               files:
@@ -573,6 +573,57 @@ milestones:
             guardrail_refs:
               - KT-SEC-001
               - KT-API-003
+
+          - id: MAT-004-T9
+            status: done
+            title: Map the controls this app claims to OWASP MASVS
+            instructions:
+              files:
+                - docs/architecture.md
+            verification:
+              - The architecture doc cites MASVS for storage, crypto, auth, network, platform, code, and privacy
+            guardrail_refs:
+              - ANDROID-SEC-002
+
+          - id: MAT-004-T10
+            status: done
+            title: Link private vulnerability reporting from the security policy
+            instructions:
+              files:
+                - SECURITY.md
+            verification:
+              - SECURITY.md links to the GitHub private vulnerability report form
+            guardrail_refs:
+              - DOC-PUB-001
+
+          - id: MAT-004-T11
+            status: done
+            title: Pin CI installs and cover uv and Docker in Dependabot
+            instructions:
+              files:
+                - .github/dependabot.yml
+                - requirements-ci.txt
+                - .devcontainer/devcontainer.json
+                - gradle/wrapper/gradle-wrapper.properties
+            verification:
+              - Dependabot has uv and docker ecosystems
+              - pip install uses --require-hashes
+              - The devcontainer image and the Gradle wrapper distribution are digest-pinned
+            guardrail_refs:
+              - SC-DEP-001
+
+          - id: MAT-004-T12
+            status: done
+            title: Require the stable checks on the default branch
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+                - .github/workflows/shared-ci.yml
+            verification:
+              - The main ruleset requires changes, quality, gate, and the shared-ci and python-quality checks that always run
+              - Path-filtered Android jobs are not required
+            guardrail_refs:
+              - CI-032
 
       - id: MAT-005
         status: open
@@ -695,6 +746,66 @@ milestones:
             guardrail_refs:
               - CI-025
 
+          - id: MAT-005-T7
+            status: open
+            title: Narrow R8 keep rules to named members
+            instructions:
+              files:
+                - app/proguard-rules.pro
+            verification:
+              - Each keep rule names the class or member it preserves and why
+              - A minified release prize still runs on the emulator
+            guardrail_refs:
+              - ANDROID-BUILD-003
+
+          - id: MAT-005-T8
+            status: open
+            title: Store the parent PIN with a Keystore AES-GCM key
+            instructions:
+              files:
+                - data/src/main/kotlin/pt/mataventuras/data/pin/PinRepository.kt
+            verification:
+              - New PINs use a Keystore AES-GCM key over plain SharedPreferences
+              - An existing EncryptedSharedPreferences PIN migrates on the next unlock
+              - security-crypto is no longer a dependency
+            guardrail_refs:
+              - KT-SEC-001
+              - ANDROID-SEC-001
+
+          - id: MAT-005-T9
+            status: open
+            title: Raise PBKDF2 iterations and rehash on unlock
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/parent/PinPolicy.kt
+            verification:
+              - New hashes use at least 600000 iterations
+              - An older hash is replaced the next time the correct PIN unlocks
+            guardrail_refs:
+              - KT-SEC-001
+
+          - id: MAT-005-T10
+            status: open
+            title: Review MainActivity singleInstance
+            instructions:
+              files:
+                - app/src/main/AndroidManifest.xml
+            verification:
+              - The launcher launchMode is either justified in the architecture doc or changed
+              - Engine activities stay singleInstance so a dying process cannot relaunch itself
+            guardrail_refs:
+              - ANDROID-SEC-002
+
+          - id: MAT-005-T11
+            status: open
+            title: Sign the release APK with a keystore kept outside the repo
+            instructions:
+              files:
+                - .github/workflows/release.yml
+            verification:
+              - The keystore file and its passwords are not committed
+              - release.yml signs the APK when the four ANDROID_* secrets are set
+
       - id: MAT-006
         status: open
         title: Prove Android analysis the agent VM cannot run
@@ -780,12 +891,10 @@ milestones:
             title: Prove CodeQL compile and the APK bill on an SDK host
             instructions:
               files:
-                - .github/workflows/codeql.yml
-                - .github/workflows/hardening.yml
-                - scripts/run-osv-sbom.sh
+                - .github/workflows/ci.yml
             verification:
-              - codeql.yml compiles :data and :app and the SARIF gate stays green
-              - hardening.yml assembles the debug APK and the CycloneDX/OSV scan stays green
+              - The android-codeql caller compiles :data and :app and the SARIF gate stays green
+              - The android-apk-sbom caller assembles the debug APK and the CycloneDX/OSV scan stays green
             guardrail_refs:
               - KT-SEC-002
               - KT-SEC-004
@@ -815,9 +924,48 @@ milestones:
             title: Move operand ranges into a per-band difficulty table
             verification:
               - NUMBERS, ADDITION, and LOGIC take the child's band, not only isSevenYears
+              - Ages 3-5 stay on small numbers; ages 6-8 keep the harder sums and logic lists
+              - isSevenYears is removed
+          - id: MAT-007-T3
+            status: open
+            title: Show Portuguese module titles on the parent dashboard
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/ui/UiLogic.kt
+                - app/src/main/res/values/strings.xml
+            verification:
+              - The parent dashboard does not print English enum ids
+              - strings.xml no longer says 3 anos or 7 anos as the band names
+          - id: MAT-007-T4
+            status: open
+            title: Keep lesson cells large enough to tap
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/ui/UiLogic.kt
+            verification:
+              - Word-search and sudoku cells are at least 48 dp
+              - Ages 3-5 use 64 dp cells, and the board scrolls
+          - id: MAT-007-T5
+            status: open
+            title: Add a word-completion board
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/ui/lesson/WordCompleteBoard.kt
+            verification:
+              - WORD_COMPLETE renders its own composable, not a generic option list
+          - id: MAT-007-T6
+            status: open
+            title: Finish memory only when every pair is found
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/ui/lesson/MemoryBoard.kt
+            verification:
+              - Two cards stay face up, a matched pair stays open, and a second tap on the same card is ignored
+              - The exercise advances only when every pair is found
+              - LETTERS uses 2x3 for ages 3-5
 
       - id: MAT-008
-        status: open
+        status: done
         title: Memory and word-completion lessons
         decision: >-
           In the context of the regular lesson list, facing only arithmetic
@@ -865,9 +1013,18 @@ milestones:
               - Timeout offers Tentar outra vez and Voltar to the Canvas host
               - A Ganhaste card replaces the spoken-only return
               - The 3–5 HUD is icon-first and kart boost is its own button
+          - id: MAT-009-T3
+            status: open
+            title: Cancel Godot embed retries when the host is destroyed
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/engine/godot/GodotEmbed.kt
+            verification:
+              - postDelayed retries are removed in onDestroy
+              - A destroyed host does not attach a fragment
 
       - id: MAT-010
-        status: open
+        status: done
         title: Companion pins and reusable CI
         decision: >-
           In the context of a public Android app, facing copied security jobs
@@ -938,6 +1095,92 @@ milestones:
               - Breakout with letters
               - Simple tower defence
               - Endless runner with math gates
+
+      - id: MAT-012
+        status: open
+        title: Calmer controls for a young child
+        decision: >-
+          In the context of a child playing on a tablet, facing tiny home
+          controls, a harsh miss, and a one-tap exit for ages 3-5, we decided
+          to enlarge the main controls, soften a miss, and restore the lesson
+          after process death, to achieve a session a young child can finish,
+          accepting a Room v3 column for a parent-set prize time limit.
+        acceptance_criteria:
+          - A speaker replay control is at least 64 dp
+          - A miss for ages 3-5 does not deduct points
+          - Leaving a lesson at ages 3-5 needs a hold or a confirm
+          - The navigation route and the profile survive process death
+          - A parent can set a prize time limit, stored by a v3 migration
+        guardrail_refs:
+          - KT-TEST-001
+        tasks:
+          - id: MAT-012-T1
+            status: open
+            title: Add a speaker replay button
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/ui/lesson
+            verification:
+              - The replay control is at least 64 dp and speaks the current prompt again
+          - id: MAT-012-T2
+            status: open
+            title: Soften a miss for ages 3-5
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/progress/RewardsEngine.kt
+                - app/src/main/kotlin/pt/mataventuras/app/ui/lesson
+            verification:
+              - A miss uses an amber cue, the mascot, and a soft tone
+              - Ages 3-5 do not lose points for a miss
+          - id: MAT-012-T3
+            status: open
+            title: Show three stars toward the next prize
+            verification:
+              - The lesson shows how many correct answers remain before a prize
+          - id: MAT-012-T4
+            status: open
+            title: Enlarge the home icon buttons
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/ui/home/HomeScreen.kt
+            verification:
+              - Home icon buttons are at least 64 dp
+              - The parent area uses a lock icon
+          - id: MAT-012-T5
+            status: open
+            title: Confirm before ages 3-5 leave a lesson
+            verification:
+              - Leaving a lesson at ages 3-5 needs a hold or a confirm
+          - id: MAT-012-T6
+            status: open
+            title: Restore the lesson route after process death
+            instructions:
+              files:
+                - app/src/main/kotlin/pt/mataventuras/app/ui/navigation/NavGraph.kt
+            verification:
+              - A Compose BackHandler handles system back
+              - SavedStateHandle restores the route and the active profile
+          - id: MAT-012-T7
+            status: open
+            title: Name options, cells, and the exit control for accessibility
+            verification:
+              - Options, cells, and the exit control set contentDescription and mergeDescendants
+              - Large fixed-size text does not scale without a cap
+          - id: MAT-012-T8
+            status: open
+            title: Use Portuguese words for points and the number square
+            verification:
+              - Visible copy says pontos
+              - Ages 3-5 see Quadrado mágico where the older band sees sudoku
+          - id: MAT-012-T9
+            status: open
+            title: Store a parent-set prize time limit in Room
+            instructions:
+              files:
+                - data/src/main/kotlin/pt/mataventuras/data/local
+            verification:
+              - Schema version 3 adds the limit without a destructive migration
+              - A migration test covers an existing v2 database
 
       - id: MAT-013
         status: open
