@@ -70,14 +70,15 @@ class GapCoverageTest {
         val steps = lessonSteps()
         var step by mutableIntStateOf(0)
         val spoken = mutableListOf<String>()
-        app.container.generator =
+        app.container.useGenerator(
             object : ExerciseGenerator() {
                 override fun generate(
                     module: LearningModule,
                     level: Int,
                     age: AgeBand,
                 ): Exercise = steps[step.coerceIn(steps.indices)].exercise
-            }
+            },
+        )
         compose.setContent {
             val current = steps[step.coerceIn(steps.indices)]
             val profile = if (current.older) older else young
@@ -142,14 +143,14 @@ class GapCoverageTest {
                         NavGraph(
                             container = app.container,
                             onSpeak = {},
-                            onReward = { _, _, _ -> },
+                            onReward = { _, _, _, _ -> },
                             memory = missing,
                         )
                     1 ->
                         NavGraph(
                             container = app.container,
                             onSpeak = {},
-                            onReward = { _, _, _ -> },
+                            onReward = { _, _, _, _ -> },
                             memory = parents,
                         )
                     2 ->
@@ -216,14 +217,14 @@ class GapCoverageTest {
                         NavGraph(
                             container = app.container,
                             onSpeak = {},
-                            onReward = { _, _, _ -> },
+                            onReward = { _, _, _, _ -> },
                             memory = lesson,
                         )
                     1 ->
                         NavGraph(
                             container = app.container,
                             onSpeak = {},
-                            onReward = { _, _, _ -> },
+                            onReward = { _, _, _, _ -> },
                             memory = home,
                         )
                     else ->

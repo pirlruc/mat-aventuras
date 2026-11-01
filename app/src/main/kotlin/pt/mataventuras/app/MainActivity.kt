@@ -38,8 +38,11 @@ class MainActivity : ComponentActivity() {
             NavGraph(
                 container = app.container,
                 onSpeak = { speech.speak(it) },
-                onReward = { ageGroup, mascot, name ->
-                    engineLauncher.launch(PrizeLaunch.intent(this, ageGroup, mascot, name))
+                onReward = { ageGroup, mascot, name, limit ->
+                    val seconds = app.container.rewards.prizeLimitSeconds(limit)
+                    engineLauncher.launch(
+                        PrizeLaunch.intent(this, ageGroup, mascot, name, limitSeconds = seconds),
+                    )
                 },
                 celebrate = celebrateWin,
                 onDismissWin = { celebrateWin = false },

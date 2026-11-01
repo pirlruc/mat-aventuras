@@ -93,10 +93,7 @@ object VoiceScripts {
      */
     fun missingLetter(word: String): String = "Qual é a letra que falta em $word?"
 
-    /**
-     * Clock prompt. [hour] is 1..12.
-     */
-    fun clockPrompt(hour: Int): String = "Que horas são? O relógio marca $hour."
+    const val CLOCK_ASK: String = "Que horas são?"
 
     /**
      * Money prompt in euros and cents.

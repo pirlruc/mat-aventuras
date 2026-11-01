@@ -58,7 +58,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-010 | done | Companion pins and reusable CI are on main |
 | MAT-011 | open | #114 merged the five lessons and two Compose prizes. The epic stays open. The other lesson and prize ideas stay in the tasks |
 | MAT-012 | done | Speaker, gentle miss, stars, home lock, exit confirm, saved route, and Room v3 prize limit |
-| MAT-013 | open | GitHub #82. T1 (#83) done. Epic stays open |
+| MAT-013 | done | T2 and T3 are on main. python-quality still runs on every pull request until the owner approves a ruleset edit |
 
 `docs/guardrail-deviations.yml` now has two entries, neither of which lowers a number:
 Kover exclusions beyond kotlinx.serialization (KT-TEST-002; floors stay 95),
@@ -224,6 +224,8 @@ bash scripts/check-ci-local.sh
   `onGodotForceQuit` as a GLES restart (`onGodotRestartRequested` already does
   that). `Host.finish` lingers 1.6 s for prize banners via a `SceneTreeTimer`
   signal (callers do not `await` it); boot errors pass `linger=false`.
+- A parent prize limit is `prize_limit` on the reward Intent. `PrizeLimit` arms every host from `SystemClock.elapsedRealtime()`. Zero or a missing extra does not finish the activity. The Godot `Host` reads `prizeLimitSeconds()` and stops on `Time.get_ticks_msec()`. Compose prizes use `Random.Default` unless the test passes a seed. The correct-answer tag is on only when the process is debuggable or Robolectric.
+- A Keystore or IO failure while reading the PIN opens the hold-and-sum reset (`6 + 7`). The parent window sets `FLAG_SECURE` while that screen is composed. Lockout stores both a wall-clock deadline and `lockedUntilElapsedMs`. `PinKeyException` is an `IllegalStateException`; catch it first.
 - Prize lives, speeds, and hit tests live only in
   `domain/src/main/resources/prize-tuning.json`. The app asset source set
   packages that file as `res://prize-tuning.json`. `Host.tune` reads it.
@@ -245,4 +247,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, the two python-quality job names, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 and MAT-006 stay open. MAT-013 is done. python-quality still runs on every pull request until the owner approves a ruleset edit.
 
-*Last updated: 2026-11-01 (MAT-013 closed after the CI pin merge; python-quality still runs on every pull request).*
+*Last updated: 2026-11-01 (MAT-013 is closed; the defect branch adds the prize limit, the clock face, and the parent PIN reset).*

@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import kotlin.random.Random
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
+import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.prize.ComposePrize
 
@@ -14,10 +15,16 @@ import pt.mataventuras.domain.prize.ComposePrize
  * Compose reward. Balloons for ages 3–5 and the answer snake for ages 6–8.
  */
 class ComposePrizeActivity : ComponentActivity() {
+    override fun onDestroy() {
+        PrizeLimit.cancel(this)
+        super.onDestroy()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val prize = prizeFrom(intent.getStringExtra(EXTRA))
-        val random = Random(intent.getLongExtra(SEED, 1L))
+        val random = if (intent.hasExtra(SEED)) Random(intent.getLongExtra(SEED, 1L)) else Random.Default
+        PrizeLimit.arm(this)
         setContent {
             MatAventurasTheme(ageFor(prize)) {
                 PrizeScreen(prize, random) {
@@ -38,11 +45,18 @@ class ComposePrizeActivity : ComponentActivity() {
         fun intent(
             context: Context,
             prize: ComposePrize,
-            seed: Long = 1L,
-        ): Intent =
-            Intent(context, ComposePrizeActivity::class.java)
-                .putExtra(EXTRA, prize.name)
-                .putExtra(SEED, seed)
+            seed: Long? = null,
+            limitSeconds: Int = 0,
+        ): Intent {
+            val intent =
+                Intent(context, ComposePrizeActivity::class.java)
+                    .putExtra(EXTRA, prize.name)
+            if (seed != null) intent.putExtra(SEED, seed)
+            if (limitSeconds > 0) {
+                intent.putExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT, limitSeconds.toString())
+            }
+            return intent
+        }
     }
 }
 

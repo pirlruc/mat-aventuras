@@ -25,7 +25,7 @@ class ClockBoard(
         val options = (others + correct).shuffled(random)
         return Exercise(
             module = LearningModule.CLOCK,
-            prompt = VoiceScripts.clockPrompt(hour),
+            prompt = VoiceScripts.CLOCK_ASK,
             spoken = VoiceScripts.CLOCK_SPOKEN,
             options = options,
             correctIndex = options.indexOf(correct),

@@ -22,8 +22,7 @@ class WordComplete(
         val answer = entry.word[hole].toString()
         val shown = entry.word.replaceRange(hole, hole + 1, "_")
         val distractors =
-            ('a'..'z')
-                .map { it.toString() }
+            wordDistractorLetters
                 .filter { it != answer.lowercase() }
                 .shuffled(random)
                 .take(3)
@@ -58,3 +57,9 @@ class WordComplete(
             )
     }
 }
+
+/**
+ * Letters a child can tap, including the pt-PT accents those words use.
+ */
+internal val wordDistractorLetters: List<String> =
+    ('a'..'z').map { it.toString() } + listOf("á", "à", "â", "ã", "é", "ê", "í", "ó", "ô", "õ", "ú", "ç")

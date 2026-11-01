@@ -6,6 +6,7 @@ import org.godotengine.godot.plugin.UsedByGodot
 import pt.mataventuras.app.engine.GodotBridge
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.app.engine.IsolatedEngineActivity
+import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.model.EngineKind
 import pt.mataventuras.plugin.KartPluginActivity
 
@@ -27,6 +28,12 @@ internal class MatAventurasGodotPlugin(
 
     @UsedByGodot
     fun youngBand(): Boolean = GodotBridge.youngBand(host)
+
+    @UsedByGodot
+    fun prizeLimitSeconds(): Int {
+        val raw = host.intent.getStringExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT)
+        return raw?.toIntOrNull() ?: 0
+    }
 
     @UsedByGodot
     fun livesLine(

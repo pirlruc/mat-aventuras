@@ -2,6 +2,7 @@ package pt.mataventuras.app.engine
 
 import android.view.MotionEvent
 import android.widget.TextView
+import pt.mataventuras.app.prize.PrizeLimit
 import pt.mataventuras.domain.engine.ArcadeInput
 import pt.mataventuras.domain.engine.ArcadeScene
 import pt.mataventuras.domain.engine.ArcadeSpan
@@ -21,6 +22,7 @@ internal object NativeRewardHost {
         activity: RunnerPluginActivity,
         game: RewardGame,
     ) {
+        PrizeLimit.arm(activity)
         when (game) {
             RewardGame.INVADERS -> attachInvaders(activity)
             RewardGame.CHOMP -> attachChomp(activity)

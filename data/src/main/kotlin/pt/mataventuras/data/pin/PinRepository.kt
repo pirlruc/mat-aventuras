@@ -34,12 +34,25 @@ class PinRepository(
     private val sealer: PinSealer = if (plaintext) PlainPinSealer else KeystorePinSealer
     private val lock = Mutex()
 
+    /** Test hook. The next [read] or [isSet] throws this and then clears it. */
+    private var failNextRead: Throwable? = null
+
+    /**
+     * Makes the next PIN read fail. Used to show the parent reset.
+     */
+    fun failNextRead(error: Throwable) {
+        failNextRead = error
+    }
+
     /**
      * Stored PIN, or null when none has been set.
      */
     suspend fun read(): PinState? =
         lock.withLock {
-            withContext(Dispatchers.IO) { readLocked() }
+            withContext(Dispatchers.IO) {
+                throwIfRequested()
+                readLocked()
+            }
         }
 
     /**
@@ -58,6 +71,7 @@ class PinRepository(
     suspend fun <T> update(transform: (PinState?) -> Pair<T, PinState?>): T =
         lock.withLock {
             withContext(Dispatchers.IO) {
+                throwIfRequested()
                 val current = readLocked()
                 val (result, next) = transform(current)
                 if (next != null) persistLocked(next)
@@ -71,6 +85,7 @@ class PinRepository(
     suspend fun isSet(): Boolean =
         lock.withLock {
             withContext(Dispatchers.IO) {
+                throwIfRequested()
                 prefs.contains(KEY_RECORD) ||
                     (prefs.contains(KEY_HASH) && prefs.contains(KEY_SALT)) ||
                     LegacyEncryptedPin.hasKeyset(prefs)
@@ -116,6 +131,7 @@ class PinRepository(
                 state.consecutiveFailures.toString(),
                 state.lockedUntilEpochMs.toString(),
                 state.iterations.toString(),
+                state.lockedUntilElapsedMs.toString(),
             ).joinToString(separator = "\n")
         val ok =
             prefs
@@ -130,11 +146,29 @@ class PinRepository(
         check(ok) { "PIN persist failed" }
     }
 
-    private fun readLocked(): PinState? = readRecord() ?: readPlainLegacy() ?: readEncryptedLegacy()
+    private fun throwIfRequested() {
+        failNextRead?.let { failure ->
+            failNextRead = null
+            throw failure
+        }
+    }
+
+    private fun readLocked(): PinState? {
+        readRecord()?.let { return it }
+        val legacy = readPlainLegacy() ?: readEncryptedLegacy() ?: return null
+        persistLocked(legacy)
+        return legacy
+    }
 
     private fun readRecord(): PinState? {
         val record = prefs.getString(KEY_RECORD, null) ?: return null
-        return decodeRecord(sealer.open(record))
+        return try {
+            decodeRecord(sealer.open(record))
+        } catch (error: GeneralSecurityException) {
+            throw PinKeyException(error)
+        } catch (error: IOException) {
+            throw PinKeyException(error)
+        }
     }
 
     private fun readPlainLegacy(): PinState? {
@@ -175,8 +209,16 @@ private fun decodeRecord(payload: String): PinState {
         consecutiveFailures = lines[2].toInt(),
         lockedUntilEpochMs = lines[3].toLong(),
         iterations = lines.getOrNull(4)?.toIntOrNull() ?: PinPolicy.LEGACY_ITERATIONS,
+        lockedUntilElapsedMs = lines.getOrNull(5)?.toLongOrNull() ?: 0L,
     )
 }
+
+/**
+ * The Keystore key for the PIN record cannot be used. The parent may reset.
+ */
+class PinKeyException(
+    cause: Throwable,
+) : IllegalStateException("PIN key unreadable", cause)
 
 /**
  * Encrypted store. Plaintext fallback is opt-in (Robolectric) and uses a

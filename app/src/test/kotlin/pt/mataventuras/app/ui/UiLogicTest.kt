@@ -72,6 +72,14 @@ class UiLogicTest {
             ),
         )
         assertEquals(
+            null,
+            UiLogic.targetShapeToDraw(
+                LearningModule.SHAPES,
+                GeometricShape.CIRCLE,
+                PlayKind.SUDOKU,
+            ),
+        )
+        assertEquals(
             GeometricShape.CIRCLE,
             UiLogic.targetShapeToDraw(
                 LearningModule.SHAPES,

@@ -13,6 +13,7 @@ data class PinState(
     val consecutiveFailures: Int,
     val lockedUntilEpochMs: Long,
     val iterations: Int = PinPolicy.LEGACY_ITERATIONS,
+    val lockedUntilElapsedMs: Long = 0L,
 )
 
 /**
@@ -42,6 +43,7 @@ sealed class PinResult {
 class PinPolicy(
     private val random: SecureRandom = SecureRandom(),
     private val now: () -> Long = { System.currentTimeMillis() },
+    private val elapsed: () -> Long = { 0L },
     private val iterations: Int = ITERATIONS,
 ) {
     /**
@@ -69,7 +71,8 @@ class PinPolicy(
         pin: String,
     ): Pair<PinResult, PinState> {
         val nowMs = now()
-        if (state.lockedUntilEpochMs > nowMs) {
+        val elapsedMs = elapsed()
+        if (stillLocked(state, nowMs, elapsedMs)) {
             return PinResult.Locked(state.lockedUntilEpochMs) to state
         }
         if (!isValidFormat(pin)) {
@@ -80,8 +83,21 @@ class PinPolicy(
         return if (constantTimeEquals(expected, actual)) {
             PinResult.Correct to refreshed(state, pin)
         } else {
-            failed(state, nowMs)
+            failed(state, nowMs, elapsedMs)
         }
+    }
+
+    /**
+     * Wall-clock lockout and elapsed-realtime lockout. A forward clock change
+     * does not end the elapsed deadline, and a reboot does not end the wall deadline.
+     */
+    private fun stillLocked(
+        state: PinState,
+        wallNow: Long,
+        elapsedNow: Long,
+    ): Boolean {
+        if (state.lockedUntilEpochMs > wallNow) return true
+        return state.lockedUntilElapsedMs > 0L && elapsedNow < state.lockedUntilElapsedMs
     }
 
     /**
@@ -92,10 +108,17 @@ class PinPolicy(
     private fun failed(
         state: PinState,
         nowMs: Long,
+        elapsedMs: Long,
     ): Pair<PinResult, PinState> {
         val failures = state.consecutiveFailures + 1
         val lockUntil = if (failures >= MAX_FAILURES) nowMs + LOCKOUT_MS else 0L
-        val next = state.copy(consecutiveFailures = failures, lockedUntilEpochMs = lockUntil)
+        val elapsedUntil = if (failures >= MAX_FAILURES && elapsedMs > 0L) elapsedMs + LOCKOUT_MS else 0L
+        val next =
+            state.copy(
+                consecutiveFailures = failures,
+                lockedUntilEpochMs = lockUntil,
+                lockedUntilElapsedMs = elapsedUntil,
+            )
         val result =
             if (lockUntil > 0L) {
                 PinResult.Locked(lockUntil)
@@ -110,7 +133,7 @@ class PinPolicy(
         pin: String,
     ): PinState {
         if (state.iterations >= iterations) {
-            return state.copy(consecutiveFailures = 0, lockedUntilEpochMs = 0L)
+            return state.copy(consecutiveFailures = 0, lockedUntilEpochMs = 0L, lockedUntilElapsedMs = 0L)
         }
         val salt = ByteArray(SALT_BYTES)
         random.nextBytes(salt)

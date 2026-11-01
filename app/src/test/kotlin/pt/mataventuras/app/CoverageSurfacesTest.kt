@@ -81,7 +81,7 @@ class CoverageSurfacesTest {
                     NavGraph(
                         container = app.container,
                         onSpeak = {},
-                        onReward = { _, _, _ -> },
+                        onReward = { _, _, _, _ -> },
                         celebrate = true,
                         onDismissWin = {},
                     )
@@ -158,7 +158,7 @@ class CoverageSurfacesTest {
         module: LearningModule,
         vararg slots: Int,
     ) {
-        app.container.generator = ExerciseGenerator(SlotRandom(slots))
+        app.container.useGenerator(ExerciseGenerator(SlotRandom(slots)))
         step.intValue = LearningModule.entries.size + 9
         compose.waitForIdle()
         step.intValue = LearningModule.entries.indexOf(module)

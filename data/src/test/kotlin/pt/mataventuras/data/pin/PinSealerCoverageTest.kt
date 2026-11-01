@@ -57,6 +57,26 @@ class PinSealerCoverageTest {
         }
 
     @Test
+    fun elapsedLockoutRoundTripsAndAForcedReadFailsClosed() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val repository = PinRepository(context, "pin_elapsed", allowPlaintextFallback = true)
+            val prefs = context.getSharedPreferences("pin_elapsed_plain", Context.MODE_PRIVATE)
+            prefs.edit().putString("record", "plain:ab\ncd\n1\n2\n1000\n50").commit()
+            assertEquals(50L, repository.read()?.lockedUntilElapsedMs)
+            prefs.edit().putString("record", "plain:ab\ncd\n1\n2\n1000\nnope").commit()
+            assertEquals(0L, repository.read()?.lockedUntilElapsedMs)
+            repository.failNextRead(PinKeyException(java.io.IOException("gone")))
+            assertRejects { repository.read() }
+            repository.failNextRead(IllegalStateException("torn"))
+            assertRejects { repository.isSet() }
+            repository.failNextRead(IllegalArgumentException("no"))
+            assertRejects {
+                repository.update { state -> Unit to state }
+            }
+        }
+
+    @Test
     fun keystoreSealerIsChosenWhenPlaintextIsOff() =
         runTest {
             val context = ApplicationProvider.getApplicationContext<Context>()

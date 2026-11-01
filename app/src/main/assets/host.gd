@@ -12,10 +12,32 @@ var _tune: Dictionary = {}
 var _hud_layer: CanvasLayer
 
 
+var _limit_deadline := 0
+
+
 func _ready() -> void:
 	_read_tuning()
 	if Engine.has_singleton("MatAventuras"):
 		plugin = Engine.get_singleton("MatAventuras")
+	_arm_limit()
+
+
+func _arm_limit() -> void:
+	if plugin == null or not plugin.has_method("prizeLimitSeconds"):
+		return
+	var seconds := int(plugin.prizeLimitSeconds())
+	if seconds <= 0:
+		return
+	_limit_deadline = Time.get_ticks_msec() + seconds * 1000
+
+
+func _process(_delta: float) -> void:
+	if _limit_deadline <= 0:
+		return
+	if Time.get_ticks_msec() < _limit_deadline:
+		return
+	_limit_deadline = 0
+	finish(false, false)
 
 
 func _read_tuning() -> void:

@@ -28,6 +28,9 @@ object EnginePluginContract {
     /** Intent extra: [pt.mataventuras.domain.model.AgeBand] name. */
     const val EXTRA_AGE: String = "age"
 
+    /** Parent prize length in seconds. Zero or absent means the host did not set one. */
+    const val EXTRA_PRIZE_LIMIT: String = "prize_limit"
+
     /** Result extra: true when the reward level completed. */
     const val RESULT_FINISHED: String = "finished"
 
@@ -150,7 +153,12 @@ object EnginePluginContract {
         childName: String,
         game: RewardGame,
         age: AgeBand,
-    ): Map<String, String> = launchExtras(mascotCode, childName, game) + (EXTRA_AGE to age.name)
+        limitSeconds: Int = 0,
+    ): Map<String, String> {
+        val extras = launchExtras(mascotCode, childName, game) + (EXTRA_AGE to age.name)
+        if (limitSeconds <= 0) return extras
+        return extras + (EXTRA_PRIZE_LIMIT to limitSeconds.toString())
+    }
 
     private val ALLOWED_ENGINE_CLASSES =
         setOf(

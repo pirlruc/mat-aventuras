@@ -1,5 +1,8 @@
 package pt.mataventuras.app.ui.parent
 
+import android.app.Activity
+import android.view.WindowManager
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,14 +29,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.data.pin.PinKeyException
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.parent.ParentSummary
 import pt.mataventuras.domain.parent.PinGate
@@ -58,6 +68,8 @@ fun ParentDashboard(
     var settingPin by remember { mutableStateOf(false) }
     var summary by remember { mutableStateOf<ParentSummary?>(null) }
     var pinBusy by remember { mutableStateOf(false) }
+    var keyBroken by remember { mutableStateOf(false) }
+    SecureParentWindow()
 
     LaunchedEffect(Unit) {
         try {
@@ -66,6 +78,9 @@ fun ParentDashboard(
             onSpeak(message)
         } catch (error: CancellationException) {
             throw error
+        } catch (_: PinKeyException) {
+            keyBroken = true
+            message = "Não consigo ler o PIN deste aparelho."
         } catch (_: IllegalStateException) {
             settingPin = false
             message = VoiceScripts.TRY_AGAIN
@@ -73,6 +88,17 @@ fun ParentDashboard(
             settingPin = false
             message = VoiceScripts.TRY_AGAIN
         }
+    }
+
+    if (keyBroken && !unlocked) {
+        ParentKeyReset(container, onBack) {
+            keyBroken = false
+            settingPin = true
+            pin = ""
+            confirmation = ""
+            message = UiLogic.pinPrompt(true)
+        }
+        return
     }
 
     if (!unlocked) {
@@ -99,7 +125,6 @@ fun ParentDashboard(
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = {
-                    if (pinBusy) return@Button
                     pinBusy = true
                     scope.launch {
                         try {
@@ -118,6 +143,8 @@ fun ParentDashboard(
                             }
                         } catch (error: CancellationException) {
                             throw error
+                        } catch (_: PinKeyException) {
+                            keyBroken = true
                         } catch (_: IllegalStateException) {
                             message = VoiceScripts.TRY_AGAIN
                         } catch (_: IllegalArgumentException) {
@@ -233,5 +260,80 @@ private fun MetricCard(
             Text(title)
             Text(value, fontWeight = FontWeight.Bold)
         }
+    }
+}
+
+@Composable
+private fun SecureParentWindow() {
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val window = (view.context as? Activity)?.window
+        window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
+    }
+}
+
+@Composable
+internal fun ParentKeyReset(
+    container: AppContainer,
+    onBack: () -> Unit,
+    holdMs: Long = 1_500,
+    onReset: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var held by remember { mutableStateOf(false) }
+    var answer by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text("Não consigo ler o PIN deste aparelho.")
+        Spacer(Modifier.height(12.dp))
+        if (!held) {
+            Text(
+                "Segurar para repor",
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    val released =
+                                        try {
+                                            withTimeout(holdMs) {
+                                                tryAwaitRelease()
+                                                true
+                                            }
+                                        } catch (_: TimeoutCancellationException) {
+                                            false
+                                        }
+                                    if (!released) held = true
+                                },
+                            )
+                        },
+            )
+        } else {
+            Text("Quanto é 6 + 7?")
+            OutlinedTextField(
+                value = answer,
+                onValueChange = { answer = it.filter { ch -> ch.isDigit() }.take(2) },
+                label = { Text("Resposta") },
+                modifier = Modifier.fillMaxWidth().testTag("pin-reset-answer"),
+                singleLine = true,
+            )
+            Button(
+                onClick = {
+                    if (answer != "13") return@Button
+                    scope.launch {
+                        container.pinRepository.clear()
+                        onReset()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Repor") }
+        }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Voltar") }
     }
 }

@@ -1,9 +1,13 @@
 package pt.mataventuras.app
 
 import android.app.Application
+import android.content.pm.ApplicationInfo
 import android.os.Build
 import java.io.File
+import kotlinx.coroutines.runBlocking
 import pt.mataventuras.app.di.AppContainer
+import pt.mataventuras.app.engine.GodotRuntime
+import pt.mataventuras.app.ui.debugAnswerTags
 import pt.mataventuras.domain.engine.EnginePluginContract
 
 /**
@@ -17,6 +21,7 @@ class MatAventurasApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        debugAnswerTags = debugAnswersFor(fingerprintOrEmpty(Build.FINGERPRINT), applicationInfo.flags)
         bindHostGraph()
     }
 
@@ -26,6 +31,7 @@ class MatAventurasApp : Application() {
     internal fun bindHostGraph(processName: String = currentProcessName()): Boolean {
         if (!shouldOpenContainer(processName)) return false
         container = AppContainer(this)
+        Thread({ runBlocking { container.pinRepository.read() } }, "pin-migrate").start()
         return true
     }
 }
@@ -36,6 +42,16 @@ class MatAventurasApp : Application() {
  * process never opens the host database. Any `package:suffix` name is skipped,
  * including Godot's unused `:phoenix` ProcessPhoenix process.
  */
+internal fun fingerprintOrEmpty(fingerprint: String?): String = fingerprint ?: ""
+
+internal fun debugAnswersFor(
+    fingerprint: String,
+    flags: Int,
+): Boolean {
+    val debuggable = (flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    return GodotRuntime.isRobolectricFingerprint(fingerprint) || debuggable
+}
+
 internal fun shouldOpenContainer(processName: String): Boolean {
     if (processName.isBlank()) return false
     return !EnginePluginContract.isNonDefaultProcessName(processName)
