@@ -2,24 +2,25 @@ package pt.mataventuras.data.pin
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import java.io.IOException
 import java.security.GeneralSecurityException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import pt.mataventuras.domain.parent.PinPolicy
 import pt.mataventuras.domain.parent.PinState
 
 /**
- * Parental PIN hash in EncryptedSharedPreferences. Plaintext PIN digits are
- * never persisted. Device Keystore failures fail closed; Robolectric tests
- * opt into a distinct private prefs file via [allowPlaintextFallback].
+ * Parental PIN hash sealed with a Keystore AES-GCM key. Plaintext PIN digits
+ * are never persisted. An EncryptedSharedPreferences record is copied into
+ * that key on the next save (the unlock). Keystore failures fail closed;
+ * Robolectric tests opt into a distinct private prefs file via
+ * [allowPlaintextFallback].
  */
 class PinRepository(
     context: Context,
-    storeName: String = "parent_pin",
+    private val storeName: String = "parent_pin",
     allowPlaintextFallback: Boolean = false,
     private val prefs: SharedPreferences =
         pinPreferences(
@@ -28,6 +29,9 @@ class PinRepository(
             allowPlaintextFallback = allowPlaintextFallback,
         ),
 ) {
+    private val appContext = context.applicationContext
+    private val plaintext = allowPlaintextFallback
+    private val sealer: PinSealer = if (plaintext) PlainPinSealer else KeystorePinSealer
     private val lock = Mutex()
 
     /**
@@ -66,7 +70,11 @@ class PinRepository(
      */
     suspend fun isSet(): Boolean =
         lock.withLock {
-            withContext(Dispatchers.IO) { prefs.contains(KEY_HASH) && prefs.contains(KEY_SALT) }
+            withContext(Dispatchers.IO) {
+                prefs.contains(KEY_RECORD) ||
+                    (prefs.contains(KEY_HASH) && prefs.contains(KEY_SALT)) ||
+                    LegacyEncryptedPin.hasKeyset(prefs)
+            }
         }
 
     /**
@@ -101,17 +109,34 @@ class PinRepository(
     }
 
     private fun persistLocked(state: PinState) {
+        val payload =
+            listOf(
+                state.hashHex,
+                state.saltHex,
+                state.consecutiveFailures.toString(),
+                state.lockedUntilEpochMs.toString(),
+                state.iterations.toString(),
+            ).joinToString(separator = "\n")
         val ok =
             prefs.edit()
-                .putString(KEY_HASH, state.hashHex)
-                .putString(KEY_SALT, state.saltHex)
-                .putInt(KEY_FAILURES, state.consecutiveFailures)
-                .putLong(KEY_LOCKOUT, state.lockedUntilEpochMs)
+                .putString(KEY_RECORD, sealer.seal(payload))
+                .remove(KEY_HASH)
+                .remove(KEY_SALT)
+                .remove(KEY_FAILURES)
+                .remove(KEY_LOCKOUT)
+                .remove(KEY_ITERATIONS)
                 .commit()
         check(ok) { "PIN persist failed" }
     }
 
-    private fun readLocked(): PinState? {
+    private fun readLocked(): PinState? = readRecord() ?: readPlainLegacy() ?: readEncryptedLegacy()
+
+    private fun readRecord(): PinState? {
+        val record = prefs.getString(KEY_RECORD, null) ?: return null
+        return decodeRecord(sealer.open(record))
+    }
+
+    private fun readPlainLegacy(): PinState? {
         val hashValue = prefs.getString(KEY_HASH, null) ?: return null
         val saltValue = prefs.getString(KEY_SALT, null) ?: return null
         check(isHex(hashValue) && isHex(saltValue)) { "corrupt PIN record" }
@@ -120,17 +145,37 @@ class PinRepository(
             saltHex = saltValue,
             consecutiveFailures = prefs.getInt(KEY_FAILURES, 0),
             lockedUntilEpochMs = prefs.getLong(KEY_LOCKOUT, 0L),
+            iterations = prefs.getInt(KEY_ITERATIONS, PinPolicy.LEGACY_ITERATIONS),
         )
+    }
+
+    private fun readEncryptedLegacy(): PinState? {
+        if (plaintext || !LegacyEncryptedPin.hasKeyset(prefs)) return null
+        return LegacyEncryptedPin.read(appContext, storeName)
     }
 }
 
 private fun isHex(value: String): Boolean =
     value.length >= 2 && value.length % 2 == 0 && value.all { it.digitToIntOrNull(radix = 16) != null }
 
+private const val KEY_RECORD: String = "record"
 private const val KEY_HASH: String = "hash"
 private const val KEY_SALT: String = "salt"
 private const val KEY_FAILURES: String = "failures"
 private const val KEY_LOCKOUT: String = "lockout"
+private const val KEY_ITERATIONS: String = "iterations"
+
+private fun decodeRecord(payload: String): PinState {
+    val lines = payload.split('\n')
+    check(lines.size >= 4 && isHex(lines[0]) && isHex(lines[1])) { "corrupt PIN record" }
+    return PinState(
+        hashHex = lines[0],
+        saltHex = lines[1],
+        consecutiveFailures = lines[2].toInt(),
+        lockedUntilEpochMs = lines[3].toLong(),
+        iterations = lines.getOrNull(4)?.toIntOrNull() ?: PinPolicy.LEGACY_ITERATIONS,
+    )
+}
 
 /**
  * Encrypted store. Plaintext fallback is opt-in (Robolectric) and uses a
@@ -162,15 +207,6 @@ internal fun encryptedPinPreferences(
     context: Context,
     storeName: String,
 ): SharedPreferences {
-    val masterKey =
-        MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-    return EncryptedSharedPreferences.create(
-        context,
-        storeName,
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-    )
+    KeystorePinSealer.ensureKey()
+    return context.getSharedPreferences(storeName, Context.MODE_PRIVATE)
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,8 +25,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.engine.KartHud
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -42,6 +45,7 @@ internal object NativeKartHost {
     fun attach(
         activity: IsolatedEngineActivity,
         showUi: Boolean = GodotRuntime.shouldEmbed(),
+        frameLimit: Int = Int.MAX_VALUE,
     ): OffroadRacerLoop {
         val seed = kotlin.math.abs(activity.mascotCode().hashCode() * 31 + activity.childName().hashCode())
         val circuit = OffroadCircuit(if (seed == 0) 7 else seed)
@@ -54,30 +58,49 @@ internal object NativeKartHost {
         }
         val mascot = activity.launchMascot()
         activity.setContent {
+            KartPlay(loop, circuit, mascot, frameLimit) { ok -> activity.completeReward(ok) }
+        }
+        return loop
+    }
+
+    /**
+     * Canvas race. [frameLimit] stops the clock in unit tests.
+     */
+    @Composable
+    internal fun KartPlay(
+        loop: OffroadRacerLoop,
+        circuit: OffroadCircuit,
+        mascot: Mascot,
+        frameLimit: Int,
+        onDone: (Boolean) -> Unit,
+    ) {
             var state by remember { mutableStateOf(loop.state) }
             var done by remember { mutableStateOf(false) }
             val spans = remember { ArrayList<OffroadSpan>(96) }
             LaunchedEffect(Unit) {
-                while (!loop.state.finished) {
+                var frames = 0
+                while (!loop.state.finished && frames < frameLimit) {
                     withFrameNanos {
                         loop.tick()
                         state = loop.state
                     }
+                    frames += 1
                 }
                 if (!done) {
                     done = true
-                    activity.completeReward(ok = true)
+                    onDone(true)
                 }
             }
             BackHandler(enabled = !done) {
                 done = true
-                activity.completeReward(ok = false)
+                onDone(false)
             }
             Box(modifier = Modifier.fillMaxSize()) {
                 Canvas(
                     modifier =
                         Modifier
                             .fillMaxSize()
+                            .testTag("kart-course")
                             .pointerInput(Unit) {
                                 awaitEachGesture {
                                     val down = awaitFirstDown()
@@ -125,8 +148,6 @@ internal object NativeKartHost {
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
-        }
-        return loop
     }
 
     /**

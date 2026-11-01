@@ -14,6 +14,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import java.security.GeneralSecurityException
 import pt.mataventuras.data.local.MatAventurasDatabase
+import pt.mataventuras.data.pin.LegacyEncryptedPin
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.pin.encryptedPinPreferences
 import pt.mataventuras.data.pin.pinPreferences
@@ -176,6 +177,41 @@ class LocalRepositoryTest {
         assertEquals(true, pins.isSet())
         assertEquals(state.hashHex, pins.read()!!.hashHex)
     }
+
+    @Test
+    fun encryptedSharedPreferencesPinMigratesOnUnlock() =
+        runTest {
+            val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+            val prefs = ctx.getSharedPreferences("pin_legacy_esp", android.content.Context.MODE_PRIVATE)
+            prefs.edit().clear().commit()
+            val policy = PinPolicy(iterations = 1_000)
+            val created = policy.create("1234")
+            prefs.edit()
+                .putString("hash", created.hashHex)
+                .putString("salt", created.saltHex)
+                .putInt("failures", 0)
+                .putLong("lockout", 0L)
+                .putInt("iterations", 1_000)
+                .commit()
+            val pins =
+                PinRepository(
+                    ctx,
+                    storeName = "pin_legacy_esp",
+                    allowPlaintextFallback = true,
+                    prefs = prefs,
+                )
+            val gate = pt.mataventuras.domain.parent.PinGate(policy)
+            val unlocked =
+                pins.update { state ->
+                    val (result, next) = gate.unlock(state!!, "1234")
+                    result to next
+                }
+            assertEquals(pt.mataventuras.domain.parent.PinGateResult.Unlocked, unlocked)
+            assertEquals(null, prefs.getString("hash", null))
+            assertEquals(true, prefs.contains("record"))
+            assertEquals(created.hashHex, pins.read()!!.hashHex)
+            assertEquals(null, LegacyEncryptedPin.read(ctx, "pin_legacy_missing"))
+        }
 
     @Test
     fun pinPreferencesFallsBackWhenEncryptedStoreFails() {

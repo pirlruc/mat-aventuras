@@ -26,7 +26,7 @@ import pt.mataventuras.domain.progress.RewardsEngine
 class AppContainer(
     context: Context,
     val pinPolicy: PinPolicy = pinPolicyForProcess(),
-    val generator: ExerciseGenerator = ExerciseGenerator(),
+    var generator: ExerciseGenerator = ExerciseGenerator(),
 ) {
     /** Room database for this process. */
     val database: MatAventurasDatabase =
@@ -75,7 +75,7 @@ class AppContainer(
 }
 
 /**
- * Production uses 120k PBKDF2 iterations. Robolectric tests use 1k so PIN UI stays fast.
+ * Production uses 600k PBKDF2 iterations. Robolectric tests use 1k so PIN UI stays fast.
  */
 internal fun pinPolicyForProcess(): PinPolicy =
     PinPolicy(iterations = pinIterationsFor(processFingerprint()))

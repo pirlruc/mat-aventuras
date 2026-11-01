@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "pt.mataventuras.data"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         minSdk = 26
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -61,7 +61,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.security.crypto)
+    implementation(libs.tink.android)
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,8 +24,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.engine.EngineInputMap
 import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.PlatformerWorld
@@ -42,6 +45,7 @@ internal object NativeRunnerHost {
     fun attach(
         activity: IsolatedEngineActivity,
         showUi: Boolean = GodotRuntime.shouldEmbed(),
+        frameLimit: Int = Int.MAX_VALUE,
     ): Platformer2dLoop {
         val seed = kotlin.math.abs(activity.mascotCode().hashCode() + activity.childName().hashCode())
         val level = PlatformerWorld.random(seed)
@@ -59,30 +63,49 @@ internal object NativeRunnerHost {
         }
         val mascot = activity.launchMascot()
         activity.setContent {
+            RunnerPlay(loop, level, mascot, frameLimit) { ok -> activity.completeReward(ok) }
+        }
+        return loop
+    }
+
+    /**
+     * Canvas runner. [frameLimit] stops the clock in unit tests.
+     */
+    @Composable
+    internal fun RunnerPlay(
+        loop: Platformer2dLoop,
+        level: pt.mataventuras.domain.engine.PlatformerLevel,
+        mascot: Mascot,
+        frameLimit: Int,
+        onDone: (Boolean) -> Unit,
+    ) {
             var state by remember { mutableStateOf(loop.state) }
             var done by remember { mutableStateOf(false) }
             val tiles = remember { ArrayList<PlatformerRect>(64) }
             LaunchedEffect(Unit) {
-                while (!loop.state.finished && loop.state.alive) {
+                var frames = 0
+                while (!loop.state.finished && loop.state.alive && frames < frameLimit) {
                     withFrameNanos {
                         loop.tick()
                         state = loop.state
                     }
+                    frames += 1
                 }
                 if (!done) {
                     done = true
-                    activity.completeReward(ok = loop.state.finished)
+                    onDone(loop.state.finished)
                 }
             }
             BackHandler(enabled = !done) {
                 done = true
-                activity.completeReward(ok = false)
+                onDone(false)
             }
             Box(modifier = Modifier.fillMaxSize()) {
                 Canvas(
                     modifier =
                         Modifier
                             .fillMaxSize()
+                            .testTag("runner-course")
                             .pointerInput(Unit) {
                                 awaitEachGesture {
                                     val down = awaitFirstDown()
@@ -139,7 +162,5 @@ internal object NativeRunnerHost {
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
-        }
-        return loop
     }
 }

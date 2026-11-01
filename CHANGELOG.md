@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The parent PIN record is sealed with a Keystore AES-GCM key. New hashes
+  use 600000 PBKDF2 iterations, and an older hash is replaced when the
+  correct PIN unlocks.
 - The README explains how to install the latest release on Android 8.0 or
   newer, how to check the APK checksum, and where the parent PIN lives.
 - The security policy links to private vulnerability reports.

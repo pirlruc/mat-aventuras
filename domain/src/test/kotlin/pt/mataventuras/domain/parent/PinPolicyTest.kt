@@ -79,6 +79,26 @@ class PinPolicyTest {
     }
 
     @Test
+    fun olderHashIsReplacedWhenThePinUnlocks() {
+        val state = policy.create("1234")
+        assertEquals(1_000, state.iterations)
+        val stronger =
+            PinPolicy(
+                random = java.security.SecureRandom.getInstance("SHA1PRNG").apply { setSeed(9) },
+                now = { now.last() },
+                iterations = 2_000,
+            )
+        val (result, next) = stronger.attempt(state, "1234")
+        assertEquals(PinResult.Correct, result)
+        assertEquals(2_000, next.iterations)
+        assertTrue(next.hashHex != state.hashHex)
+        val (again, stable) = stronger.attempt(next, "1234")
+        assertEquals(PinResult.Correct, again)
+        assertEquals(next.hashHex, stable.hashHex)
+        assertEquals(2_000, stable.iterations)
+    }
+
+    @Test
     fun unlocksAfterLockoutElapses() {
         var state = policy.create("4321")
         repeat(PinPolicy.MAX_FAILURES) {

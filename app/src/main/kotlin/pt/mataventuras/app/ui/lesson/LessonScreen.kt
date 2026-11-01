@@ -555,6 +555,7 @@ private fun SoupBoard(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("soup-board")
             .pointerInput(exercise.prompt, columns, cells.size, found) {
                 awaitEachGesture {
                     val gap = 8.dp.toPx()

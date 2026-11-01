@@ -12,6 +12,7 @@ data class PinState(
     val saltHex: String,
     val consecutiveFailures: Int,
     val lockedUntilEpochMs: Long,
+    val iterations: Int = PinPolicy.LEGACY_ITERATIONS,
 )
 
 /**
@@ -52,6 +53,7 @@ class PinPolicy(
             saltHex = toHex(salt),
             consecutiveFailures = 0,
             lockedUntilEpochMs = 0L,
+            iterations = iterations,
         )
     }
 
@@ -70,9 +72,9 @@ class PinPolicy(
             return PinResult.InvalidFormat to state
         }
         val expected = fromHex(state.hashHex)
-        val actual = derive(pin, fromHex(state.saltHex))
+        val actual = derive(pin, fromHex(state.saltHex), state.iterations)
         return if (constantTimeEquals(expected, actual)) {
-            PinResult.Correct to state.copy(consecutiveFailures = 0, lockedUntilEpochMs = 0L)
+            PinResult.Correct to refreshed(state, pin)
         } else {
             failed(state, nowMs)
         }
@@ -99,12 +101,31 @@ class PinPolicy(
         return result to next
     }
 
+    private fun refreshed(
+        state: PinState,
+        pin: String,
+    ): PinState {
+        if (state.iterations >= iterations) {
+            return state.copy(consecutiveFailures = 0, lockedUntilEpochMs = 0L)
+        }
+        val salt = ByteArray(SALT_BYTES)
+        random.nextBytes(salt)
+        return PinState(
+            hashHex = toHex(derive(pin, salt, iterations)),
+            saltHex = toHex(salt),
+            consecutiveFailures = 0,
+            lockedUntilEpochMs = 0L,
+            iterations = iterations,
+        )
+    }
+
     private fun derive(
         pin: String,
         salt: ByteArray,
+        rounds: Int = iterations,
     ): ByteArray {
         val chars = pin.toCharArray()
-        val spec = PBEKeySpec(chars, salt, iterations, HASH_BITS)
+        val spec = PBEKeySpec(chars, salt, rounds, HASH_BITS)
         chars.fill('\u0000')
         return try {
             SecretKeyFactory.getInstance(ALGORITHM).generateSecret(spec).encoded
@@ -119,7 +140,8 @@ class PinPolicy(
         const val LOCKOUT_MS: Long = 60_000L
         const val SALT_BYTES: Int = 16
         const val HASH_BITS: Int = 256
-        const val ITERATIONS: Int = 120_000
+        const val ITERATIONS: Int = 600_000
+        const val LEGACY_ITERATIONS: Int = 120_000
         const val ALGORITHM: String = "PBKDF2WithHmacSHA256"
     }
 }

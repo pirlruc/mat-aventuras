@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** prize UX (`feature-prize-ux`)
+**Last agent focus:** security and coverage (`feature-security-r8-coverage`, not pushed)
 
 ---
 
@@ -50,7 +50,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-002 | done | Emulator job, Robolectric gates, lesson packs |
 | MAT-003 | done | Godot 4 plugin in `:engine2d` and `:engine3d` |
 | MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
-| MAT-005 | open | T1 and T4–T6 done. Shared rules are `domain/src/main/resources/prize-tuning.json` (packaged as an asset). T2 minified prize, T3 Kover excludes, and T7–T11 remain |
+| MAT-005 | open | T1 and T4–T6 done. Local `feature-security-r8-coverage` has the Keystore PIN, 600k PBKDF2, narrowed keep rules, and Compose BOM `2026.09.00` (`compileSdk` 37). T3 is blocked: with the screen classes measured, JaCoCo Kover is about 92% line and 87% branch. Do not push until both floors are 95. T2 still needs a minified prize on `mat_api36` |
 | MAT-006 | open | T1 and T2 done. T3 is the androiddevops CodeQL and APK-bill proof |
 | MAT-007 | done | `BandDifficulty` replaces `isSevenYears()`. Memory, word board, cell size, and pt-PT parent titles are on this branch |
 | MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
@@ -148,6 +148,10 @@ bash scripts/check-ci-local.sh
   keep Compose screens out of detekt `LongMethod`.
 - `:app` kover is 95% line and branch. New arcade/scene branches need tests
   (`EngineCoverageTest`); do not exclude them to make the gate pass.
+  Measuring `LessonScreenKt`, `NavGraphKt`, `NativeKartHost`, and
+  `NativeRunnerHost` drops the module to about 92% line and 87% branch
+  even with `useJacoco()` (Compose compiler branches, kotlinx-kover #756).
+  Do not push `feature-security-r8-coverage` until both floors hold.
 - `OffroadScene.fill` clears the span list each call. Four gates put the first
   arch at 96 m, so `DRAW_AHEAD` must be greater than that (140 m) or spawn
   paints no posts. Near META, assert `BANNER_ARGB`, not `POST_ARGB`. Kart TTS
@@ -234,4 +238,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset already requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, and the two python-quality job names. Reviews stay at 0. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed.
 9. bestpractices.dev is last, after 0.2.0 and the companion issues.
 
-*Last updated: 2026-11-01 (prize UX; androiddevops 1.0.2; pydevops 3.3.10; commondevops 5.7.0)*
+*Last updated: 2026-11-01 (prize UX merged as #112; security branch is local and blocked on Kover 95).*
