@@ -1196,7 +1196,7 @@ milestones:
               - A migration test covers an existing v2 database
 
       - id: MAT-013
-        status: open
+        status: done
         title: Fewer Actions minutes on pull requests
         decision: >-
           In the context of a public Android app, facing a full Gradle, CodeQL,
@@ -1216,7 +1216,7 @@ milestones:
               - ci.yml calls androiddevops 1.1.0
               - shared-ci.yml calls commondevops 5.8.0 with ci-lint
           - id: MAT-013-T2
-            status: open
+            status: done
             title: Skip scorecard on pull requests and the bill when Gradle did not change
             instructions:
               files:
@@ -1226,7 +1226,7 @@ milestones:
               - Scorecard runs on push and on the schedule, not on a pull request
               - The APK bill runs on push, on the schedule, and on a pull request that touches gradle or the version catalog
           - id: MAT-013-T3
-            status: open
+            status: done
             title: Lint shell format and the devcontainer Dockerfile
             instructions:
               files:
@@ -1348,7 +1348,7 @@ milestones:
           - REL-PUB-004
         tasks:
           - id: MAT-015-T1
-            status: open
+            status: done
             title: Turn on signing and the release environment
             instructions:
               files:
