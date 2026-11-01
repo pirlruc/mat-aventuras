@@ -33,32 +33,10 @@ internal object PlainPinSealer : PinSealer {
  */
 internal object KeystorePinSealer : PinSealer {
     private const val ALIAS: String = "mat_aventuras_pin_aes"
-    private const val GCM_TAG_BITS: Int = 128
-    private const val IV_BYTES: Int = 12
 
-    override fun seal(plain: String): String {
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.ENCRYPT_MODE, key())
-        val iv = cipher.iv
-        val body = cipher.doFinal(plain.toByteArray(Charsets.UTF_8))
-        val packed = ByteArray(iv.size + body.size)
-        iv.copyInto(packed)
-        body.copyInto(packed, destinationOffset = iv.size)
-        return "gcm:" + Base64.encodeToString(packed, Base64.NO_WRAP)
-    }
+    override fun seal(plain: String): String = sealWith(key(), plain)
 
-    override fun open(sealed: String): String {
-        check(sealed.startsWith("gcm:")) { "corrupt PIN record" }
-        val packed = Base64.decode(sealed.removePrefix("gcm:"), Base64.NO_WRAP)
-        check(packed.size > IV_BYTES) { "corrupt PIN record" }
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(
-            Cipher.DECRYPT_MODE,
-            key(),
-            GCMParameterSpec(GCM_TAG_BITS, packed, 0, IV_BYTES),
-        )
-        return cipher.doFinal(packed, IV_BYTES, packed.size - IV_BYTES).toString(Charsets.UTF_8)
-    }
+    override fun open(sealed: String): String = openWith(key(), sealed)
 
     /**
      * Creates the Keystore key when it is missing. Throws when the device
@@ -68,21 +46,61 @@ internal object KeystorePinSealer : PinSealer {
         key()
     }
 
-    private fun key(): SecretKey {
+    private fun key(): SecretKey = secretKey(existingKey(), ::newKey)
+
+    private fun existingKey(): SecretKey? {
         val store = KeyStore.getInstance("AndroidKeyStore")
         store.load(null)
-        val existing = store.getKey(ALIAS, null) as? SecretKey
-        if (existing != null) return existing
+        return store.getKey(ALIAS, null) as? SecretKey
+    }
+
+    private fun newKey(): SecretKey {
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
-        val spec =
-            KeyGenParameterSpec.Builder(
-                ALIAS,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
-            ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setKeySize(256)
-                .build()
-        generator.init(spec)
+        generator.init(keySpec())
         return generator.generateKey()
     }
 }
+
+internal fun sealWith(
+    key: SecretKey,
+    plain: String,
+): String {
+    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    cipher.init(Cipher.ENCRYPT_MODE, key)
+    val iv = cipher.iv
+    val body = cipher.doFinal(plain.toByteArray(Charsets.UTF_8))
+    val packed = ByteArray(iv.size + body.size)
+    iv.copyInto(packed)
+    body.copyInto(packed, destinationOffset = iv.size)
+    return "gcm:" + Base64.encodeToString(packed, Base64.NO_WRAP)
+}
+
+internal fun openWith(
+    key: SecretKey,
+    sealed: String,
+): String {
+    check(sealed.startsWith("gcm:")) { "corrupt PIN record" }
+    val packed = Base64.decode(sealed.removePrefix("gcm:"), Base64.NO_WRAP)
+    check(packed.size > 12) { "corrupt PIN record" }
+    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    cipher.init(
+        Cipher.DECRYPT_MODE,
+        key,
+        GCMParameterSpec(128, packed, 0, 12),
+    )
+    return cipher.doFinal(packed, 12, packed.size - 12).toString(Charsets.UTF_8)
+}
+
+internal fun secretKey(
+    existing: SecretKey?,
+    generate: () -> SecretKey,
+): SecretKey = existing ?: generate()
+
+internal fun keySpec(): KeyGenParameterSpec =
+    KeyGenParameterSpec.Builder(
+        "mat_aventuras_pin_aes",
+        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+    ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+        .setKeySize(256)
+        .build()

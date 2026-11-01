@@ -46,6 +46,15 @@ internal object LegacyEncryptedPin {
         val app = context.applicationContext
         val keys = keyset(app, KEY_KEYSET, fileName).getPrimitive(DeterministicAead::class.java)
         val values = keyset(app, VALUE_KEYSET, fileName).getPrimitive(Aead::class.java)
+        return legacyFields(prefs, fileName, keys, values)
+    }
+
+    internal fun legacyFields(
+        prefs: SharedPreferences,
+        fileName: String,
+        keys: DeterministicAead,
+        values: Aead,
+    ): Map<String, Any?> {
         val fields = HashMap<String, Any?>()
         for (entry in prefs.all) {
             val storedKey = entry.key
@@ -56,6 +65,8 @@ internal object LegacyEncryptedPin {
         }
         return fields
     }
+
+    internal fun legacyState(fields: Map<String, Any?>): PinState? = stateFrom(fields)
 
     private fun stateFrom(fields: Map<String, Any?>): PinState? {
         val hash = fields["hash"] as? String ?: return null
