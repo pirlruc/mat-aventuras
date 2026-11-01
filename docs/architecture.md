@@ -34,8 +34,8 @@ therefore kept playable native 2D/3D engines. MAT-003 loads **one** engine
 | Layer | Technology | Process |
 | --- | --- | --- |
 | Menus, lessons, parental PIN, leaderboard | Jetpack Compose | default |
-| 2D prizes (age 3, and sometimes age 7) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
-| 2.5D off-road race (age 7) | Godot 4 Node2D with rivals; native Canvas fallback | `:engine3d` |
+| 2D prizes (ages 3–5, and sometimes 6–8) | Godot 4 (`gl_compatibility`); native Canvas fallback | `:engine2d` |
+| 2.5D off-road race (ages 6–8) | Godot 4 Node2D with rivals; native Canvas fallback | `:engine3d` |
 | Persistence | Room + DataStore | default only (engines return extras) |
 
 The 3D Activity does **not** open Room. It returns `RESULT_FINISHED`
@@ -55,8 +55,8 @@ strip.
 
 Plugin Activities:
 
-- age 3 → `pt.mataventuras.plugin.RunnerPluginActivity` in `:engine2d`
-- age 7 → `pt.mataventuras.plugin.KartPluginActivity` in `:engine3d`
+- ages 3–5 → `pt.mataventuras.plugin.RunnerPluginActivity` in `:engine2d`
+- ages 6–8 → `pt.mataventuras.plugin.KartPluginActivity` in `:engine3d`
 
 Contract: extras `mascot` / `name`, result `finished`, no Room, no `INTERNET`.
 The Compose host uses `StartActivityForResult` only. Robolectric cannot load
@@ -110,8 +110,9 @@ perspective racer.
 ## Game engine wrapper
 
 `EngineLauncher.intentFor(context, ageGroup, mascot, name)` picks
-`RunnerPluginActivity` (age 3, `:engine2d`) or `KartPluginActivity`
-(age 7, `:engine3d`). `MainActivity` uses `StartActivityForResult` so Compose
+`RunnerPluginActivity` (ages 3–5, `:engine2d`) or `KartPluginActivity`
+(ages 6–8, `:engine3d`). Ages 6–8 can also draw a 2D prize.
+`MainActivity` uses `StartActivityForResult` so Compose
 is not hosting a Godot view.
 
 On device those Activities attach `GodotFragment` after the host FrameLayout
@@ -131,11 +132,11 @@ so physics is unit-tested without an emulator.
 All user data stays on the device. The app declares **no `INTERNET`
 permission**. No Retrofit, Firebase, or Play Games.
 
-### Room schema (`mat_aventuras.db`, version 1)
+### Room schema (`mat_aventuras.db`, version 2)
 
 | Table | Role |
 | --- | --- |
-| `profiles` | Child profile: name, `AgeGroup`, mascot code, avatar, points |
+| `profiles` | Child profile: name, `AgeBand`, mascot code, avatar, points |
 | `sessions` | Lesson session: module, hits, misses, duration |
 | `badges` | Unique `(profileId, code)` badges |
 | `avatars` | Unique `(profileId, avatarId)` unlocks |
@@ -170,7 +171,7 @@ are English.
 
 ### Age-adaptive tokens (`tokensFor`)
 
-| | 3 years | 7 years |
+| | 3–5 | 6–8 |
 | --- | --- | --- |
 | Min tap target | 88 dp | 56 dp |
 | Title | 34 sp | 26 sp |
@@ -207,14 +208,17 @@ Home is a module grid (not numbered campaign levels). Each module is an
 infinite generator. Reward every 3 consecutive hits (`RewardsEngine`).
 Finishing a reward Activity awards 15 bonus points on the last profile.
 
-| Age | Lessons (Compose, mascot-hosted) | Reward mini-game |
+| Band | Lessons (Compose, mascot-hosted) | Reward mini-game |
 | --- | --- | --- |
-| **3** | Counting 1–10 (`COUNTING`, Ouriço Veloz); shapes (`SHAPES`, Porquinho Rosa); digits 0–9 (`NUMBERS`, Cão Herói) | 2D runner, letter-climb, or maze (`RunnerPluginActivity` in `:engine2d`) |
-| **7** | Two-digit addition and missing addend; two-digit subtraction (take-away, comparison, number-line); times-tables 3–12 with a missing factor and equal groups; exact division 2–10 (fair share and grouping); skip-counting and extrema (`LOGIC`) | Dirt race with rivals (`KartPluginActivity` in `:engine3d`) plus 2D invaders/maze/climb |
+| **3–5** | Counting 1–10 (`COUNTING`); shapes (`SHAPES`); digits and a small sudoku (`NUMBERS`); addition; sequences (`LOGIC`); memory; letters | 2D runner, letter-climb, or maze (`RunnerPluginActivity` in `:engine2d`) |
+| **6–8** | Numbers, addition, subtraction, multiplication, exact division, logic, memory, letters, and missing-letter words | Those 2D prizes, plus invaders, and the dirt race (`KartPluginActivity` in `:engine3d`) |
 
-Age 7 confirms before leaving a lesson (`VoiceScripts.confirmExit`).
-Age 3 leaves immediately. A finished reward returns `RESULT_FINISHED`;
+Ages 6–8 confirm before leaving a lesson (`VoiceScripts.confirmExit`).
+Ages 3–5 leave on one tap. A finished reward returns `RESULT_FINISHED`;
 the host speaks a pt-PT line and applies bonus points.
+
+`LearningModule.isSevenYears()` still selects the harder board. That knob
+does not mean "this module is only for 6–8". Per-band ranges are MAT-007-T2.
 
 ## Testing policy (KT-TEST-003)
 
@@ -246,67 +250,77 @@ and render into Epic MAT-006. Coverage floors stay at 95.
 KT-DOC-001's Dokka `doc_coverage` ratio applies to publishable modules. This
 app does not publish API docs, so that ratio is not applicable. Public types
 still carry KDoc (`scripts/verify-kdoc.py`).
-Remaining emulator instrumented tests are tracked in MAT-002-T1.
-
 `:app` and `:data` are omitted from the Gradle build when `ANDROID_HOME` is
-unset (`settings.gradle.kts`). This agent VM has no Android SDK, so those
-modules are not compiled, tested, or linted here. ktlint and detekt are
-applied only on `:domain`, including in the CI quality job, so Android
-sources are not statically analyzed until MAT-006-T1. The CI test job does
-install the SDK and runs `:data` and `:app` unit tests, Kover, and
-`:app:lintDebug`. CodeQL compile and the APK bill need that same SDK
-(MAT-006-T2, MAT-006-T3).
+unset (`settings.gradle.kts`). A machine with the SDK compiles them. CI
+runs ktlint, detekt, unit tests, Kover, and `:app:lintDebug` on all three
+modules. CodeQL compile and the APK bill are the androiddevops callers in
+`ci.yml` (MAT-006-T3).
 
 ### Shared CI jobs
 
 `.github/workflows/shared-ci.yml` calls commondevops at peeled commit
-`b85f95bbac8ba7d82eb90d1d84d1b8d1e8590a12` (annotated tag `5.6.2`). `uses:`
-and `scripts_ref` are that same SHA (CI-018 / CI-034). `checkout_token` is
-`COMMONDEVOPS_READ_TOKEN`. A `uses:` line cannot carry a PAT; when the ops
-repo is private again, this repository still needs Actions access to read
-the workflow file. Do not drop the token.
+`01d993bc72eebc8806ae85f9459c4f3d6dd3415e` (annotated tag `5.7.0`). `uses:`
+and `scripts_ref` are that same SHA (CI-018 / CI-034). A `uses:` line cannot
+carry a PAT. When an ops repo is private, this public repo still needs
+Actions access to read the workflow file. Once androiddevops is private, a
+public caller cannot use those workflows and must vendor the pinned file.
 
-Token-free jobs stay in `ci.yml` and `hardening.yml` so Dependabot, which
-receives no Actions secrets (CI-024), still has a green path: YAML parse,
-Gradle quality and tests, the license scan, wrapper validation, the privacy
-manifest, MobSF, CodeQL, and the APK bill. Gitleaks, Semgrep, Grype, actionlint,
-shellcheck, and zizmor run only through the reusable workflows. Fork pull
-requests skip those reusable jobs because they have no secret.
+`ci.yml` always runs `quality`. A `changes` job skips Gradle, CodeQL, MobSF,
+and the APK bill on a pull request that does not touch `app/`, `data/`,
+`domain/`, `gradle/`, or `scripts/`. `gate` treats a skipped job as success.
+Those four jobs call androiddevops `1.0.2`
+(`6146c3b38d8915e92742a2a4eef6bd276047ac91`) and pass
+`secrets.GITHUB_TOKEN` as `checkout_token`. Fork pull requests skip the
+reusable jobs that need a secret.
 
 | Ops repo | Reuse here |
 | --- | --- |
-| commondevops `common-infra-lint` | Called from `shared-ci.yml` (actionlint, shellcheck, zizmor). No Dockerfile under `docker/`, so hadolint no-ops. |
+| commondevops `common-infra-lint` | Called from `shared-ci.yml` (actionlint, shellcheck, zizmor) on `ci-lint`. No Dockerfile under `docker/`, so hadolint no-ops. |
 | commondevops `common-doc-verify` | Called with the caller YAML list, link lint, and markdownlint. |
-| commondevops `common-scaffold-verify` | Called. In-repo `scripts/validate-issues.py` still runs on the token-free job. |
-| commondevops `common-secrets-sast` | Called with `semgrep_config: p/kotlin`. The workflow also loads `.semgrep.yml` when that file exists. |
-| commondevops `common-supply-chain` | Called (Syft directory, Grype, Trivy fs). The APK bill stays `scripts/gradle-to-cyclonedx.py` because dex has no Maven coordinates. SARIF upload is a separate job (CI-042) with `retention-days: 1` (CI-041). |
+| commondevops `common-scaffold-verify` | Called. In-repo `scripts/validate-issues.py` still runs on the quality job. |
+| commondevops `common-secrets-sast` | Called with `semgrep_config: p/kotlin` on `ci-lint`. The workflow also loads `.semgrep.yml` when that file exists. |
+| commondevops `common-supply-chain` | Called (Syft directory, Grype, Trivy fs). The APK bill is the androiddevops CycloneDX job, because dex has no Maven coordinates. |
 | commondevops `common-pins-verify` | Called. `scripts/check-submodule-pins.sh` asserts the gitlinks. |
-| commondevops `common-scorecard` | Called with `blocking: false` and `publish_results: false` so it does not need repository settings. |
-| commondevops `common-release` | Not called yet. The first GitHub Release uses it. |
+| commondevops `common-scorecard` | Called with `blocking: false` and `publish_results: false`. |
+| commondevops `common-release` | Called from `release.yml` after `android-release-apk`. The release artifact is `android-release-apk`. Signing secrets are optional. |
+| androiddevops | `android-gradle-ci`, `android-codeql`, `android-mobsf`, `android-apk-sbom`, and `android-release-apk`, tag `1.0.2`. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
-| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `7ebee303030c09ce8f52e99660691e4c4b41238f` (annotated tag `3.3.10`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`. |
+| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `7ebee303030c09ce8f52e99660691e4c4b41238f` (annotated tag `3.3.10`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. |
 
-Dependabot pull requests stay on the token-free jobs (CI-024). The reusable
-workflows also skip `dependabot[bot]` internally. Scheduled security jobs
-run on the 1st and the 15th so the gap stays inside
+Scheduled security jobs run on the 1st and the 15th so the gap stays inside
 `security_rescan_interval_days` (CI-029).
 
 Local parity (CI-008):
 
 ```bash
-python3 scripts/validate-issues.py docs/issues.yml
-python3 scripts/lint-doc-links.py --root .
-./gradlew :domain:ktlintCheck :domain:detekt :domain:test :domain:koverVerify
-python3 scripts/verify-coverage.py
-bash scripts/ci-local.sh
-uv sync --all-groups --all-extras
-pytest --cov=scripts --cov=tests --cov-branch
+bash scripts/check-ci-local.sh
+bash scripts/check-ci-docker.sh
+bash scripts/check-godot.sh
 ```
 
-Bootstrap labels/milestones (needs write token; not done by this agent):
+`check-ci-local.sh` runs the host linters it finds, then `scripts/ci-local.sh`
+for KDoc, licenses, privacy, and Gradle. Docker covers the linters that are
+not on the host.
+
+Issue sync (write token):
 
 ```bash
-bash .github/scaffold/scripts/setup-issue-scaffold.sh
 python3 .github/scaffold/scripts/issues-sync.py --repo pirlruc/mat-aventuras --yaml docs/issues.yml --dry-run
 ```
+
+## Security review (ANDROID-SEC-002)
+
+[OWASP MASVS](https://mas.owasp.org/MASVS/) is the reference for the controls
+this app claims. It is not a scanner gate. MASVS-RESILIENCE is not claimed.
+There is no remote endpoint, so certificate pinning does not apply.
+
+| Group | Claim |
+| --- | --- |
+| MASVS-STORAGE | Profiles, sessions, badges, and avatars stay in the app sandbox. `allowBackup` is false and the data-extraction rules exclude databases, shared preferences, and files. |
+| MASVS-CRYPTO | The parent PIN is a PBKDF2-HMAC-SHA256 hash with a 16-byte salt, stored with `EncryptedSharedPreferences`. A Keystore failure fails closed. The iteration count is 120000. Replacing `security-crypto` and raising the count are open (MAT-005-T8, MAT-005-T9). |
+| MASVS-AUTH | The parent area asks for a 4-digit PIN. Five failures lock the check for 60 seconds. Comparison is constant-time. |
+| MASVS-NETWORK | The merged manifest removes `INTERNET`. `usesCleartextTraffic` is false. The app has no remote API. |
+| MASVS-PLATFORM | Reward activities are not exported. The launcher is exported because it is the MAIN activity. Godot's `FileProvider` and `ProcessPhoenix` are removed at merge. The app does not use a WebView. `MainActivity` `singleInstance` is under review (MAT-005-T10). |
+| MASVS-CODE | `minSdk` is 26 and `targetSdk` is 36. Release builds enable R8. Keep rules are still broad (MAT-005-T7). The release keystore is not in the repository (MAT-005-T11). |
+| MASVS-PRIVACY | No account, no advert, and no analytics. The only permission the app keeps is `VIBRATE`. Child display names are length-capped before they are stored or spoken. |

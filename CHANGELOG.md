@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The README explains how to install the latest release on Android 8.0 or
+  newer, how to check the APK checksum, and where the parent PIN lives.
+- The security policy links to private vulnerability reports.
+- The architecture note maps the controls the app claims to OWASP MASVS.
 - Android CI calls androiddevops. A pull request that does not touch the app,
   the domain, Gradle, or scripts skips Gradle, CodeQL, MobSF, and the APK bill.
 - The release workflow attaches the release APK and a SHA-256 checksum.
