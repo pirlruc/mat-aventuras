@@ -8,7 +8,7 @@ import pt.mataventuras.domain.model.LearningModule
 /**
  * Builds exercises. Prompt text is pt-PT UI copy. [random] is injected for tests.
  */
-class ExerciseGenerator(
+open class ExerciseGenerator(
     private val random: Random = Random.Default,
 ) {
     private val boards: PlayBoardFactory = PlayBoardFactory(random, ::numericOptions)
@@ -18,7 +18,7 @@ class ExerciseGenerator(
      * Next exercise for [module], mixing classic buttons with boards.
      * [level] 0..3 grows interactive boards as the child strings hits together.
      */
-    fun generate(
+    open fun generate(
         module: LearningModule,
         level: Int = 0,
         age: AgeBand = AgeBand.SIX_TO_EIGHT,

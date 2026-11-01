@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "pt.mataventuras.app"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "pt.mataventuras.app"
         minSdk = 26
@@ -116,24 +116,15 @@ detekt {
 }
 
 kover {
+    useJacoco()
     reports {
         filters {
             excludes {
                 classes("pt.mataventuras.app.BuildConfig")
                 classes("*ComposableSingletons*")
-                // Compose compiler restart-group branches cannot be exhausted under Robolectric.
-                // Screen rules live in UiLogic and stay inside the 95% gate.
-                annotatedBy("androidx.compose.runtime.Composable")
-                classes("*Kt$*")
-                classes("*Activity$*")
                 // Godot JNI host: Robolectric cannot load libgodot_android.so.
+                // Instrumented tests cover the plugin process (ANDROID-TEST-001).
                 classes("pt.mataventuras.app.engine.godot.*")
-                // Device-only GL/Compose surfaces; Robolectric uses session/loop without these views.
-                classes("pt.mataventuras.app.engine.NativeKartHost*")
-                classes("pt.mataventuras.app.engine.NativeRunnerHost*")
-                // Compose file facades still emit non-@Composable restart-group branches.
-                classes("pt.mataventuras.app.ui.lesson.LessonScreenKt")
-                classes("pt.mataventuras.app.ui.navigation.NavGraphKt")
             }
         }
     }

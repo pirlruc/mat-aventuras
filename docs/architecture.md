@@ -320,9 +320,9 @@ There is no remote endpoint, so certificate pinning does not apply.
 | Group | Claim |
 | --- | --- |
 | MASVS-STORAGE | Profiles, sessions, badges, and avatars stay in the app sandbox. `allowBackup` is false and the data-extraction rules exclude databases, shared preferences, and files. |
-| MASVS-CRYPTO | The parent PIN is a PBKDF2-HMAC-SHA256 hash with a 16-byte salt, stored with `EncryptedSharedPreferences`. A Keystore failure fails closed. The iteration count is 120000. Replacing `security-crypto` and raising the count are open (MAT-005-T8, MAT-005-T9). |
+| MASVS-CRYPTO | The parent PIN is a PBKDF2-HMAC-SHA256 hash with a 16-byte salt. The record is sealed with a Keystore AES-GCM key. A hash stored by the old EncryptedSharedPreferences file is copied across on the next unlock. A Keystore failure fails closed. New hashes use 600000 iterations; an older hash is replaced when the correct PIN unlocks. |
 | MASVS-AUTH | The parent area asks for a 4-digit PIN. Five failures lock the check for 60 seconds. Comparison is constant-time. |
 | MASVS-NETWORK | The merged manifest removes `INTERNET`. `usesCleartextTraffic` is false. The app has no remote API. |
-| MASVS-PLATFORM | Reward activities are not exported. The launcher is exported because it is the MAIN activity. Godot's `FileProvider` and `ProcessPhoenix` are removed at merge. The app does not use a WebView. `MainActivity` `singleInstance` is under review (MAT-005-T10). |
-| MASVS-CODE | `minSdk` is 26 and `targetSdk` is 36. Release builds enable R8. Keep rules are still broad (MAT-005-T7). The release keystore is not in the repository (MAT-005-T11). |
+| MASVS-PLATFORM | Reward activities are not exported. The launcher is exported because it is the MAIN activity. Godot's `FileProvider` and `ProcessPhoenix` are removed at merge. The app does not use a WebView. `MainActivity` stays `singleInstance` so a reward process can deliver a restart extra to the existing launcher instead of stacking a second task. Engine activities stay `singleInstance` so a dying process cannot relaunch itself. |
+| MASVS-CODE | `minSdk` is 26 and `targetSdk` is 36. Release builds enable R8. Each keep rule names a Godot class or a plugin method and why. The release keystore is not in the repository (MAT-005-T11). |
 | MASVS-PRIVACY | No account, no advert, and no analytics. The only permission the app keeps is `VIBRATE`. Child display names are length-capped before they are stored or spoken. |

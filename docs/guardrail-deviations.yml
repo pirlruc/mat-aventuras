@@ -15,13 +15,10 @@ deviations:
   - id: KT-TEST-002
     epic: MAT-006
     why: >-
-      Line and branch floors stay at the org 95. Exclusions go beyond the
-      named kotlinx.serialization $$serializer members: BuildConfig, Room
-      *_Impl, ComposableSingletons, @Composable and *Kt$* compiler classes,
-      *Activity$*, the Godot JNI package (libgodot_android.so cannot load
-      under Robolectric), NativeKartHost, NativeRunnerHost, LessonScreenKt,
-      and NavGraphKt. MAT-005-T3 removes the screen facades and the two
-      native hosts once an SDK host can prove the floor. This is not a
+      Line and branch floors stay at the org 95. The only exclusion beyond
+      BuildConfig, Room *_Impl, and ComposableSingletons is the Godot JNI
+      package, because libgodot_android.so cannot load under Robolectric.
+      Instrumented tests on the emulator cover that package. This is not a
       lowered number.
     owner: pirlruc
     review: 2026-12-31
