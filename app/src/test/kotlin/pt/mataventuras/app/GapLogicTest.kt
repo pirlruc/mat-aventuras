@@ -2,9 +2,9 @@ package pt.mataventuras.app
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.view.ViewGroup
 import android.widget.Button
-import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.unit.Density
@@ -19,7 +19,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLooper
 import pt.mataventuras.app.di.pinIterationsFor
@@ -42,18 +41,17 @@ import pt.mataventuras.app.ui.SoupRelease
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.home.ModuleTitles
 import pt.mataventuras.app.ui.lesson.AnswerCuePlayer
-import pt.mataventuras.app.ui.lesson.resolveSoupGesture
-import pt.mataventuras.app.ui.lesson.scoreSudokuPick
 import pt.mataventuras.app.ui.lesson.paintCountDots
 import pt.mataventuras.app.ui.lesson.paintShapeGlyph
 import pt.mataventuras.app.ui.lesson.paintStarDots
+import pt.mataventuras.app.ui.lesson.resolveSoupGesture
+import pt.mataventuras.app.ui.lesson.scoreSudokuPick
 import pt.mataventuras.domain.engine.OffroadCircuit
-import pt.mataventuras.domain.engine.RewardGame
-import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.PlatformerEnemy
 import pt.mataventuras.domain.engine.PlatformerPowerup
 import pt.mataventuras.domain.engine.PlatformerWorld
 import pt.mataventuras.domain.engine.PrizeHud
+import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.math.Exercise
 import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
@@ -71,7 +69,9 @@ class GapLogicTest {
     @Test
     fun drawHelpersAndEdgeBranches() {
         val bitmap = Bitmap.createBitmap(80, 80, Bitmap.Config.ARGB_8888)
-        val canvas = androidx.compose.ui.graphics.Canvas(android.graphics.Canvas(bitmap))
+        val canvas =
+            androidx.compose.ui.graphics
+                .Canvas(android.graphics.Canvas(bitmap))
         val circuit = OffroadCircuit(7)
         val kart = OffroadRacerLoop(circuit)
         val level =
@@ -172,12 +172,13 @@ class GapLogicTest {
                 spoken = "Sudoku",
                 options = listOf("4", "9"),
                 correctIndex = 0,
-                play = PlayBoard(
-                    kind = PlayKind.SUDOKU,
-                    cells = listOf("1", "", "2", "3"),
-                    columns = 2,
-                    solution = listOf("1", "4", "2", "3"),
-                ),
+                play =
+                    PlayBoard(
+                        kind = PlayKind.SUDOKU,
+                        cells = listOf("1", "", "2", "3"),
+                        columns = 2,
+                        solution = listOf("1", "4", "2", "3"),
+                    ),
             )
         val started = SudokuPlay.start(sudokuExercise.play.cells)
         val attempts = mutableListOf<Pair<Boolean, Boolean>>()
@@ -229,47 +230,59 @@ class GapLogicTest {
     fun bootBackOpensTheCanvasFallback() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val kart =
-            Robolectric.buildActivity(
-                KartPluginActivity::class.java,
-                pt.mataventuras.app.engine.EngineLauncher.intentFor(
-                    context,
-                    AgeBand.SIX_TO_EIGHT,
-                    Mascot.BRAVE_PLUMBER,
-                    "Rui",
-                    pt.mataventuras.domain.model.EngineKind.THREE_D,
-                ),
-            ).setup().get()
+            Robolectric
+                .buildActivity(
+                    KartPluginActivity::class.java,
+                    pt.mataventuras.app.engine.EngineLauncher.intentFor(
+                        context,
+                        AgeBand.SIX_TO_EIGHT,
+                        Mascot.BRAVE_PLUMBER,
+                        "Rui",
+                        pt.mataventuras.domain.model.EngineKind.THREE_D,
+                    ),
+                ).setup()
+                .get()
         GodotRewardBinder.bindKart(kart, embed = true) { _, _ -> }
         clickLabeled(kart, PrizeHud.RETRY_LABEL)
         clickLabeled(kart, PrizeHud.BACK_LABEL)
         assertNotNull(kart.nativeSession)
 
         val runner =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                pt.mataventuras.app.engine.EngineLauncher.intentFor(
-                    context,
-                    AgeBand.THREE_TO_FIVE,
-                    Mascot.SPEEDY_HEDGEHOG,
-                    "Ana",
-                    game = RewardGame.RUNNER,
-                ),
-            ).setup().get()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    pt.mataventuras.app.engine.EngineLauncher.intentFor(
+                        context,
+                        AgeBand.THREE_TO_FIVE,
+                        Mascot.SPEEDY_HEDGEHOG,
+                        "Ana",
+                        game = RewardGame.RUNNER,
+                    ),
+                ).setup()
+                .get()
         GodotRewardBinder.bindRunner(runner, embed = true) { _, _ -> }
         clickLabeled(runner, PrizeHud.BACK_LABEL)
         assertNotNull(runner.loop)
     }
 
-    private fun clickLabeled(activity: Activity, label: String) {
+    private fun clickLabeled(
+        activity: Activity,
+        label: String,
+    ) {
         val root = activity.window.decorView as ViewGroup
         val button = findButton(root, label)
         assertNotNull(button)
         button!!.performClick()
     }
 
-    private fun findButton(view: android.view.View, label: String): Button? {
+    private fun findButton(
+        view: android.view.View,
+        label: String,
+    ): Button? {
         if (view is Button && (view.text?.toString() == label || view.tag == "prize-boot-back" || view.tag == "prize-boot-retry")) {
-            if (view.text?.toString() == label || view.tag?.toString()?.endsWith(if (label == PrizeHud.BACK_LABEL) "back" else "retry") == true) {
+            if (view.text?.toString() == label ||
+                view.tag?.toString()?.endsWith(if (label == PrizeHud.BACK_LABEL) "back" else "retry") == true
+            ) {
                 return view
             }
         }

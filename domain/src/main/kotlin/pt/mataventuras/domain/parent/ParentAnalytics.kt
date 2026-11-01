@@ -43,17 +43,19 @@ class ParentAnalytics {
         val misses = owned.sumOf { it.misses }
         val time = owned.sumOf { it.durationMs }
         val byModule =
-            owned.groupBy { it.module }.map { (module, list) ->
-                val h = list.sumOf { it.hits }
-                val m = list.sumOf { it.misses }
-                ModulePerformance(
-                    module = module,
-                    hits = h,
-                    misses = m,
-                    accuracy = accuracy(h, m),
-                    timeMs = list.sumOf { it.durationMs },
-                )
-            }.sortedBy { it.module.name }
+            owned
+                .groupBy { it.module }
+                .map { (module, list) ->
+                    val h = list.sumOf { it.hits }
+                    val m = list.sumOf { it.misses }
+                    ModulePerformance(
+                        module = module,
+                        hits = h,
+                        misses = m,
+                        accuracy = accuracy(h, m),
+                        timeMs = list.sumOf { it.durationMs },
+                    )
+                }.sortedBy { it.module.name }
         val needsWork =
             byModule
                 .filter { (it.hits + it.misses) >= MIN_SAMPLES && it.accuracy < IMPROVE_THRESHOLD }

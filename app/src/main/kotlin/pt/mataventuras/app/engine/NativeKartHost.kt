@@ -29,9 +29,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.engine.KartHud
 import pt.mataventuras.domain.engine.OffroadCircuit
+import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
@@ -75,79 +75,79 @@ internal object NativeKartHost {
         frameLimit: Int,
         onDone: (Boolean) -> Unit,
     ) {
-            var state by remember { mutableStateOf(loop.state) }
-            var done by remember { mutableStateOf(false) }
-            val spans = remember { ArrayList<OffroadSpan>(96) }
-            LaunchedEffect(Unit) {
-                var frames = 0
-                while (kartKeepsTicking(loop.state.finished, frames, frameLimit)) {
-                    withFrameNanos {
-                        loop.tick()
-                        state = loop.state
-                    }
-                    frames += 1
+        var state by remember { mutableStateOf(loop.state) }
+        var done by remember { mutableStateOf(false) }
+        val spans = remember { ArrayList<OffroadSpan>(96) }
+        LaunchedEffect(Unit) {
+            var frames = 0
+            while (kartKeepsTicking(loop.state.finished, frames, frameLimit)) {
+                withFrameNanos {
+                    loop.tick()
+                    state = loop.state
                 }
-                if (!done) {
-                    done = true
-                    onDone(true)
-                }
+                frames += 1
             }
-            BackHandler(enabled = !done) {
+            if (!done) {
                 done = true
-                onDone(false)
+                onDone(true)
             }
-            Box(modifier = Modifier.fillMaxSize()) {
-                Canvas(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .testTag("kart-course")
-                            .pointerInput(Unit) {
-                                awaitEachGesture {
-                                    val down = awaitFirstDown()
-                                    val nx = down.position.x / size.width.coerceAtLeast(1).toFloat()
-                                    loop.handleTouch(nx, MotionEvent.ACTION_DOWN)
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                        if (!change.pressed) {
-                                            loop.handleTouch(nx, MotionEvent.ACTION_UP)
-                                            change.consume()
-                                            return@awaitEachGesture
-                                        }
-                                        val next = change.position.x / size.width.coerceAtLeast(1).toFloat()
-                                        loop.handleTouch(next, MotionEvent.ACTION_MOVE)
+        }
+        BackHandler(enabled = !done) {
+            done = true
+            onDone(false)
+        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            Canvas(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .testTag("kart-course")
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown()
+                                val nx = down.position.x / size.width.coerceAtLeast(1).toFloat()
+                                loop.handleTouch(nx, MotionEvent.ACTION_DOWN)
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                    if (!change.pressed) {
+                                        loop.handleTouch(nx, MotionEvent.ACTION_UP)
                                         change.consume()
+                                        return@awaitEachGesture
                                     }
+                                    val next = change.position.x / size.width.coerceAtLeast(1).toFloat()
+                                    loop.handleTouch(next, MotionEvent.ACTION_MOVE)
+                                    change.consume()
                                 }
-                            },
-                ) {
-                    paintKartCourse(spans, state, circuit, mascot)
-                }
-                val hud = KartHud.raceOverlay(state, circuit.length)
-                Text(
-                    text = listOf(
+                            }
+                        },
+            ) {
+                paintKartCourse(spans, state, circuit, mascot)
+            }
+            val hud = KartHud.raceOverlay(state, circuit.length)
+            Text(
+                text =
+                    listOf(
                         KartHud.CONTROL_HINT,
                         KartHud.META_HINT,
                         hud.first,
                         hud.second,
                     ).joinToString("\n"),
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    modifier =
-                        Modifier
-                            .padding(16.dp)
-                            .background(Color(0x99000000), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                )
-            }
+                color = Color.White,
+                fontSize = 22.sp,
+                modifier =
+                    Modifier
+                        .padding(16.dp)
+                        .background(Color(0x99000000), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+        }
     }
 
     /**
      * Overlay lines for tests and HUD helpers.
      */
-    fun hudLines(loop: OffroadRacerLoop): Pair<String, String> =
-        KartHud.raceOverlay(loop.state, loop.circuit.length)
+    fun hudLines(loop: OffroadRacerLoop): Pair<String, String> = KartHud.raceOverlay(loop.state, loop.circuit.length)
 }
 
 internal fun kartKeepsTicking(

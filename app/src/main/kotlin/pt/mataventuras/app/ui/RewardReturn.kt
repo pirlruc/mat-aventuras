@@ -11,8 +11,7 @@ internal object RewardReturn {
     /**
      * Reads the finished extra, treating a missing Intent as not finished.
      */
-    fun finishedExtra(data: Intent?): Boolean =
-        data?.getBooleanExtra(EngineLauncher.RESULT_FINISHED, false) ?: false
+    fun finishedExtra(data: Intent?): Boolean = data?.getBooleanExtra(EngineLauncher.RESULT_FINISHED, false) ?: false
 
     /**
      * Speaks the pt-PT return line and reports whether the level finished.

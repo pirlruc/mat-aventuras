@@ -33,12 +33,13 @@ fun MatAventurasTheme(
         LocalUiTokens provides tokens,
     ) {
         MaterialTheme(
-            colorScheme = lightColorScheme(
-                primary = Blue,
-                secondary = Orange,
-                background = background,
-                surface = Color.White,
-            ),
+            colorScheme =
+                lightColorScheme(
+                    primary = Blue,
+                    secondary = Orange,
+                    background = background,
+                    surface = Color.White,
+                ),
             content = content,
         )
     }

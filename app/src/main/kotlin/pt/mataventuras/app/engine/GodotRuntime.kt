@@ -20,8 +20,7 @@ object GodotRuntime {
     /**
      * True when this process should create a GodotFragment.
      */
-    fun shouldEmbed(fingerprint: String = processFingerprint()): Boolean =
-        !isRobolectricFingerprint(fingerprint)
+    fun shouldEmbed(fingerprint: String = processFingerprint()): Boolean = !isRobolectricFingerprint(fingerprint)
 
     /**
      * Command line for a packaged Godot 4 Android-library project.
@@ -61,8 +60,7 @@ object GodotRuntime {
     /**
      * True when [fingerprint] is a Robolectric VM.
      */
-    fun isRobolectricFingerprint(fingerprint: String): Boolean =
-        fingerprint.contains("robolectric", ignoreCase = true)
+    fun isRobolectricFingerprint(fingerprint: String): Boolean = fingerprint.contains("robolectric", ignoreCase = true)
 
     private fun processFingerprint(): String = Build.FINGERPRINT.orEmpty()
 }

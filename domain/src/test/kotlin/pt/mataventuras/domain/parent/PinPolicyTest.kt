@@ -84,7 +84,10 @@ class PinPolicyTest {
         assertEquals(1_000, state.iterations)
         val stronger =
             PinPolicy(
-                random = java.security.SecureRandom.getInstance("SHA1PRNG").apply { setSeed(9) },
+                random =
+                    java.security.SecureRandom
+                        .getInstance("SHA1PRNG")
+                        .apply { setSeed(9) },
                 now = { now.last() },
                 iterations = 2_000,
             )

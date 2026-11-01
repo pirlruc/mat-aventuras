@@ -9,7 +9,9 @@ internal sealed interface Destination {
 
     data object Home : Destination
 
-    data class Lesson(val module: LearningModule) : Destination
+    data class Lesson(
+        val module: LearningModule,
+    ) : Destination
 
     data object Leaderboard : Destination
 
@@ -19,7 +21,9 @@ internal sealed interface Destination {
 /**
  * Navigation route and active profile id kept in [SavedStateHandle].
  */
-internal class RouteMemory(private val saved: SavedStateHandle) : ViewModel() {
+internal class RouteMemory(
+    private val saved: SavedStateHandle,
+) : ViewModel() {
     /**
      * Last route name, or the age-selection screen.
      */

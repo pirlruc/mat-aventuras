@@ -39,10 +39,11 @@ internal object LessonRecorder {
         val sessions = container.repository.sessionsFor(profile.id)
         val alreadyBadges = container.repository.badgeCodes(profile.id)
         val alreadyAvatars = container.repository.avatarIds(profile.id)
-        container.rewards.newBadges(
-            alreadyUnlocked = alreadyBadges,
-            totals = LessonProgress.totals(sessions, hits, misses),
-        ).forEach { container.repository.unlockBadge(profile.id, it.name) }
+        container.rewards
+            .newBadges(
+                alreadyUnlocked = alreadyBadges,
+                totals = LessonProgress.totals(sessions, hits, misses),
+            ).forEach { container.repository.unlockBadge(profile.id, it.name) }
         container.rewards.newAvatars(alreadyAvatars, current.points).forEach {
             container.repository.unlockAvatar(profile.id, it.name)
         }

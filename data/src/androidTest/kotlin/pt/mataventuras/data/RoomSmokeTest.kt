@@ -23,7 +23,8 @@ class RoomSmokeTest {
         runBlocking {
             val context = ApplicationProvider.getApplicationContext<Context>()
             val database =
-                Room.inMemoryDatabaseBuilder(context, MatAventurasDatabase::class.java)
+                Room
+                    .inMemoryDatabaseBuilder(context, MatAventurasDatabase::class.java)
                     .allowMainThreadQueries()
                     .build()
             try {

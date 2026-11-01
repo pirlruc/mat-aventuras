@@ -2,9 +2,9 @@ package pt.mataventuras.app
 
 import android.app.Application
 import android.os.Build
+import java.io.File
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.domain.engine.EnginePluginContract
-import java.io.File
 
 /**
  * Default-process application. Holds [AppContainer] for Compose screens.

@@ -175,7 +175,12 @@ internal object PlatformerScene {
         }
         level.enemies.forEachIndexed { i, enemy ->
             if ((state.stompedMask shr i) and 1 == 1) return@forEachIndexed
-            val x = worldX(pt.mataventuras.domain.engine.PlatformerHazards.enemyX(enemy, state.elapsed), camera)
+            val x =
+                worldX(
+                    pt.mataventuras.domain.engine.PlatformerHazards
+                        .enemyX(enemy, state.elapsed),
+                    camera,
+                )
             out.add(PlatformerRect(x, groundY - 22f, 20f, 18f, 0xFF6D4C41))
         }
     }

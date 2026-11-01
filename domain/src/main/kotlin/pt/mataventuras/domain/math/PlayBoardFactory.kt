@@ -89,13 +89,21 @@ class PlayBoardFactory(
         }
 
     private fun shapeSudoku(level: Int): Exercise {
-        val glyphs = GeometricShape.entries.drop(level % 2).take(4).map { it.displayName }
+        val glyphs =
+            GeometricShape.entries
+                .drop(level % 2)
+                .take(4)
+                .map { it.displayName }
         val n = glyphs.size
         val full = SudokuGrids.filled(n, random).map { glyphs[it - 1] }
         val hole = random.nextInt(full.size)
         val answer = full[hole]
         val cells = full.mapIndexed { i, value -> if (i == hole) "" else value }
-        val others = GeometricShape.entries.map { it.displayName }.filter { it != answer }.take(3)
+        val others =
+            GeometricShape.entries
+                .map { it.displayName }
+                .filter { it != answer }
+                .take(3)
         val options = (others + answer).shuffled(random)
         return Exercise(
             module = LearningModule.SHAPES,
@@ -242,7 +250,11 @@ class PlayBoardFactory(
         val symbols = SYMBOLS.take(word.length)
         val legend = word.mapIndexed { i, ch -> "${symbols[i]}=$ch" }
         val code = word.indices.joinToString("") { symbols[it] }
-        val others = PortugueseNumberWords.CIPHER.filter { it != word }.shuffled(random).take(3)
+        val others =
+            PortugueseNumberWords.CIPHER
+                .filter { it != word }
+                .shuffled(random)
+                .take(3)
         val options = (others + word).shuffled(random)
         return Exercise(
             module = LearningModule.LOGIC,
@@ -324,7 +336,10 @@ class PlayBoardFactory(
         return if (asNumber != null) {
             numericOptions(asNumber, 1, 10).map { it.toString() }.filter { it != piece }.take(3)
         } else {
-            GeometricShape.entries.map { it.displayName }.filter { it != piece }.take(3)
+            GeometricShape.entries
+                .map { it.displayName }
+                .filter { it != piece }
+                .take(3)
         }
     }
 

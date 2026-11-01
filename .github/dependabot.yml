@@ -38,3 +38,8 @@ updates:
     multi-ecosystem-group: all-dependencies
     cooldown:
       default-days: 7
+    # The Android jobs use Temurin 17. A major tag would leave that LTS.
+    # Recorded as SC-DEP-003 in docs/guardrail-deviations.yml.
+    ignore:
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]

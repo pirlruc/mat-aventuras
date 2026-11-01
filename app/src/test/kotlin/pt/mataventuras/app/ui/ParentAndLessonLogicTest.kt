@@ -45,49 +45,78 @@ class ParentAndLessonLogicTest {
     val compose = createComposeRule()
 
     @Test
-    fun recorderWritesSessionAndFirstStepsBadge() = runTest {
-        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
-        val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
-        val profile = app.container.repository.getProfile(id)!!
-        LessonRecorder.persist(
-            container = app.container,
-            profile = profile,
-            module = LearningModule.ADDITION,
-            hits = 6,
-            misses = 0,
-            startedAt = 1_000,
-            nowMs = 4_000,
-        )
-        val sessions = app.container.repository.sessionsFor(id)
-        assertEquals(1, sessions.size)
-        assertEquals(6, sessions[0].hits)
-        assertEquals(3_000, sessions[0].durationMs)
-        assertEquals(0, app.container.repository.getProfile(id)!!.points)
-        assertTrue(app.container.repository.badgeCodes(id).contains("FIRST_STEPS"))
-        assertEquals(false, app.container.repository.avatarIds(id).contains(AvatarCode.RUNNER.name))
-        app.container.repository.addPoints(id, 60)
-        LessonRecorder.persist(
-            container = app.container,
-            profile = profile,
-            module = LearningModule.ADDITION,
-            hits = 6,
-            misses = 0,
-            startedAt = 5_000,
-            nowMs = 6_000,
-        )
-        assertEquals(60, app.container.repository.getProfile(id)!!.points)
-        assertTrue(app.container.repository.avatarIds(id).contains(AvatarCode.RUNNER.name))
-        LessonRecorder.persist(
-            container = app.container,
-            profile = profile.copy(id = 9_999),
-            module = LearningModule.COUNTING,
-            hits = 1,
-            misses = 0,
-            startedAt = 0,
-            nowMs = 1,
-        )
-        assertEquals(2, app.container.repository.sessionsFor(id).size)
-    }
+    fun recorderWritesSessionAndFirstStepsBadge() =
+        runTest {
+            val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+            val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
+            val profile = app.container.repository.getProfile(id)!!
+            LessonRecorder.persist(
+                container = app.container,
+                profile = profile,
+                module = LearningModule.ADDITION,
+                hits = 6,
+                misses = 0,
+                startedAt = 1_000,
+                nowMs = 4_000,
+            )
+            val sessions = app.container.repository.sessionsFor(id)
+            assertEquals(1, sessions.size)
+            assertEquals(6, sessions[0].hits)
+            assertEquals(3_000, sessions[0].durationMs)
+            assertEquals(
+                0,
+                app.container.repository
+                    .getProfile(id)!!
+                    .points,
+            )
+            assertTrue(
+                app.container.repository
+                    .badgeCodes(id)
+                    .contains("FIRST_STEPS"),
+            )
+            assertEquals(
+                false,
+                app.container.repository
+                    .avatarIds(id)
+                    .contains(AvatarCode.RUNNER.name),
+            )
+            app.container.repository.addPoints(id, 60)
+            LessonRecorder.persist(
+                container = app.container,
+                profile = profile,
+                module = LearningModule.ADDITION,
+                hits = 6,
+                misses = 0,
+                startedAt = 5_000,
+                nowMs = 6_000,
+            )
+            assertEquals(
+                60,
+                app.container.repository
+                    .getProfile(id)!!
+                    .points,
+            )
+            assertTrue(
+                app.container.repository
+                    .avatarIds(id)
+                    .contains(AvatarCode.RUNNER.name),
+            )
+            LessonRecorder.persist(
+                container = app.container,
+                profile = profile.copy(id = 9_999),
+                module = LearningModule.COUNTING,
+                hits = 1,
+                misses = 0,
+                startedAt = 0,
+                nowMs = 1,
+            )
+            assertEquals(
+                2,
+                app.container.repository
+                    .sessionsFor(id)
+                    .size,
+            )
+        }
 
     @Test
     fun parentCanSetPinAndSeeEmptyWorkList() {
@@ -106,25 +135,29 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText("Confirmar PIN").performTextInput("1111")
         compose.onNodeWithText("Guardar PIN").performClick()
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Os PIN não coincidem ou não têm quatro números.")
+            compose
+                .onAllNodesWithText("Os PIN não coincidem ou não têm quatro números.")
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
         compose.onNodeWithText("Confirmar PIN").performTextReplacement("4242")
         compose.onNodeWithText("Guardar PIN").performClick()
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText(VoiceScripts.STAYS_ON_DEVICE, useUnmergedTree = true)
+            compose
+                .onAllNodesWithText(VoiceScripts.STAYS_ON_DEVICE, useUnmergedTree = true)
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
+            compose
+                .onAllNodesWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
         compose.onNodeWithText("1 min").performScrollTo().performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
+        compose
+            .onNodeWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
             .performScrollTo()
             .assertIsDisplayed()
         compose.onNodeWithText("Fechar").performClick()
@@ -177,19 +210,31 @@ class ParentAndLessonLogicTest {
             val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
             val pins = app.container.pinRepository
             pins.clear()
-            val gate = pt.mataventuras.domain.parent.PinGate(app.container.pinPolicy)
-            val mismatch = pt.mataventuras.app.ui.parent.ParentPin.submit(true, "1234", "0000", gate, pins)
+            val gate =
+                pt.mataventuras.domain.parent
+                    .PinGate(app.container.pinPolicy)
+            val mismatch =
+                pt.mataventuras.app.ui.parent.ParentPin
+                    .submit(true, "1234", "0000", gate, pins)
             assertTrue(mismatch is pt.mataventuras.domain.parent.PinGateResult.Stay)
             assertEquals(false, pins.isSet())
-            val created = pt.mataventuras.app.ui.parent.ParentPin.submit(true, "1234", "1234", gate, pins)
+            val created =
+                pt.mataventuras.app.ui.parent.ParentPin
+                    .submit(true, "1234", "1234", gate, pins)
             assertEquals(pt.mataventuras.domain.parent.PinGateResult.Unlocked, created)
             assertEquals(true, pins.isSet())
-            val asUnlock = pt.mataventuras.app.ui.parent.ParentPin.submit(true, "1234", "", gate, pins)
+            val asUnlock =
+                pt.mataventuras.app.ui.parent.ParentPin
+                    .submit(true, "1234", "", gate, pins)
             assertEquals(pt.mataventuras.domain.parent.PinGateResult.Unlocked, asUnlock)
-            val wrong = pt.mataventuras.app.ui.parent.ParentPin.submit(false, "0000", "", gate, pins)
+            val wrong =
+                pt.mataventuras.app.ui.parent.ParentPin
+                    .submit(false, "0000", "", gate, pins)
             assertTrue(wrong is pt.mataventuras.domain.parent.PinGateResult.Stay)
             pins.clear()
-            val missing = pt.mataventuras.app.ui.parent.ParentPin.submit(false, "1234", "", gate, pins)
+            val missing =
+                pt.mataventuras.app.ui.parent.ParentPin
+                    .submit(false, "1234", "", gate, pins)
             assertTrue(missing is pt.mataventuras.domain.parent.PinGateResult.Stay)
         }
 
@@ -338,62 +383,99 @@ class ParentAndLessonLogicTest {
     }
 
     @Test
-    fun rewardRecorderAwardsPointsOnlyWhenFinished() = runTest {
-        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
-        val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
-        val start = app.container.repository.getProfile(id)!!
-        app.container.repository.updateProfile(start.copy(points = 40))
-        app.container.lastProfile.save(id)
-        RewardRecorder.apply(app.container, finished = false)
-        assertEquals(40, app.container.repository.getProfile(id)!!.points)
-        RewardRecorder.apply(app.container, finished = true)
-        assertEquals(55, app.container.repository.getProfile(id)!!.points)
-        assertTrue(app.container.repository.avatarIds(id).contains(AvatarCode.RUNNER.name))
-        app.container.repository.addPoints(id, 10)
-        RewardRecorder.apply(app.container, finished = true)
-        assertEquals(80, app.container.repository.getProfile(id)!!.points)
-        LessonRecorder.persist(
-            container = app.container,
-            profile = start,
-            module = LearningModule.ADDITION,
-            hits = 1,
-            misses = 0,
-            startedAt = 1,
-            nowMs = 2,
-        )
-        assertEquals(80, app.container.repository.getProfile(id)!!.points)
-        app.container.lastProfile.clear()
-        RewardRecorder.apply(app.container, finished = true)
-        assertEquals(80, app.container.repository.getProfile(id)!!.points)
-        app.container.lastProfile.save(9_999)
-        RewardRecorder.apply(app.container, finished = true)
-        assertEquals(80, app.container.repository.getProfile(id)!!.points)
-    }
+    fun rewardRecorderAwardsPointsOnlyWhenFinished() =
+        runTest {
+            val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+            val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
+            val start = app.container.repository.getProfile(id)!!
+            app.container.repository.updateProfile(start.copy(points = 40))
+            app.container.lastProfile.save(id)
+            RewardRecorder.apply(app.container, finished = false)
+            assertEquals(
+                40,
+                app.container.repository
+                    .getProfile(id)!!
+                    .points,
+            )
+            RewardRecorder.apply(app.container, finished = true)
+            assertEquals(
+                55,
+                app.container.repository
+                    .getProfile(id)!!
+                    .points,
+            )
+            assertTrue(
+                app.container.repository
+                    .avatarIds(id)
+                    .contains(AvatarCode.RUNNER.name),
+            )
+            app.container.repository.addPoints(id, 10)
+            RewardRecorder.apply(app.container, finished = true)
+            assertEquals(
+                80,
+                app.container.repository
+                    .getProfile(id)!!
+                    .points,
+            )
+            LessonRecorder.persist(
+                container = app.container,
+                profile = start,
+                module = LearningModule.ADDITION,
+                hits = 1,
+                misses = 0,
+                startedAt = 1,
+                nowMs = 2,
+            )
+            assertEquals(
+                80,
+                app.container.repository
+                    .getProfile(id)!!
+                    .points,
+            )
+            app.container.lastProfile.clear()
+            RewardRecorder.apply(app.container, finished = true)
+            assertEquals(
+                80,
+                app.container.repository
+                    .getProfile(id)!!
+                    .points,
+            )
+            app.container.lastProfile.save(9_999)
+            RewardRecorder.apply(app.container, finished = true)
+            assertEquals(
+                80,
+                app.container.repository
+                    .getProfile(id)!!
+                    .points,
+            )
+        }
 
     @Test
-    fun profileResumePrefersStoredThenLatest() = runTest {
-        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
-        app.container.lastProfile.clear()
-        val first = ProfileResume.openNew(
-            app.container.lastProfile,
-            app.container.repository,
-            "Ana",
-            AgeBand.THREE_TO_FIVE,
-            Mascot.SPEEDY_HEDGEHOG,
-        )!!
-        val second =
-            app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
-        app.container.lastProfile.save(first.id)
-        val stored =
-            ProfileResume.continueCandidate(app.container.lastProfile, app.container.repository)
-        assertEquals(first.id, stored!!.id)
-        app.container.lastProfile.save(9_999)
-        val fallback =
-            ProfileResume.continueCandidate(app.container.lastProfile, app.container.repository)
-        assertEquals(second, fallback!!.id)
-        ProfileResume.remember(app.container.lastProfile, first)
-        assertEquals(first.id, app.container.lastProfile.read())
-    }
+    fun profileResumePrefersStoredThenLatest() =
+        runTest {
+            val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+            app.container.lastProfile.clear()
+            val first =
+                ProfileResume.openNew(
+                    app.container.lastProfile,
+                    app.container.repository,
+                    "Ana",
+                    AgeBand.THREE_TO_FIVE,
+                    Mascot.SPEEDY_HEDGEHOG,
+                )!!
+            val second =
+                app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
+            app.container.lastProfile.save(first.id)
+            val stored =
+                ProfileResume.continueCandidate(app.container.lastProfile, app.container.repository)
+            assertEquals(first.id, stored!!.id)
+            app.container.lastProfile.save(9_999)
+            val fallback =
+                ProfileResume.continueCandidate(app.container.lastProfile, app.container.repository)
+            assertEquals(second, fallback!!.id)
+            ProfileResume.remember(app.container.lastProfile, first)
+            assertEquals(first.id, app.container.lastProfile.read())
+        }
 
     @Test
     fun leaderboardWithActiveProfileShowsRewards() {
@@ -419,7 +501,11 @@ class ParentAndLessonLogicTest {
             compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
         val before = scoreLine()
-        compose.onAllNodesWithTag("correct-answer").onFirst().performScrollTo().performClick()
+        compose
+            .onAllNodesWithTag("correct-answer")
+            .onFirst()
+            .performScrollTo()
+            .performClick()
         compose.waitUntil(8_000) { scoreLine() != before }
     }
 
@@ -427,7 +513,11 @@ class ParentAndLessonLogicTest {
         compose.waitUntil(8_000) {
             compose.onAllNodesWithTag("distractor").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onAllNodesWithTag("distractor").onFirst().performScrollTo().performClick()
+        compose
+            .onAllNodesWithTag("distractor")
+            .onFirst()
+            .performScrollTo()
+            .performClick()
         compose.waitForIdle()
     }
 

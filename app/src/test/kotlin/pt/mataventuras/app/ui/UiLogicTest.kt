@@ -288,9 +288,16 @@ class UiLogicTest {
             pt.mataventuras.domain.parent.PinPolicy.ITERATIONS,
             pinIterationsFor("user/release-keys"),
         )
-        assertTrue(pt.mataventuras.app.di.roomAllowsMainThread("robolectric"))
-        assertFalse(pt.mataventuras.app.di.roomAllowsMainThread("user/release-keys"))
-        pt.mataventuras.app.di.processFingerprint()
+        assertTrue(
+            pt.mataventuras.app.di
+                .roomAllowsMainThread("robolectric"),
+        )
+        assertFalse(
+            pt.mataventuras.app.di
+                .roomAllowsMainThread("user/release-keys"),
+        )
+        pt.mataventuras.app.di
+            .processFingerprint()
     }
 
     @Test

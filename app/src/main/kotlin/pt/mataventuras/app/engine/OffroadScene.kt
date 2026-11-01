@@ -136,19 +136,19 @@ internal object OffroadScene {
         ground: Float,
         wrapped: Float,
     ) {
-            val t = (wrapped / DRAW_AHEAD).coerceIn(0f, 1f)
-            val y = ground - (ground - horizon) * t - 8f
-            val scale = 1.4f / (0.4f + t * 2f)
-            val dist = state.distance + wrapped
-            val curve = circuit.curveAt(dist)
-            val center = width * 0.5f - state.lateral * 95f * scale + curve * 40f * (1f - t)
-            val roadW = 360f * scale * circuit.widthAt(dist)
-            val postW = 8f * scale
-            val postH = 36f * scale
-            val barH = 10f * scale
-            out.add(OffroadSpan(center - roadW * 0.5f, y - postH, postW, postH, POST_ARGB))
-            out.add(OffroadSpan(center + roadW * 0.5f - postW, y - postH, postW, postH, POST_ARGB))
-            out.add(OffroadSpan(center - roadW * 0.5f, y - postH, roadW, barH, 0xFF43A047))
+        val t = (wrapped / DRAW_AHEAD).coerceIn(0f, 1f)
+        val y = ground - (ground - horizon) * t - 8f
+        val scale = 1.4f / (0.4f + t * 2f)
+        val dist = state.distance + wrapped
+        val curve = circuit.curveAt(dist)
+        val center = width * 0.5f - state.lateral * 95f * scale + curve * 40f * (1f - t)
+        val roadW = 360f * scale * circuit.widthAt(dist)
+        val postW = 8f * scale
+        val postH = 36f * scale
+        val barH = 10f * scale
+        out.add(OffroadSpan(center - roadW * 0.5f, y - postH, postW, postH, POST_ARGB))
+        out.add(OffroadSpan(center + roadW * 0.5f - postW, y - postH, postW, postH, POST_ARGB))
+        out.add(OffroadSpan(center - roadW * 0.5f, y - postH, roadW, barH, 0xFF43A047))
     }
 
     private fun addMeta(

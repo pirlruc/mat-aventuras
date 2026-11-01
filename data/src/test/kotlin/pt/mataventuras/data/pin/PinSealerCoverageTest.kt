@@ -63,7 +63,11 @@ class PinSealerCoverageTest {
             val prefs = context.getSharedPreferences("pin_ks", Context.MODE_PRIVATE)
             val repository = PinRepository(context, "pin_ks", prefs = prefs)
             assertNull(repository.read())
-            prefs.edit().putString(KEY_KEYSET, "keyset").putString(VALUE_KEYSET, "keyset").commit()
+            prefs
+                .edit()
+                .putString(KEY_KEYSET, "keyset")
+                .putString(VALUE_KEYSET, "keyset")
+                .commit()
             assertRejects { repository.read() }
             assertFails { LegacyEncryptedPin.read(context, "pin_ks") }
         }
@@ -129,7 +133,12 @@ private fun writeFields(
     fields: Map<String, Any?>,
     intPref: Boolean = false,
 ) {
-    val editor = prefs.edit().clear().putString(KEY_KEYSET, "keyset").putString(VALUE_KEYSET, "keyset")
+    val editor =
+        prefs
+            .edit()
+            .clear()
+            .putString(KEY_KEYSET, "keyset")
+            .putString(VALUE_KEYSET, "keyset")
     fields.forEach { (name, value) ->
         val clearKey = if (name == "__NULL__") "__NULL__" else name
         val encryptedKey =
@@ -185,7 +194,9 @@ private fun typedLong(value: Long): ByteArray {
     return buffer.array()
 }
 
-private class EchoAead : Aead, DeterministicAead {
+private class EchoAead :
+    Aead,
+    DeterministicAead {
     override fun encrypt(
         plaintext: ByteArray,
         associatedData: ByteArray,

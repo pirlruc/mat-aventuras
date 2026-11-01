@@ -23,10 +23,14 @@ sealed class PinResult {
     data object Correct : PinResult()
 
     /** Wrong PIN; [remaining] attempts until lockout. */
-    data class Incorrect(val remaining: Int) : PinResult()
+    data class Incorrect(
+        val remaining: Int,
+    ) : PinResult()
 
     /** Too many failures; [unlocksAtEpochMs] is when lockout ends. */
-    data class Locked(val unlocksAtEpochMs: Long) : PinResult()
+    data class Locked(
+        val unlocksAtEpochMs: Long,
+    ) : PinResult()
 
     /** Value is not four digits. */
     data object InvalidFormat : PinResult()

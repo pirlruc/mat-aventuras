@@ -24,8 +24,8 @@ class LocalRepository(
     private val now: () -> Long = { System.currentTimeMillis() },
 ) {
     /** Live list of profiles, strongest first. */
-    fun observeProfiles(): Flow<List<ChildProfile>> =
-        database.profileDao().observeAll().map { list -> list.map { it.toDomain() } }
+    @Suppress("MaxLineLength")
+    fun observeProfiles(): Flow<List<ChildProfile>> = database.profileDao().observeAll().map { list -> list.map { it.toDomain() } }
 
     /** Live sessions for one child. */
     fun observeSessions(profileId: Long): Flow<List<LearningSession>> =
@@ -40,19 +40,24 @@ class LocalRepository(
         database.avatarDao().observeFor(profileId).map { list -> list.map { it.toDomain() } }
 
     /** Creates a profile and grants the starter avatar. */
-    suspend fun createProfile(name: String, ageGroup: AgeBand, mascot: Mascot): Long {
+    suspend fun createProfile(
+        name: String,
+        ageGroup: AgeBand,
+        mascot: Mascot,
+    ): Long {
         val nowMs = now()
-        val id = database.profileDao().insert(
-            ChildProfile(
-                id = 0,
-                name = ChildName.sanitize(name),
-                ageGroup = ageGroup,
-                favouriteMascot = mascot,
-                avatarId = AvatarCode.STARTER.name,
-                points = 0,
-                createdAtEpochMs = nowMs,
-            ).toEntity().copy(id = 0),
-        )
+        val id =
+            database.profileDao().insert(
+                ChildProfile(
+                    id = 0,
+                    name = ChildName.sanitize(name),
+                    ageGroup = ageGroup,
+                    favouriteMascot = mascot,
+                    avatarId = AvatarCode.STARTER.name,
+                    points = 0,
+                    createdAtEpochMs = nowMs,
+                ).toEntity().copy(id = 0),
+            )
         database.avatarDao().insert(
             AvatarEntity(
                 profileId = id,
@@ -89,19 +94,21 @@ class LocalRepository(
     suspend fun latestProfile(): ChildProfile? = database.profileDao().latest()?.toDomain()
 
     /** Every stored session. */
-    suspend fun allSessions(): List<LearningSession> =
-        database.sessionDao().all().map { it.toDomain() }
+    suspend fun allSessions(): List<LearningSession> = database.sessionDao().all().map { it.toDomain() }
 
     /** Sessions for one child, newest first. */
-    suspend fun sessionsFor(profileId: Long): List<LearningSession> =
-        database.sessionDao().forProfile(profileId).map { it.toDomain() }
+    @Suppress("MaxLineLength")
+    suspend fun sessionsFor(profileId: Long): List<LearningSession> = database.sessionDao().forProfile(profileId).map { it.toDomain() }
 
     /** Inserts a session and returns its row id. */
-    suspend fun saveSession(session: LearningSession): Long =
-        database.sessionDao().insert(session.toEntity().copy(id = 0))
+    @Suppress("MaxLineLength")
+    suspend fun saveSession(session: LearningSession): Long = database.sessionDao().insert(session.toEntity().copy(id = 0))
 
     /** Unlocks a badge; duplicates are ignored. */
-    suspend fun unlockBadge(profileId: Long, code: String) {
+    suspend fun unlockBadge(
+        profileId: Long,
+        code: String,
+    ) {
         database.badgeDao().insert(
             BadgeEntity(
                 profileId = profileId,
@@ -112,7 +119,10 @@ class LocalRepository(
     }
 
     /** Unlocks an avatar; duplicates are ignored. */
-    suspend fun unlockAvatar(profileId: Long, avatarId: String) {
+    suspend fun unlockAvatar(
+        profileId: Long,
+        avatarId: String,
+    ) {
         database.avatarDao().insert(
             AvatarEntity(
                 profileId = profileId,
@@ -123,10 +133,8 @@ class LocalRepository(
     }
 
     /** Badge codes already owned by [profileId]. */
-    suspend fun badgeCodes(profileId: Long): Set<String> =
-        database.badgeDao().codesFor(profileId).toSet()
+    suspend fun badgeCodes(profileId: Long): Set<String> = database.badgeDao().codesFor(profileId).toSet()
 
     /** Avatar ids already owned by [profileId]. */
-    suspend fun avatarIds(profileId: Long): Set<String> =
-        database.avatarDao().idsFor(profileId).toSet()
+    suspend fun avatarIds(profileId: Long): Set<String> = database.avatarDao().idsFor(profileId).toSet()
 }

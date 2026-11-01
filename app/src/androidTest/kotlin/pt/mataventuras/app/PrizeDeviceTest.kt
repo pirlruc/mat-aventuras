@@ -3,13 +3,13 @@ package pt.mataventuras.app
 import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import java.io.FileInputStream
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.plugin.KartPluginActivity
 import pt.mataventuras.plugin.RunnerPluginActivity
-import java.io.FileInputStream
 
 /**
  * Launches every prize on a device and checks the boot log.
@@ -61,7 +61,8 @@ class PrizeDeviceTest {
 
     private fun shell(command: String): String {
         val descriptor =
-            InstrumentationRegistry.getInstrumentation()
+            InstrumentationRegistry
+                .getInstrumentation()
                 .uiAutomation
                 .executeShellCommand(command)
         return FileInputStream(descriptor.fileDescriptor).bufferedReader().use { it.readText() }

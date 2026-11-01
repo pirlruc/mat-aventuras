@@ -54,10 +54,11 @@ class RewardsEngineTest {
         assertEquals("Primeiros passos", BadgeCode.FIRST_STEPS.title)
         val already = setOf(BadgeCode.FIRST_STEPS.name)
         assertFalse(
-            engine.newBadges(
-                already,
-                ProgressTotals(1, 0, 0, 0, false, 0),
-            ).contains(BadgeCode.FIRST_STEPS),
+            engine
+                .newBadges(
+                    already,
+                    ProgressTotals(1, 0, 0, 0, false, 0),
+                ).contains(BadgeCode.FIRST_STEPS),
         )
         val avatars = engine.newAvatars(emptySet(), 500)
         assertEquals(AvatarCode.entries.size, avatars.size)

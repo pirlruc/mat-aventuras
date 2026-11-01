@@ -84,12 +84,39 @@ class GodotPluginHostTest {
                 fromRelaunch = true,
             ),
         )
-        assertEquals("res://kart.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.KART))
-        assertEquals("res://runner.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.RUNNER))
-        assertEquals("res://invaders.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.INVADERS))
-        assertEquals("res://chomp.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.CHOMP))
-        assertEquals("res://climb.tscn", pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.CLIMB))
-        assertTrue(NativeKartHost.hudLines(pt.mataventuras.app.engine.OffroadRacerLoop()).first.startsWith("Volta"))
+        assertEquals(
+            "res://kart.tscn",
+            pt.mataventuras.domain.engine.RewardCatalog
+                .scenePath(RewardGame.KART),
+        )
+        assertEquals(
+            "res://runner.tscn",
+            pt.mataventuras.domain.engine.RewardCatalog
+                .scenePath(RewardGame.RUNNER),
+        )
+        assertEquals(
+            "res://invaders.tscn",
+            pt.mataventuras.domain.engine.RewardCatalog
+                .scenePath(RewardGame.INVADERS),
+        )
+        assertEquals(
+            "res://chomp.tscn",
+            pt.mataventuras.domain.engine.RewardCatalog
+                .scenePath(RewardGame.CHOMP),
+        )
+        assertEquals(
+            "res://climb.tscn",
+            pt.mataventuras.domain.engine.RewardCatalog
+                .scenePath(RewardGame.CLIMB),
+        )
+        assertTrue(
+            NativeKartHost
+                .hudLines(
+                    pt.mataventuras.app.engine
+                        .OffroadRacerLoop(),
+                ).first
+                .startsWith("Volta"),
+        )
     }
 
     @Test
@@ -142,79 +169,96 @@ class GodotPluginHostTest {
     fun binderEmbedHookDoesNotConstructGodot() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val kartController =
-            Robolectric.buildActivity(
-                KartPluginActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.SIX_TO_EIGHT,
-                    Mascot.BRAVE_PLUMBER,
-                    "Rui",
-                    pt.mataventuras.domain.model.EngineKind.THREE_D,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    KartPluginActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.SIX_TO_EIGHT,
+                        Mascot.BRAVE_PLUMBER,
+                        "Rui",
+                        pt.mataventuras.domain.model.EngineKind.THREE_D,
+                    ),
+                ).setup()
         val kart = kartController.get()
         var kartScene = ""
         GodotRewardBinder.bindKart(kart, embed = true) { _, scene -> kartScene = scene }
-        assertEquals(pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.KART), kartScene)
+        assertEquals(
+            pt.mataventuras.domain.engine.RewardCatalog
+                .scenePath(RewardGame.KART),
+            kartScene,
+        )
         GodotRewardBinder.bindKart(kart, embed = false)
         assertNotNull(kart.nativeSession)
         destroy(kartController)
 
         val runnerController =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG, "Ana", game = RewardGame.RUNNER),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG, "Ana", game = RewardGame.RUNNER),
+                ).setup()
         val runner = runnerController.get()
         var runnerScene = ""
         GodotRewardBinder.bindRunner(runner, embed = true) { _, scene -> runnerScene = scene }
-        assertEquals(pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.RUNNER), runnerScene)
+        assertEquals(
+            pt.mataventuras.domain.engine.RewardCatalog
+                .scenePath(RewardGame.RUNNER),
+            runnerScene,
+        )
         GodotRewardBinder.bindRunner(runner, embed = false)
         assertNotNull(runner.loop)
         destroy(runnerController)
 
         val climbController =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.THREE_TO_FIVE,
-                    Mascot.HERO_PUP,
-                    "Ana",
-                    game = RewardGame.CLIMB,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.THREE_TO_FIVE,
+                        Mascot.HERO_PUP,
+                        "Ana",
+                        game = RewardGame.CLIMB,
+                    ),
+                ).setup()
         assertNotNull(climbController.get().climb)
         var climbScene = ""
         GodotRewardBinder.bindRunner(climbController.get(), embed = true) { _, scene -> climbScene = scene }
-        assertEquals(pt.mataventuras.domain.engine.RewardCatalog.scenePath(RewardGame.CLIMB), climbScene)
+        assertEquals(
+            pt.mataventuras.domain.engine.RewardCatalog
+                .scenePath(RewardGame.CLIMB),
+            climbScene,
+        )
         destroy(climbController)
         val invadersController =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.SIX_TO_EIGHT,
-                    Mascot.MISCHIEVOUS_ALIEN,
-                    "Rui",
-                    pt.mataventuras.domain.model.EngineKind.TWO_D,
-                    RewardGame.INVADERS,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.SIX_TO_EIGHT,
+                        Mascot.MISCHIEVOUS_ALIEN,
+                        "Rui",
+                        pt.mataventuras.domain.model.EngineKind.TWO_D,
+                        RewardGame.INVADERS,
+                    ),
+                ).setup()
         assertNotNull(invadersController.get().invaders)
         assertEquals(RewardGame.INVADERS.name, invadersController.get().sceneCode())
         destroy(invadersController)
         val chompController =
-            Robolectric.buildActivity(
-                RunnerPluginActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.THREE_TO_FIVE,
-                    Mascot.PINK_PIGLET,
-                    "Eva",
-                    game = RewardGame.CHOMP,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    RunnerPluginActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.THREE_TO_FIVE,
+                        Mascot.PINK_PIGLET,
+                        "Eva",
+                        game = RewardGame.CHOMP,
+                    ),
+                ).setup()
         assertNotNull(chompController.get().chomp)
         destroy(chompController)
     }
@@ -266,16 +310,17 @@ class GodotPluginHostTest {
     fun bridgeReadsExtrasAndFinishesOnUiThread() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         val kartController =
-            Robolectric.buildActivity(
-                KartPluginActivity::class.java,
-                EngineLauncher.intentFor(
-                    ctx,
-                    AgeBand.SIX_TO_EIGHT,
-                    Mascot.BRAVE_PLUMBER,
-                    "Rui",
-                    pt.mataventuras.domain.model.EngineKind.THREE_D,
-                ),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    KartPluginActivity::class.java,
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.SIX_TO_EIGHT,
+                        Mascot.BRAVE_PLUMBER,
+                        "Rui",
+                        pt.mataventuras.domain.model.EngineKind.THREE_D,
+                    ),
+                ).setup()
         val kart = kartController.get()
         assertEquals("brave_plumber", GodotBridge.mascotCode(kart))
         assertEquals("Rui", GodotBridge.childName(kart))
@@ -286,7 +331,11 @@ class GodotPluginHostTest {
     @Test
     fun godotProjectIsPackagedWithCompatibilityRenderer() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
-        val project = ctx.assets.open("project.godot").bufferedReader().readText()
+        val project =
+            ctx.assets
+                .open("project.godot")
+                .bufferedReader()
+                .readText()
         assertTrue(project.contains("use_hidden_project_data_directory=false"))
         assertTrue(project.contains("gl_compatibility"))
         assertTrue(project.contains("GL Compatibility"))
@@ -295,10 +344,18 @@ class GodotPluginHostTest {
         assertTrue(project.contains("import_etc2_astc=true"))
         assertTrue(project.contains("default_clear_color"))
         assertTrue(project.contains("aspect=\"expand\""))
-        val bootScene = ctx.assets.open("boot.tscn").bufferedReader().readText()
+        val bootScene =
+            ctx.assets
+                .open("boot.tscn")
+                .bufferedReader()
+                .readText()
         assertTrue(bootScene.contains("res://boot.gd"))
         assertTrue(bootScene.contains("ColorRect"))
-        val boot = ctx.assets.open("boot.gd").bufferedReader().readText()
+        val boot =
+            ctx.assets
+                .open("boot.gd")
+                .bufferedReader()
+                .readText()
         assertTrue(boot.contains("get_visible_rect"))
         assertTrue(boot.contains("DisplayServer"))
         assertTrue(boot.contains("_process"))
@@ -310,10 +367,18 @@ class GodotPluginHostTest {
         assertTrue(boot.contains("get_script()"))
         assertTrue(boot.contains("Host.finish"))
         assertTrue(boot.contains("Host.finish(false, false)"))
-        val kartScene = ctx.assets.open("kart.tscn").bufferedReader().readText()
+        val kartScene =
+            ctx.assets
+                .open("kart.tscn")
+                .bufferedReader()
+                .readText()
         assertTrue(kartScene.contains("type=\"Node2D\""))
         ctx.assets.open("runner.tscn").close()
-        val kartScript = ctx.assets.open("kart.gd").bufferedReader().readText()
+        val kartScript =
+            ctx.assets
+                .open("kart.gd")
+                .bufferedReader()
+                .readText()
         assertTrue(kartScript.contains("minf(delta"))
         assertTrue(kartScript.contains("_update_hud(boost_timer > 0.0)"))
         assertTrue(kartScript.contains("Arcos"))
@@ -329,7 +394,11 @@ class GodotPluginHostTest {
         assertTrue(kartScript.contains("_arm_boost"))
         assertTrue(kartScript.contains("_draw_rivals"))
         assertTrue(kartScript.contains("Host.skin_hud"))
-        val runnerScript = ctx.assets.open("runner.gd").bufferedReader().readText()
+        val runnerScript =
+            ctx.assets
+                .open("runner.gd")
+                .bufferedReader()
+                .readText()
         assertTrue(runnerScript.contains("minf(delta"))
         assertTrue(runnerScript.contains("in_pit_fall"))
         assertTrue(runnerScript.contains("_add_part"))
@@ -340,18 +409,34 @@ class GodotPluginHostTest {
         ctx.assets.open("invaders.tscn").close()
         ctx.assets.open("chomp.tscn").close()
         ctx.assets.open("climb.tscn").close()
-        val invadersScript = ctx.assets.open("invaders.gd").bufferedReader().readText()
+        val invadersScript =
+            ctx.assets
+                .open("invaders.gd")
+                .bufferedReader()
+                .readText()
         assertTrue(invadersScript.contains("Host.lives_text"))
         assertTrue(invadersScript.contains("Host.tune"))
-        val chompScript = ctx.assets.open("chomp.gd").bufferedReader().readText()
+        val chompScript =
+            ctx.assets
+                .open("chomp.gd")
+                .bufferedReader()
+                .readText()
         assertTrue(chompScript.contains("bolinhas"))
         assertTrue(chompScript.contains("Host.lives_text"))
         assertTrue(chompScript.contains("var pos: Vector2 = sample.pos"))
         assertFalse(chompScript.contains("var nx := sample.pos"))
-        val climbScript = ctx.assets.open("climb.gd").bufferedReader().readText()
+        val climbScript =
+            ctx.assets
+                .open("climb.gd")
+                .bufferedReader()
+                .readText()
         assertTrue(climbScript.contains("barris") || climbScript.contains("Letras"))
         assertTrue(climbScript.contains("Host.tune"))
-        val hostScript = ctx.assets.open("host.gd").bufferedReader().readText()
+        val hostScript =
+            ctx.assets
+                .open("host.gd")
+                .bufferedReader()
+                .readText()
         assertTrue(hostScript.contains("view_size"))
         assertTrue(hostScript.contains("skin_hud"))
         assertTrue(hostScript.contains("linger"))
@@ -382,7 +467,8 @@ class GodotPluginHostTest {
         val appInfo = ctx.packageManager.getApplicationInfo(ctx.packageName, 0)
         assertEquals(0, appInfo.flags and android.content.pm.ApplicationInfo.FLAG_ALLOW_BACKUP)
         val activities =
-            ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_ACTIVITIES)
+            ctx.packageManager
+                .getPackageInfo(ctx.packageName, PackageManager.GET_ACTIVITIES)
                 .activities
                 ?.toList()
                 .orEmpty()
@@ -394,8 +480,7 @@ class GodotPluginHostTest {
                     it.name.contains("Plugin") ||
                         it.name.endsWith("Kart3dActivity") ||
                         it.name.endsWith("Platformer2dActivity")
-                }
-                .all { EnginePluginContract.isIsolatedProcessName(it.processName.orEmpty()) },
+                }.all { EnginePluginContract.isIsolatedProcessName(it.processName.orEmpty()) },
         )
         assertFalse(activities.any { it.name.contains("ProcessPhoenix") })
         val providers =
@@ -438,12 +523,14 @@ class GodotPluginHostTest {
         assertFalse(app.bindHostGraph("pt.mataventuras.app:engine3d"))
         assertFalse(app.bindHostGraph(""))
         val nativeKartController =
-            Robolectric.buildActivity(
-                Kart3dActivity::class.java,
-                android.content.Intent(ctx, Kart3dActivity::class.java)
-                    .putExtra(EngineLauncher.EXTRA_MASCOT, "hero_pup")
-                    .putExtra(EngineLauncher.EXTRA_NAME, "Ana"),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    Kart3dActivity::class.java,
+                    android.content
+                        .Intent(ctx, Kart3dActivity::class.java)
+                        .putExtra(EngineLauncher.EXTRA_MASCOT, "hero_pup")
+                        .putExtra(EngineLauncher.EXTRA_NAME, "Ana"),
+                ).setup()
         nativeKartController.get().closeFinished()
         assertTrue(nativeKartController.get().isRewardSettled())
         assertFalse(nativeKartController.get().completeReward(ok = false))
@@ -455,11 +542,13 @@ class GodotPluginHostTest {
         nativeKartController.get().completeRewardOnUi(ok = false)
         assertFalse(nativeKartController.get().completeReward(ok = true))
         val namelessController =
-            Robolectric.buildActivity(
-                Kart3dActivity::class.java,
-                android.content.Intent(ctx, Kart3dActivity::class.java)
-                    .putExtra(EngineLauncher.EXTRA_MASCOT, "hero_pup"),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    Kart3dActivity::class.java,
+                    android.content
+                        .Intent(ctx, Kart3dActivity::class.java)
+                        .putExtra(EngineLauncher.EXTRA_MASCOT, "hero_pup"),
+                ).setup()
         assertEquals("", namelessController.get().childName())
         namelessController.get().finish()
         assertFalse(namelessController.get().completeReward(ok = true))
@@ -467,12 +556,14 @@ class GodotPluginHostTest {
         assertTrue(namelessController.get().isDestroyed)
         assertFalse(namelessController.get().completeReward(ok = false))
         val nativeRunnerController =
-            Robolectric.buildActivity(
-                Platformer2dActivity::class.java,
-                android.content.Intent(ctx, Platformer2dActivity::class.java)
-                    .putExtra(EngineLauncher.EXTRA_MASCOT, "hero_pup")
-                    .putExtra(EngineLauncher.EXTRA_NAME, "Ana"),
-            ).setup()
+            Robolectric
+                .buildActivity(
+                    Platformer2dActivity::class.java,
+                    android.content
+                        .Intent(ctx, Platformer2dActivity::class.java)
+                        .putExtra(EngineLauncher.EXTRA_MASCOT, "hero_pup")
+                        .putExtra(EngineLauncher.EXTRA_NAME, "Ana"),
+                ).setup()
         nativeRunnerController.get().completeReward(ok = true)
         assertTrue(nativeRunnerController.get().isRewardSettled())
         assertFalse(nativeRunnerController.get().completeReward(ok = false))

@@ -4,6 +4,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
+import java.util.ArrayList
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -11,7 +12,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
-import java.util.ArrayList
 import pt.mataventuras.app.engine.ArcadeBoardView
 import pt.mataventuras.app.engine.ChompLoop
 import pt.mataventuras.app.engine.ClimbLoop
@@ -99,8 +99,10 @@ class EngineCoverageTest {
                 view.draw(android.graphics.Canvas())
                 view.dispatchTouchEvent(MotionEvent.obtain(0L, 8L, MotionEvent.ACTION_MOVE, 10f, 10f, 0))
                 view.measure(
-                    android.view.View.MeasureSpec.makeMeasureSpec(240, android.view.View.MeasureSpec.EXACTLY),
-                    android.view.View.MeasureSpec.makeMeasureSpec(240, android.view.View.MeasureSpec.EXACTLY),
+                    android.view.View.MeasureSpec
+                        .makeMeasureSpec(240, android.view.View.MeasureSpec.EXACTLY),
+                    android.view.View.MeasureSpec
+                        .makeMeasureSpec(240, android.view.View.MeasureSpec.EXACTLY),
                 )
                 view.layout(0, 0, 240, 240)
                 assertTrue(view.spanCount() > 3)

@@ -2,13 +2,15 @@ package pt.mataventuras.app.speech
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
-import pt.mataventuras.app.ui.UiLogic
 import java.util.Locale
+import pt.mataventuras.app.ui.UiLogic
 
 /**
  * On-device TTS in Portuguese from Portugal. No cloud voice services.
  */
-class SpeechEngine(context: Context) : TextToSpeech.OnInitListener {
+class SpeechEngine(
+    context: Context,
+) : TextToSpeech.OnInitListener {
     private val tts = TextToSpeech(context.applicationContext, this)
     private var ready = false
     private var released = false

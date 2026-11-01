@@ -68,20 +68,22 @@ fun AgeSelectionScreen(
     LaunchedEffect(Unit) { onSpeak(VoiceScripts.AGE_SELECTION) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFFF8E1))
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color(0xFFFFF8E1))
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Image(
             painter = painterResource(R.drawable.ic_launcher_foreground),
             contentDescription = "Ícone de ${VoiceScripts.APP_TITLE}",
-            modifier = Modifier
-                .size(96.dp)
-                .clip(CircleShape),
+            modifier =
+                Modifier
+                    .size(96.dp)
+                    .clip(CircleShape),
         )
         Text(
             text = VoiceScripts.APP_TITLE,
@@ -116,9 +118,10 @@ fun AgeSelectionScreen(
                     onSpeak(EntryLogic.continueLabel(lastProfile))
                     onContinueLast()
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFB8C00)),
             ) {
@@ -175,21 +178,25 @@ fun AgeSelectionScreen(
                             mascot = candidate
                             onSpeak("Eu sou o ${candidate.displayName}!")
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(candidate.primaryArgb)
-                                .copy(alpha = UiLogic.ageButtonAlpha(chosen)),
-                        ),
-                        border = BorderStroke(
-                            UiLogic.selectionBorderDp(chosen).dp,
-                            Color(UiLogic.selectionHighlightArgb(chosen)),
-                        ),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor =
+                                    Color(candidate.primaryArgb)
+                                        .copy(alpha = UiLogic.ageButtonAlpha(chosen)),
+                            ),
+                        border =
+                            BorderStroke(
+                                UiLogic.selectionBorderDp(chosen).dp,
+                                Color(UiLogic.selectionHighlightArgb(chosen)),
+                            ),
                         contentPadding = PaddingValues(0.dp),
-                        modifier = Modifier
-                            .size(UiLogic.mascotChipDp(ageGroup!!).dp)
-                            .semantics {
-                                contentDescription = candidate.displayName
-                                role = Role.Button
-                            },
+                        modifier =
+                            Modifier
+                                .size(UiLogic.mascotChipDp(ageGroup!!).dp)
+                                .semantics {
+                                    contentDescription = candidate.displayName
+                                    role = Role.Button
+                                },
                         shape = CircleShape,
                     ) {
                         Text(
@@ -207,9 +214,10 @@ fun AgeSelectionScreen(
                     onConfirm(chosen, finalName, mascot)
                 },
                 enabled = ageGroup != null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(tokens.minButtonDp.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(tokens.minButtonDp.dp),
                 shape = RoundedCornerShape(24.dp),
             ) {
                 Text(VoiceScripts.START, fontSize = tokens.titleSp.sp)
@@ -236,16 +244,19 @@ private fun AgeButton(
     val side = UiLogic.AGE_BUTTON_SIDE_DP.dp
     Button(
         onClick = onClick,
-        modifier = Modifier
-            .size(side)
-            .clip(RoundedCornerShape(28.dp)),
-        border = BorderStroke(
-            UiLogic.selectionBorderDp(selected).dp,
-            Color(UiLogic.selectionHighlightArgb(selected)),
-        ),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = color.copy(alpha = UiLogic.ageButtonAlpha(selected)),
-        ),
+        modifier =
+            Modifier
+                .size(side)
+                .clip(RoundedCornerShape(28.dp)),
+        border =
+            BorderStroke(
+                UiLogic.selectionBorderDp(selected).dp,
+                Color(UiLogic.selectionHighlightArgb(selected)),
+            ),
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = color.copy(alpha = UiLogic.ageButtonAlpha(selected)),
+            ),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(UiLogic.ageButtonEmoji(huge), fontSize = 40.sp)
