@@ -808,42 +808,36 @@ milestones:
 
       - id: MAT-006
         status: open
-        title: Prove Android analysis the agent VM cannot run
+        title: Keep the Godot coverage exclude honest
         overview:
           problem: >-
-            This agent VM has no Android SDK, so settings.gradle.kts omits
-            :app and :data. ktlint and detekt are plugins on :domain only, and
-            the CI quality job runs only those domain tasks. The GitHub Actions
-            test job already installs the SDK and runs :data and :app unit
-            tests, Kover, and :app:lintDebug, but that job was not executed
-            here. CodeQL's manual Kotlin compile and the APK CycloneDX bill
-            have the same SDK dependency.
+            ktlint, detekt, unit tests, Kover, lint, CodeQL, and the debug APK
+            bill already run on an SDK host. The remaining KT-TEST-002 exclude
+            is the Godot JNI package, because libgodot_android.so cannot load
+            under Robolectric. That exclude still needs an emulator run that
+            shows the prize actually renders.
           goal: >-
-            An SDK host proves static analysis, unit tests, Kover, lint,
-            CodeQL compile, and the APK bill for the Android modules, and the
-            recorded deviations shrink to what that proof still requires.
+            An emulator proves the Godot prize past the boot screen, and the
+            recorded deviations stay limited to the JNI package and to Dokka.
             Numeric coverage floors stay at 95.
         decision: >-
-          In the context of an agent VM with no Android SDK, facing :app and
-          :data omitted from the Gradle build and ktlint/detekt applied only
-          on :domain, we decided to record the analysis and coverage
-          departures and require an SDK host to prove the Android jobs, to
-          achieve an honest guardrail record without lowering the 95 percent
-          floors, accepting that this VM cannot compile the Android modules.
+          In the context of Android modules an SDK host can compile, facing a
+          Godot JNI package that unit tests cannot load, we decided to keep
+          the 95 percent floors and prove the JNI exclude with an emulator
+          run, to achieve a deviation that matches what Robolectric cannot
+          load, accepting a monthly emulator job instead of a pull-request
+          emulator.
         architecture:
           target: >-
-            Keep the SDK include gate in settings.gradle.kts. Apply the same
-            formatter and detekt config to :app and :data once an SDK host
-            can compile them. Do not remove Kover exclusions until that host
-            shows the 95 percent floor still holds. MAT-005-T3 owns shrinking
-            LessonScreenKt, NavGraphKt, NativeKartHost, and NativeRunnerHost.
+            Keep the SDK include gate in settings.gradle.kts. Kover measures
+            LessonScreen, NavGraph, NativeKartHost, and NativeRunnerHost.
+            The Godot JNI package stays excluded until an instrumented test
+            can load libgodot_android.so.
           modules:
             - app/
             - data/
-            - domain/build.gradle.kts
             - .github/workflows/ci.yml
-            - .github/workflows/codeql.yml
-            - .github/workflows/hardening.yml
+            - .github/workflows/emulator.yml
         acceptance_criteria:
           - ktlint and detekt run on :app and :data in CI
           - :data and :app unit tests, Kover, and :app:lintDebug are green on an SDK runner
@@ -866,7 +860,6 @@ milestones:
                 - .github/workflows/ci.yml
             verification:
               - CI runs :app and :data ktlint and detekt on a runner with the Android SDK
-              - This VM cannot include those projects while ANDROID_HOME is unset
             guardrail_refs:
               - KT-BUILD-002
               - KT-CPLX-001
@@ -881,7 +874,6 @@ milestones:
                 - data/src/test
             verification:
               - :data:testDebugUnitTest, :app:testDebugUnitTest, Kover verify, and :app:lintDebug pass
-              - The steps already exist in the CI test job; they were not run on the agent VM
             guardrail_refs:
               - KT-TEST-002
               - ANDROID-LINT-001
@@ -898,6 +890,19 @@ milestones:
             guardrail_refs:
               - KT-SEC-002
               - KT-SEC-004
+
+          - id: MAT-006-T4
+            status: open
+            title: Prove the Godot prize renders on an emulator
+            instructions:
+              files:
+                - .github/workflows/emulator.yml
+                - app/src/androidTest
+            verification:
+              - An emulator log shows MatPrize ready and a screenshot is past the boot blue
+              - The KT-TEST-002 exclude stays the Godot JNI package only
+            guardrail_refs:
+              - KT-TEST-002
 
       - id: MAT-007
         status: done
@@ -1061,19 +1066,19 @@ milestones:
               files:
                 - domain/src/main/kotlin/pt/mataventuras/domain/math
             verification:
+              - "Shipped in 0.2.0: Qual é diferente, repeating patterns, big and small"
               - Colour and shape sorting
-              - Qual é diferente
               - Connect-the-dots 1–10
-              - Repeating patterns
-              - Big and small
               - Syllable clapping
               - Shadows
           - id: MAT-011-T2
             status: open
             title: Lessons for 6–8 beyond the current boards
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/math
             verification:
-              - Reading the clock
-              - Euros and cents
+              - "Shipped in 0.2.0: reading the clock, euros and cents"
               - Simple fractions
               - Ordering numbers to 100
               - Word problems
@@ -1082,16 +1087,24 @@ milestones:
           - id: MAT-011-T3
             status: open
             title: Prizes for 3–5 beyond runner, climb, and chomp
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/prize
+                - app/src/main/kotlin/pt/mataventuras/app/prize
             verification:
-              - Balloon pop by number or letter
+              - "Shipped in 0.2.0: balloon pop"
               - Fishing
               - Colouring
               - Bubble-pop rhythm
           - id: MAT-011-T4
             status: open
             title: Prizes for 6–8 beyond invaders and kart
+            instructions:
+              files:
+                - domain/src/main/kotlin/pt/mataventuras/domain/prize
+                - app/src/main/kotlin/pt/mataventuras/app/prize
             verification:
-              - Snake that eats the right answer
+              - "Shipped in 0.2.0: snake that eats the right answer"
               - Breakout with letters
               - Simple tower defence
               - Endless runner with math gates
@@ -1202,3 +1215,144 @@ milestones:
             verification:
               - ci.yml calls androiddevops 1.0.2
               - shared-ci.yml calls commondevops 5.7.0 with ci-lint
+          - id: MAT-013-T2
+            status: open
+            title: Skip scorecard on pull requests and the bill when Gradle did not change
+            instructions:
+              files:
+                - .github/workflows/shared-ci.yml
+                - .github/workflows/ci.yml
+            verification:
+              - Scorecard runs on push and on the schedule, not on a pull request
+              - The APK bill runs on push, on the schedule, and on a pull request that touches gradle or the version catalog
+          - id: MAT-013-T3
+            status: open
+            title: Lint shell format and the devcontainer Dockerfile
+            instructions:
+              files:
+                - .github/workflows/shared-ci.yml
+                - .devcontainer/Dockerfile
+                - .dockerignore
+            verification:
+              - common-infra-lint runs shfmt
+              - hadolint scans .devcontainer/Dockerfile
+              - The repository has a .dockerignore
+            guardrail_refs:
+              - SHELL-LINT-002
+              - DOCKER-LINT-001
+              - DOCKER-BUILD-005
+
+      - id: MAT-014
+        status: open
+        title: Fix shipped defects and harden the parent area
+        decision: >-
+          In the context of the 0.2.0 lessons and prizes, facing a kart the
+          child cannot reach, a prize timer that is stored and never applied,
+          and a clock prompt that speaks the answer, we decided to fix those
+          defects and harden the parent PIN before adding more lessons, to
+          achieve a release a parent can trust, accepting a longer 0.3.0.
+        architecture:
+          target: Prize selection, prize hosts, and the parent PIN screen.
+          modules:
+            - domain/
+            - app/
+            - data/
+        acceptance_criteria:
+          - Ages 6-8 can be offered the kart
+          - A parent prize time limit ends the prize
+          - The clock lesson draws a face and does not speak the hour
+          - The parent screen cannot be captured and a lockout ignores a clock change
+        guardrail_refs:
+          - ANDROID-SEC-001
+          - KT-SEC-005
+        tasks:
+          - id: MAT-014-T1
+            status: open
+            title: Offer the kart to ages 6-8
+            verification:
+              - PrizeOffers.pick includes the 3D catalog for ages 6-8
+          - id: MAT-014-T2
+            status: open
+            title: Enforce the parent prize time limit
+            verification:
+              - Compose, Canvas, and Godot hosts stop the prize at the stored limit
+              - The deadline uses elapsed realtime
+          - id: MAT-014-T3
+            status: open
+            title: Draw a clock and stop speaking the answer
+            verification:
+              - The prompt is Que horas são without the hour
+              - A clock face composable shows the hour
+          - id: MAT-014-T4
+            status: open
+            title: Show size as a picture
+            verification:
+              - Size options are shapes at different scales
+              - The words are content descriptions only
+          - id: MAT-014-T5
+            status: open
+            title: Keep four money choices
+            verification:
+              - MoneyBoard always returns three decoys distinct from the price
+          - id: MAT-014-T6
+            status: open
+            title: Use Portuguese accented distractors
+            verification:
+              - Word completion distractors include common pt-PT accented letters
+          - id: MAT-014-T7
+            status: open
+            title: Make PIN lockout ignore a wall-clock change
+            verification:
+              - Lockout uses a monotonic deadline
+              - A legacy plaintext PIN record is sealed on startup
+          - id: MAT-014-T8
+            status: open
+            title: Hide the parent screen from screenshots
+            verification:
+              - FLAG_SECURE is set while the parent area is shown
+          - id: MAT-014-T9
+            status: open
+            title: Offer a reset when the PIN key cannot be read
+            verification:
+              - An unrecoverable Keystore failure offers a reset behind a hold and an arithmetic gate
+          - id: MAT-014-T10
+            status: open
+            title: Close the small production seams
+            verification:
+              - Compose prizes use Random.Default in production
+              - AppContainer.generator is a val
+              - The correct-answer test tag is debug-only
+              - PrizeBoot holds the Activity in a WeakReference
+
+      - id: MAT-015
+        status: open
+        title: Sign and attest releases
+        decision: >-
+          In the context of a public Android release, facing an APK that is
+          keystore-signed but has no Sigstore signature and no provenance, we
+          decided to sign each release file with keyless cosign and attest
+          the build, to achieve SC-SIGN-001 and SC-PROV-001, accepting a
+          tag-restricted environment for the keystore secrets.
+        architecture:
+          target: release.yml calling common-release with sign true.
+          modules:
+            - .github/workflows/release.yml
+        acceptance_criteria:
+          - The GitHub Release attaches a sigstore bundle for each file
+          - The run records a build-provenance attestation
+          - Publish secrets live in an environment limited to tags
+        guardrail_refs:
+          - SC-SIGN-001
+          - SC-PROV-001
+          - REL-PUB-003
+          - REL-PUB-004
+        tasks:
+          - id: MAT-015-T1
+            status: open
+            title: Turn on signing and the release environment
+            instructions:
+              files:
+                - .github/workflows/release.yml
+            verification:
+              - release.yml passes sign true and environment release
+              - The release artifact includes the CycloneDX bill

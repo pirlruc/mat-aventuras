@@ -11,7 +11,7 @@ Language split: **code, comments, KDoc, and this documentation are English**.
 
 ## Decision (Y-statement)
 
-In the context of a native Android educational math game for ages 3 and 7,
+In the context of a native Android educational math game for ages 3–5 and 6–8,
 facing Compose-to-engine RAM spikes on mid-tier tablets and a local-only
 privacy constraint, we decided to host all learning and dashboards in
 Jetpack Compose and run reward mini-games as dedicated Activities
@@ -145,7 +145,7 @@ Leaderboard is a query: profiles ordered by points, then average
 accuracy from sessions (`LeaderboardCalculator`).
 
 PIN state is **not** in Room. `PinRepository` stores the PBKDF2 hash,
-salt, and lockout in `EncryptedSharedPreferences` (`parent_pin`). Android Keystore
+salt, and lockout, sealed with a Keystore AES-GCM key. Android Keystore
 failures fail closed. Robolectric tests opt into a distinct `*_plain`
 private prefs file. Plaintext PIN digits are never persisted.
 `android:allowBackup` is **false**, `fullBackupContent` is false, and
@@ -154,8 +154,8 @@ backup and device-to-device transfer cannot copy profiles or the PIN hash.
 
 ### Parental PIN
 
-- 4 digits, PBKDF2-HMAC-SHA256, 120k iterations, 16-byte salt
-- Encrypted at rest (`EncryptedSharedPreferences` + Android Keystore)
+- 4 digits, PBKDF2-HMAC-SHA256, 600000 iterations (a hash written at 120000 is replaced on the next correct unlock), 16-byte salt
+- Sealed at rest with a Keystore AES-GCM key
 - Constant-time compare
 - 5 failures → 60 s lockout (`PinPolicy`)
 - Unlock is a single locked read-modify-write so concurrent taps cannot skip lockout
@@ -210,8 +210,8 @@ Finishing a reward Activity awards 15 bonus points on the last profile.
 
 | Band | Lessons (Compose, mascot-hosted) | Reward mini-game |
 | --- | --- | --- |
-| **3–5** | Counting 1–10 (`COUNTING`); shapes (`SHAPES`); digits and a small sudoku (`NUMBERS`); addition; sequences (`LOGIC`); memory; letters | 2D runner, letter-climb, or maze (`RunnerPluginActivity` in `:engine2d`) |
-| **6–8** | Numbers, addition, subtraction, multiplication, exact division, logic, memory, letters, and missing-letter words | Those 2D prizes, plus invaders, and the dirt race (`KartPluginActivity` in `:engine3d`) |
+| **3–5** | Counting, shapes, numbers, addition, logic, memory, letters, odd one out, size, patterns | 2D runner, letter-climb, maze, balloon pop |
+| **6–8** | Numbers, addition, subtraction, multiplication, exact division, logic, memory, letters, words, clock, money | Those 2D prizes, invaders, the kart race, and the answer snake |
 
 Both age bands confirm before leaving a lesson (`VoiceScripts.confirmExit`).
 Ages 3–5 see "Quadrado mágico" on the number square. A finished reward returns `RESULT_FINISHED`;
@@ -226,10 +226,9 @@ small board on both bands.
 
 - Domain tests are deterministic: inject `Random(seed)`, `SecureRandom` with a
   fixed seed, and a controllable `now` clock for PIN lockout.
-- Do not mark a failing test as flaky. Quarantine means skip with a linked
-  Task id and a deterministic reproduction, then delete the skip.
+- A failing test is not marked flaky. A skip names a Task and a reproduction,
+  then the skip is removed.
 - No `Thread.sleep` in `:domain` tests. Time is injected.
-- Retrying a red test in CI without a root-cause Task is not allowed.
 - A major behaviour change adds or updates the automated tests for that behaviour.
 
 ## Guardrails
@@ -314,7 +313,7 @@ python3 .github/scaffold/scripts/issues-sync.py --repo pirlruc/mat-aventuras --y
 
 ## Attack surface
 
-The app has no network attacker: the merged manifest has no `INTERNET` permission. The cases this review treats as in scope are a shared or stolen device, guessing the parent PIN, installing a replaced APK, and extracting data from a backup. Backup and device transfer are disabled. Update this section when that behaviour changes.
+The app has no network attacker: the merged manifest has no `INTERNET` permission. The cases this review treats as in scope are a shared or stolen device, guessing the parent PIN, installing a replaced APK, and extracting data from a backup. Backup and device transfer are disabled.
 
 ## Security review (ANDROID-SEC-002)
 

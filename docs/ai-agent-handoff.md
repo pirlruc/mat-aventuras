@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** Confirm the required `DCO` check on `feature-dco-required-check`. The owner chose to leave approving reviews at 0. androiddevops stays public.
+**Last agent focus:** Round 3 starts with the manifest and the public docs. MAT-014 and MAT-015 are open. Approving reviews stay at 0. androiddevops stays public.
 
 ---
 
@@ -124,8 +124,7 @@ bash scripts/check-ci-local.sh
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
-- Scaffold branch convention is `feature-*`; this cloud run used
-  `cursor/code-quality-guardrails-1948` per the agent environment.
+- Scaffold branch convention is `feature-*`.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
 - Run `:domain:ktlintFormat` before `:domain:ktlintCheck` (parallel format+check races).
 - Never construct `GodotFragment` under Robolectric (`GodotRuntime.shouldEmbed`
@@ -237,4 +236,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, the two python-quality job names, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011, MAT-006, and MAT-013 stay open.
 
-*Last updated: 2026-11-01 (DCO is a required check; approving reviews stay at 0; androiddevops stays public).*
+*Last updated: 2026-11-01 (round 3: MAT-014 and MAT-015 authored; public docs cleaned).*

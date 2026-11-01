@@ -62,7 +62,7 @@ fallback still kills the engine heap. Robolectric ignores `android:process`.
 | `MatAventuras` singleton | GDScript ↔ extras / `completeReward` |
 | Domain engines | Kart, platformer, off-road, invaders, chomp, climb |
 
-Default APK: age 3 → `RunnerPluginActivity` in `:engine2d`, age 7 →
+Default APK: ages 3–5 → `RunnerPluginActivity` in `:engine2d`, ages 6–8 →
 `KartPluginActivity` in `:engine3d`. On a real device that is Godot. Under
 Robolectric the same Activities attach native Canvas instead of
 `GodotFragment`.
