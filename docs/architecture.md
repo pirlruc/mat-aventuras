@@ -217,8 +217,10 @@ Ages 6–8 confirm before leaving a lesson (`VoiceScripts.confirmExit`).
 Ages 3–5 leave on one tap. A finished reward returns `RESULT_FINISHED`;
 the host speaks a pt-PT line and applies bonus points.
 
-`LearningModule.isSevenYears()` still selects the harder board. That knob
-does not mean "this module is only for 6–8". Per-band ranges are MAT-007-T2.
+`BandDifficulty.forAge` picks the ranges. Ages 3–5 stay on numbers 0–9,
+sums up to 10, and logic steps of 1 or 2. Ages 6–8 use numbers up to 100,
+addition from 12, and the longer step lists. NUMBERS sudoku stays the
+small board on both bands.
 
 ## Testing policy (KT-TEST-003)
 

@@ -1,9 +1,9 @@
 package pt.mataventuras.domain.math
 
 import kotlin.random.Random
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
-import pt.mataventuras.domain.model.isSevenYears
 
 /**
  * Visible puzzle frame whose missing cell is the real answer.
@@ -16,20 +16,22 @@ object PuzzlePatterns {
         module: LearningModule,
         n: Int,
         random: Random,
+        age: AgeBand = AgeBand.SIX_TO_EIGHT,
     ): List<String> {
         if (module == LearningModule.SHAPES) {
             val glyphs = GeometricShape.entries.shuffled(random).take(2).map { it.displayName }
             return List(n * n) { glyphs[it % glyphs.size] }
         }
-        val spec = sequence(module, random)
+        val spec = sequence(module, random, age)
         return List(n * n) { (spec.start + it * spec.step).toString() }
     }
 
     private fun sequence(
         module: LearningModule,
         random: Random,
+        age: AgeBand,
     ): SequenceSpec {
-        if (module == LearningModule.COUNTING || !module.isSevenYears()) {
+        if (module == LearningModule.COUNTING || !usesOlderBoard(module, age)) {
             val start = random.nextInt(1, 5)
             val step = if (module == LearningModule.COUNTING) 1 else 1 + random.nextInt(2)
             return SequenceSpec(start, step)

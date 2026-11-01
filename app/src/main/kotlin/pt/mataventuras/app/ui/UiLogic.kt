@@ -8,6 +8,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import pt.mataventuras.domain.math.GroupTokens
 import pt.mataventuras.domain.math.PlayBoard
+import pt.mataventuras.app.ui.home.ModuleTitles
 import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.math.SudokuHoles
 import pt.mataventuras.domain.model.AgeBand
@@ -190,15 +191,20 @@ internal object UiLogic {
     fun lessonLevel(hits: Int): Int = (hits / 3).coerceIn(0, 3)
 
     /**
-     * Sudoku/soup cell height so 5×5 and 6×6 boards still fit.
+     * Sudoku and word-search cell size. Ages 3–5 stay at 64 dp and scroll.
      */
-    fun playCellHeightDp(columns: Int): Int =
-        when {
-            columns >= 6 -> 44
+    fun playCellHeightDp(
+        columns: Int,
+        age: AgeBand = AgeBand.SIX_TO_EIGHT,
+    ): Int {
+        if (age == AgeBand.THREE_TO_FIVE) return 64
+        return when {
+            columns >= 6 -> 48
             columns >= 5 -> 52
             columns >= 4 -> 56
             else -> 72
         }
+    }
 
     /**
      * False while a previous tap is still being scored.
@@ -214,12 +220,25 @@ internal object UiLogic {
      * Soup cells are the answers; other kinds keep a palette.
      */
     fun showsOptionPalette(kind: PlayKind): Boolean =
-        kind != PlayKind.SOUP && kind != PlayKind.MEMORY
+        kind != PlayKind.SOUP && kind != PlayKind.MEMORY && kind != PlayKind.WORD_COMPLETE
 
     /**
      * Pair grid. Taps are not a single correct option.
      */
     fun showsMemoryBoard(kind: PlayKind): Boolean = kind == PlayKind.MEMORY
+
+    /**
+     * Missing-letter word, drawn apart from the generic option list.
+     */
+    fun showsWordBoard(kind: PlayKind): Boolean = kind == PlayKind.WORD_COMPLETE
+
+    /**
+     * Ages 3–5 addition shows the sum as dots.
+     */
+    fun showsSumDots(
+        module: LearningModule,
+        visualCount: Int,
+    ): Boolean = module == LearningModule.ADDITION && visualCount in 1..10
 
     /**
      * Test tag for a tappable answer.
@@ -418,7 +437,7 @@ internal object UiLogic {
      * One module row on the parental dashboard.
      */
     fun modulePerformanceLine(module: ModulePerformance): String =
-        "${module.module.name.lowercase()} — ${(module.accuracy * 100).toInt()}% " +
+        "${ModuleTitles.noun(module.module)} — ${(module.accuracy * 100).toInt()}% " +
             "(${module.hits} certos, ${formatDuration(module.timeMs)})"
 
     /**
@@ -428,7 +447,7 @@ internal object UiLogic {
         if (modules.isEmpty()) {
             listOf("Nenhum módulo abaixo de 70% com amostra suficiente.")
         } else {
-            modules.map { "• ${it.name.lowercase()}" }
+            modules.map { "• ${ModuleTitles.noun(it)}" }
         }
 
     /**

@@ -2,10 +2,10 @@
 <resources>
     <string name="app_name">Mat Aventuras</string>
     <string name="app_tagline">Números, formas e jogos.</string>
-    <string name="app_description">Uma aventura de matemática para os 3 e os 7 anos. Tudo fica neste aparelho.</string>
+    <string name="app_description">Uma aventura de matemática para os 3 a 5 e os 6 a 8 anos. Tudo fica neste aparelho.</string>
     <string name="age_selection">Olá! Escolhe a tua idade.</string>
-    <string name="three_years">3 anos</string>
-    <string name="seven_years">7 anos</string>
+    <string name="three_years">3 a 5 anos</string>
+    <string name="seven_years">6 a 8 anos</string>
     <string name="continue_label">Continuar</string>
     <string name="your_name">Como te chamas?</string>
     <string name="leaderboard">Classificação</string>

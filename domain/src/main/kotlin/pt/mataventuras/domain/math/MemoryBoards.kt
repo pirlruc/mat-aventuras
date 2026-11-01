@@ -1,6 +1,7 @@
 package pt.mataventuras.domain.math
 
 import kotlin.random.Random
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.voice.VoiceScripts
 
@@ -11,14 +12,18 @@ class MemoryBoards(
     private val random: Random,
 ) {
     /**
-     * 2×3 identical pairs for a young memory lesson, otherwise a 4×4 match.
+     * 2×3 for ages 3–5. Ages 6–8 use a 4×4 match. [level] stays in range.
      */
     fun make(
         module: LearningModule,
         level: Int,
+        age: AgeBand = AgeBand.SIX_TO_EIGHT,
     ): Exercise {
-        val young = module == LearningModule.MEMORY && level < 2
-        val faces = if (young) identicalFaces() else matchingFaces(module)
+        val young = age == AgeBand.THREE_TO_FIVE
+        val faces =
+            youngFaces(module, young).let { built ->
+                if (level < 0) built.take(6) else built
+            }
         val order = faces.indices.shuffled(random)
         val cells = order.map { faces[it].label }
         val keys = order.map { faces[it].key }
@@ -51,6 +56,16 @@ class MemoryBoards(
         if (first !in play.solution.indices || second !in play.solution.indices) return false
         return play.solution[first] == play.solution[second]
     }
+
+    private fun youngFaces(
+        module: LearningModule,
+        young: Boolean,
+    ): List<Face> =
+        when {
+            !young -> matchingFaces(module)
+            module == LearningModule.LETTERS -> matchingFaces(module).take(6)
+            else -> identicalFaces()
+        }
 
     private fun identicalFaces(): List<Face> =
         listOf("1", "2", "3").flatMap { label ->

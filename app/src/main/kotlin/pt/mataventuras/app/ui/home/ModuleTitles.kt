@@ -15,7 +15,7 @@ internal object ModuleTitles {
         mascot: Mascot,
     ): String = "${noun(module)} com o ${mascot.displayName}"
 
-    private fun noun(module: LearningModule): String =
+    internal fun noun(module: LearningModule): String =
         earlyNoun(module) ?: laterNoun(module)
 
     private fun earlyNoun(module: LearningModule): String? =

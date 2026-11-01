@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** manifest reconciliation and user-facing docs (`feature-manifest-docs`)
+**Last agent focus:** per-band difficulty (`feature-band-difficulty`)
 
 ---
 
@@ -52,7 +52,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
 | MAT-005 | open | T4–T6 done. T1 shared simulation, T2 minified prize on a device, and T3 Kover excludes remain. T7–T11 are the keep rules, Keystore PIN, PBKDF2 rehash, `singleInstance` review, and release signing |
 | MAT-006 | open | T1 and T2 done. T3 is the androiddevops CodeQL and APK-bill proof |
-| MAT-007 | open | Bands and Room v2 are on main. T2–T6 are per-band ranges, parent titles, cell size, the word board, and memory |
+| MAT-007 | done | `BandDifficulty` replaces `isSevenYears()`. Memory, word board, cell size, and pt-PT parent titles are on this branch |
 | MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
 | MAT-009 | open | T1 done. T2 prize UX and T3 cancel `GodotEmbed` retries remain |
 | MAT-010 | done | Companion pins and reusable CI are on main |
@@ -190,7 +190,7 @@ bash scripts/check-ci-local.sh
   a 2D process cannot load `kart.tscn` (or `boot.tscn`).
 - PIN unlock goes through `PinRepository.update` so lockout is not racy.
 - PIN digits are ASCII `0-9` only. `PinPolicy.derive` clears the password chars and the `PBEKeySpec`.
-- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is 2. `MIGRATION_1_2` rewrites `THREE_YEARS` and `SEVEN_YEARS`. `security-crypto` is `1.1.0-alpha06` so `MasterKey.Builder` exists. `LearningModule.isSevenYears` is the harder-board switch, not "includes 6–8": NUMBERS must stay the easy sudoku.
+- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is 2. `MIGRATION_1_2` rewrites `THREE_YEARS` and `SEVEN_YEARS`. `security-crypto` is `1.1.0-alpha06` so `MasterKey.Builder` exists. `BandDifficulty.forAge` is the range switch. NUMBERS sudoku stays the small board on both bands. Do not bring back `isSevenYears()`.
 - Prize GDScript pointer/HUD/steer helpers live on the `Host` autoload (`read_pointer`, `make_hud`, `axis_from_normalized_x`). Keep them aligned with `EngineInputMap` (dead-zone 0.14, jump flick 56 px).
 - Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
 - `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
@@ -215,8 +215,8 @@ bash scripts/check-ci-local.sh
 ## Suggested next work
 
 1. Tag `0.1.0` is on main. Do not move it. `release.yml` builds an APK through androiddevops `android-release-apk`, then calls common-release `5.7.0` with `release_artifact: android-release-apk`. Signing secrets are not set. Do not generate the keystore until the step before the 0.2.0 release, and the owner must back it up.
-2. Next product branch is `feature-band-difficulty` (MAT-007-T2 through T6): `BandDifficulty`, remove `isSevenYears()`, the 3–5 regression, memory, `WordCompleteBoard`, 48/64 dp cells, pt-PT parent titles, `strings.xml`.
-3. Then `feature-kids-ux` (MAT-012), `feature-prize-ux` (MAT-009-T2, MAT-009-T3, MAT-005-T1), and `feature-security-r8-coverage` (MAT-005-T2, T3, T7–T10, MAT-006-T3). MAT-011 stays open except the five lessons and two Compose prizes on `feature-new-lessons-prizes`.
+2. Next product branch is `feature-kids-ux` (MAT-012): speaker, gentle miss, stars, home icons, 3–5 exit confirm, `BackHandler`, `SavedStateHandle`, Room v3 prize time limit.
+3. Then `feature-prize-ux` (MAT-009-T2, MAT-009-T3, MAT-005-T1) and `feature-security-r8-coverage` (MAT-005-T2, T3, T7–T10, MAT-006-T3). MAT-011 stays open except the five lessons and two Compose prizes on `feature-new-lessons-prizes`.
 4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
 5. When androiddevops later becomes private, this public repo cannot call its workflows. Vendor the pinned workflow. Do not change visibility from an agent session. mat-aventuras stays public.
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review is issues-only, after 0.2.0, and dedupes this list.
@@ -224,4 +224,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset already requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, and the two python-quality job names. Reviews stay at 0. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed.
 9. bestpractices.dev is last, after 0.2.0 and the companion issues.
 
-*Last updated: 2026-11-01 (manifest and user docs; androiddevops 1.0.2; pydevops 3.3.10; commondevops 5.7.0)*
+*Last updated: 2026-11-01 (band difficulty; androiddevops 1.0.2; pydevops 3.3.10; commondevops 5.7.0)*

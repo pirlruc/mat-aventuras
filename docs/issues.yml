@@ -900,7 +900,7 @@ milestones:
               - KT-SEC-004
 
       - id: MAT-007
-        status: open
+        status: done
         title: Age bands of 3–5 and 6–8
         decision: >-
           In the context of lessons that a three-year-old and a seven-year-old
@@ -920,14 +920,14 @@ milestones:
               - AgeBandMigrationTest rewrites THREE_YEARS and SEVEN_YEARS
               - The age screen says 3 a 5 anos and 6 a 8 anos
           - id: MAT-007-T2
-            status: open
+            status: done
             title: Move operand ranges into a per-band difficulty table
             verification:
               - NUMBERS, ADDITION, and LOGIC take the child's band, not only isSevenYears
               - Ages 3-5 stay on small numbers; ages 6-8 keep the harder sums and logic lists
               - isSevenYears is removed
           - id: MAT-007-T3
-            status: open
+            status: done
             title: Show Portuguese module titles on the parent dashboard
             instructions:
               files:
@@ -937,7 +937,7 @@ milestones:
               - The parent dashboard does not print English enum ids
               - strings.xml no longer says 3 anos or 7 anos as the band names
           - id: MAT-007-T4
-            status: open
+            status: done
             title: Keep lesson cells large enough to tap
             instructions:
               files:
@@ -946,7 +946,7 @@ milestones:
               - Word-search and sudoku cells are at least 48 dp
               - Ages 3-5 use 64 dp cells, and the board scrolls
           - id: MAT-007-T5
-            status: open
+            status: done
             title: Add a word-completion board
             instructions:
               files:
@@ -954,7 +954,7 @@ milestones:
             verification:
               - WORD_COMPLETE renders its own composable, not a generic option list
           - id: MAT-007-T6
-            status: open
+            status: done
             title: Finish memory only when every pair is found
             instructions:
               files:

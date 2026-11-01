@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.LearningModule
 
 class ExerciseGeneratorTest {
@@ -112,10 +113,39 @@ class ExerciseGeneratorTest {
 
     @Test
     fun numberIsZeroToNine() {
-        val exercise = generator.number()
+        val exercise = generator.number(AgeBand.THREE_TO_FIVE)
         val n = exercise.options[exercise.correctIndex].toInt()
         assertTrue(n in 0..9)
         assertTrue(exercise.prompt.contains("número"))
+    }
+
+    @Test
+    fun youngAdditionStaysWithinTenAndShowsDots() {
+        repeat(30) {
+            val exercise = ExerciseGenerator(Random(it)).addition(AgeBand.THREE_TO_FIVE)
+            assertTrue(exercise.visualCount in 1..10)
+            val numbers = Regex("\\d+").findAll(exercise.prompt).map { it.value.toInt() }.toList()
+            assertTrue(numbers.all { it in 0..10 })
+        }
+    }
+
+    @Test
+    fun youngLogicUsesStepsOfOneOrTwo() {
+        val prompts = (0..40).map { ExerciseGenerator(Random(it)).logic(AgeBand.THREE_TO_FIVE).prompt }
+        val sequences = prompts.filter { it.startsWith("Completa") }
+        assertTrue(sequences.isNotEmpty())
+        sequences.forEach { prompt ->
+            val numbers = Regex("\\d+").findAll(prompt).map { it.value.toInt() }.toList()
+            val step = numbers[1] - numbers[0]
+            assertTrue(step == 1 || step == 2)
+        }
+    }
+
+    @Test
+    fun olderNumbersReachPastNine() {
+        val values = (0..40).map { ExerciseGenerator(Random(it)).number(AgeBand.SIX_TO_EIGHT) }
+        assertTrue(values.any { it.options[it.correctIndex].toInt() > 9 })
+        assertTrue(values.all { it.options[it.correctIndex].toInt() in 0..100 })
     }
 
     @Test

@@ -23,25 +23,3 @@ enum class LearningModule(
  * Modules available for an age band, in curriculum order.
  */
 fun modulesFor(age: AgeBand): List<LearningModule> = LearningModule.entries.filter { age in it.bands }
-
-/**
- * True for the harder arithmetic and logic boards.
- * Shared modules such as [NUMBERS] stay on the younger board until the
- * generator takes an [AgeBand].
- */
-fun LearningModule.isSevenYears(): Boolean =
-    when (this) {
-        LearningModule.ADDITION,
-        LearningModule.SUBTRACTION,
-        LearningModule.MULTIPLICATION,
-        LearningModule.DIVISION,
-        LearningModule.LOGIC,
-        LearningModule.WORDS,
-        -> true
-        LearningModule.COUNTING,
-        LearningModule.SHAPES,
-        LearningModule.NUMBERS,
-        LearningModule.MEMORY,
-        LearningModule.LETTERS,
-        -> false
-    }

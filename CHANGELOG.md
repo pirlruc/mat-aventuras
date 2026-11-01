@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Ages 3–5 stay on small numbers, sums up to 10, and short logic steps.
+  Ages 6–8 keep the wider ranges.
+- A memory round stays open until every pair is found. Ages 3–5 letters
+  use a 2×3 board.
+- Word completion has its own board. Lesson cells stay at least 48 dp,
+  and 64 dp for ages 3–5.
+- The parent dashboard names lessons in Portuguese.
+
 ### Changed
 
 - The README explains how to install the latest release on Android 8.0 or
