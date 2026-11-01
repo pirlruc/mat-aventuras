@@ -52,6 +52,18 @@ object VoiceScripts {
     const val MEMORY_SPOKEN: String = "Vira duas cartas que fazem par."
     const val REWARD_FINISHED: String = "Boa! Ganhaste um prémio. Vamos continuar."
     const val REWARD_RETURN: String = "Boa! Vamos continuar."
+    const val ODD_ONE_PROMPT: String = "Qual é diferente?"
+    const val ODD_ONE_SPOKEN: String = "Toca no que é diferente."
+    const val SIZE_SMALL_PROMPT: String = "Qual é o pequeno?"
+    const val SIZE_BIG_PROMPT: String = "Qual é o grande?"
+    const val SIZE_SPOKEN: String = "Toca no tamanho que pedi."
+    const val PATTERN_PROMPT: String = "O que vem a seguir?"
+    const val PATTERN_SPOKEN: String = "Olha para o padrão. O que vem a seguir?"
+    const val CLOCK_SPOKEN: String = "Olha para o relógio. Que horas são?"
+    const val MONEY_SPOKEN: String = "Conta os euros e os cêntimos."
+    const val POP_BALLOON: String = "Rebenta o balão certo."
+    const val SNAKE_PROMPT: String = "A cobra come a resposta certa."
+    const val SNAKE_DONE: String = "A cobra ficou cheia!"
 
     /**
      * Host mascot greeting (pt-PT).
@@ -80,6 +92,24 @@ object VoiceScripts {
      * Spoken prompt for a word with one letter hidden.
      */
     fun missingLetter(word: String): String = "Qual é a letra que falta em $word?"
+
+    /**
+     * Clock prompt. [hour] is 1..12.
+     */
+    fun clockPrompt(hour: Int): String = "Que horas são? O relógio marca $hour."
+
+    /**
+     * Money prompt in euros and cents.
+     */
+    fun moneyPrompt(
+        euros: Int,
+        cents: Int,
+    ): String = "Quanto é $euros € e $cents cêntimos?"
+
+    /**
+     * Balloon the child should tap.
+     */
+    fun popBalloon(label: String): String = "Rebenta o balão $label."
 
     /**
      * Short curriculum + reward blurb for the selected age band.

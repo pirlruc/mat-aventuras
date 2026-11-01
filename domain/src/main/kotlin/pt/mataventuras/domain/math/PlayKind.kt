@@ -122,6 +122,9 @@ object PlayKinds {
         when (module) {
             LearningModule.MEMORY, LearningModule.LETTERS -> listOf(PlayKind.MEMORY)
             LearningModule.WORDS -> listOf(PlayKind.WORD_COMPLETE)
+            LearningModule.ODD_ONE, LearningModule.SIZE, LearningModule.PATTERNS,
+            LearningModule.CLOCK, LearningModule.MONEY,
+            -> listOf(PlayKind.CHOICE)
             else -> null
         }
 
