@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,18 +27,21 @@ internal fun WordCompleteBoard(
 ) {
     val shown = exercise.play.cells.firstOrNull().orEmpty()
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = shown,
-            fontSize = 40.sp,
-            fontWeight = FontWeight.ExtraBold,
-            modifier = Modifier.testTag("word-complete"),
-        )
+        CappedScale {
+            Text(
+                text = shown,
+                fontSize = 40.sp,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.testTag("word-complete"),
+            )
+        }
         exercise.options.forEachIndexed { index, letter ->
             Button(
                 onClick = { onPick(index) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
+                    .semantics(mergeDescendants = true) { contentDescription = letter }
                     .testTag(UiLogic.optionAnswerTag(exercise.isCorrect(index), false)),
             ) {
                 Text(letter, fontWeight = FontWeight.Bold, fontSize = 28.sp)

@@ -34,7 +34,7 @@ fun tokensFor(age: AgeBand): UiTokens =
                 titleSp = 34,
                 bodySp = 22,
                 usesTextNavigation = false,
-                confirmsBeforeExit = false,
+                confirmsBeforeExit = true,
             )
         AgeBand.SIX_TO_EIGHT ->
             UiTokens(

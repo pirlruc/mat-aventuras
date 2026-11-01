@@ -51,6 +51,7 @@ class NavAndParentTest {
             compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText(VoiceScripts.LEAVE).performClick()
+        compose.onNodeWithText(VoiceScripts.CONFIRM_LEAVE).performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }

@@ -86,7 +86,7 @@ fun LeaderboardAndRewardsScreen(
                     )
                     Column(Modifier.weight(1f)) {
                         Text(row.name, fontWeight = FontWeight.Bold)
-                        Text("${row.points} pts · ${(row.averageAccuracy * 100).toInt()}% precisos")
+                        Text("${row.points} pontos · ${(row.averageAccuracy * 100).toInt()}% precisos")
                     }
                 }
             }

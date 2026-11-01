@@ -14,6 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import pt.mataventuras.domain.math.Exercise
@@ -44,7 +46,12 @@ internal fun MemoryBoard(
                     val open = index in face.matched || index in face.up
                     Button(
                         onClick = { face = face.reveal(exercise.play, index) },
-                        modifier = Modifier.weight(1f).height(64.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(64.dp)
+                            .semantics(mergeDescendants = true) {
+                                contentDescription = if (open) label else "carta fechada"
+                            },
                     ) {
                         Text(if (open) label else "?", fontWeight = FontWeight.Bold)
                     }

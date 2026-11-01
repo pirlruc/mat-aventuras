@@ -68,11 +68,11 @@ object VoiceScripts {
     }
 
     /**
-     * Exit confirmation, age 7 only.
+     * Exit confirmation spoken before the lesson closes.
      */
-    fun confirmExit(age: AgeBand): String? =
+    fun confirmExit(age: AgeBand): String =
         when (age) {
-            AgeBand.THREE_TO_FIVE -> null
+            AgeBand.THREE_TO_FIVE -> "Queres sair do jogo?"
             AgeBand.SIX_TO_EIGHT -> "Queres sair deste desafio?"
         }
 

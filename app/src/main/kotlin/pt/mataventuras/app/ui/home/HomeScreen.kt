@@ -75,18 +75,24 @@ fun HomeScreen(
             }
         }
         if (UiLogic.usesIconNav(profile.ageGroup)) {
-            TextButton(
-                onClick = {
-                    HomeNav.announceAndGo(onSpeak, VoiceScripts.LEADERBOARD, onLeaderboard)
-                },
-                modifier = Modifier.semantics { contentDescription = VoiceScripts.LEADERBOARD },
-            ) { Text("★") }
-            TextButton(
-                onClick = {
-                    HomeNav.announceAndGo(onSpeak, VoiceScripts.PARENT_DASHBOARD, onParents)
-                },
-                modifier = Modifier.semantics { contentDescription = VoiceScripts.PARENT_DASHBOARD },
-            ) { Text("· · ·") }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(
+                    onClick = {
+                        HomeNav.announceAndGo(onSpeak, VoiceScripts.LEADERBOARD, onLeaderboard)
+                    },
+                    modifier = Modifier
+                        .height(64.dp)
+                        .semantics(mergeDescendants = true) { contentDescription = VoiceScripts.LEADERBOARD },
+                ) { Text("★") }
+                Button(
+                    onClick = {
+                        HomeNav.announceAndGo(onSpeak, VoiceScripts.PARENT_DASHBOARD, onParents)
+                    },
+                    modifier = Modifier
+                        .height(64.dp)
+                        .semantics(mergeDescendants = true) { contentDescription = VoiceScripts.PARENT_DASHBOARD },
+                ) { Text("\uD83D\uDD12") }
+            }
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = onLeaderboard, modifier = Modifier.weight(1f)) {

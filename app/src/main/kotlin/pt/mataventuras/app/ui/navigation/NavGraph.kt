@@ -1,5 +1,6 @@
 package pt.mataventuras.app.ui.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -7,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.ProfileResume
@@ -21,31 +23,47 @@ import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.Mascot
 
-private sealed interface Destination {
-    data object Selection : Destination
-    data object Home : Destination
-    data class Lesson(val module: LearningModule) : Destination
-    data object Leaderboard : Destination
-    data object Parents : Destination
-}
-
 /**
  * In-memory navigation host for selection, home, lessons, rewards, and parents.
+ * [memory] restores the route and profile after process death.
  */
 @Composable
-fun NavGraph(
+internal fun NavGraph(
     container: AppContainer,
     onSpeak: (String) -> Unit,
     onReward: (AgeBand, Mascot, String) -> Unit,
+    memory: RouteMemory = viewModel(),
 ) {
     val scope = rememberCoroutineScope()
-    var destination by remember { mutableStateOf<Destination>(Destination.Selection) }
+    var destination by remember {
+        mutableStateOf(RouteMemory.destination(memory.route(), memory.moduleName()))
+    }
     var profile by remember { mutableStateOf<ChildProfile?>(null) }
     var continueProfile by remember { mutableStateOf<ChildProfile?>(null) }
+    var restored by remember { mutableStateOf(false) }
     val ageGroup = profile?.ageGroup ?: AgeBand.THREE_TO_FIVE
 
     LaunchedEffect(Unit) {
+        val id = memory.profileId()
+        if (id != 0L) {
+            val loaded = container.repository.getProfile(id)
+            if (loaded == null) {
+                destination = Destination.Selection
+            } else {
+                profile = loaded
+            }
+        }
+        restored = true
+    }
+    LaunchedEffect(restored, destination, profile?.id) {
+        if (!restored) return@LaunchedEffect
+        memory.remember(RouteMemory.routeOf(destination), profile?.id ?: 0L, RouteMemory.moduleOf(destination))
+    }
+    LaunchedEffect(Unit) {
         continueProfile = ProfileResume.continueCandidate(container.lastProfile, container.repository)
+    }
+    BackHandler(enabled = destination !is Destination.Lesson && destination !is Destination.Selection) {
+        destination = if (destination is Destination.Home) Destination.Selection else Destination.Home
     }
     LaunchedEffect(Unit) {
         container.profileTouches.collect { id ->

@@ -2,7 +2,6 @@ package pt.mataventuras.app.ui
 
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
-import pt.mataventuras.domain.model.tokensFor
 import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
@@ -26,16 +25,20 @@ internal object EntryLogic {
 }
 
 /**
- * Lesson-exit rules. Age 7 confirms; age 3 leaves immediately.
+ * Lesson-exit rules. Both bands confirm before the lesson closes.
  */
 internal object LessonFlow {
     /**
-     * First tap on age 7 asks; a second tap (or any tap on age 3) leaves.
+     * First tap asks. A second tap, while the confirm label is showing, leaves.
      */
     fun shouldAskExitConfirm(
         age: AgeBand,
         confirming: Boolean,
-    ): Boolean = tokensFor(age).confirmsBeforeExit && !confirming
+    ): Boolean =
+        when (age) {
+            AgeBand.THREE_TO_FIVE -> !confirming
+            AgeBand.SIX_TO_EIGHT -> !confirming
+        }
 
     /**
      * Exit button label (pt-PT).

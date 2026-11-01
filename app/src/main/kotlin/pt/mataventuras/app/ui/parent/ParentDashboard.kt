@@ -172,6 +172,7 @@ fun ParentDashboard(
             }
             Text("Áreas a melhorar", fontWeight = FontWeight.Bold)
             UiLogic.needsWorkLines(data.needsWork).forEach { Text(it) }
+            PrizeLimitRow(container, profile!!)
         }
         Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Fechar") }
     }
@@ -188,6 +189,29 @@ private fun PinField(label: String, value: String, onChange: (String) -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
     )
+}
+
+@Composable
+private fun PrizeLimitRow(
+    container: AppContainer,
+    profile: ChildProfile,
+) {
+    val scope = rememberCoroutineScope()
+    var seconds by remember(profile.id) { mutableStateOf(profile.prizeLimitSeconds) }
+    Text("Tempo do prémio: ${seconds / 60} min", fontWeight = FontWeight.Bold)
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(60, 120, 180).forEach { choice ->
+            Button(
+                onClick = {
+                    val stored = container.rewards.prizeLimitSeconds(choice)
+                    seconds = stored
+                    scope.launch {
+                        container.repository.updateProfile(profile.copy(prizeLimitSeconds = stored))
+                    }
+                },
+            ) { Text("${choice / 60} min") }
+        }
+    }
 }
 
 @Composable

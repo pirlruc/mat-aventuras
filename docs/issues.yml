@@ -1097,7 +1097,7 @@ milestones:
               - Endless runner with math gates
 
       - id: MAT-012
-        status: open
+        status: done
         title: Calmer controls for a young child
         decision: >-
           In the context of a child playing on a tablet, facing tiny home
@@ -1115,7 +1115,7 @@ milestones:
           - KT-TEST-001
         tasks:
           - id: MAT-012-T1
-            status: open
+            status: done
             title: Add a speaker replay button
             instructions:
               files:
@@ -1123,7 +1123,7 @@ milestones:
             verification:
               - The replay control is at least 64 dp and speaks the current prompt again
           - id: MAT-012-T2
-            status: open
+            status: done
             title: Soften a miss for ages 3-5
             instructions:
               files:
@@ -1133,12 +1133,12 @@ milestones:
               - A miss uses an amber cue, the mascot, and a soft tone
               - Ages 3-5 do not lose points for a miss
           - id: MAT-012-T3
-            status: open
+            status: done
             title: Show three stars toward the next prize
             verification:
               - The lesson shows how many correct answers remain before a prize
           - id: MAT-012-T4
-            status: open
+            status: done
             title: Enlarge the home icon buttons
             instructions:
               files:
@@ -1147,12 +1147,12 @@ milestones:
               - Home icon buttons are at least 64 dp
               - The parent area uses a lock icon
           - id: MAT-012-T5
-            status: open
+            status: done
             title: Confirm before ages 3-5 leave a lesson
             verification:
               - Leaving a lesson at ages 3-5 needs a hold or a confirm
           - id: MAT-012-T6
-            status: open
+            status: done
             title: Restore the lesson route after process death
             instructions:
               files:
@@ -1161,19 +1161,19 @@ milestones:
               - A Compose BackHandler handles system back
               - SavedStateHandle restores the route and the active profile
           - id: MAT-012-T7
-            status: open
+            status: done
             title: Name options, cells, and the exit control for accessibility
             verification:
               - Options, cells, and the exit control set contentDescription and mergeDescendants
               - Large fixed-size text does not scale without a cap
           - id: MAT-012-T8
-            status: open
+            status: done
             title: Use Portuguese words for points and the number square
             verification:
               - Visible copy says pontos
               - Ages 3-5 see Quadrado mágico where the older band sees sudoku
           - id: MAT-012-T9
-            status: open
+            status: done
             title: Store a parent-set prize time limit in Room
             instructions:
               files:

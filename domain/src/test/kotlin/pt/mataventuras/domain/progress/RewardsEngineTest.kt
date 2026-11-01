@@ -18,6 +18,9 @@ class RewardsEngineTest {
     fun pointsNeverGoNegative() {
         assertEquals(10, engine.pointsForAttempt(true))
         assertEquals(-2, engine.pointsForAttempt(false))
+        assertEquals(0, engine.pointsForAttempt(false, AgeBand.THREE_TO_FIVE))
+        assertEquals(120, engine.prizeLimitSeconds(30))
+        assertEquals(60, engine.prizeLimitSeconds(60))
         assertEquals(15, engine.pointsForRewardFinish(true))
         assertEquals(0, engine.pointsForRewardFinish(false))
         assertEquals(0, engine.applyPoints(1, -2))

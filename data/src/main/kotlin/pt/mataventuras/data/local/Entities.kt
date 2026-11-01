@@ -14,6 +14,7 @@ data class ProfileEntity(
     val avatarId: String,
     val points: Int,
     val createdAtEpochMs: Long,
+    val prizeLimitSeconds: Int = 120,
 )
 
 /** Stored lesson session. */

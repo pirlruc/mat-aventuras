@@ -41,7 +41,26 @@ class AgeBandMigrationTest {
         assertEquals(listOf("THREE_TO_FIVE", "SIX_TO_EIGHT"), ages)
     }
 
+    @Test
+    fun addsPrizeLimitWithoutDeletingRows() {
+        helper.createDatabase(PRIZE, 2).apply {
+            execSQL(
+                "INSERT INTO profiles (name, ageGroup, mascotCode, avatarId, points, createdAtEpochMs) " +
+                    "VALUES ('Ana', 'THREE_TO_FIVE', 'speedy_hedgehog', 'a', 4, 1)",
+            )
+            close()
+        }
+        val migrated = helper.runMigrationsAndValidate(PRIZE, 3, true, MIGRATION_2_3)
+        migrated.query("SELECT name, points, prizeLimitSeconds FROM profiles").use { cursor ->
+            assertEquals(true, cursor.moveToFirst())
+            assertEquals("Ana", cursor.getString(0))
+            assertEquals(4, cursor.getInt(1))
+            assertEquals(120, cursor.getInt(2))
+        }
+    }
+
     private companion object {
         const val NAME: String = "age-band-migration"
+        const val PRIZE: String = "prize-limit-migration"
     }
 }

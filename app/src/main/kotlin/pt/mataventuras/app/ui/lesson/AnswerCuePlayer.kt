@@ -16,10 +16,11 @@ class AnswerCuePlayer(
      */
     fun play(
         correct: Boolean,
+        gentle: Boolean = false,
         haptic: (Int) -> Unit = {},
     ) {
         try {
-            playTone(UiLogic.answerTone(correct), UiLogic.answerToneMs(correct))
+            playTone(UiLogic.answerTone(correct, gentle), UiLogic.answerToneMs(correct, gentle))
         } catch (_: RuntimeException) {
             // Host tests and muted devices have no tone generator.
         }

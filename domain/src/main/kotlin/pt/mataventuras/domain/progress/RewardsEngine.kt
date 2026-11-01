@@ -1,5 +1,7 @@
 package pt.mataventuras.domain.progress
 
+import pt.mataventuras.domain.model.AgeBand
+
 /**
  * Digital badge catalogue. Codes are stable Room keys. [title]/[description] are pt-PT UI copy.
  */
@@ -42,7 +44,22 @@ class RewardsEngine {
     /**
      * Points earned for one attempt.
      */
-    fun pointsForAttempt(correct: Boolean): Int = if (correct) HIT_POINTS else MISS_POINTS
+    fun pointsForAttempt(
+        correct: Boolean,
+        age: AgeBand = AgeBand.SIX_TO_EIGHT,
+    ): Int {
+        if (correct) return HIT_POINTS
+        if (age == AgeBand.THREE_TO_FIVE) return 0
+        return MISS_POINTS
+    }
+
+    /**
+     * Parent-set prize length. Unknown values stay on the two-minute default.
+     */
+    fun prizeLimitSeconds(seconds: Int): Int {
+        if (seconds in ALLOWED_PRIZE_LIMITS) return seconds
+        return DEFAULT_PRIZE_LIMIT_SECONDS
+    }
 
     /**
      * New total, never negative.
@@ -101,5 +118,7 @@ class RewardsEngine {
         const val HITS_FOR_REWARD: Int = 3
         const val THIRTY_MINUTES_MS: Long = 30L * 60L * 1000L
         const val PERFECT_MINIMUM: Int = 5
+        const val DEFAULT_PRIZE_LIMIT_SECONDS: Int = 120
+        val ALLOWED_PRIZE_LIMITS: Set<Int> = setOf(60, 120, 180)
     }
 }
