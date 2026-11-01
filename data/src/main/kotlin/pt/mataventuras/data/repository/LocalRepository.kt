@@ -24,8 +24,8 @@ class LocalRepository(
     private val now: () -> Long = { System.currentTimeMillis() },
 ) {
     /** Live list of profiles, strongest first. */
-    fun observeProfiles(): Flow<List<ChildProfile>> =
-        database.profileDao().observeAll().map { list -> list.map { it.toDomain() } }
+    @Suppress("MaxLineLength")
+    fun observeProfiles(): Flow<List<ChildProfile>> = database.profileDao().observeAll().map { list -> list.map { it.toDomain() } }
 
     /** Live sessions for one child. */
     fun observeSessions(profileId: Long): Flow<List<LearningSession>> =
@@ -97,12 +97,12 @@ class LocalRepository(
     suspend fun allSessions(): List<LearningSession> = database.sessionDao().all().map { it.toDomain() }
 
     /** Sessions for one child, newest first. */
-    suspend fun sessionsFor(profileId: Long): List<LearningSession> =
-        database.sessionDao().forProfile(profileId).map { it.toDomain() }
+    @Suppress("MaxLineLength")
+    suspend fun sessionsFor(profileId: Long): List<LearningSession> = database.sessionDao().forProfile(profileId).map { it.toDomain() }
 
     /** Inserts a session and returns its row id. */
-    suspend fun saveSession(session: LearningSession): Long =
-        database.sessionDao().insert(session.toEntity().copy(id = 0))
+    @Suppress("MaxLineLength")
+    suspend fun saveSession(session: LearningSession): Long = database.sessionDao().insert(session.toEntity().copy(id = 0))
 
     /** Unlocks a badge; duplicates are ignored. */
     suspend fun unlockBadge(

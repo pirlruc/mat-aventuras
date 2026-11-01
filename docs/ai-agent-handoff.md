@@ -100,11 +100,13 @@ bash scripts/check-ci-local.sh
 
 - ktlint 14 flags `@Composable` PascalCase names. `.editorconfig` sets
   `ktlint_function_naming_ignore_when_annotated_with = Composable`. ktlint
-  joins an expression body that fits its own line length, and detekt's
-  `MaxLineLength` is 120. A body that would exceed 120 characters has to be
-  a block, or the next `ktlintFormat` puts it back on one line. The
-  devcontainer stays on Temurin 17. Dependabot ignores Temurin semver-major
-  under the SC-DEP-003 deviation on MAT-013.
+  joins an expression body that fits its own line length (about 140), and
+  detekt's `MaxLineLength` is 120. A body between those two limits stays one
+  line with `@Suppress("MaxLineLength")`. A longer body is a block so
+  `ktlintFormat` does not rejoin it. Godot 4.7.2 `--import` aborts;
+  `scripts/check-godot.sh` uses `--editor` and fails on `SCRIPT ERROR`.
+  The devcontainer stays on Temurin 17. Dependabot ignores Temurin
+  semver-major under the SC-DEP-003 deviation on MAT-013.
 - `scripts/checkout-guardrails.sh` inits `docs/guardrails` with
   `GUARDRAILS_READ_TOKEN` (full clone; a shallow fetch of the pinned commit
   fails). Push to `main` fails closed without the token. Other events skip
