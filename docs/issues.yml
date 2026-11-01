@@ -626,7 +626,7 @@ milestones:
               - CI-032
 
       - id: MAT-005
-        status: open
+        status: done
         title: Close review gaps without new coverage deviations
         overview:
           problem: >-
