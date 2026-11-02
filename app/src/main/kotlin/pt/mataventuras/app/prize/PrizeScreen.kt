@@ -15,6 +15,9 @@ internal fun PrizeScreen(
 ) {
     when (prize) {
         ComposePrize.BALLOONS -> BalloonPopScreen(random, onFinished)
+        ComposePrize.FISHING -> FishingScreen(random, onFinished)
+        ComposePrize.COLOURING -> ColouringScreen(random, onFinished)
+        ComposePrize.BUBBLES -> BubbleRhythmScreen(random, onFinished)
         ComposePrize.SNAKE -> AnswerSnakeScreen(random, onFinished)
     }
 }

@@ -75,6 +75,61 @@ class ComposePrizeScreenTest {
     }
 
     @Test
+    fun fishingFinishesOnTheNamedFish() {
+        val fish =
+            pt.mataventuras.domain.prize.FishCatch
+                .round(Random(4))
+        var finished = 0
+        compose.setContent {
+            PrizeScreen(ComposePrize.FISHING, Random(4)) { finished += 1 }
+        }
+        val miss = (fish.labels.indexOf(fish.target) + 1) % fish.labels.size
+        compose.onNodeWithTag("fish-$miss").performClick()
+        assertEquals(0, finished)
+        compose.onNodeWithTag("fish-${fish.labels.indexOf(fish.target)}").performClick()
+        assertEquals(1, finished)
+    }
+
+    @Test
+    fun colouringFinishesOnTheNamedColour() {
+        val colour =
+            pt.mataventuras.domain.prize.Colouring
+                .round(Random(5))
+        var finished = 0
+        compose.setContent {
+            PrizeScreen(ComposePrize.COLOURING, Random(5)) { finished += 1 }
+        }
+        compose.onNodeWithTag("paint").assertExists()
+        val miss = (colour.labels.indexOf(colour.target) + 1) % colour.labels.size
+        compose.onNodeWithTag("colour-$miss").performClick()
+        assertEquals(0, finished)
+        compose.onNodeWithTag("colour-${colour.labels.indexOf(colour.target)}").performClick()
+        assertEquals(1, finished)
+    }
+
+    @Test
+    fun bubblesFinishOnlyInOrder() {
+        val bubbles =
+            pt.mataventuras.domain.prize.BubbleRhythm
+                .round(Random(6))
+        var finished = 0
+        compose.setContent {
+            PrizeScreen(ComposePrize.BUBBLES, Random(6)) { finished += 1 }
+        }
+        val miss = bubbles.labels.indexOfFirst { it != "1" }
+        compose.onNodeWithTag("bubble-$miss").performClick()
+        compose.onNodeWithText("Bolhas: 0").assertExists()
+        var step = bubbles
+        listOf("1", "2", "3").forEach { label ->
+            compose.onNodeWithTag("bubble-${step.labels.indexOf(label)}").performClick()
+            step =
+                pt.mataventuras.domain.prize.BubbleRhythm
+                    .pop(step, step.labels.indexOf(label))
+        }
+        assertEquals(1, finished)
+    }
+
+    @Test
     fun launchIntentsMatchTheOffer() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val balloons =
@@ -89,6 +144,9 @@ class ComposePrizeScreenTest {
         assertEquals(ComposePrize.BALLOONS, prizeFrom(balloons.getStringExtra(ComposePrizeActivity.EXTRA)))
         assertEquals(AgeBand.SIX_TO_EIGHT, ageFor(ComposePrize.SNAKE))
         assertEquals(AgeBand.THREE_TO_FIVE, ageFor(ComposePrize.BALLOONS))
+        assertEquals(AgeBand.THREE_TO_FIVE, ageFor(ComposePrize.FISHING))
+        assertEquals(AgeBand.THREE_TO_FIVE, ageFor(ComposePrize.COLOURING))
+        assertEquals(AgeBand.THREE_TO_FIVE, ageFor(ComposePrize.BUBBLES))
         assertEquals(ComposePrize.BALLOONS, prizeFrom("missing"))
         val godot =
             PrizeLaunch.intent(

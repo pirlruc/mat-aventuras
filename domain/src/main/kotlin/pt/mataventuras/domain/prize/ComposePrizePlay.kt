@@ -11,6 +11,9 @@ import pt.mataventuras.domain.model.EngineKind
  */
 enum class ComposePrize {
     BALLOONS,
+    FISHING,
+    COLOURING,
+    BUBBLES,
     SNAKE,
 }
 
@@ -51,11 +54,18 @@ object PrizeOffers {
             } else {
                 emptyList()
             }
-        val compose =
-            PrizeOffer.Compose(
-                if (age == AgeBand.THREE_TO_FIVE) ComposePrize.BALLOONS else ComposePrize.SNAKE,
-            )
+        val compose = composePrizes(age).map { PrizeOffer.Compose(it) }
         val offers = godot + kart + compose
         return offers[random.nextInt(offers.size)]
     }
+
+    /**
+     * Compose prizes for [age]. Ages 3–5 fish, colour, and pop. Ages 6–8 keep the snake.
+     */
+    fun composePrizes(age: AgeBand): List<ComposePrize> =
+        if (age == AgeBand.THREE_TO_FIVE) {
+            listOf(ComposePrize.BALLOONS, ComposePrize.FISHING, ComposePrize.COLOURING, ComposePrize.BUBBLES)
+        } else {
+            listOf(ComposePrize.SNAKE)
+        }
 }

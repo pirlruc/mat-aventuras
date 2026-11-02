@@ -120,6 +120,14 @@ object VoiceScripts {
     fun popBalloon(label: String): String = "Rebenta o balão $label."
 
     /**
+     * Fishing prompt. [label] is the fish the child should catch.
+     */
+    fun catchFish(label: String): String = "Pesca o peixe $label."
+
+    const val COLOUR_SPOKEN: String = "Pinta com a cor que eu disse."
+    const val BUBBLE_SPOKEN: String = "Rebenta as bolhas por ordem: um, dois, três."
+
+    /**
      * Short curriculum + reward blurb for the selected age band.
      */
     fun agePreview(age: AgeBand): String =
