@@ -1072,7 +1072,7 @@ milestones:
               - Syllable clapping
               - Shadows
           - id: MAT-011-T2
-            status: open
+            status: done
             title: Lessons for 6–8 beyond the current boards
             instructions:
               files:

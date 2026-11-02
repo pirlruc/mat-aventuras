@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** Ages 3–5 can fish, colour, and pop bubbles in order, beside the balloons. The prize clock still ends those activities. Do not mark MAT-011-T3 done until that pull request merges. MAT-011-T4 is next. Approving reviews stay at 0.
+**Last agent focus:** Ages 3–5 can fish, colour, and pop bubbles in order, beside the balloons. The prize clock still ends those activities. MAT-011-T2 is closed. Do not mark MAT-011-T3 done until that pull request merges. MAT-011-T4 is next. Approving reviews stay at 0.
 
 ---
 
