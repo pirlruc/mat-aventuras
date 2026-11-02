@@ -46,7 +46,8 @@ internal fun showsShapeGlyph(module: LearningModule): Boolean = module == Learni
 internal fun showsDotStrip(module: LearningModule): Boolean {
     val counting = module == LearningModule.COUNTING
     val numbers = module == LearningModule.NUMBERS
-    return counting || numbers
+    val dots = module == LearningModule.DOTS
+    return counting || numbers || dots
 }
 
 /**

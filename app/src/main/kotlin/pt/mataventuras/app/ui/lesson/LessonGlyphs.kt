@@ -123,6 +123,17 @@ internal fun VisualOption(
         SizeMark(text)
         return
     }
+    if (module == LearningModule.SORT) {
+        SortMark(text)
+        return
+    }
+    if (module == LearningModule.SHADOW) {
+        val shape = shapeKind(text)
+        if (shape != null) {
+            ShapeGlyph(shape)
+        }
+        return
+    }
     val shape = if (showsShapeGlyph(module)) shapeKind(text) else null
     val dots = visualDotCount(module, text)
     Row(
@@ -168,11 +179,13 @@ internal fun ShapeGlyph(shape: GeometricShape) {
     }
 }
 
-internal fun DrawScope.paintShapeGlyph(shape: GeometricShape) {
+internal fun DrawScope.paintShapeGlyph(
+    shape: GeometricShape,
+    color: Color = Color(0xFF1565C0),
+) {
     val cx = size.width / 2f
     val cy = size.height / 2f
     val radius = size.minDimension / 2.4f
-    val color = Color(0xFF1565C0)
     when (shape) {
         GeometricShape.CIRCLE -> drawCircle(color, radius = radius, center = Offset(cx, cy))
         GeometricShape.SQUARE -> {

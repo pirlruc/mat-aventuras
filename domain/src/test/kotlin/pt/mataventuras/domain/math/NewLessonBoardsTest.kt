@@ -3,11 +3,13 @@ package pt.mataventuras.domain.math
 import kotlin.random.Random
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.domain.engine.RewardGame
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.LearningModule
+import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.model.mascotFor
 import pt.mataventuras.domain.prize.AnswerSnake
 import pt.mataventuras.domain.prize.BalloonPop
@@ -53,6 +55,66 @@ class NewLessonBoardsTest {
         assertEquals(MascotCheck.ODD, mascotFor(LearningModule.ODD_ONE))
         assertEquals(MascotCheck.SIZE, mascotFor(LearningModule.SIZE))
         assertEquals(MascotCheck.PATTERNS, mascotFor(LearningModule.PATTERNS))
+    }
+
+    @Test
+    fun youngRoundsCoverColourDotsClapsAndShadow() {
+        val sort = (0..8).map { SortBoard(Random(it)).make() }
+        assertTrue(sort.any { it.options.contains("vermelho") })
+        assertTrue(sort.any { it.targetShape != null })
+        sort.forEach { round ->
+            assertEquals(LearningModule.SORT, round.module)
+            assertTrue(round.isCorrect(round.correctIndex))
+        }
+        val dots = DotsBoard(Random(2)).make()
+        assertEquals(dots.visualCount + 1, dots.options[dots.correctIndex].toInt())
+        assertTrue(dots.visualCount in 1..9)
+        val claps = ClapBoard(Random(3)).make()
+        val word = claps.prompt.substringAfter("para ").removeSuffix("?")
+        val expected = ClapBoard.WORDS.first { it.first == word }.second
+        assertEquals(expected.toString(), claps.options[claps.correctIndex])
+        val shadow = ShadowBoard(Random(4)).make()
+        val shadowShape = checkNotNull(shadow.targetShape)
+        assertEquals(VoiceScripts.SHADOW_PROMPT, shadow.prompt)
+        assertFalse(shadow.prompt.contains(shadowShape.displayName))
+        assertEquals(shadowShape.displayName, shadow.options[shadow.correctIndex])
+        listOf(LearningModule.SORT, LearningModule.DOTS, LearningModule.CLAPS, LearningModule.SHADOW).forEach {
+            val round = ExerciseGenerator(Random(1)).generate(it, 0, AgeBand.THREE_TO_FIVE)
+            assertEquals(it, round.module)
+        }
+        assertEquals(Mascot.SPEEDY_HEDGEHOG, mascotFor(LearningModule.DOTS))
+        assertEquals(Mascot.PINK_PIGLET, mascotFor(LearningModule.SORT))
+        assertEquals(Mascot.PINK_PIGLET, mascotFor(LearningModule.SHADOW))
+        assertEquals(Mascot.HERO_PUP, mascotFor(LearningModule.CLAPS))
+        assertThrows(IllegalArgumentException::class.java) {
+            Exercise(
+                module = LearningModule.SORT,
+                prompt = "a",
+                spoken = "b",
+                options = listOf("a"),
+                correctIndex = 3,
+            )
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            Exercise(
+                module = LearningModule.SORT,
+                prompt = "a",
+                spoken = "b",
+                options = listOf("a"),
+                correctIndex = 0,
+                play = PlayBoard(targetIndices = listOf(4)),
+            )
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            Exercise(
+                module = LearningModule.SORT,
+                prompt = "a",
+                spoken = "b",
+                options = listOf("a"),
+                correctIndex = 0,
+                play = PlayBoard(wordPaths = listOf(listOf(4))),
+            )
+        }
     }
 
     @Test

@@ -51,7 +51,7 @@ open class ExerciseGenerator(
             LearningModule.PATTERNS -> PatternBoard(random).make()
             LearningModule.CLOCK -> ClockBoard(random).make()
             LearningModule.MONEY -> MoneyBoard(random).make()
-            else -> error("Board lessons are not choice questions.")
+            else -> youngRound(module, random)
         }
 
     internal fun counting(): Exercise {
@@ -258,3 +258,15 @@ internal fun numericChoice(
         correctIndex = options.indexOf(correct),
         visualCount = visualCount,
     )
+
+private fun youngRound(
+    module: LearningModule,
+    random: Random,
+): Exercise =
+    when (module) {
+        LearningModule.SORT -> SortBoard(random).make()
+        LearningModule.DOTS -> DotsBoard(random).make()
+        LearningModule.CLAPS -> ClapBoard(random).make()
+        LearningModule.SHADOW -> ShadowBoard(random).make()
+        else -> error("Board lessons are not choice questions.")
+    }

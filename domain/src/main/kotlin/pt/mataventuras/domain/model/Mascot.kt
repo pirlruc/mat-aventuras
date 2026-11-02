@@ -28,13 +28,13 @@ enum class Mascot(
  */
 fun mascotFor(module: LearningModule): Mascot =
     when (module) {
-        LearningModule.COUNTING, LearningModule.SIZE -> Mascot.SPEEDY_HEDGEHOG
-        LearningModule.SHAPES -> Mascot.PINK_PIGLET
+        LearningModule.COUNTING, LearningModule.SIZE, LearningModule.DOTS -> Mascot.SPEEDY_HEDGEHOG
+        LearningModule.SHAPES, LearningModule.SORT, LearningModule.SHADOW -> Mascot.PINK_PIGLET
         LearningModule.NUMBERS -> Mascot.HERO_PUP
         LearningModule.ADDITION, LearningModule.SUBTRACTION, LearningModule.CLOCK, LearningModule.MONEY ->
             Mascot.BRAVE_PLUMBER
         LearningModule.MULTIPLICATION, LearningModule.DIVISION -> Mascot.MISCHIEVOUS_ALIEN
-        LearningModule.LOGIC, LearningModule.WORDS -> Mascot.HERO_PUP
+        LearningModule.LOGIC, LearningModule.WORDS, LearningModule.CLAPS -> Mascot.HERO_PUP
         LearningModule.MEMORY, LearningModule.LETTERS, LearningModule.ODD_ONE, LearningModule.PATTERNS ->
             Mascot.PINK_PIGLET
     }

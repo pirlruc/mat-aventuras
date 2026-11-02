@@ -3,6 +3,7 @@ package pt.mataventuras.app.ui.lesson
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -350,6 +352,13 @@ internal fun LessonPlayColumn(
         ) {
             if (module == LearningModule.CLOCK) {
                 ClockFace(clockHour(exercise.options.getOrNull(exercise.correctIndex).orEmpty()))
+            }
+            if (module == LearningModule.SHADOW) {
+                exercise.targetShape?.let { shape ->
+                    Canvas(modifier = Modifier.size(96.dp).testTag("shadow")) {
+                        paintShapeGlyph(shape, Color.Black)
+                    }
+                }
             }
             if (showsOptionPalette(exercise.play.kind)) {
                 exercise.options.forEachIndexed { index, text ->
