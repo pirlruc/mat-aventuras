@@ -117,6 +117,8 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
+      # The reusable upload job requests actions: read even when upload is never.
+      actions: read
       security-events: write
     uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
     with:

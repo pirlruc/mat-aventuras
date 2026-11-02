@@ -130,7 +130,8 @@ bash scripts/check-ci-local.sh
   (this repo has Actions read). Gradle, CodeQL, MobSF, and the APK bill call
   androiddevops `1.2.0` (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) from
   `ci.yml`, `emulator.yml`, and `release.yml`. `release.yml` still passes
-  `environment: release`.
+  `environment: release`. The CodeQL caller must grant `actions: read`
+  because the reusable upload job requests it even when `upload` is `never`.
   The CI jobs skip a pull request that does not touch app, data, domain,
   gradle, or scripts. Do not gate them on `github.actor == 'dependabot[bot]'`.
   Scorecard is advisory (`blocking: false`, `publish_results: false`).
