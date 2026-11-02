@@ -807,7 +807,7 @@ milestones:
               - release.yml signs the APK when the four ANDROID_* secrets are set
 
       - id: MAT-006
-        status: open
+        status: done
         title: Keep the Godot coverage exclude honest
         overview:
           problem: >-
@@ -892,7 +892,7 @@ milestones:
               - KT-SEC-004
 
           - id: MAT-006-T4
-            status: open
+            status: done
             title: Prove the Godot prize renders on an emulator
             instructions:
               files:

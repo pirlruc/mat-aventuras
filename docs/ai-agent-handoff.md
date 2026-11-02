@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-02
-**Last agent focus:** Tag `0.3.0` is annotated on `038ff00`. The GitHub Release asset is a signed `app-release.apk`. `apksigner` verifies APK Signature Scheme v2. Checksums match. `gh attestation verify` and `cosign verify-blob` succeed for the APK and the CycloneDX bill. Do not move `0.3.0`.
+**Last agent focus:** MAT-006 is proven on `mat_api36`. `PrizeDeviceTest` requires `boot-ready` and a frame that is not the blue overlay. Runner, climb, chomp, invaders, and kart all reached that. Tag `0.3.0` stays on `038ff00`. Do not move it.
 
 ---
 
@@ -52,7 +52,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-003 | done | Godot 4 plugin in `:engine2d` and `:engine3d` |
 | MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
 | MAT-005 | done | T1–T11 done. Release [0.2.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.2.0) attaches the signed APK, `app-release.apk.sha256`, and `app-release.cdx.json`. Tag commit `2eafb4af`. Do not move `0.1.0` or `0.2.0` |
-| MAT-006 | open | T1–T3 done in #113. CodeQL and the APK bill reported no high or critical findings |
+| MAT-006 | done | T1–T3 done in #113. T4: `mat_api36` log shows `boot-ready` for every prize, and the frames are past the boot overlay. The Godot JNI package stays excluded from Kover |
 | MAT-007 | done | `BandDifficulty` replaces `isSevenYears()`. Memory, word board, cell size, and pt-PT parent titles are on this branch |
 | MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
 | MAT-009 | done | Loading overlay, timeout with Tentar outra vez / Voltar, Ganhaste card, icon HUD, kart boost button, and cancelled embed retries |
@@ -225,13 +225,20 @@ bash scripts/check-ci-local.sh
   Chomp and climb use 3 lives with i-frames. Keep GDScript in sync with
   `:domain` engines.
 - `GodotEmbed.attach` waits for a >32 px host view (layout listener, then a
-  1.2 s sized retry). Only a 4.8 s last resort attaches anyway. Both runnables
-  are tracked by `EngineAttachRetries` and removed in `onDestroy`. Do not call
-  `GodotEmbed` from that destroy path: loading the Godot fragment class pulls
-  in `libgodot_android`. Keep `boot.gd`'s window-size wait; do not treat
-  `onGodotForceQuit` as a GLES restart (`onGodotRestartRequested` already does
-  that). `Host.finish` lingers 1.6 s for prize banners via a `SceneTreeTimer`
-  signal (callers do not `await` it); boot errors pass `linger=false`.
+  1.2 s sized retry). Only a 4.8 s last resort attaches anyway. The layout
+  listener posts the fragment commit. A commit inside that callback leaves
+  the Godot view at 0×0, the GL thread never gets a surface, and the scene
+  never starts. After commit, the first child is `MATCH_PARENT` and the host
+  requests layout again. Both runnables are tracked by `EngineAttachRetries`
+  and removed in `onDestroy`. Do not call `GodotEmbed` from that destroy
+  path: loading the Godot fragment class pulls in `libgodot_android`. Keep
+  `boot.gd`'s window-size wait; do not treat `onGodotForceQuit` as a GLES
+  restart (`onGodotRestartRequested` already does that). `Host.finish`
+  lingers 1.6 s for prize banners via a `SceneTreeTimer` signal (callers do
+  not `await` it); boot errors pass `linger=false`. `Host` resolves the
+  `MatAventuras` singleton lazily and calls `prizeReady()` on the object.
+  `has_method` does not see those Java plugin methods, so a `has_method`
+  guard never hides the boot overlay. Do not raise `PrizeBoot.TIMEOUT_MS`.
 - A parent prize limit is `prize_limit` on the reward Intent. `PrizeLimit` arms every host from `SystemClock.elapsedRealtime()`. Zero or a missing extra does not finish the activity. The Godot `Host` reads `prizeLimitSeconds()` and stops on `Time.get_ticks_msec()`. Compose prizes use `Random.Default` unless the test passes a seed. The correct-answer tag is on only when the process is debuggable or Robolectric.
 - A Keystore or IO failure while reading the PIN opens the hold-and-sum reset (`6 + 7`). The parent window sets `FLAG_SECURE` while that screen is composed. Lockout stores both a wall-clock deadline and `lockedUntilElapsedMs`. `PinKeyException` is an `IllegalStateException`; catch it first.
 - Prize lives, speeds, and hit tests live only in
@@ -253,6 +260,6 @@ bash scripts/check-ci-local.sh
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review is issues-only, after 0.2.0, and dedupes this list.
 7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. Callers pin `3.3.10`, which runs the containers as root, skips mypy when `installable_app` is false, reads pip-audit 2.10's dependencies object, and runs the quality report as a module. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. It is not behind `PYTHON_QUALITY_ENABLED`. `install_runner_packages` stays false. Do not pin `main`. Do not move pydevops 3.3.1 through 3.3.10. Leave pydevops `feature-cmn-551` alone.
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
-9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 stays open: the device log is `boot-timeout`, not `MatPrize ready`. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
+9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done: on `mat_api36`, every prize logs `boot-ready` and the frame is past the boot overlay. The JNI exclude stays. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-02 (0.3.0 is a signed APK on tag 038ff00; do not move the tag).*
+*Last updated: 2026-11-02 (MAT-006 proven on mat_api36; tag 0.3.0 stays on 038ff00).*
