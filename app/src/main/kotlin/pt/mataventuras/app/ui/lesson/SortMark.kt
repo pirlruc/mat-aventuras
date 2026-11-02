@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -22,11 +23,18 @@ internal fun SortMark(label: String) {
                 .size(56.dp)
                 .semantics { contentDescription = label },
     ) {
-        if (shape != null) {
-            paintShapeGlyph(shape)
-        } else {
-            drawCircle(colourOf(label))
-        }
+        drawSortMark(shape, label)
+    }
+}
+
+internal fun DrawScope.drawSortMark(
+    shape: GeometricShape?,
+    label: String,
+) {
+    if (shape != null) {
+        paintShapeGlyph(shape)
+    } else {
+        drawCircle(colourOf(label))
     }
 }
 

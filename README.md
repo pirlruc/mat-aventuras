@@ -20,15 +20,16 @@ belong to both.
 
 | Band | Lessons | Prize games |
 | --- | --- | --- |
-| 3 a 5 anos | Contar, formas, números, somar, lógica, memória, letras, Qual é diferente, Grande e pequeno, Padrões | Plataforma, subir letras, labirinto, balões |
-| 6 a 8 anos | Números, somar, subtrair, multiplicar, dividir, lógica, memória, letras, palavras, Que horas são, Euros e cêntimos | Those, plus invasores, the kart race, and the answer snake |
+| 3 a 5 anos | Contar, formas, números, somar, lógica, memória, letras, Qual é diferente, Grande e pequeno, Padrões, Cores e formas, Ligar os pontos, Palmas, Sombras | Plataforma, subir letras, labirinto, balões, pesca, pintar, bolhas |
+| 6 a 8 anos | Números, somar, subtrair, multiplicar, dividir, lógica, memória, letras, palavras, Que horas são, Euros e cêntimos, Frações, Até 100, Problemas, Tangram, Sílabas | Those, plus invasores, the kart race, the answer snake, letter breakout, a sum tower, and two number gates |
 
 Version 0.1.0 gave ages 3–5 number ranges meant for older children. 0.2.0
-keeps that band on small numbers and sums up to 10.
+keeps that band on small numbers and sums up to 10. 0.3.0 adds the lessons
+and prize games in the table above.
 
 ## Install
 
-Install **0.2.0** `app-release.apk` from
+Install **0.3.0** `app-release.apk` from
 [GitHub Releases](https://github.com/pirlruc/mat-aventuras/releases/latest).
 That file is signed. Do not use the 0.1.0 debug APK for daily use.
 Also download `app-release.apk.sha256` and `app-release.cdx.json` (the

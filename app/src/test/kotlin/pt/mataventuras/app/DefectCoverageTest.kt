@@ -38,6 +38,7 @@ import pt.mataventuras.app.ui.lesson.SizeMark
 import pt.mataventuras.app.ui.lesson.VisualOption
 import pt.mataventuras.app.ui.lesson.clockHour
 import pt.mataventuras.app.ui.lesson.colourOf
+import pt.mataventuras.app.ui.lesson.drawSortMark
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.parent.ParentKeyReset
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
@@ -47,6 +48,7 @@ import pt.mataventuras.domain.math.Exercise
 import pt.mataventuras.domain.math.ExerciseGenerator
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
+import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.prize.ComposePrize
@@ -259,6 +261,7 @@ class DefectCoverageTest {
         assertEquals(Color(0xFFFDD835), colourOf("amarelo"))
         assertEquals(Color(0xFF43A047), colourOf("verde"))
         assertEquals(Color(0xFF90A4AE), colourOf("nada"))
+        drawBothSortMarks()
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         val younger =
             kotlinx.coroutines.runBlocking {
@@ -482,6 +485,24 @@ private fun pendingPrizeTick(): Runnable {
     field.isAccessible = true
     val timers = field.get(PrizeLimit) as Map<*, *>
     return timers.values.filterIsInstance<Runnable>().first()
+}
+
+private fun drawBothSortMarks() {
+    val bitmap = android.graphics.Bitmap.createBitmap(64, 64, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas =
+        androidx.compose.ui.graphics
+            .Canvas(android.graphics.Canvas(bitmap))
+    androidx.compose.ui.graphics.drawscope.CanvasDrawScope().draw(
+        androidx.compose.ui.unit
+            .Density(1f),
+        androidx.compose.ui.unit.LayoutDirection.Ltr,
+        canvas,
+        androidx.compose.ui.geometry
+            .Size(64f, 64f),
+    ) {
+        drawSortMark(GeometricShape.CIRCLE, GeometricShape.CIRCLE.displayName)
+        drawSortMark(null, "vermelho")
+    }
 }
 
 private fun forgetPrizeHosts() {
