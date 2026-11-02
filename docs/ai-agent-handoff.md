@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-02
-**Last agent focus:** 0.3.1 is the patch for the prize start fix. Tag `0.3.0` stays on `038ff00`. Do not move it. Dispatch `release.yml` with `--ref 0.3.1` after the annotated tag exists.
+**Last agent focus:** Tag `0.3.1` is annotated on `ef2caa3`. Run 41467120356 published a signed `app-release.apk`. `apksigner` verifies APK Signature Scheme v2. The checksum matches. Tag `0.3.0` stays on `038ff00`. Do not move either tag.
 
 ---
 
@@ -262,4 +262,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done: on `mat_api36`, every prize logs `boot-ready` and the frame is past the boot overlay. The JNI exclude stays. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-02 (0.3.1 is the prize-start patch; tag 0.3.0 stays on 038ff00).*
+*Last updated: 2026-11-02 (0.3.1 signed APK on ef2caa3, run 41467120356; tag 0.3.0 stays on 038ff00).*
