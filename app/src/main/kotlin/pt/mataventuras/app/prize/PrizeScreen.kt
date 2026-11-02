@@ -19,5 +19,8 @@ internal fun PrizeScreen(
         ComposePrize.COLOURING -> ColouringScreen(random, onFinished)
         ComposePrize.BUBBLES -> BubbleRhythmScreen(random, onFinished)
         ComposePrize.SNAKE -> AnswerSnakeScreen(random, onFinished)
+        ComposePrize.BREAKOUT -> BreakoutScreen(random, onFinished)
+        ComposePrize.TOWER -> TowerScreen(random, onFinished)
+        ComposePrize.RUNNER -> RunnerGateScreen(random, onFinished)
     }
 }

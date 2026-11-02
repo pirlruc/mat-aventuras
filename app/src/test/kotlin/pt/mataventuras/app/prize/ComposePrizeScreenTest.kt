@@ -13,7 +13,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import pt.mataventuras.app.ComposeHostActivity
 import pt.mataventuras.app.ui.home.ModuleTitles
+import pt.mataventuras.app.ui.lesson.ShapeGlyph
+import pt.mataventuras.app.ui.lesson.StarGrid
 import pt.mataventuras.domain.model.AgeBand
+import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.Mascot
 import pt.mataventuras.domain.prize.AnswerSnake
@@ -130,6 +133,63 @@ class ComposePrizeScreenTest {
     }
 
     @Test
+    fun emptyAndSingleStarGridsDraw() {
+        compose.setContent {
+            StarGrid(0)
+            StarGrid(1)
+            GeometricShape.entries.forEach { ShapeGlyph(it) }
+        }
+    }
+
+    @Test
+    fun breakoutFinishesOnTheNamedLetter() {
+        val round =
+            pt.mataventuras.domain.prize.LetterBreakout
+                .round(Random(7))
+        var finished = 0
+        compose.setContent {
+            PrizeScreen(ComposePrize.BREAKOUT, Random(7)) { finished += 1 }
+        }
+        val hit = round.labels.indexOf(round.target)
+        compose.onNodeWithTag("breakout-${(hit + 1) % round.labels.size}").performClick()
+        assertEquals(0, finished)
+        compose.onNodeWithTag("breakout-$hit").performClick()
+        assertEquals(1, finished)
+    }
+
+    @Test
+    fun towerFinishesOnTheSum() {
+        val round =
+            pt.mataventuras.domain.prize.TowerDefence
+                .round(Random(8))
+        var finished = 0
+        compose.setContent {
+            PrizeScreen(ComposePrize.TOWER, Random(8)) { finished += 1 }
+        }
+        val hit = round.labels.indexOf(round.target)
+        compose.onNodeWithTag("tower-${(hit + 1) % round.labels.size}").performClick()
+        assertEquals(0, finished)
+        compose.onNodeWithTag("tower-$hit").performClick()
+        assertEquals(1, finished)
+    }
+
+    @Test
+    fun runnerFinishesOnTheRightGate() {
+        val round =
+            pt.mataventuras.domain.prize.MathGate
+                .round(Random(9))
+        var finished = 0
+        compose.setContent {
+            PrizeScreen(ComposePrize.RUNNER, Random(9)) { finished += 1 }
+        }
+        val hit = round.labels.indexOf(round.target)
+        compose.onNodeWithTag("gate-${(hit + 1) % round.labels.size}").performClick()
+        assertEquals(0, finished)
+        compose.onNodeWithTag("gate-$hit").performClick()
+        assertEquals(1, finished)
+    }
+
+    @Test
     fun launchIntentsMatchTheOffer() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val balloons =
@@ -143,6 +203,9 @@ class ComposePrizeScreenTest {
         assertEquals(ComposePrizeActivity::class.java.name, balloons.component?.className)
         assertEquals(ComposePrize.BALLOONS, prizeFrom(balloons.getStringExtra(ComposePrizeActivity.EXTRA)))
         assertEquals(AgeBand.SIX_TO_EIGHT, ageFor(ComposePrize.SNAKE))
+        assertEquals(AgeBand.SIX_TO_EIGHT, ageFor(ComposePrize.BREAKOUT))
+        assertEquals(AgeBand.SIX_TO_EIGHT, ageFor(ComposePrize.TOWER))
+        assertEquals(AgeBand.SIX_TO_EIGHT, ageFor(ComposePrize.RUNNER))
         assertEquals(AgeBand.THREE_TO_FIVE, ageFor(ComposePrize.BALLOONS))
         assertEquals(AgeBand.THREE_TO_FIVE, ageFor(ComposePrize.FISHING))
         assertEquals(AgeBand.THREE_TO_FIVE, ageFor(ComposePrize.COLOURING))

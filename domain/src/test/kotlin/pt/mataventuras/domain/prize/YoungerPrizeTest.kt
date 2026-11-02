@@ -31,7 +31,8 @@ class YoungerPrizeTest {
             step = BubbleRhythm.pop(step, step.labels.indexOf(label))
         }
         assertTrue(BubbleRhythm.done(step))
-        assertEquals(PrizeOffers.composePrizes(AgeBand.SIX_TO_EIGHT), listOf(ComposePrize.SNAKE))
+        assertTrue(ComposePrize.SNAKE in PrizeOffers.composePrizes(AgeBand.SIX_TO_EIGHT))
+        assertTrue(ComposePrize.BREAKOUT in PrizeOffers.composePrizes(AgeBand.SIX_TO_EIGHT))
         assertTrue(ComposePrize.FISHING in PrizeOffers.composePrizes(AgeBand.THREE_TO_FIVE))
     }
 }

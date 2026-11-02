@@ -75,5 +75,6 @@ internal fun ageFor(prize: ComposePrize): AgeBand =
     when (prize) {
         ComposePrize.BALLOONS, ComposePrize.FISHING, ComposePrize.COLOURING, ComposePrize.BUBBLES ->
             AgeBand.THREE_TO_FIVE
-        ComposePrize.SNAKE -> AgeBand.SIX_TO_EIGHT
+        ComposePrize.SNAKE, ComposePrize.BREAKOUT, ComposePrize.TOWER, ComposePrize.RUNNER ->
+            AgeBand.SIX_TO_EIGHT
     }
