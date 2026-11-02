@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-02
-**Last agent focus:** Tag `0.3.0` is published, but the APK is unsigned. The keystore secrets are on the `release` environment, and the `apk` job did not select that environment, so Gradle wrote `app-release-unsigned.apk`. Provenance for that file verifies. The `apk` job now selects `environment: release` on this branch. Re-running the existing tag does not pick up that workflow. Do not move `0.3.0` until the owner approves replacing the tag and the GitHub Release.
+**Last agent focus:** Tag `0.3.0` is published, but the APK is unsigned. androiddevops **1.1.1** (`6112c854ad15b8e1b0884b4e8b33a45890d1090b`) selects the `release` environment inside `android-release-apk`. This branch passes that input. Re-running tag `0.3.0` uses the old workflow. Do not move `0.3.0` until the owner approves replacing the tag and the GitHub Release.
 
 ---
 
@@ -35,7 +35,8 @@ equals the recorded sha.
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
 | commondevops | `.github/workflows/shared-ci.yml` | tag `5.8.0`, peeled `cb34967f` |
-| androiddevops | `.github/workflows/ci.yml` | tag `1.1.0`, peeled `bca85a82` |
+| androiddevops CI | `.github/workflows/ci.yml` | tag `1.1.0`, peeled `bca85a82` |
+| androiddevops release | `.github/workflows/release.yml` | tag `1.1.1`, peeled `6112c854` |
 | pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.3.10`, peeled `7ebee303` |
 | ci-lint image | `scripts/check-ci-docker.sh` | `sha256:f9001c4c` |
 
@@ -127,7 +128,9 @@ bash scripts/check-ci-local.sh
   the workflow file. Scanner jobs pull private `ci-lint` and `ci-supply-chain`
   (this repo has Actions read). Gradle, CodeQL, MobSF, and the APK bill call
   androiddevops `1.1.0` (`bca85a8216e4e94fde2f9b54ff8d65a87af07949`) from
-  `ci.yml`. They skip a pull request that does not touch app, data, domain,
+  `ci.yml`. `release.yml` calls `android-release-apk` at `1.1.1`
+  (`6112c854ad15b8e1b0884b4e8b33a45890d1090b`) with `environment: release`.
+  The CI jobs skip a pull request that does not touch app, data, domain,
   gradle, or scripts. Do not gate them on `github.actor == 'dependabot[bot]'`.
   Scorecard is advisory (`blocking: false`, `publish_results: false`).
 - `:app` / `:data` are skipped when `ANDROID_HOME` is unset so a JDK-only
@@ -244,7 +247,7 @@ bash scripts/check-ci-local.sh
 
 1. Tag `0.2.0` is on `2eafb4af`. Do not move `0.1.0` or `0.2.0`. The GitHub Release attaches signed `app-release.apk`, `app-release.apk.sha256`, and `app-release.cdx.json`. Do not replace the APK or the checksum. The keystore is outside the repo. The owner has a backup. Losing both copies means an installed app cannot be updated. Do not commit either file, and do not copy the password.
 2. MAT-005 is done. #113 merged the Keystore PIN and the 95 percent floors. The release notes say 0.1.0 was too hard for ages 3–5.
-3. MAT-011 is done after pull requests #147 through #151. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report. Tag `0.3.0` points at `92b8269` and its GitHub Release holds `app-release-unsigned.apk`. The `apk` job must use `environment: release` before a replacement release can be signed. Do not move `0.1.0`, `0.2.0`, or `0.3.0` without the owner.
+3. MAT-011 is done after pull requests #147 through #151. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report. Tag `0.3.0` points at `92b8269` and its GitHub Release holds `app-release-unsigned.apk`. androiddevops `1.1.1` is the pin that can read the keystore. Do not move `0.1.0`, `0.2.0`, or `0.3.0` without the owner.
 4. Emulator smoke tests passed on `mat_api36`. The CI job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only).
 5. When androiddevops later becomes private, this public repo cannot call its workflows. Vendor the pinned workflow. Do not change visibility from an agent session. mat-aventuras stays public.
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review is issues-only, after 0.2.0, and dedupes this list.
@@ -252,4 +255,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 stays open: the device log is `boot-timeout`, not `MatPrize ready`. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-02 (0.3.0 is published unsigned; the apk job must use the release environment before the tag is replaced).*
+*Last updated: 2026-11-02 (0.3.0 is published unsigned; 1.1.1 can sign it after the tag is replaced).*

@@ -284,8 +284,8 @@ reusable jobs that need a secret.
 | commondevops `common-supply-chain` | Called (Syft directory, Grype, Trivy fs). The APK bill is the androiddevops CycloneDX job, because dex has no Maven coordinates. |
 | commondevops `common-pins-verify` | Called. `scripts/check-submodule-pins.sh` asserts the gitlinks. |
 | commondevops `common-scorecard` | Called with `blocking: false` and `publish_results: false`. |
-| commondevops `common-release` | Called from `release.yml` after `android-release-apk`. The release artifact is `android-release-apk`. Signing secrets are optional. |
-| androiddevops | `android-gradle-ci`, `android-codeql`, `android-mobsf`, `android-apk-sbom`, and `android-release-apk`, tag `1.1.0`. |
+| commondevops `common-release` | Called from `release.yml` after `android-release-apk`. The release artifact is `android-release-apk`. The job selects the `release` environment. |
+| androiddevops | CI jobs `android-gradle-ci`, `android-codeql`, `android-mobsf`, and `android-apk-sbom` stay on tag `1.1.0` (`bca85a8216e4e94fde2f9b54ff8d65a87af07949`). `android-release-apk` is tag `1.1.1` (`6112c854ad15b8e1b0884b4e8b33a45890d1090b`) and selects the `release` environment. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
 | pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `7ebee303030c09ce8f52e99660691e4c4b41238f` (annotated tag `3.3.10`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. |
