@@ -18,14 +18,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import pt.mataventuras.app.R
 import pt.mataventuras.app.ui.HomeNav
-import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.app.ui.theme.titleSpSize
+import pt.mataventuras.app.ui.usesIconNav
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.mascotFor
@@ -57,14 +59,19 @@ fun HomeScreen(
                 .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("Olá, ${profile.name}!", fontSize = tokens.titleSpSize, fontWeight = FontWeight.ExtraBold)
-        Text("${profile.points} pontos", style = MaterialTheme.typography.titleMedium)
+        Text(
+            stringResource(R.string.hello_name, profile.name),
+            fontSize = tokens.titleSpSize,
+            fontWeight = FontWeight.ExtraBold,
+        )
+        Text(stringResource(R.string.points_count, profile.points), style = MaterialTheme.typography.titleMedium)
         Text(VoiceScripts.agePreview(profile.ageGroup), style = MaterialTheme.typography.bodyLarge)
         modules.forEach { module ->
             val mascot = mascotFor(module)
+            val letsGo = stringResource(R.string.lets_go_with, mascot.displayName)
             Button(
                 onClick = {
-                    onSpeak("Vamos com o ${mascot.displayName}!")
+                    onSpeak(letsGo)
                     onModule(module)
                 },
                 modifier =
@@ -76,7 +83,7 @@ fun HomeScreen(
                 Text(ModuleTitles.of(module, mascot), fontWeight = FontWeight.Bold)
             }
         }
-        if (UiLogic.usesIconNav(profile.ageGroup)) {
+        if (usesIconNav(profile.ageGroup)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
                     onClick = {

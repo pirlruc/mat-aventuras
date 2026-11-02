@@ -23,10 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import pt.mataventuras.app.R
 import pt.mataventuras.app.di.AppContainer
-import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.avatarLine
+import pt.mataventuras.app.ui.badgeLine
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LeaderboardEntry
 import pt.mataventuras.domain.model.UnlockedAvatar
@@ -70,7 +73,7 @@ fun LeaderboardAndRewardsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(VoiceScripts.LEADERBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text("Só neste aparelho — irmãos e amigos.")
+        Text(stringResource(R.string.on_this_device))
         table.forEach { row ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -78,7 +81,7 @@ fun LeaderboardAndRewardsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text("${row.rank}º", fontWeight = FontWeight.Black)
+                    Text(stringResource(R.string.rank, row.rank), fontWeight = FontWeight.Black)
                     Box(
                         modifier =
                             Modifier
@@ -88,22 +91,28 @@ fun LeaderboardAndRewardsScreen(
                     )
                     Column(Modifier.weight(1f)) {
                         Text(row.name, fontWeight = FontWeight.Bold)
-                        Text("${row.points} pontos · ${(row.averageAccuracy * 100).toInt()}% precisos")
+                        Text(
+                            stringResource(
+                                R.string.points_accuracy,
+                                row.points,
+                                (row.averageAccuracy * 100).toInt(),
+                            ),
+                        )
                     }
                 }
             }
         }
         Text(VoiceScripts.REWARDS, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text("Distintivos")
+        Text(stringResource(R.string.badges))
         BadgeCode.entries.forEach { code ->
             val owned = badges.any { it.code == code.name }
-            Text(UiLogic.badgeLine(owned, code))
+            Text(badgeLine(owned, code))
         }
-        Text("Avatares")
+        Text(stringResource(R.string.avatars))
         AvatarCode.entries.forEach { code ->
             val owned = avatars.any { it.avatarId == code.name }
-            Text(UiLogic.avatarLine(owned, code))
+            Text(avatarLine(owned, code))
         }
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Voltar") }
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
     }
 }

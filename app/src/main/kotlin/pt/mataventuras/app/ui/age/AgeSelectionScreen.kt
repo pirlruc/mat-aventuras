@@ -45,6 +45,13 @@ import androidx.compose.ui.unit.sp
 import pt.mataventuras.app.R
 import pt.mataventuras.app.ui.EntryLogic
 import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.ageButtonAlpha
+import pt.mataventuras.app.ui.ageButtonEmoji
+import pt.mataventuras.app.ui.fallbackChildName
+import pt.mataventuras.app.ui.mascotChipDp
+import pt.mataventuras.app.ui.mascotGlyph
+import pt.mataventuras.app.ui.selectionBorderDp
+import pt.mataventuras.app.ui.selectionHighlightArgb
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildName
 import pt.mataventuras.domain.model.ChildProfile
@@ -182,17 +189,17 @@ fun AgeSelectionScreen(
                             ButtonDefaults.buttonColors(
                                 containerColor =
                                     Color(candidate.primaryArgb)
-                                        .copy(alpha = UiLogic.ageButtonAlpha(chosen)),
+                                        .copy(alpha = ageButtonAlpha(chosen)),
                             ),
                         border =
                             BorderStroke(
-                                UiLogic.selectionBorderDp(chosen).dp,
-                                Color(UiLogic.selectionHighlightArgb(chosen)),
+                                selectionBorderDp(chosen).dp,
+                                Color(selectionHighlightArgb(chosen)),
                             ),
                         contentPadding = PaddingValues(0.dp),
                         modifier =
                             Modifier
-                                .size(UiLogic.mascotChipDp(ageGroup!!).dp)
+                                .size(mascotChipDp(ageGroup!!).dp)
                                 .semantics {
                                     contentDescription = candidate.displayName
                                     role = Role.Button
@@ -200,7 +207,7 @@ fun AgeSelectionScreen(
                         shape = CircleShape,
                     ) {
                         Text(
-                            UiLogic.mascotGlyph(candidate),
+                            mascotGlyph(candidate),
                             fontSize = 26.sp,
                             modifier = Modifier.clearAndSetSemantics { },
                         )
@@ -210,7 +217,7 @@ fun AgeSelectionScreen(
             Button(
                 onClick = {
                     val chosen = ageGroup ?: return@Button
-                    val finalName = UiLogic.fallbackChildName(name)
+                    val finalName = fallbackChildName(name)
                     onConfirm(chosen, finalName, mascot)
                 },
                 enabled = ageGroup != null,
@@ -250,16 +257,16 @@ private fun AgeButton(
                 .clip(RoundedCornerShape(28.dp)),
         border =
             BorderStroke(
-                UiLogic.selectionBorderDp(selected).dp,
-                Color(UiLogic.selectionHighlightArgb(selected)),
+                selectionBorderDp(selected).dp,
+                Color(selectionHighlightArgb(selected)),
             ),
         colors =
             ButtonDefaults.buttonColors(
-                containerColor = color.copy(alpha = UiLogic.ageButtonAlpha(selected)),
+                containerColor = color.copy(alpha = ageButtonAlpha(selected)),
             ),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(UiLogic.ageButtonEmoji(huge), fontSize = 40.sp)
+            Text(ageButtonEmoji(huge), fontSize = 40.sp)
             Spacer(Modifier.height(8.dp))
             Text(label, fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         }

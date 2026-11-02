@@ -1,7 +1,7 @@
 package pt.mataventuras.app.engine
 
 import pt.mataventuras.app.engine.godot.GodotEmbed
-import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.mascotGlyph
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.engine.RewardCatalog
 import pt.mataventuras.domain.engine.RewardGame
@@ -67,7 +67,7 @@ internal object GodotRewardBinder {
         onGodot(activity, scene)
         PrizeBoot.show(
             activity,
-            UiLogic.mascotGlyph(activity.launchMascot()),
+            mascotGlyph(activity.launchMascot()),
             onRetry = {
                 onGodot(activity, scene)
                 PrizeBoot.markLoading(activity)

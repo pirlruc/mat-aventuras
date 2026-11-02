@@ -43,7 +43,6 @@ internal object NativeKartHost {
      * Starts the 2.5D dirt circuit. [showUi] is false under Robolectric so the
      * Compose frame clock does not keep Espresso busy.
      */
-    @Suppress("CyclomaticComplexMethod", "LongMethod")
     fun attach(
         activity: IsolatedEngineActivity,
         showUi: Boolean = GodotRuntime.shouldEmbed(),

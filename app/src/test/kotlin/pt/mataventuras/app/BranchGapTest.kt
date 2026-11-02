@@ -11,7 +11,6 @@ import pt.mataventuras.app.engine.noteRunnerJump
 import pt.mataventuras.app.engine.runnerKeepsTicking
 import pt.mataventuras.app.prize.finishIfPopped
 import pt.mataventuras.app.ui.SoupRelease
-import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.lesson.extendSoup
 import pt.mataventuras.app.ui.lesson.foundSoupCells
 import pt.mataventuras.app.ui.lesson.puzzleCells
@@ -21,6 +20,10 @@ import pt.mataventuras.app.ui.lesson.soupBoardCells
 import pt.mataventuras.app.ui.lesson.sudokuExtraHeight
 import pt.mataventuras.app.ui.lesson.sudokuTitle
 import pt.mataventuras.app.ui.lesson.visualDotCount
+import pt.mataventuras.app.ui.soupIndexAt
+import pt.mataventuras.app.ui.soupPickIndex
+import pt.mataventuras.app.ui.soupReleaseKind
+import pt.mataventuras.app.ui.soupSlotOrNull
 import pt.mataventuras.domain.math.Exercise
 import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
@@ -102,26 +105,26 @@ class BranchGapTest {
 
         assertEquals(
             SoupRelease.MISS,
-            UiLogic.soupReleaseKind(listOf(5), listOf(listOf(0, 1), listOf(2, 3)), setOf(0, 1)),
+            soupReleaseKind(listOf(5), listOf(listOf(0, 1), listOf(2, 3)), setOf(0, 1)),
         )
         assertEquals(
             SoupRelease.IGNORE,
-            UiLogic.soupReleaseKind(listOf(0), listOf(listOf(1, 2, 3)), emptySet()),
+            soupReleaseKind(listOf(0), listOf(listOf(1, 2, 3)), emptySet()),
         )
         assertEquals(
             SoupRelease.MISS,
-            UiLogic.soupReleaseKind(listOf(9), listOf(listOf(1, 2, 3), listOf(4)), emptySet()),
+            soupReleaseKind(listOf(9), listOf(listOf(1, 2, 3), listOf(4)), emptySet()),
         )
         assertEquals(
             SoupRelease.MISS,
-            UiLogic.soupReleaseKind(listOf(9), listOf(listOf(4), listOf(1, 2, 3)), emptySet()),
+            soupReleaseKind(listOf(9), listOf(listOf(4), listOf(1, 2, 3)), emptySet()),
         )
-        assertEquals(null, UiLogic.soupSlotOrNull(cell = 10f, offset = 0f, gap = 1f, count = 0))
-        assertEquals(0, UiLogic.soupSlotOrNull(cell = 10f, offset = 1f, gap = 1f, count = 2))
+        assertEquals(null, soupSlotOrNull(cell = 10f, offset = 0f, gap = 1f, count = 0))
+        assertEquals(0, soupSlotOrNull(cell = 10f, offset = 1f, gap = 1f, count = 2))
         assertEquals(
             0,
-            UiLogic.soupPickIndex(listOf(0, 1), listOf(listOf(2, 3)), emptySet(), 4),
+            soupPickIndex(listOf(0, 1), listOf(listOf(2, 3)), emptySet(), 4),
         )
-        assertEquals(null, UiLogic.soupIndexAt(1f, 1f, 40f, 40f, 0, 0, 1f))
+        assertEquals(null, soupIndexAt(1f, 1f, 40f, 40f, 0, 0, 1f))
     }
 }
