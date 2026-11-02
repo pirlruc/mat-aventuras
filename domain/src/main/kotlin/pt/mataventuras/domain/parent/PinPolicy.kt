@@ -14,6 +14,7 @@ data class PinState(
     val lockedUntilEpochMs: Long,
     val iterations: Int = PinPolicy.LEGACY_ITERATIONS,
     val lockedUntilElapsedMs: Long = 0L,
+    val lockoutBootCount: Int = 0,
 )
 
 /**
@@ -44,6 +45,7 @@ class PinPolicy(
     private val random: SecureRandom = SecureRandom(),
     private val now: () -> Long = { System.currentTimeMillis() },
     private val elapsed: () -> Long = { 0L },
+    private val bootCount: () -> Int = { 0 },
     private val iterations: Int = ITERATIONS,
 ) {
     /**
@@ -96,8 +98,14 @@ class PinPolicy(
         wallNow: Long,
         elapsedNow: Long,
     ): Boolean {
-        if (state.lockedUntilEpochMs > wallNow) return true
-        return state.lockedUntilElapsedMs > 0L && elapsedNow < state.lockedUntilElapsedMs
+        val wall = state.lockedUntilEpochMs > wallNow
+        val sameBoot = bootCount() == state.lockoutBootCount
+        val elapsedLock =
+            state.lockedUntilElapsedMs > 0L &&
+                elapsedNow > 0L &&
+                elapsedNow < state.lockedUntilElapsedMs &&
+                sameBoot
+        return wall || elapsedLock
     }
 
     /**
@@ -118,6 +126,7 @@ class PinPolicy(
                 consecutiveFailures = failures,
                 lockedUntilEpochMs = lockUntil,
                 lockedUntilElapsedMs = elapsedUntil,
+                lockoutBootCount = if (elapsedUntil > 0L) bootCount() else 0,
             )
         val result =
             if (lockUntil > 0L) {
@@ -133,7 +142,12 @@ class PinPolicy(
         pin: String,
     ): PinState {
         if (state.iterations >= iterations) {
-            return state.copy(consecutiveFailures = 0, lockedUntilEpochMs = 0L, lockedUntilElapsedMs = 0L)
+            return state.copy(
+                consecutiveFailures = 0,
+                lockedUntilEpochMs = 0L,
+                lockedUntilElapsedMs = 0L,
+                lockoutBootCount = 0,
+            )
         }
         val salt = ByteArray(SALT_BYTES)
         random.nextBytes(salt)

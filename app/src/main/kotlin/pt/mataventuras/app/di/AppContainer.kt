@@ -3,6 +3,7 @@ package pt.mataventuras.app.di
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
+import android.provider.Settings
 import androidx.room.Room
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,7 +27,7 @@ import pt.mataventuras.domain.progress.RewardsEngine
  */
 class AppContainer(
     context: Context,
-    val pinPolicy: PinPolicy = pinPolicyForProcess(),
+    val pinPolicy: PinPolicy = pinPolicyForProcess(context),
     generator: ExerciseGenerator = ExerciseGenerator(),
 ) {
     private var exerciseGenerator: ExerciseGenerator = generator
@@ -92,10 +93,13 @@ class AppContainer(
 /**
  * Production uses 600k PBKDF2 iterations. Robolectric tests use 1k so PIN UI stays fast.
  */
-internal fun pinPolicyForProcess(): PinPolicy =
+internal fun pinPolicyForProcess(context: Context): PinPolicy =
     PinPolicy(
         iterations = pinIterationsFor(processFingerprint()),
         elapsed = { SystemClock.elapsedRealtime() },
+        bootCount = {
+            Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, 0)
+        },
     )
 
 internal fun pinIterationsFor(fingerprint: String): Int =

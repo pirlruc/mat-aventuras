@@ -4,7 +4,10 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.Build
 import java.io.File
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.app.ui.debugAnswerTags
@@ -16,6 +19,8 @@ import pt.mataventuras.domain.engine.EnginePluginContract
  * so Godot/GLES heaps stay killable and never share the host database.
  */
 class MatAventurasApp : Application() {
+    private val pinMigrate = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     lateinit var container: AppContainer
         private set
 
@@ -31,7 +36,7 @@ class MatAventurasApp : Application() {
     internal fun bindHostGraph(processName: String = currentProcessName()): Boolean {
         if (!shouldOpenContainer(processName)) return false
         container = AppContainer(this)
-        Thread({ runBlocking { container.pinRepository.read() } }, "pin-migrate").start()
+        pinMigrate.launch { container.pinRepository.read() }
         return true
     }
 }

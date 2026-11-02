@@ -158,6 +158,16 @@ class ExerciseGeneratorTest {
     }
 
     @Test
+    fun padOptionsFillsAShortList() {
+        val numbers = padOptions(emptyList(), "4", numeric = true)
+        assertEquals(listOf("5", "6", "7"), numbers)
+        val words = padOptions(listOf("peça 0"), "peça", numeric = false)
+        assertEquals(3, words.size)
+        assertTrue("peça" !in words || words.count { it == "peça" } <= 1)
+        assertEquals(listOf("a", "b", "c"), padOptions(listOf("a", "b", "c", "d"), "a", numeric = false))
+    }
+
+    @Test
     fun numericOptionsFillsADegenerateRange() {
         val options = ExerciseGenerator(Random(0)).numericOptions(5, 5, 5)
         assertEquals(4, options.size)

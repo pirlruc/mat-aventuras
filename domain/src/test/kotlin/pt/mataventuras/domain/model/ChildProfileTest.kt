@@ -67,7 +67,7 @@ class ChildProfileTest {
 
     @Test
     fun shapeDisplayNamesAreEuropeanPortuguese() {
-        assertEquals("rectângulo", GeometricShape.RECTANGLE.displayName)
+        assertEquals("retângulo", GeometricShape.RECTANGLE.displayName)
         assertEquals("triângulo", GeometricShape.TRIANGLE.displayName)
         assertEquals("círculo", GeometricShape.CIRCLE.displayName)
     }

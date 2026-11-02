@@ -164,7 +164,7 @@ backup and device-to-device transfer cannot copy profiles or the PIN hash.
 ## UI/UX (pt-PT)
 
 Visible copy, TTS, and spoken prompts are Portuguese from Portugal
-(`tu`, *ecrã*, *aplicação*, *classificação*, *rectângulo*). Locale:
+(`tu`, *ecrã*, *aplicação*, *classificação*, *retângulo*). Locale:
 `pt-PT` (`res/xml/locales_config.xml`). TTS uses `Locale.forLanguageTag("pt-PT")`.
 Identifiers for those strings (`VoiceScripts.WELL_DONE`, resource names)
 are English.

@@ -41,6 +41,7 @@ import pt.mataventuras.app.ui.lesson.colourOf
 import pt.mataventuras.app.ui.lesson.drawSortMark
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.parent.ParentKeyReset
+import pt.mataventuras.app.ui.parent.pinNotice
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.data.pin.PinKeyException
 import pt.mataventuras.domain.engine.EnginePluginContract
@@ -51,6 +52,9 @@ import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.Mascot
+import pt.mataventuras.domain.parent.AdultChallenge
+import pt.mataventuras.domain.parent.PinGateResult
+import pt.mataventuras.domain.parent.PinNotice
 import pt.mataventuras.domain.prize.ComposePrize
 import pt.mataventuras.domain.voice.VoiceScripts
 import pt.mataventuras.plugin.RunnerPluginActivity
@@ -67,19 +71,31 @@ class DefectCoverageTest {
         assertEquals(1, clockHour("0:00"))
         compose.setContent {
             ClockFace(3)
-            SizeMark("Grande")
-            SizeMark("Pequeno")
+            SizeMark("Grande", option = 1)
+            SizeMark("Pequeno", option = 2)
         }
         compose.onNodeWithTag("clock-face").assertExists()
-        compose.onNodeWithContentDescription("Grande").assertExists()
-        compose.onNodeWithContentDescription("Pequeno").assertExists()
+        compose.onNodeWithContentDescription("Opção 1").assertExists()
+        compose.onNodeWithContentDescription("Opção 2").assertExists()
     }
 
     @Test
     fun answerTagHidesTheCorrectOptionOutsideDebug() {
         assertEquals("correct-answer", debugAnswerTag(correct = true, debug = true))
-        assertEquals("answer", debugAnswerTag(correct = true, debug = false))
+        assertEquals("option", debugAnswerTag(correct = true, debug = false))
+        assertEquals("option", debugAnswerTag(correct = false, debug = false))
         assertEquals("distractor", debugAnswerTag(correct = false, debug = true))
+    }
+
+    @Test
+    fun prizeDeadlineSurvivesRecreation() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val intent = ComposePrizeActivity.intent(context, ComposePrize.BALLOONS, limitSeconds = 30)
+        val host = Robolectric.buildActivity(ComposePrizeActivity::class.java, intent).setup()
+        val deadline = host.get().intent.getLongExtra(PrizeLimit.EXTRA_DEADLINE, 0L)
+        assertTrue(deadline > 0L)
+        host.recreate()
+        assertEquals(deadline, host.get().intent.getLongExtra(PrizeLimit.EXTRA_DEADLINE, 0L))
     }
 
     @Test
@@ -112,18 +128,24 @@ class DefectCoverageTest {
         var reset = 0
         var left = 0
         compose.setContent {
-            ParentKeyReset(app.container, onBack = { left += 1 }, holdMs = 0, onReset = { reset += 1 })
+            ParentKeyReset(
+                app.container,
+                onBack = { left += 1 },
+                holdMs = 0,
+                challenge = AdultChallenge(6, 7),
+                onReset = { reset += 1 },
+            )
         }
         compose.onNodeWithText("Segurar para repor").performTouchInput {
             down(center)
             up()
         }
-        compose.onNodeWithText("Quanto é 6 + 7?").assertExists()
+        compose.onNodeWithText("Quanto é 6 × 7?").assertExists()
         compose.onNodeWithText("Resposta").performTextInput("ab")
         compose.onNodeWithText("Repor").performClick()
         assertEquals(0, reset)
         assertEquals(0, reset)
-        compose.onNodeWithText("Resposta").performTextInput("13")
+        compose.onNodeWithText("Resposta").performTextInput("42")
         compose.onNodeWithText("Repor").performClick()
         compose.waitUntil(8_000) { reset == 1 }
         compose.onNodeWithText("Voltar").performClick()
@@ -146,13 +168,19 @@ class DefectCoverageTest {
     fun aShortHoldDoesNotOpenTheResetSum() {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
         compose.setContent {
-            ParentKeyReset(app.container, onBack = {}, holdMs = 60_000, onReset = {})
+            ParentKeyReset(
+                app.container,
+                onBack = {},
+                holdMs = 60_000,
+                challenge = AdultChallenge(6, 7),
+                onReset = {},
+            )
         }
         compose.onNodeWithText("Segurar para repor").performTouchInput {
             down(center)
             up()
         }
-        assertTrue(compose.onAllNodesWithText("Quanto é 6 + 7?").fetchSemanticsNodes().isEmpty())
+        assertTrue(compose.onAllNodesWithText("Quanto é 6 × 7?").fetchSemanticsNodes().isEmpty())
     }
 
     @Test
@@ -211,10 +239,26 @@ class DefectCoverageTest {
                 createdAtEpochMs = 0L,
             )
         compose.setContent {
-            ParentDashboard(app.container, profile, onSpeak = {}, onBack = {})
+            ParentDashboard(
+                app.container,
+                profile,
+                onSpeak = {},
+                onBack = {},
+                challenge = AdultChallenge(6, 7),
+                adultHoldMs = 0,
+            )
         }
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Segurar para repor").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Segurar para repor").performTouchInput {
+            down(center)
+            up()
+        }
+        compose.onNodeWithText("Resposta").performTextInput("42")
+        compose.onNodeWithText("Repor").performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Segurar para continuar").fetchSemanticsNodes().isNotEmpty()
         }
     }
 
@@ -250,8 +294,8 @@ class DefectCoverageTest {
                 LessonScreen(app.container, younger, LearningModule.SIZE, {}, {}, {})
             }
         }
-        assertTrue(compose.onAllNodesWithContentDescription("Grande").fetchSemanticsNodes().isNotEmpty())
-        assertTrue(compose.onAllNodesWithContentDescription("Pequeno").fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithContentDescription("Grande").fetchSemanticsNodes().isEmpty())
+        assertTrue(compose.onAllNodesWithContentDescription("Opção 1").fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test
@@ -290,7 +334,8 @@ class DefectCoverageTest {
                 LessonScreen(app.container, younger, LearningModule.SORT, {}, {}, {})
             }
         }
-        compose.onNodeWithContentDescription(colour).assertIsDisplayed()
+        assertTrue(compose.onAllNodesWithContentDescription(colour).fetchSemanticsNodes().isEmpty())
+        assertTrue(compose.onAllNodesWithContentDescription("Opção 1").fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test
@@ -305,7 +350,8 @@ class DefectCoverageTest {
                 LessonScreen(app.container, younger, LearningModule.SORT, {}, {}, {})
             }
         }
-        compose.onNodeWithContentDescription(name).assertIsDisplayed()
+        assertTrue(compose.onAllNodesWithContentDescription(name).fetchSemanticsNodes().isEmpty())
+        assertTrue(compose.onAllNodesWithContentDescription("Opção 1").fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test
@@ -445,6 +491,31 @@ class DefectCoverageTest {
             VisualOption(module = LearningModule.TANGRAM, text = "nada")
         }
         assertTrue(compose.onAllNodesWithText("nada").fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    fun pinNoticeMapsEveryNoticeOntoTheResolvedCopy() {
+        val lines = listOf("w0", "w1")
+        val mismatch = PinGateResult.Stay(PinNotice.MISMATCH)
+        val format = PinGateResult.Stay(PinNotice.FORMAT)
+        val locked = PinGateResult.Stay(PinNotice.LOCKED)
+        val missing = PinGateResult.Stay(PinNotice.MISSING)
+        assertEquals("mismatch", pinNotice(mismatch, "mismatch", "format", "locked", "missing", lines))
+        assertEquals("format", pinNotice(format, "mismatch", "format", "locked", "missing", lines))
+        assertEquals("locked", pinNotice(locked, "mismatch", "format", "locked", "missing", lines))
+        assertEquals("missing", pinNotice(missing, "mismatch", "format", "locked", "missing", lines))
+        assertEquals(
+            "w1",
+            pinNotice(PinGateResult.Stay(PinNotice.WRONG, 1), "mismatch", "format", "locked", "missing", lines),
+        )
+        assertEquals(
+            "w0",
+            pinNotice(PinGateResult.Stay(PinNotice.WRONG, -1), "mismatch", "format", "locked", "missing", lines),
+        )
+        assertEquals(
+            "w1",
+            pinNotice(PinGateResult.Stay(PinNotice.WRONG, 9), "mismatch", "format", "locked", "missing", lines),
+        )
     }
 }
 

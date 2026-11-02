@@ -33,6 +33,8 @@ func bridge() -> Object:
 
 
 func _arm_limit() -> void:
+	if _limit_deadline != 0:
+		return
 	var bridge_plugin := bridge()
 	if bridge_plugin == null:
 		return

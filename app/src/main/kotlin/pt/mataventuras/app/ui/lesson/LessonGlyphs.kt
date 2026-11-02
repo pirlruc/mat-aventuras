@@ -119,13 +119,14 @@ internal fun PuzzleFrame(
 internal fun VisualOption(
     module: LearningModule,
     text: String,
+    option: Int = 1,
 ) {
     if (module == LearningModule.SIZE) {
-        SizeMark(text)
+        SizeMark(text, option)
         return
     }
     if (module == LearningModule.SORT) {
-        SortMark(text)
+        SortMark(text, option)
         return
     }
     if (showsSilhouette(module)) {

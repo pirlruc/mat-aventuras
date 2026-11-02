@@ -370,15 +370,24 @@ internal fun LessonPlayColumn(
                             Modifier
                                 .fillMaxWidth()
                                 .height(optionMinHeightDp(module, tokens.minButtonDp).dp)
-                                .semantics(mergeDescendants = true) { contentDescription = text }
-                                .testTag(
+                                .semantics(mergeDescendants = true) {
+                                    contentDescription =
+                                        if (
+                                            module == LearningModule.SIZE ||
+                                            module == LearningModule.SORT
+                                        ) {
+                                            "Opção ${index + 1}"
+                                        } else {
+                                            text
+                                        }
+                                }.testTag(
                                     optionAnswerTag(
                                         correct = exercise.isCorrect(index),
                                         fillEveryBlank = fillEveryBlank,
                                     ),
                                 ),
                     ) {
-                        VisualOption(module = module, text = text)
+                        VisualOption(module = module, text = text, option = index + 1)
                     }
                 }
             }

@@ -157,7 +157,17 @@ class GapCoverageTest {
                         MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
                             LeaderboardAndRewardsScreen(app.container, profile) {}
                         }
-                    else -> ParentDashboard(app.container, profile, onSpeak = {}, onBack = {})
+                    else ->
+                        ParentDashboard(
+                            app.container,
+                            profile,
+                            onSpeak = {},
+                            onBack = {},
+                            challenge =
+                                pt.mataventuras.domain.parent
+                                    .AdultChallenge(12, 3),
+                            adultHoldMs = 0,
+                        )
                 }
             }
         }
@@ -184,6 +194,12 @@ class GapCoverageTest {
             compose.onAllNodesWithText("Ana").fetchSemanticsNodes().isNotEmpty()
         }
         mode = 3
+        compose.onNodeWithText("Segurar para continuar").performTouchInput {
+            down(center)
+            up()
+        }
+        compose.onNodeWithText("Resposta").performTextInput("36")
+        compose.onNodeWithText("Continuar").performClick()
         compose.onNodeWithText("PIN").performClick().performTextInput("1234")
         compose.onNodeWithText("Confirmar PIN").performClick().performTextInput("1234")
         compose.onNodeWithText("Guardar PIN").performClick()
@@ -417,7 +433,17 @@ class GapCoverageTest {
                             onReward = {},
                             onExit = {},
                         )
-                    1 -> ParentDashboard(app.container, null, onSpeak = {}, onBack = {})
+                    1 ->
+                        ParentDashboard(
+                            app.container,
+                            null,
+                            onSpeak = {},
+                            onBack = {},
+                            challenge =
+                                pt.mataventuras.domain.parent
+                                    .AdultChallenge(12, 3),
+                            adultHoldMs = 0,
+                        )
                     else -> BalloonPopScreen(kotlin.random.Random(1)) {}
                 }
             }
@@ -446,6 +472,12 @@ class GapCoverageTest {
         )
 
         mode = 1
+        compose.onNodeWithText("Segurar para continuar").performTouchInput {
+            down(center)
+            up()
+        }
+        compose.onNodeWithText("Resposta").performTextInput("36")
+        compose.onNodeWithText("Continuar").performClick()
         compose.onNodeWithText("PIN").performClick().performTextInput("1234")
         compose.onNodeWithText("Confirmar PIN").performClick().performTextInput("1234")
         compose.onNodeWithText("Guardar PIN").performClick()

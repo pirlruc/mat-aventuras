@@ -11,7 +11,7 @@ enum class GeometricShape(
     CIRCLE("círculo"),
     SQUARE("quadrado"),
     TRIANGLE("triângulo"),
-    RECTANGLE("rectângulo"),
+    RECTANGLE("retângulo"),
     STAR("estrela"),
 }
 

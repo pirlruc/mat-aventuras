@@ -34,6 +34,14 @@
     <string name="clock_face">Relógio</string>
     <string name="pin_save">Guardar PIN</string>
     <string name="pin_enter">Entrar</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_confirm">Confirmar PIN</string>
+    <string name="pin_mismatch">Os PIN não coincidem ou não têm quatro números.</string>
+    <string name="pin_four_digits">O PIN tem quatro números.</string>
+    <string name="pin_locked">Demasiadas tentativas. Espera um minuto.</string>
+    <string name="pin_wrong_remaining">PIN incorreto. Restam %1$d.</string>
+    <string name="hold_for_adult">Segurar para continuar</string>
+    <string name="option_n">Opção %1$d</string>
     <string name="choose_child">Escolhe um perfil de criança primeiro.</string>
     <string name="per_module">Por módulo</string>
     <string name="hits_misses">Acertos / erros</string>
@@ -42,7 +50,7 @@
     <string name="minutes_short">%1$d min</string>
     <string name="pin_unreadable">Não consigo ler o PIN deste aparelho.</string>
     <string name="hold_to_reset">Segurar para repor</string>
-    <string name="reset_sum">Quanto é 6 + 7?</string>
+    <string name="reset_sum">Quanto é 6 × 7?</string>
     <string name="answer">Resposta</string>
     <string name="reset_pin">Repor</string>
     <string name="needs_work_clear" formatted="false">Nenhum módulo abaixo de 70% com amostra suficiente.</string>

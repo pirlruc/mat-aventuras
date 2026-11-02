@@ -41,6 +41,7 @@ class PinRepository(
      * Makes the next PIN read fail. Used to show the parent reset.
      */
     fun failNextRead(error: Throwable) {
+        check(plaintext) { "PIN test hook is off" }
         failNextRead = error
     }
 
@@ -132,6 +133,7 @@ class PinRepository(
                 state.lockedUntilEpochMs.toString(),
                 state.iterations.toString(),
                 state.lockedUntilElapsedMs.toString(),
+                state.lockoutBootCount.toString(),
             ).joinToString(separator = "\n")
         val ok =
             prefs
@@ -160,6 +162,7 @@ class PinRepository(
         return legacy
     }
 
+    @Suppress("ThrowsCount")
     private fun readRecord(): PinState? {
         val record = prefs.getString(KEY_RECORD, null) ?: return null
         return try {
@@ -167,6 +170,8 @@ class PinRepository(
         } catch (error: GeneralSecurityException) {
             throw PinKeyException(error)
         } catch (error: IOException) {
+            throw PinKeyException(error)
+        } catch (error: IllegalStateException) {
             throw PinKeyException(error)
         }
     }
@@ -206,10 +211,11 @@ private fun decodeRecord(payload: String): PinState {
     return PinState(
         hashHex = lines[0],
         saltHex = lines[1],
-        consecutiveFailures = lines[2].toInt(),
-        lockedUntilEpochMs = lines[3].toLong(),
+        consecutiveFailures = lines[2].toIntOrNull() ?: error("corrupt PIN record"),
+        lockedUntilEpochMs = lines[3].toLongOrNull() ?: error("corrupt PIN record"),
         iterations = lines.getOrNull(4)?.toIntOrNull() ?: PinPolicy.LEGACY_ITERATIONS,
         lockedUntilElapsedMs = lines.getOrNull(5)?.toLongOrNull() ?: 0L,
+        lockoutBootCount = lines.getOrNull(6)?.toIntOrNull() ?: 0,
     )
 }
 

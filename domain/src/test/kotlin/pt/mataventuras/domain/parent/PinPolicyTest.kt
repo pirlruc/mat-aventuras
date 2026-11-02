@@ -67,6 +67,60 @@ class PinPolicyTest {
     }
 
     @Test
+    fun rebootIgnoresTheElapsedLockout() {
+        var boot = 3
+        val elapsed = mutableListOf(5_000L)
+        val wall = mutableListOf(1_000_000L)
+        val locked =
+            PinPolicy(
+                random = SecureRandom.getInstance("SHA1PRNG").apply { setSeed(7) },
+                now = { wall.last() },
+                elapsed = { elapsed.last() },
+                bootCount = { boot },
+                iterations = 1_000,
+            )
+        var state = locked.create("1234")
+        repeat(PinPolicy.MAX_FAILURES) {
+            state = locked.attempt(state, "9999").second
+        }
+        assertEquals(3, state.lockoutBootCount)
+        wall += state.lockedUntilEpochMs + 1
+        boot = 4
+        val (result, _) = locked.attempt(state, "1234")
+        assertEquals(PinResult.Correct, result)
+    }
+
+    @Test
+    fun adultProductUsesTwoDigitsTimesOne() {
+        val challenge = AdultChallenge.draw(kotlin.random.Random(1))
+        val drawn = AdultChallenge.draw()
+        assertTrue(challenge.left in 10..99)
+        assertTrue(challenge.right in 2..9)
+        assertEquals(challenge.left * challenge.right, challenge.product)
+        assertTrue(challenge.prompt.contains("×"))
+        assertTrue(drawn.left in 10..99)
+    }
+
+    @Test
+    fun matchingButShortPinStaysOnTheGate() {
+        val gate = PinGate(policy)
+        val stay = gate.setPin("12", "12").first
+        assertEquals(PinNotice.MISMATCH, (stay as PinGateResult.Stay).notice)
+    }
+
+    @Test
+    fun elapsedLockoutDoesNotApplyWhenTheClockIsZero() {
+        val state =
+            policy.create("1234").copy(
+                lockedUntilEpochMs = 0L,
+                lockedUntilElapsedMs = 50_000L,
+                lockoutBootCount = 0,
+            )
+        val (result, _) = policy.attempt(state, "1234")
+        assertEquals(PinResult.Correct, result)
+    }
+
+    @Test
     fun invalidFormatIsRejected() {
         assertFalse(policy.isValidFormat("12"))
         assertFalse(policy.isValidFormat("abcd"))
@@ -152,6 +206,6 @@ class PinPolicyTest {
         var locked = state
         repeat(PinPolicy.MAX_FAILURES) { locked = gate.unlock(locked, "9999").second }
         val blocked = gate.unlock(locked, "1234")
-        assertTrue((blocked.first as PinGateResult.Stay).message.contains("Demasiadas"))
+        assertEquals(PinNotice.LOCKED, (blocked.first as PinGateResult.Stay).notice)
     }
 }

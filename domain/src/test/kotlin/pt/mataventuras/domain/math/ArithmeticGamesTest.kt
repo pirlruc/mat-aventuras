@@ -42,7 +42,7 @@ class ArithmeticGamesTest {
         assertEquals(nums[0] - nums[1] * nums[2], answer(exercise))
         assertEquals(nums[2], nums[3])
         assertTrue(answer(exercise) >= 2)
-        assertTrue(exercise.spoken.contains("reta numérica"))
+        assertTrue(exercise.spoken.contains("salta para trás"))
     }
 
     @Test

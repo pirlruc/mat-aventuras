@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A release build no longer tags which option is the answer.
+- The Compose prize timer keeps the same deadline after a rotation.
+- The parent area asks a two-digit multiplication before the first PIN
+  and before a Keystore reset. A reboot does not extend the PIN lockout
+  past the clock time.
+- Size and colour options are announced as "Opção n".
+
 ## [0.3.1] - 2026-11-02
 
 ### Fixed

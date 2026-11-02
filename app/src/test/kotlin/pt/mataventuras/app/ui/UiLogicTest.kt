@@ -43,7 +43,7 @@ class UiLogicTest {
         assertEquals(104, optionMinHeightDp(LearningModule.NUMBERS, 88))
         assertEquals(GeometricShape.SQUARE, shapeKind("quadrado"))
         assertEquals(GeometricShape.TRIANGLE, shapeKind("triângulo"))
-        assertEquals(GeometricShape.RECTANGLE, shapeKind("rectângulo"))
+        assertEquals(GeometricShape.RECTANGLE, shapeKind("retângulo"))
         assertEquals(GeometricShape.STAR, shapeKind("estrela"))
         assertEquals(0, optionInt("0"))
         assertEquals(88, optionMinHeightDp(LearningModule.ADDITION, 88))
@@ -129,6 +129,7 @@ class UiLogicTest {
         assertFalse(shouldRepeatSpokenPrompt(false))
         assertTrue(showsOptionPalette(PlayKind.CHOICE))
         assertFalse(showsOptionPalette(PlayKind.SOUP))
+        debugAnswerTags = true
         assertEquals("correct-answer", answerTag(true))
         assertEquals("distractor", answerTag(false))
         assertEquals("correct-answer", optionAnswerTag(correct = true, fillEveryBlank = false))
