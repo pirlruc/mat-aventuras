@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** Ages 6–8 can break a letter, stop a wave, and run through the right gate, beside the snake. The prize clock still ends those activities. Do not mark MAT-011-T4 done until that pull request merges. Then close MAT-011. Approving reviews stay at 0.
+**Last agent focus:** Ages 6–8 can break a letter, stop a wave, and run through the right gate, beside the snake. The prize clock still ends those activities. MAT-011-T3 is closed. Do not mark MAT-011-T4 or MAT-011 done until that pull request merges. Approving reviews stay at 0.
 
 ---
 

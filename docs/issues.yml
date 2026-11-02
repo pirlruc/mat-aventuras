@@ -1085,7 +1085,7 @@ milestones:
               - Tangram
               - Spelling with syllables
           - id: MAT-011-T3
-            status: open
+            status: done
             title: Prizes for 3–5 beyond runner, climb, and chomp
             instructions:
               files:
