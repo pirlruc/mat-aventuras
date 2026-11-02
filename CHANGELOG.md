@@ -5,15 +5,31 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-11-02
+
+### Added
+
+- Ages 3–5: Cores e formas, Ligar os pontos, Palmas, and Sombras.
+- Ages 6–8: Frações, Até 100, Problemas, Tangram, and Sílabas.
+- Ages 3–5 prize games: fishing, colouring, and popping bubbles in order.
+- Ages 6–8 prize games: letter breakout, a tower that asks for a sum, and
+  a short run with two number gates.
+
+### Fixed
+
+- A prize stops on the time that has passed, so changing the tablet clock
+  does not end it early or keep it open.
+- Ages 6–8 can open the kart race again.
+- The clock lesson shows the time on a face instead of saying the hour.
+- If the device key for the parent PIN fails, a parent can reset it by
+  holding the screen and answering a sum. The parent screen stays out of
+  screenshots.
 
 ### Changed
 
 - Android Gradle Plugin 9.5.0, Kotlin 2.4.21, Gradle 9.8.2, and Godot 4.7.2.
   The devcontainer stays on Temurin 17.
 - A release attaches the dependency bill and signs the release files.
-- The install notes name 0.2.0, the dependency bill, vibration, a
-  Portuguese voice, and how to clear a forgotten PIN.
 
 ## [0.2.0] - 2026-11-01
 

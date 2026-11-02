@@ -50,6 +50,9 @@ class NavAndParentTest {
         }
         compose.onNodeWithText("★").performScrollTo().performClick()
         compose.onNodeWithText("Voltar").performScrollTo().performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Contar com o Ouriço Veloz").fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText("Contar com o Ouriço Veloz").performScrollTo().performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithTag("correct-answer").fetchSemanticsNodes().isNotEmpty()
