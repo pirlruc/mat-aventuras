@@ -1243,7 +1243,7 @@ milestones:
               - DOCKER-BUILD-005
 
       - id: MAT-014
-        status: open
+        status: done
         title: Fix shipped defects and harden the parent area
         decision: >-
           In the context of the 0.2.0 lessons and prizes, facing a kart the
@@ -1267,56 +1267,56 @@ milestones:
           - KT-SEC-005
         tasks:
           - id: MAT-014-T1
-            status: open
+            status: done
             title: Offer the kart to ages 6-8
             verification:
               - PrizeOffers.pick includes the 3D catalog for ages 6-8
           - id: MAT-014-T2
-            status: open
+            status: done
             title: Enforce the parent prize time limit
             verification:
               - Compose, Canvas, and Godot hosts stop the prize at the stored limit
               - The deadline uses elapsed realtime
           - id: MAT-014-T3
-            status: open
+            status: done
             title: Draw a clock and stop speaking the answer
             verification:
               - The prompt is Que horas são without the hour
               - A clock face composable shows the hour
           - id: MAT-014-T4
-            status: open
+            status: done
             title: Show size as a picture
             verification:
               - Size options are shapes at different scales
               - The words are content descriptions only
           - id: MAT-014-T5
-            status: open
+            status: done
             title: Keep four money choices
             verification:
               - MoneyBoard always returns three decoys distinct from the price
           - id: MAT-014-T6
-            status: open
+            status: done
             title: Use Portuguese accented distractors
             verification:
               - Word completion distractors include common pt-PT accented letters
           - id: MAT-014-T7
-            status: open
+            status: done
             title: Make PIN lockout ignore a wall-clock change
             verification:
               - Lockout uses a monotonic deadline
               - A legacy plaintext PIN record is sealed on startup
           - id: MAT-014-T8
-            status: open
+            status: done
             title: Hide the parent screen from screenshots
             verification:
               - FLAG_SECURE is set while the parent area is shown
           - id: MAT-014-T9
-            status: open
+            status: done
             title: Offer a reset when the PIN key cannot be read
             verification:
               - An unrecoverable Keystore failure offers a reset behind a hold and an arithmetic gate
           - id: MAT-014-T10
-            status: open
+            status: done
             title: Close the small production seams
             verification:
               - Compose prizes use Random.Default in production
