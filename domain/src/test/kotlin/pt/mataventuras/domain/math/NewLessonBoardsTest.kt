@@ -136,13 +136,17 @@ class NewLessonBoardsTest {
     @Test
     fun eachAgeCanDrawItsComposePrize() {
         val young = (0..60).map { PrizeOffers.pick(AgeBand.THREE_TO_FIVE, Random(it)) }
-        val older = (0..20).map { PrizeOffers.pick(AgeBand.SIX_TO_EIGHT, Random(it)) }
+        val older = (0..80).map { PrizeOffers.pick(AgeBand.SIX_TO_EIGHT, Random(it)) }
         assertTrue(young.any { it is PrizeOffer.Compose && it.prize == ComposePrize.BALLOONS })
         assertTrue(young.any { it is PrizeOffer.Compose && it.prize == ComposePrize.FISHING })
         assertTrue(young.any { it is PrizeOffer.Compose && it.prize == ComposePrize.COLOURING })
         assertTrue(young.any { it is PrizeOffer.Compose && it.prize == ComposePrize.BUBBLES })
         assertTrue(young.any { it is PrizeOffer.Godot })
         assertTrue(older.any { it is PrizeOffer.Compose && it.prize == ComposePrize.SNAKE })
+        assertTrue(older.any { it is PrizeOffer.Compose && it.prize == ComposePrize.BREAKOUT })
+        assertTrue(older.any { it is PrizeOffer.Compose && it.prize == ComposePrize.TOWER })
+        assertTrue(older.any { it is PrizeOffer.Compose && it.prize == ComposePrize.RUNNER })
+        assertFalse(young.any { it is PrizeOffer.Compose && it.prize == ComposePrize.BREAKOUT })
         assertTrue(older.any { it is PrizeOffer.Godot })
         assertFalse(young.any { it is PrizeOffer.Compose && it.prize == ComposePrize.SNAKE })
         val wide = (0 until 80).map { PrizeOffers.pick(AgeBand.SIX_TO_EIGHT, Random(it)) }

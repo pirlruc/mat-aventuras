@@ -126,6 +126,9 @@ object VoiceScripts {
 
     const val COLOUR_SPOKEN: String = "Pinta com a cor que eu disse."
     const val BUBBLE_SPOKEN: String = "Rebenta as bolhas por ordem: um, dois, três."
+    const val BREAKOUT_SPOKEN: String = "Parte a letra que eu disse."
+    const val TOWER_SPOKEN: String = "Pára o invasor com a soma certa."
+    const val RUNNER_SPOKEN: String = "Passa pelo portão com a resposta."
 
     /**
      * Short curriculum + reward blurb for the selected age band.

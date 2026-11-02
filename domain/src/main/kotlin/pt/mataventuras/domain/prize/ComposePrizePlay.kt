@@ -15,6 +15,9 @@ enum class ComposePrize {
     COLOURING,
     BUBBLES,
     SNAKE,
+    BREAKOUT,
+    TOWER,
+    RUNNER,
 }
 
 /**
@@ -66,6 +69,6 @@ object PrizeOffers {
         if (age == AgeBand.THREE_TO_FIVE) {
             listOf(ComposePrize.BALLOONS, ComposePrize.FISHING, ComposePrize.COLOURING, ComposePrize.BUBBLES)
         } else {
-            listOf(ComposePrize.SNAKE)
+            listOf(ComposePrize.SNAKE, ComposePrize.BREAKOUT, ComposePrize.TOWER, ComposePrize.RUNNER)
         }
 }
