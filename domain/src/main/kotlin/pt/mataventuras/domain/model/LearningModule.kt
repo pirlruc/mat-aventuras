@@ -26,6 +26,11 @@ enum class LearningModule(
     SHADOW(setOf(AgeBand.THREE_TO_FIVE)),
     CLOCK(setOf(AgeBand.SIX_TO_EIGHT)),
     MONEY(setOf(AgeBand.SIX_TO_EIGHT)),
+    FRACTION(setOf(AgeBand.SIX_TO_EIGHT)),
+    ORDER(setOf(AgeBand.SIX_TO_EIGHT)),
+    WORD_PROBLEM(setOf(AgeBand.SIX_TO_EIGHT)),
+    TANGRAM(setOf(AgeBand.SIX_TO_EIGHT)),
+    SPELL(setOf(AgeBand.SIX_TO_EIGHT)),
 }
 
 /**

@@ -75,6 +75,7 @@ import pt.mataventuras.app.ui.showsMemoryBoard
 import pt.mataventuras.app.ui.showsNumberHero
 import pt.mataventuras.app.ui.showsOptionPalette
 import pt.mataventuras.app.ui.showsPuzzleFrame
+import pt.mataventuras.app.ui.showsSilhouette
 import pt.mataventuras.app.ui.showsSoupBoard
 import pt.mataventuras.app.ui.showsStarGrid
 import pt.mataventuras.app.ui.showsSudokuGrid
@@ -353,9 +354,10 @@ internal fun LessonPlayColumn(
             if (module == LearningModule.CLOCK) {
                 ClockFace(clockHour(exercise.options.getOrNull(exercise.correctIndex).orEmpty()))
             }
-            if (module == LearningModule.SHADOW) {
+            if (showsSilhouette(module)) {
                 exercise.targetShape?.let { shape ->
-                    Canvas(modifier = Modifier.size(96.dp).testTag("shadow")) {
+                    val tag = if (module == LearningModule.SHADOW) "shadow" else "tangram"
+                    Canvas(modifier = Modifier.size(96.dp).testTag(tag)) {
                         paintShapeGlyph(shape, Color.Black)
                     }
                 }

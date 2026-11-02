@@ -35,6 +35,7 @@ import pt.mataventuras.app.ui.debugAnswerTag
 import pt.mataventuras.app.ui.lesson.ClockFace
 import pt.mataventuras.app.ui.lesson.LessonScreen
 import pt.mataventuras.app.ui.lesson.SizeMark
+import pt.mataventuras.app.ui.lesson.VisualOption
 import pt.mataventuras.app.ui.lesson.clockHour
 import pt.mataventuras.app.ui.lesson.colourOf
 import pt.mataventuras.app.ui.parent.ParentDashboard
@@ -409,6 +410,39 @@ class DefectCoverageTest {
             compose.onAllNodesWithText("Segurar para repor").fetchSemanticsNodes().isNotEmpty()
         }
     }
+
+    @Test
+    fun fractionLessonAsksForHalf() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val older = olderProfile(app, "Rui")
+        compose.setContent {
+            MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
+                LessonScreen(app.container, older, LearningModule.FRACTION, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("metade", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun tangramLessonDrawsTheMissingPiece() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val older = olderProfile(app, "Lia")
+        compose.setContent {
+            MatAventurasTheme(AgeBand.SIX_TO_EIGHT) {
+                LessonScreen(app.container, older, LearningModule.TANGRAM, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("tangram").assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.TANGRAM_PROMPT).assertIsDisplayed()
+    }
+
+    @Test
+    fun aTangramOptionThatIsNotAShapeDrawsNoGlyph() {
+        compose.setContent {
+            VisualOption(module = LearningModule.TANGRAM, text = "nada")
+        }
+        assertTrue(compose.onAllNodesWithText("nada").fetchSemanticsNodes().isEmpty())
+    }
 }
 
 private fun sortSeed(colour: Boolean): Int =
@@ -424,6 +458,15 @@ private fun sortRound(seed: Int): Exercise =
     )
 
 private fun sortGenerator(seed: Int): ExerciseGenerator = ExerciseGenerator(Random(seed))
+
+private fun olderProfile(
+    app: MatAventurasApp,
+    name: String,
+): ChildProfile =
+    kotlinx.coroutines.runBlocking {
+        val id = app.container.repository.createProfile(name, AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
+        app.container.repository.getProfile(id)!!
+    }
 
 private fun youngProfile(
     app: MatAventurasApp,

@@ -47,6 +47,7 @@ import pt.mataventuras.app.ui.lesson.resolveSoupGesture
 import pt.mataventuras.app.ui.lesson.scoreSudokuPick
 import pt.mataventuras.app.ui.showsNumberHero
 import pt.mataventuras.app.ui.showsOptionPalette
+import pt.mataventuras.app.ui.showsSilhouette
 import pt.mataventuras.app.ui.showsStarGrid
 import pt.mataventuras.app.ui.showsSumDots
 import pt.mataventuras.app.ui.soupAreAdjacent
@@ -132,6 +133,9 @@ class GapLogicTest {
         assertFalse(showsSumDots(LearningModule.ADDITION, 11))
         assertTrue(showsSumDots(LearningModule.ADDITION, 4))
         assertFalse(showsSumDots(LearningModule.SHAPES, 4))
+        assertTrue(showsSilhouette(LearningModule.SHADOW))
+        assertTrue(showsSilhouette(LearningModule.TANGRAM))
+        assertFalse(showsSilhouette(LearningModule.SPELL))
         assertFalse(showsStarGrid(LearningModule.SHAPES, 3))
         assertTrue(showsNumberHero(LearningModule.NUMBERS, PlayKind.CHOICE))
         assertFalse(showsNumberHero(LearningModule.NUMBERS, PlayKind.SOUP))

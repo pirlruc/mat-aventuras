@@ -51,7 +51,12 @@ open class ExerciseGenerator(
             LearningModule.PATTERNS -> PatternBoard(random).make()
             LearningModule.CLOCK -> ClockBoard(random).make()
             LearningModule.MONEY -> MoneyBoard(random).make()
-            else -> youngRound(module, random)
+            else ->
+                if (isOlderBoard(module)) {
+                    olderRound(module, random)
+                } else {
+                    youngRound(module, random)
+                }
         }
 
     internal fun counting(): Exercise {
@@ -258,6 +263,26 @@ internal fun numericChoice(
         correctIndex = options.indexOf(correct),
         visualCount = visualCount,
     )
+
+private fun isOlderBoard(module: LearningModule): Boolean =
+    module == LearningModule.FRACTION ||
+        module == LearningModule.ORDER ||
+        module == LearningModule.WORD_PROBLEM ||
+        module == LearningModule.TANGRAM ||
+        module == LearningModule.SPELL
+
+internal fun olderRound(
+    module: LearningModule,
+    random: Random,
+): Exercise =
+    when (module) {
+        LearningModule.FRACTION -> FractionBoard(random).make()
+        LearningModule.ORDER -> OrderBoard(random).make()
+        LearningModule.WORD_PROBLEM -> WordProblemBoard(random).make()
+        LearningModule.TANGRAM -> TangramBoard(random).make()
+        LearningModule.SPELL -> SpellBoard(random).make()
+        else -> error("Board lessons are not choice questions.")
+    }
 
 private fun youngRound(
     module: LearningModule,

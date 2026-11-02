@@ -125,6 +125,8 @@ object PlayKinds {
             LearningModule.ODD_ONE, LearningModule.SIZE, LearningModule.PATTERNS,
             LearningModule.SORT, LearningModule.DOTS, LearningModule.CLAPS, LearningModule.SHADOW,
             LearningModule.CLOCK, LearningModule.MONEY,
+            LearningModule.FRACTION, LearningModule.ORDER, LearningModule.WORD_PROBLEM,
+            LearningModule.TANGRAM, LearningModule.SPELL,
             -> listOf(PlayKind.CHOICE)
             else -> null
         }
