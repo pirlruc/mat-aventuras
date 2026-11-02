@@ -13,25 +13,41 @@ var _hud_layer: CanvasLayer
 
 
 var _limit_deadline := 0
+var _limit_checked := false
+var _ready_sent := false
+var _ready_note := false
 
 
 func _ready() -> void:
 	_read_tuning()
-	if Engine.has_singleton("MatAventuras"):
-		plugin = Engine.get_singleton("MatAventuras")
+	bridge()
 	_arm_limit()
 
 
+func bridge() -> Object:
+	# The Android plugin is registered on the render thread after this
+	# autoload's _ready, so the first lookup can miss it.
+	if plugin == null and Engine.has_singleton("MatAventuras"):
+		plugin = Engine.get_singleton("MatAventuras")
+	return plugin
+
+
 func _arm_limit() -> void:
-	if plugin == null or not plugin.has_method("prizeLimitSeconds"):
+	var bridge_plugin := bridge()
+	if bridge_plugin == null:
 		return
-	var seconds := int(plugin.prizeLimitSeconds())
+	var seconds := int(bridge_plugin.prizeLimitSeconds())
 	if seconds <= 0:
 		return
 	_limit_deadline = Time.get_ticks_msec() + seconds * 1000
 
 
 func _process(_delta: float) -> void:
+	if not _ready_sent:
+		_send_ready()
+	if not _limit_checked and bridge() != null:
+		_arm_limit()
+		_limit_checked = true
 	if _limit_deadline <= 0:
 		return
 	if Time.get_ticks_msec() < _limit_deadline:
@@ -71,26 +87,41 @@ func tune_i(game: String, key: String) -> int:
 
 
 func young() -> bool:
-	if plugin != null and plugin.has_method("youngBand"):
-		return bool(plugin.youngBand())
-	return false
+	var bridge_plugin := bridge()
+	if bridge_plugin == null:
+		return false
+	return bool(bridge_plugin.youngBand())
 
 
 func lives_text(current: int, maximum: int) -> String:
-	if plugin != null and plugin.has_method("livesLine"):
-		return str(plugin.livesLine(current, maximum))
-	return "Vidas %d/%d" % [current, maximum]
+	var bridge_plugin := bridge()
+	if bridge_plugin == null:
+		return "Vidas %d/%d" % [current, maximum]
+	return str(bridge_plugin.livesLine(current, maximum))
 
 
 func mark_ready() -> void:
+	_send_ready()
+
+
+func _send_ready() -> void:
+	if _ready_sent:
+		return
+	var bridge_plugin := bridge()
+	if bridge_plugin == null:
+		if not _ready_note:
+			print("MatPrize bridge pending")
+			_ready_note = true
+		return
 	print("MatPrize ready")
-	if plugin != null and plugin.has_method("prizeReady"):
-		plugin.prizeReady()
+	bridge_plugin.prizeReady()
+	_ready_sent = true
 
 
 func mascot_code() -> String:
-	if plugin:
-		return str(plugin.mascotCode())
+	var bridge_plugin := bridge()
+	if bridge_plugin:
+		return str(bridge_plugin.mascotCode())
 	return ""
 
 
@@ -111,8 +142,9 @@ func mascot_color() -> Color:
 
 
 func child_name() -> String:
-	if plugin:
-		return str(plugin.childName())
+	var bridge_plugin := bridge()
+	if bridge_plugin:
+		return str(bridge_plugin.childName())
 	return ""
 
 
@@ -243,8 +275,9 @@ func finish(ok: bool, linger: bool = true) -> void:
 
 
 func _complete(ok: bool) -> void:
-	if plugin:
-		plugin.completeReward(ok)
+	var bridge_plugin := bridge()
+	if bridge_plugin:
+		bridge_plugin.completeReward(ok)
 		return
 	var later := get_tree()
 	if later:

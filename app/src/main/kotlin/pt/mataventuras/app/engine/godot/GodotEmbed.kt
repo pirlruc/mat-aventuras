@@ -2,6 +2,8 @@ package pt.mataventuras.app.engine.godot
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import pt.mataventuras.app.R
 import pt.mataventuras.app.engine.EngineAttachRetries
 import pt.mataventuras.app.engine.GodotRuntime
@@ -103,6 +105,16 @@ internal object GodotEmbed {
             .beginTransaction()
             .replace(R.id.godot_fragment_container, fragment, TAG)
             .commitNowAllowingStateLoss()
+        // A commit during layout leaves the Godot view at 0×0, so the GL
+        // thread never gets a surface and the scene never starts.
+        val host = activity.findViewById<ViewGroup>(R.id.godot_fragment_container) ?: return
+        val godotView = host.getChildAt(0) ?: return
+        godotView.layoutParams =
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            )
+        host.post { host.requestLayout() }
     }
 
     /**
@@ -132,7 +144,7 @@ internal object GodotEmbed {
                 ) {
                     if (!GodotRuntime.isSurfaceReady(v.width, v.height)) return
                     v.removeOnLayoutChangeListener(this)
-                    commitFragment(activity, scene)
+                    v.post { commitFragment(activity, scene) }
                 }
             }
         container.addOnLayoutChangeListener(listener)
