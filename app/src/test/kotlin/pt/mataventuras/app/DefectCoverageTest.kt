@@ -31,9 +31,11 @@ import org.robolectric.Shadows.shadowOf
 import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.prize.ComposePrizeActivity
 import pt.mataventuras.app.prize.PrizeLimit
+import pt.mataventuras.app.prize.finishTower
 import pt.mataventuras.app.ui.debugAnswerTag
 import pt.mataventuras.app.ui.lesson.ClockFace
 import pt.mataventuras.app.ui.lesson.LessonScreen
+import pt.mataventuras.app.ui.lesson.ShapeGlyph
 import pt.mataventuras.app.ui.lesson.SizeMark
 import pt.mataventuras.app.ui.lesson.VisualOption
 import pt.mataventuras.app.ui.lesson.clockHour
@@ -56,6 +58,7 @@ import pt.mataventuras.domain.parent.AdultChallenge
 import pt.mataventuras.domain.parent.PinGateResult
 import pt.mataventuras.domain.parent.PinNotice
 import pt.mataventuras.domain.prize.ComposePrize
+import pt.mataventuras.domain.prize.TowerDefence
 import pt.mataventuras.domain.voice.VoiceScripts
 import pt.mataventuras.plugin.RunnerPluginActivity
 
@@ -65,12 +68,21 @@ class DefectCoverageTest {
     val compose = createComposeRule()
 
     @Test
+    fun aWrongTowerIndexDoesNotFinish() {
+        val round = TowerDefence.round(Random(1))
+        var finished = false
+        finishTower(round, -1) { finished = true }
+        assertFalse(finished)
+    }
+
+    @Test
     fun clockFaceAndSizeMarkDrawWithoutTheAnswerWord() {
         assertEquals(3, clockHour("3:00"))
         assertEquals(12, clockHour("nope"))
         assertEquals(1, clockHour("0:00"))
         compose.setContent {
             ClockFace(3)
+            ShapeGlyph(GeometricShape.CIRCLE)
             SizeMark("Grande", option = 1)
             SizeMark("Pequeno", option = 2)
         }
