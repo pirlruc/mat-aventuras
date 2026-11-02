@@ -119,7 +119,7 @@ fun AgeSelectionScreen(
             textAlign = TextAlign.Center,
             color = Color(0xFF0D47A1),
         )
-        if (EntryLogic.showsContinue(lastProfile) && lastProfile != null) {
+        if (lastProfile != null) {
             Button(
                 onClick = {
                     onSpeak(EntryLogic.continueLabel(lastProfile))
@@ -167,8 +167,9 @@ fun AgeSelectionScreen(
                 color = Color(0xFF1B5E20),
             )
         }
-        if (ageGroup != null) {
-            val tokens = tokensFor(ageGroup!!)
+        val selected = ageGroup
+        if (selected != null) {
+            val tokens = tokensFor(selected)
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it.take(ChildName.MAX_LENGTH) },
@@ -199,7 +200,7 @@ fun AgeSelectionScreen(
                         contentPadding = PaddingValues(0.dp),
                         modifier =
                             Modifier
-                                .size(mascotChipDp(ageGroup!!).dp)
+                                .size(mascotChipDp(selected).dp)
                                 .semantics {
                                     contentDescription = candidate.displayName
                                     role = Role.Button
@@ -215,12 +216,7 @@ fun AgeSelectionScreen(
                 }
             }
             Button(
-                onClick = {
-                    val chosen = ageGroup ?: return@Button
-                    val finalName = fallbackChildName(name)
-                    onConfirm(chosen, finalName, mascot)
-                },
-                enabled = ageGroup != null,
+                onClick = { onConfirm(selected, fallbackChildName(name), mascot) },
                 modifier =
                     Modifier
                         .fillMaxWidth()
