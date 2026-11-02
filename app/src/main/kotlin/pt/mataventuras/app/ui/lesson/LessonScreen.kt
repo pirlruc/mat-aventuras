@@ -3,30 +3,21 @@ package pt.mataventuras.app.ui.lesson
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,22 +28,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -63,16 +47,44 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import pt.mataventuras.app.R
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.answerFlashArgb
+import pt.mataventuras.app.ui.answerFlashCaption
+import pt.mataventuras.app.ui.answerFlashGlyph
+import pt.mataventuras.app.ui.answerFlashScale
+import pt.mataventuras.app.ui.answerFlashScrimArgb
+import pt.mataventuras.app.ui.groupsBanner
+import pt.mataventuras.app.ui.lessonFillsViewport
+import pt.mataventuras.app.ui.lessonLevel
+import pt.mataventuras.app.ui.lessonScoreLine
+import pt.mataventuras.app.ui.lessonScrolls
+import pt.mataventuras.app.ui.optionAnswerTag
+import pt.mataventuras.app.ui.optionMinHeightDp
+import pt.mataventuras.app.ui.prizeStarLine
+import pt.mataventuras.app.ui.prizeStars
+import pt.mataventuras.app.ui.shouldRepeatSpokenPrompt
+import pt.mataventuras.app.ui.showsAnswerFlash
+import pt.mataventuras.app.ui.showsCipherLegend
+import pt.mataventuras.app.ui.showsGroupsBoard
+import pt.mataventuras.app.ui.showsMemoryBoard
+import pt.mataventuras.app.ui.showsNumberHero
+import pt.mataventuras.app.ui.showsOptionPalette
+import pt.mataventuras.app.ui.showsPuzzleFrame
+import pt.mataventuras.app.ui.showsSoupBoard
+import pt.mataventuras.app.ui.showsStarGrid
+import pt.mataventuras.app.ui.showsSudokuGrid
+import pt.mataventuras.app.ui.showsSumDots
+import pt.mataventuras.app.ui.showsWordBoard
+import pt.mataventuras.app.ui.sudokuFillsEveryBlank
+import pt.mataventuras.app.ui.targetShapeToDraw
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.domain.math.Exercise
-import pt.mataventuras.domain.math.SudokuBoardState
 import pt.mataventuras.domain.math.SudokuPlay
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
-import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.voice.VoiceScripts
 
@@ -99,8 +111,8 @@ fun LessonScreen(
     val pointsGate = remember { Mutex() }
     val pointsTicket = remember { AtomicInteger(0) }
     val pickLock = remember { AtomicBoolean(false) }
-    val fillViewport = UiLogic.lessonFillsViewport(profile.ageGroup)
-    val scrolls = UiLogic.lessonScrolls(profile.ageGroup, exercise.play.kind)
+    val fillViewport = lessonFillsViewport(profile.ageGroup)
+    val scrolls = lessonScrolls(profile.ageGroup, exercise.play.kind)
     val scrollState = rememberScrollState()
     val view = LocalView.current
     val cues = remember { AnswerCuePlayer.device() }
@@ -134,7 +146,7 @@ fun LessonScreen(
         }
     }
 
-    val fillSudoku = UiLogic.sudokuFillsEveryBlank(exercise.play)
+    val fillSudoku = sudokuFillsEveryBlank(exercise.play)
     var sudoku by remember(exercise.prompt, exercise.play.cells) {
         mutableStateOf(SudokuPlay.start(exercise.play.cells))
     }
@@ -167,7 +179,7 @@ fun LessonScreen(
                 onSpeak(VoiceScripts.LETS_PLAY)
                 onReward(profile.ageGroup)
             }
-            exercise = container.generator.generate(module, UiLogic.lessonLevel(hits), profile.ageGroup)
+            exercise = container.generator.generate(module, lessonLevel(hits), profile.ageGroup)
         }
         pickLock.set(false)
     }
@@ -225,7 +237,7 @@ fun LessonScreen(
 }
 
 @Composable
-private fun LessonPlayColumn(
+internal fun LessonPlayColumn(
     modifier: Modifier,
     exercise: Exercise,
     module: LearningModule,
@@ -253,29 +265,33 @@ private fun LessonPlayColumn(
         verticalArrangement = if (scrolls) Arrangement.spacedBy(12.dp) else Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        val listen = stringResource(R.string.listen)
+        val listenAgain = stringResource(R.string.listen_again)
+        val stars = stringResource(R.string.stars_of_three, prizeStars(streak))
+        val score = lessonScoreLine(hits, points, stringResource(R.string.score_line))
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Button(
             onClick = { onSpeak(exercise.spoken) },
             modifier =
                 Modifier
                     .height(64.dp)
-                    .semantics(mergeDescendants = true) { contentDescription = "Ouvir outra vez" },
-        ) { Text("Ouvir") }
+                    .semantics(mergeDescendants = true) { contentDescription = listenAgain },
+        ) { Text(listen) }
         Text(
-            UiLogic.prizeStarLine(streak),
-            modifier = Modifier.semantics { contentDescription = "${UiLogic.prizeStars(streak)} de 3 estrelas" },
+            prizeStarLine(streak),
+            modifier = Modifier.semantics { contentDescription = stars },
         )
-        if (UiLogic.showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {
+        if (showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {
             StarGrid(exercise.visualCount)
         }
-        if (UiLogic.showsSumDots(module, exercise.visualCount)) {
+        if (showsSumDots(module, exercise.visualCount)) {
             DotStrip(exercise.visualCount)
         }
-        if (UiLogic.showsNumberHero(module, exercise.play.kind)) {
+        if (showsNumberHero(module, exercise.play.kind)) {
             NumberHero(exercise.visualCount)
         }
-        UiLogic.targetShapeToDraw(module, exercise.targetShape, exercise.play.kind)?.let { ShapeGlyph(it) }
-        if (UiLogic.showsSudokuGrid(exercise.play.kind)) {
+        targetShapeToDraw(module, exercise.targetShape, exercise.play.kind)?.let { ShapeGlyph(it) }
+        if (showsSudokuGrid(exercise.play.kind)) {
             CappedScale {
                 Text(
                     sudokuTitle(exercise.play.kind, age),
@@ -294,24 +310,24 @@ private fun LessonPlayColumn(
                 age = age,
             )
         }
-        if (UiLogic.showsSoupBoard(exercise.play.kind)) {
+        if (showsSoupBoard(exercise.play.kind)) {
             SoupBoard(exercise = exercise, onPick = onPick, onMissKeep = onMissKeep, age = age)
         }
-        if (UiLogic.showsCipherLegend(exercise.play.kind)) {
+        if (showsCipherLegend(exercise.play.kind)) {
             CipherPanel(exercise)
         }
-        if (UiLogic.showsPuzzleFrame(exercise.play.kind)) {
+        if (showsPuzzleFrame(exercise.play.kind)) {
             PuzzleFrame(exercise, age)
         }
-        if (UiLogic.showsMemoryBoard(exercise.play.kind)) {
+        if (showsMemoryBoard(exercise.play.kind)) {
             MemoryBoard(exercise, onPick)
         }
-        if (UiLogic.showsWordBoard(exercise.play.kind)) {
+        if (showsWordBoard(exercise.play.kind)) {
             WordCompleteBoard(exercise, onPick)
         }
-        if (UiLogic.showsGroupsBoard(exercise.play.kind)) {
+        if (showsGroupsBoard(exercise.play.kind)) {
             Text(
-                UiLogic.groupsBanner(module),
+                groupsBanner(module),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF1B5E20),
@@ -335,17 +351,17 @@ private fun LessonPlayColumn(
             if (module == LearningModule.CLOCK) {
                 ClockFace(clockHour(exercise.options.getOrNull(exercise.correctIndex).orEmpty()))
             }
-            if (UiLogic.showsOptionPalette(exercise.play.kind)) {
+            if (showsOptionPalette(exercise.play.kind)) {
                 exercise.options.forEachIndexed { index, text ->
                     Button(
                         onClick = { onPick(index) },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .height(UiLogic.optionMinHeightDp(module, tokens.minButtonDp).dp)
+                                .height(optionMinHeightDp(module, tokens.minButtonDp).dp)
                                 .semantics(mergeDescendants = true) { contentDescription = text }
                                 .testTag(
-                                    UiLogic.optionAnswerTag(
+                                    optionAnswerTag(
                                         correct = exercise.isCorrect(index),
                                         fillEveryBlank = fillEveryBlank,
                                     ),
@@ -356,12 +372,12 @@ private fun LessonPlayColumn(
                 }
             }
         }
-        Text(UiLogic.lessonScoreLine(hits, points))
+        Text(score)
     }
 }
 
 @Composable
-private fun LessonExitBar(
+internal fun LessonExitBar(
     ageGroup: AgeBand,
     confirming: Boolean,
     onSpeak: (String) -> Unit,
@@ -397,7 +413,7 @@ private fun LessonExitBar(
 }
 
 @Composable
-private fun RepeatPromptOnResume(
+internal fun RepeatPromptOnResume(
     spoken: String,
     onSpeak: (String) -> Unit,
 ) {
@@ -409,7 +425,7 @@ private fun RepeatPromptOnResume(
                 when (event) {
                     Lifecycle.Event.ON_STOP -> stopped = true
                     Lifecycle.Event.ON_RESUME -> {
-                        if (UiLogic.shouldRepeatSpokenPrompt(stopped)) onSpeak(spoken)
+                        if (shouldRepeatSpokenPrompt(stopped)) onSpeak(spoken)
                         stopped = false
                     }
                     else -> Unit
@@ -421,7 +437,7 @@ private fun RepeatPromptOnResume(
 }
 
 @Composable
-private fun AnswerFlash(
+internal fun AnswerFlash(
     correct: Boolean,
     tick: Int,
     gentle: Boolean,
@@ -434,14 +450,14 @@ private fun AnswerFlash(
         alpha.animateTo(0f, animationSpec = tween(UiLogic.ANSWER_FLASH_MS))
     }
     val fade = alpha.value
-    if (!UiLogic.showsAnswerFlash(fade)) return
-    val color = Color(UiLogic.answerFlashArgb(correct, gentle))
-    val scale = UiLogic.answerFlashScale(fade)
+    if (!showsAnswerFlash(fade)) return
+    val color = Color(answerFlashArgb(correct, gentle))
+    val scale = answerFlashScale(fade)
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color(UiLogic.answerFlashScrimArgb(correct, gentle)).copy(alpha = fade * 0.55f))
+                .background(Color(answerFlashScrimArgb(correct, gentle)).copy(alpha = fade * 0.55f))
                 .testTag("answer-flash"),
         contentAlignment = Alignment.Center,
     ) {
@@ -456,481 +472,18 @@ private fun AnswerFlash(
         ) {
             CappedScale {
                 Text(
-                    UiLogic.answerFlashGlyph(correct, gentle, mascot),
+                    answerFlashGlyph(correct, gentle, mascot),
                     fontSize = 96.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = color,
                 )
             }
             Text(
-                UiLogic.answerFlashCaption(correct),
+                answerFlashCaption(correct),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = color,
             )
         }
-    }
-}
-
-@Composable
-private fun SudokuBoard(
-    exercise: Exercise,
-    cells: List<String>,
-    focus: Int,
-    fillEveryBlank: Boolean,
-    onFocus: (Int) -> Unit,
-    age: AgeBand,
-) {
-    val columns = exercise.play.columns.coerceAtLeast(1)
-    val shown = shownSudokuCells(cells, exercise.options)
-    val cellDp = UiLogic.playCellHeightDp(columns, age) + sudokuExtraHeight(age)
-    val boxW = UiLogic.sudokuBoxWidth(columns)
-    val boxH = UiLogic.sudokuBoxHeight(columns)
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF0D47A1))
-                .padding(6.dp),
-    ) {
-        shown.chunked(columns).forEachIndexed { row, rowCells ->
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = UiLogic.sudokuGapDp(row, boxH).dp),
-            ) {
-                rowCells.forEachIndexed { col, cell ->
-                    val index = row * columns + col
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .height(cellDp.dp)
-                                .padding(start = UiLogic.sudokuGapDp(col, boxW).dp)
-                                .background(
-                                    Color(
-                                        UiLogic.sudokuCellArgb(
-                                            cell,
-                                            focused = index == focus,
-                                            fillEveryBlank = fillEveryBlank,
-                                        ),
-                                    ),
-                                ).semantics(mergeDescendants = true) {
-                                    contentDescription = if (cell.isBlank()) "casa vazia" else cell
-                                }.testTag("board-cell-$index")
-                                .then(sudokuFocusModifier(fillEveryBlank, cell) { onFocus(index) }),
-                    ) {
-                        GridCellFace(
-                            module = exercise.module,
-                            cell = cell,
-                            fillEveryBlank = fillEveryBlank,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SoupBoard(
-    exercise: Exercise,
-    onPick: (Int) -> Unit,
-    onMissKeep: () -> Unit,
-    age: AgeBand,
-) {
-    val columns = exercise.play.columns.coerceAtLeast(1)
-    val cells = soupBoardCells(exercise.play.cells, exercise.options)
-    val paths = exercise.play.soupPaths()
-    var selected by remember(exercise.prompt) { mutableStateOf(emptyList<Int>()) }
-    var found by remember(exercise.prompt) { mutableStateOf(emptySet<Int>()) }
-    val foundCells = foundSoupCells(found, paths)
-    val cellDp = UiLogic.playCellHeightDp(columns, age)
-    val onGesture: (List<Int>) -> Unit = { path ->
-        found = resolveSoupGesture(path, paths, found, cells.size, onPick, onMissKeep)
-    }
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .testTag("soup-board")
-                .pointerInput(exercise.prompt, columns, cells.size, found) {
-                    awaitEachGesture {
-                        val gap = 8.dp.toPx()
-                        val path =
-                            collectSoupPath(columns, cells.size, gap, size.width.toFloat(), size.height.toFloat()) {
-                                selected = it
-                            }
-                        onGesture(path)
-                        selected = emptyList()
-                    }
-                },
-    ) {
-        cells.chunked(columns).forEachIndexed { row, rowCells ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                rowCells.forEachIndexed { col, cell ->
-                    val index = row * columns + col
-                    SoupCell(
-                        module = exercise.module,
-                        cell = cell,
-                        correct = exercise.isCorrect(index),
-                        selected = index in selected,
-                        found = index in foundCells,
-                        heightDp = cellDp,
-                        onTap = { onGesture(listOf(index)) },
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RowScope.SoupCell(
-    module: LearningModule,
-    cell: String,
-    correct: Boolean,
-    selected: Boolean,
-    found: Boolean,
-    heightDp: Int,
-    onTap: () -> Unit,
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-            Modifier
-                .weight(1f)
-                .height(heightDp.dp)
-                .background(Color(UiLogic.soupSelectedArgb(selected, found)))
-                .testTag(UiLogic.answerTag(correct))
-                .semantics {
-                    onClick {
-                        onTap()
-                        true
-                    }
-                },
-    ) {
-        GridCellFace(module = module, cell = cell)
-    }
-}
-
-internal fun scoreSudokuPick(
-    fillSudoku: Boolean,
-    exercise: Exercise,
-    sudoku: SudokuBoardState,
-    index: Int,
-    onAttempt: (Boolean, Boolean) -> Unit,
-): SudokuBoardState {
-    val token = exercise.options.getOrNull(index)
-    val step = if (fillSudoku && token != null) SudokuPlay.place(sudoku, token, exercise.play.solution) else null
-    return when {
-        !fillSudoku -> {
-            onAttempt(exercise.isCorrect(index), true)
-            sudoku
-        }
-        step == null -> sudoku
-        !step.correct -> {
-            onAttempt(false, false)
-            sudoku
-        }
-        else -> {
-            if (step.solved) onAttempt(true, true)
-            step.state
-        }
-    }
-}
-
-internal fun resolveSoupGesture(
-    path: List<Int>,
-    paths: List<List<Int>>,
-    found: Set<Int>,
-    cellCount: Int,
-    onPick: (Int) -> Unit,
-    onMissKeep: () -> Unit,
-): Set<Int> {
-    val match = UiLogic.soupMatchedPath(path, paths, found)
-    if (match != null) {
-        val next = found + match
-        if (next.size >= paths.size) onPick(paths[match].first())
-        return next
-    }
-    val kind = UiLogic.soupReleaseKind(path, paths, found)
-    if (UiLogic.soupKeepsBoard(kind, paths.size)) {
-        onMissKeep()
-    } else {
-        UiLogic.soupPickIndex(path, paths, found, cellCount)?.let(onPick)
-    }
-    return found
-}
-
-private suspend fun AwaitPointerEventScope.collectSoupPath(
-    columns: Int,
-    cellCount: Int,
-    gapPx: Float,
-    width: Float,
-    height: Float,
-    onPath: (List<Int>) -> Unit,
-): List<Int> {
-    val down = awaitFirstDown()
-    var path =
-        listOfNotNull(
-            UiLogic.soupIndexAt(down.position.x, down.position.y, width, height, columns, cellCount, gapPx),
-        )
-    onPath(path)
-    while (true) {
-        val event = awaitPointerEvent()
-        val change = event.changes.firstOrNull { it.id == down.id } ?: break
-        if (!change.pressed) {
-            change.consume()
-            return path
-        }
-        path =
-            extendSoup(
-                path,
-                UiLogic.soupIndexAt(
-                    change.position.x,
-                    change.position.y,
-                    width,
-                    height,
-                    columns,
-                    cellCount,
-                    gapPx,
-                ),
-                columns,
-            )
-        onPath(path)
-        change.consume()
-    }
-    return path
-}
-
-@Composable
-private fun CipherPanel(exercise: Exercise) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        exercise.play.cells.forEach { line ->
-            Text(line, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-        }
-        Text(
-            exercise.play.cipherCode,
-            fontSize = 40.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF0D47A1),
-        )
-    }
-}
-
-@Composable
-private fun GroupsBoard(
-    exercise: Exercise,
-    age: AgeBand,
-) {
-    val columns = exercise.play.columns.coerceAtLeast(1)
-    val cellDp = UiLogic.playCellHeightDp(columns, age)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        exercise.play.cells.chunked(columns).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEach { cell ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier =
-                            Modifier
-                                .size(cellDp.dp)
-                                .background(Color(UiLogic.groupTokenArgb(cell))),
-                    ) {
-                        Text(cell, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PuzzleFrame(
-    exercise: Exercise,
-    age: AgeBand,
-) {
-    val cells = puzzleCells(exercise.play.cells)
-    val columns = exercise.play.columns.coerceAtLeast(2)
-    val cellDp = UiLogic.playCellHeightDp(columns, age)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        cells.chunked(columns).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                row.forEach { cell ->
-                    val hole = UiLogic.isBoardHole(cell)
-                    Button(
-                        onClick = {},
-                        enabled = false,
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                disabledContainerColor = if (hole) Color(0xFFFFE082) else Color(0xFFBBDEFB),
-                                disabledContentColor = Color(0xFF0D47A1),
-                            ),
-                        modifier = Modifier.size(cellDp.dp),
-                    ) {
-                        GridCellFace(module = exercise.module, cell = cell)
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun sudokuFocusModifier(
-    fillEveryBlank: Boolean,
-    cell: String,
-    onFocus: () -> Unit,
-): Modifier =
-    if (fillEveryBlank && SudokuPlay.isBlank(cell)) {
-        Modifier.clickable(onClick = onFocus)
-    } else {
-        Modifier
-    }
-
-@Composable
-private fun GridCellFace(
-    module: LearningModule,
-    cell: String,
-    fillEveryBlank: Boolean = false,
-) {
-    val label = UiLogic.holeLabel(cell, fillEveryBlank)
-    val shape = UiLogic.shapeKind(label)
-    val dots = UiLogic.optionInt(label) ?: 0
-    when {
-        shape != null -> ShapeGlyph(shape)
-        dots > 0 && module == LearningModule.COUNTING -> DotStrip(dots)
-        else -> Text(label, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-    }
-}
-
-@Composable
-private fun VisualOption(
-    module: LearningModule,
-    text: String,
-) {
-    if (module == LearningModule.SIZE) {
-        SizeMark(text)
-        return
-    }
-    val shape = if (UiLogic.showsShapeGlyph(module)) UiLogic.shapeKind(text) else null
-    val dots = visualDotCount(module, text)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        if (shape != null) {
-            ShapeGlyph(shape)
-        } else if (dots > 0) {
-            DotStrip(dots)
-        }
-        Text(text, fontWeight = FontWeight.Bold, fontSize = if (shape != null) 18.sp else 28.sp)
-    }
-}
-
-@Composable
-private fun NumberHero(value: Int) {
-    Text(
-        text = value.toString(),
-        fontSize = 88.sp,
-        fontWeight = FontWeight.ExtraBold,
-        color = Color(0xFF0D47A1),
-    )
-}
-
-@Composable
-private fun DotStrip(count: Int) {
-    Canvas(modifier = Modifier.size(72.dp, 36.dp)) {
-        paintCountDots(count)
-    }
-}
-
-internal fun DrawScope.paintCountDots(count: Int) {
-    UiLogic.starCenters(count, size.minDimension).forEach { (cx, cy) ->
-        drawCircle(Color(0xFFFFC107), radius = 7f, center = Offset(cx, cy))
-    }
-}
-
-@Composable
-private fun ShapeGlyph(shape: GeometricShape) {
-    Canvas(modifier = Modifier.size(48.dp)) {
-        paintShapeGlyph(shape)
-    }
-}
-
-internal fun DrawScope.paintShapeGlyph(shape: GeometricShape) {
-    val cx = size.width / 2f
-    val cy = size.height / 2f
-    val radius = size.minDimension / 2.4f
-    val color = Color(0xFF1565C0)
-    when (shape) {
-        GeometricShape.CIRCLE -> drawCircle(color, radius = radius, center = Offset(cx, cy))
-        GeometricShape.SQUARE -> {
-            val side = radius * 1.6f
-            drawRect(
-                color,
-                topLeft = Offset(cx - side / 2f, cy - side / 2f),
-                size = Size(side, side),
-            )
-        }
-        GeometricShape.RECTANGLE -> {
-            val width = radius * 2.1f
-            val height = radius * 1.2f
-            drawRect(
-                color,
-                topLeft = Offset(cx - width / 2f, cy - height / 2f),
-                size = Size(width, height),
-            )
-        }
-        GeometricShape.TRIANGLE -> {
-            val pts = UiLogic.triangleVertices(cx, cy, radius)
-            drawPath(
-                Path().apply {
-                    moveTo(pts[0].first, pts[0].second)
-                    lineTo(pts[1].first, pts[1].second)
-                    lineTo(pts[2].first, pts[2].second)
-                    close()
-                },
-                color,
-            )
-        }
-        GeometricShape.STAR -> {
-            val pts = UiLogic.starVertices(cx, cy, radius)
-            drawPath(
-                Path().apply {
-                    moveTo(pts[0].first, pts[0].second)
-                    pts.drop(1).forEach { lineTo(it.first, it.second) }
-                    close()
-                },
-                color,
-            )
-        }
-    }
-}
-
-@Composable
-internal fun CappedScale(content: @Composable () -> Unit) {
-    val current = LocalDensity.current
-    val scale = current.fontScale.coerceAtMost(UiLogic.MAX_FONT_SCALE)
-    CompositionLocalProvider(LocalDensity provides Density(current.density, scale)) {
-        content()
-    }
-}
-
-@Composable
-private fun StarGrid(count: Int) {
-    Canvas(modifier = Modifier.size(220.dp)) {
-        paintStarDots(count)
-    }
-}
-
-internal fun DrawScope.paintStarDots(count: Int) {
-    UiLogic.starCenters(count, size.minDimension).forEach { (cx, cy) ->
-        drawCircle(Color(0xFFFFC107), radius = 16f, center = Offset(cx, cy))
     }
 }

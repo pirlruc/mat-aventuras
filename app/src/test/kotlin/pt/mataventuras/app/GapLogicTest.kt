@@ -38,7 +38,6 @@ import pt.mataventuras.app.engine.paintKartCourse
 import pt.mataventuras.app.engine.paintRunnerCourse
 import pt.mataventuras.app.ui.ProfileResume
 import pt.mataventuras.app.ui.SoupRelease
-import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.home.ModuleTitles
 import pt.mataventuras.app.ui.lesson.AnswerCuePlayer
 import pt.mataventuras.app.ui.lesson.paintCountDots
@@ -46,6 +45,15 @@ import pt.mataventuras.app.ui.lesson.paintShapeGlyph
 import pt.mataventuras.app.ui.lesson.paintStarDots
 import pt.mataventuras.app.ui.lesson.resolveSoupGesture
 import pt.mataventuras.app.ui.lesson.scoreSudokuPick
+import pt.mataventuras.app.ui.showsNumberHero
+import pt.mataventuras.app.ui.showsOptionPalette
+import pt.mataventuras.app.ui.showsStarGrid
+import pt.mataventuras.app.ui.showsSumDots
+import pt.mataventuras.app.ui.soupAreAdjacent
+import pt.mataventuras.app.ui.soupExtendPath
+import pt.mataventuras.app.ui.soupIndexAt
+import pt.mataventuras.app.ui.soupPickIndex
+import pt.mataventuras.app.ui.soupReleaseKind
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.engine.PlatformerEnemy
 import pt.mataventuras.domain.engine.PlatformerPowerup
@@ -119,32 +127,32 @@ class GapLogicTest {
         assertEquals("Jogar", ModuleTitles.laterNoun(LearningModule.COUNTING))
         AnswerCuePlayer.createGenerator()
 
-        PlayKind.entries.forEach { UiLogic.showsOptionPalette(it) }
-        assertFalse(UiLogic.showsSumDots(LearningModule.ADDITION, 0))
-        assertFalse(UiLogic.showsSumDots(LearningModule.ADDITION, 11))
-        assertTrue(UiLogic.showsSumDots(LearningModule.ADDITION, 4))
-        assertFalse(UiLogic.showsSumDots(LearningModule.SHAPES, 4))
-        assertFalse(UiLogic.showsStarGrid(LearningModule.SHAPES, 3))
-        assertTrue(UiLogic.showsNumberHero(LearningModule.NUMBERS, PlayKind.CHOICE))
-        assertFalse(UiLogic.showsNumberHero(LearningModule.NUMBERS, PlayKind.SOUP))
-        assertEquals(null, UiLogic.soupIndexAt(1f, 1f, 0f, 10f, 2, 4, 1f))
-        assertFalse(UiLogic.soupAreAdjacent(0, 2, 3))
-        assertFalse(UiLogic.soupAreAdjacent(0, 6, 3))
-        assertTrue(UiLogic.soupAreAdjacent(0, 4, 3))
-        assertEquals(listOf(1), UiLogic.soupExtendPath(emptyList(), 1, 2))
-        assertEquals(listOf(0), UiLogic.soupExtendPath(listOf(0), 0, 2))
-        assertEquals(listOf(0), UiLogic.soupExtendPath(listOf(0), 5, 2))
-        assertEquals(SoupRelease.IGNORE, UiLogic.soupReleaseKind(emptyList(), emptyList()))
+        PlayKind.entries.forEach { showsOptionPalette(it) }
+        assertFalse(showsSumDots(LearningModule.ADDITION, 0))
+        assertFalse(showsSumDots(LearningModule.ADDITION, 11))
+        assertTrue(showsSumDots(LearningModule.ADDITION, 4))
+        assertFalse(showsSumDots(LearningModule.SHAPES, 4))
+        assertFalse(showsStarGrid(LearningModule.SHAPES, 3))
+        assertTrue(showsNumberHero(LearningModule.NUMBERS, PlayKind.CHOICE))
+        assertFalse(showsNumberHero(LearningModule.NUMBERS, PlayKind.SOUP))
+        assertEquals(null, soupIndexAt(1f, 1f, 0f, 10f, 2, 4, 1f))
+        assertFalse(soupAreAdjacent(0, 2, 3))
+        assertFalse(soupAreAdjacent(0, 6, 3))
+        assertTrue(soupAreAdjacent(0, 4, 3))
+        assertEquals(listOf(1), soupExtendPath(emptyList(), 1, 2))
+        assertEquals(listOf(0), soupExtendPath(listOf(0), 0, 2))
+        assertEquals(listOf(0), soupExtendPath(listOf(0), 5, 2))
+        assertEquals(SoupRelease.IGNORE, soupReleaseKind(emptyList(), emptyList()))
         assertEquals(
             SoupRelease.MISS,
-            UiLogic.soupReleaseKind(listOf(0, 1), listOf(listOf(2, 3)), setOf(0)),
+            soupReleaseKind(listOf(0, 1), listOf(listOf(2, 3)), setOf(0)),
         )
-        assertEquals(null, UiLogic.soupPickIndex(listOf(0), listOf(listOf(0, 1)), emptySet(), 4))
-        assertEquals(0, UiLogic.soupPickIndex(listOf(0, 1), listOf(listOf(0, 1)), emptySet(), 4))
-        assertEquals(0, UiLogic.soupPickIndex(listOf(0, 1), listOf(listOf(2, 3)), emptySet(), 4))
-        assertEquals(SoupRelease.IGNORE, UiLogic.soupReleaseKind(emptyList(), listOf(listOf(0)), emptySet()))
-        assertEquals(SoupRelease.IGNORE, UiLogic.soupReleaseKind(listOf(0), emptyList(), emptySet()))
-        assertEquals(SoupRelease.MISS, UiLogic.soupReleaseKind(listOf(0, 1), listOf(listOf(0)), setOf(0)))
+        assertEquals(null, soupPickIndex(listOf(0), listOf(listOf(0, 1)), emptySet(), 4))
+        assertEquals(0, soupPickIndex(listOf(0, 1), listOf(listOf(0, 1)), emptySet(), 4))
+        assertEquals(0, soupPickIndex(listOf(0, 1), listOf(listOf(2, 3)), emptySet(), 4))
+        assertEquals(SoupRelease.IGNORE, soupReleaseKind(emptyList(), listOf(listOf(0)), emptySet()))
+        assertEquals(SoupRelease.IGNORE, soupReleaseKind(listOf(0), emptyList(), emptySet()))
+        assertEquals(SoupRelease.MISS, soupReleaseKind(listOf(0, 1), listOf(listOf(0)), setOf(0)))
         var picked = -1
         var missed = false
         val found =

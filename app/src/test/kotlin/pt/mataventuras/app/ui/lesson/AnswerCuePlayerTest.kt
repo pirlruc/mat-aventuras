@@ -5,7 +5,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.answerHaptic
+import pt.mataventuras.app.ui.answerTone
 
 @RunWith(RobolectricTestRunner::class)
 class AnswerCuePlayerTest {
@@ -16,8 +17,8 @@ class AnswerCuePlayerTest {
         val player = AnswerCuePlayer(playTone = { tone, ms -> tones += tone to ms })
         player.play(true) { haptics += it }
         player.play(false) { haptics += it }
-        assertEquals(listOf(UiLogic.answerTone(true) to 180, UiLogic.answerTone(false) to 260), tones)
-        assertEquals(listOf(UiLogic.answerHaptic(true), UiLogic.answerHaptic(false)), haptics)
+        assertEquals(listOf(answerTone(true) to 180, answerTone(false) to 260), tones)
+        assertEquals(listOf(answerHaptic(true), answerHaptic(false)), haptics)
         player.release()
     }
 

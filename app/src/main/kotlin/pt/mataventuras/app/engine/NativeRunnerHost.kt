@@ -43,7 +43,6 @@ internal object NativeRunnerHost {
      * Starts the 2D coin platformer. [showUi] is false under Robolectric so the
      * Compose frame clock does not keep Espresso busy.
      */
-    @Suppress("CyclomaticComplexMethod", "LongMethod")
     fun attach(
         activity: IsolatedEngineActivity,
         showUi: Boolean = GodotRuntime.shouldEmbed(),

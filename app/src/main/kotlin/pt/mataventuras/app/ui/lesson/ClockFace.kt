@@ -9,23 +9,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlin.math.cos
 import kotlin.math.sin
+import pt.mataventuras.app.R
 
 /**
  * Twelve-hour face. The prompt does not say the hour; the hand does.
  */
 @Composable
 internal fun ClockFace(hour: Int) {
+    val label = stringResource(R.string.clock_face)
     Canvas(
         modifier =
             Modifier
                 .size(160.dp)
                 .testTag("clock-face")
-                .semantics { contentDescription = "Relógio" },
+                .semantics { contentDescription = label },
     ) {
         paintClockFace(hour)
     }
