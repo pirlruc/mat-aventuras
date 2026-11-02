@@ -41,6 +41,15 @@ internal fun targetShapeToDraw(
 internal fun showsShapeGlyph(module: LearningModule): Boolean = module == LearningModule.SHAPES
 
 /**
+ * Shadow and tangram draw the shape and hide its name on the prompt.
+ */
+internal fun showsSilhouette(module: LearningModule): Boolean {
+    val shadow = module == LearningModule.SHADOW
+    val tangram = module == LearningModule.TANGRAM
+    return shadow || tangram
+}
+
+/**
  * Counting and number options also show a dot strip.
  */
 internal fun showsDotStrip(module: LearningModule): Boolean {

@@ -38,7 +38,7 @@ class ChildProfileTest {
     @Test
     fun modulesPerAgeBand() {
         assertEquals(14, modulesFor(AgeBand.THREE_TO_FIVE).size)
-        assertEquals(11, modulesFor(AgeBand.SIX_TO_EIGHT).size)
+        assertEquals(16, modulesFor(AgeBand.SIX_TO_EIGHT).size)
         assertTrue(LearningModule.COUNTING in modulesFor(AgeBand.THREE_TO_FIVE))
         assertTrue(LearningModule.MULTIPLICATION in modulesFor(AgeBand.SIX_TO_EIGHT))
         assertTrue(LearningModule.DIVISION in modulesFor(AgeBand.SIX_TO_EIGHT))

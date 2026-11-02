@@ -33,6 +33,11 @@ class ComposePrizeScreenTest {
         assertEquals("Padrões", ModuleTitles.noun(LearningModule.PATTERNS))
         assertEquals("Que horas são", ModuleTitles.noun(LearningModule.CLOCK))
         assertEquals("Euros e cêntimos", ModuleTitles.noun(LearningModule.MONEY))
+        assertEquals("Frações", ModuleTitles.noun(LearningModule.FRACTION))
+        assertEquals("Até 100", ModuleTitles.noun(LearningModule.ORDER))
+        assertEquals("Problemas", ModuleTitles.noun(LearningModule.WORD_PROBLEM))
+        assertEquals("Tangram", ModuleTitles.noun(LearningModule.TANGRAM))
+        assertEquals("Sílabas", ModuleTitles.noun(LearningModule.SPELL))
     }
 
     @Test

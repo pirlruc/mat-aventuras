@@ -34,6 +34,7 @@ import pt.mataventuras.app.ui.isBoardHole
 import pt.mataventuras.app.ui.playCellHeightDp
 import pt.mataventuras.app.ui.shapeKind
 import pt.mataventuras.app.ui.showsShapeGlyph
+import pt.mataventuras.app.ui.showsSilhouette
 import pt.mataventuras.app.ui.starCenters
 import pt.mataventuras.app.ui.starVertices
 import pt.mataventuras.app.ui.triangleVertices
@@ -127,7 +128,7 @@ internal fun VisualOption(
         SortMark(text)
         return
     }
-    if (module == LearningModule.SHADOW) {
+    if (showsSilhouette(module)) {
         val shape = shapeKind(text)
         if (shape != null) {
             ShapeGlyph(shape)

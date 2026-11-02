@@ -54,6 +54,16 @@ internal object ModuleTitles {
             LearningModule.DOTS -> "Ligar os pontos"
             LearningModule.CLAPS -> "Palmas"
             LearningModule.SHADOW -> "Sombras"
+            else -> olderNoun(module)
+        }
+
+    private fun olderNoun(module: LearningModule): String =
+        when (module) {
+            LearningModule.FRACTION -> "Frações"
+            LearningModule.ORDER -> "Até 100"
+            LearningModule.WORD_PROBLEM -> "Problemas"
+            LearningModule.TANGRAM -> "Tangram"
+            LearningModule.SPELL -> "Sílabas"
             else -> "Jogar"
         }
 }

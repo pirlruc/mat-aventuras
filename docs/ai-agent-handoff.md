@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** Ages 3–5 have colour and shape sorting, connect-the-dots, syllable clapping, and shadows. Do not mark MAT-011-T1 done until that pull request merges. MAT-011-T2 is next. Approving reviews stay at 0.
+**Last agent focus:** Ages 6–8 have halves, the next number up to 100, a word problem, tangram, and first syllables. Do not mark MAT-011-T2 done until that pull request merges. MAT-011-T3 is next. Approving reviews stay at 0.
 
 ---
 
@@ -252,4 +252,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, the two python-quality job names, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 and MAT-006 stay open. MAT-013 is done. python-quality still runs on every pull request until the owner approves a ruleset edit.
 
-*Last updated: 2026-11-01 (ages 3–5 lessons: sorting, dots, clapping, shadows).*
+*Last updated: 2026-11-01 (ages 6–8 lessons: halves, order to 100, word problems, tangram, syllables).*
