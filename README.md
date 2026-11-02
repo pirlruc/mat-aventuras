@@ -25,11 +25,12 @@ belong to both.
 
 Version 0.1.0 gave ages 3–5 number ranges meant for older children. 0.2.0
 keeps that band on small numbers and sums up to 10. 0.3.0 adds the lessons
-and prize games in the table above.
+and prize games in the table above. 0.3.1 makes those prize games leave the
+loading screen and start.
 
 ## Install
 
-Install **0.3.0** `app-release.apk` from
+Install **0.3.1** `app-release.apk` from
 [GitHub Releases](https://github.com/pirlruc/mat-aventuras/releases/latest).
 That file is signed. Do not use the 0.1.0 debug APK for daily use.
 Also download `app-release.apk.sha256` and `app-release.cdx.json` (the
