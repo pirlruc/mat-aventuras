@@ -14,27 +14,40 @@ import pt.mataventuras.domain.prize.PrizeClock
  * [SystemClock.elapsedRealtime], not the wall clock.
  */
 internal object PrizeLimit {
+    /** Absolute [SystemClock.elapsedRealtime] deadline, so a rotation does not restart the limit. */
+    const val EXTRA_DEADLINE: String = "prize_deadline_elapsed"
+
     private val main = Handler(Looper.getMainLooper())
     private val timers = HashMap<Int, Runnable>()
     private val hosts = HashMap<Int, WeakReference<Activity>>()
 
     /**
-     * Arms [activity] from its `prize_limit` extra. A missing or zero limit does nothing.
+     * Arms [activity] from its `prize_limit` extra. A second call keeps the
+     * deadline already stored on the intent.
      */
     fun arm(activity: Activity) {
         val seconds = activity.intent.getStringExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT)?.toIntOrNull() ?: 0
         if (seconds <= 0) return
+        val existing = activity.intent.getLongExtra(EXTRA_DEADLINE, 0L)
+        val deadline =
+            if (existing > 0L) {
+                existing
+            } else {
+                PrizeClock.deadlineMs(SystemClock.elapsedRealtime(), seconds).also {
+                    activity.intent.putExtra(EXTRA_DEADLINE, it)
+                }
+            }
         val id = System.identityHashCode(activity)
         timers.remove(id)?.let { main.removeCallbacks(it) }
         hosts[id] = WeakReference(activity)
-        val deadline = PrizeClock.deadlineMs(SystemClock.elapsedRealtime(), seconds)
+        val delay = (deadline - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
         val tick =
             Runnable {
                 timers.remove(id)
                 stopIfDue(hosts.remove(id)?.get(), deadline, seconds)
             }
         timers[id] = tick
-        main.postDelayed(tick, seconds * 1_000L)
+        main.postDelayed(tick, delay)
     }
 
     /**

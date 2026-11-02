@@ -35,6 +35,8 @@ class ClapBoard(
                 "bola" to 2,
                 "banana" to 3,
                 "sapato" to 3,
+                "borboleta" to 4,
+                "computador" to 4,
             )
     }
 }

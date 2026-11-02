@@ -333,19 +333,33 @@ class PlayBoardFactory(
 
     private fun numericOrShapes(piece: String): List<String> {
         val asNumber = piece.toIntOrNull()
-        return if (asNumber != null) {
-            numericOptions(asNumber, 1, 10).map { it.toString() }.filter { it != piece }.take(3)
-        } else {
-            GeometricShape.entries
-                .map { it.displayName }
-                .filter { it != piece }
-                .take(3)
-        }
+        val picked =
+            if (asNumber != null) {
+                numericOptions(asNumber, 1, 10).map { it.toString() }.filter { it != piece }
+            } else {
+                GeometricShape.entries.map { it.displayName }.filter { it != piece }
+            }
+        return padOptions(picked, piece, asNumber != null)
     }
 
     private companion object {
         val SYMBOLS: List<String> = listOf("▲", "●", "■", "◆", "★", "♥")
     }
+}
+
+internal fun padOptions(
+    picked: List<String>,
+    piece: String,
+    numeric: Boolean,
+): List<String> {
+    val padded = picked.take(3).toMutableList()
+    var extra = 0
+    while (padded.size < 3) {
+        val candidate = if (numeric) (piece.toInt() + extra).toString() else "peça $extra"
+        extra += 1
+        if (candidate != piece && candidate !in padded) padded += candidate
+    }
+    return padded
 }
 
 private data class CipherSpec(

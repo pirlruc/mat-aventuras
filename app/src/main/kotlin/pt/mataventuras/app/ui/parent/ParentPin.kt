@@ -3,6 +3,7 @@ package pt.mataventuras.app.ui.parent
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.domain.parent.PinGate
 import pt.mataventuras.domain.parent.PinGateResult
+import pt.mataventuras.domain.parent.PinNotice
 import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
@@ -22,7 +23,7 @@ internal object ParentPin {
         pins.update { state ->
             when {
                 settingPin && state == null -> gate.setPin(pin, confirmation)
-                state == null -> PinGateResult.Stay(VoiceScripts.TRY_AGAIN, null) to null
+                state == null -> PinGateResult.Stay(PinNotice.MISSING, speak = VoiceScripts.TRY_AGAIN) to null
                 else -> gate.unlock(state, pin)
             }
         }

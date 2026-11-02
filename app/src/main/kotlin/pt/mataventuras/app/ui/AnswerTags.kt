@@ -1,17 +1,17 @@
 package pt.mataventuras.app.ui
 
 /**
- * True in unit tests and debug builds. [MatAventurasApp] clears it on a release install.
+ * True in unit tests and debug builds. A release install leaves this false.
  */
-internal var debugAnswerTags: Boolean = true
+internal var debugAnswerTags: Boolean = false
 
 /**
- * Answer test tags. Release builds do not mark the correct option.
+ * Answer test tags. A release build uses one tag for every option.
  */
 internal fun debugAnswerTag(
     correct: Boolean,
     debug: Boolean,
 ): String {
-    if (!correct) return "distractor"
-    return if (debug) "correct-answer" else "answer"
+    if (!debug) return "option"
+    return if (correct) "correct-answer" else "distractor"
 }

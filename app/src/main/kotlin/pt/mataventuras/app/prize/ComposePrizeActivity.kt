@@ -20,8 +20,16 @@ class ComposePrizeActivity : ComponentActivity() {
         super.onDestroy()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val deadline = intent.getLongExtra(PrizeLimit.EXTRA_DEADLINE, 0L)
+        if (deadline > 0L) outState.putLong(PrizeLimit.EXTRA_DEADLINE, deadline)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val restored = savedInstanceState?.getLong(PrizeLimit.EXTRA_DEADLINE, 0L) ?: 0L
+        if (restored > 0L) intent.putExtra(PrizeLimit.EXTRA_DEADLINE, restored)
         val prize = prizeFrom(intent.getStringExtra(EXTRA))
         val random = if (intent.hasExtra(SEED)) Random(intent.getLongExtra(SEED, 1L)) else Random.Default
         PrizeLimit.arm(this)

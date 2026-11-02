@@ -51,9 +51,12 @@ import pt.mataventuras.app.ui.pinSubmitLabel
 import pt.mataventuras.app.ui.waitingForProfile
 import pt.mataventuras.data.pin.PinKeyException
 import pt.mataventuras.domain.model.ChildProfile
+import pt.mataventuras.domain.parent.AdultChallenge
 import pt.mataventuras.domain.parent.ParentSummary
 import pt.mataventuras.domain.parent.PinGate
 import pt.mataventuras.domain.parent.PinGateResult
+import pt.mataventuras.domain.parent.PinNotice
+import pt.mataventuras.domain.parent.PinPolicy
 import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
@@ -65,6 +68,8 @@ fun ParentDashboard(
     profile: ChildProfile?,
     onSpeak: (String) -> Unit,
     onBack: () -> Unit,
+    challenge: AdultChallenge = AdultChallenge.draw(),
+    adultHoldMs: Long = 1_500,
 ) {
     val scope = rememberCoroutineScope()
     val gate = remember { PinGate(container.pinPolicy) }
@@ -76,6 +81,14 @@ fun ParentDashboard(
     var summary by remember { mutableStateOf<ParentSummary?>(null) }
     var pinBusy by remember { mutableStateOf(false) }
     var keyBroken by remember { mutableStateOf(false) }
+    var adultOk by remember { mutableStateOf(false) }
+    val unreadable = stringResource(R.string.pin_unreadable)
+    val mismatch = stringResource(R.string.pin_mismatch)
+    val pinFormat = stringResource(R.string.pin_four_digits)
+    val lockedCopy = stringResource(R.string.pin_locked)
+    val missingCopy = stringResource(R.string.try_again)
+    val wrongLines = (0..PinPolicy.MAX_FAILURES).map { stringResource(R.string.pin_wrong_remaining, it) }
+    val puzzle = remember { challenge }
     SecureParentWindow()
 
     LaunchedEffect(Unit) {
@@ -87,7 +100,7 @@ fun ParentDashboard(
             throw error
         } catch (_: PinKeyException) {
             keyBroken = true
-            message = "Não consigo ler o PIN deste aparelho."
+            message = unreadable
         } catch (_: IllegalStateException) {
             settingPin = false
             message = VoiceScripts.TRY_AGAIN
@@ -98,13 +111,25 @@ fun ParentDashboard(
     }
 
     if (keyBroken && !unlocked) {
-        ParentKeyReset(container, onBack) {
+        ParentKeyReset(container, onBack, adultHoldMs, puzzle) {
             keyBroken = false
             settingPin = true
             pin = ""
             confirmation = ""
             message = pinPrompt(true)
         }
+        return
+    }
+
+    if (settingPin && !adultOk && !unlocked) {
+        AdultHold(
+            challenge = puzzle,
+            holdMs = adultHoldMs,
+            holdLabel = stringResource(R.string.hold_for_adult),
+            title = VoiceScripts.PARENT_DASHBOARD,
+            buttonLabel = stringResource(R.string.continue_label),
+            onBack = onBack,
+        ) { adultOk = true }
         return
     }
 
@@ -124,10 +149,10 @@ fun ParentDashboard(
             Spacer(Modifier.height(12.dp))
             Text(message)
             Spacer(Modifier.height(12.dp))
-            PinField("PIN", pin) { pin = it.take(4) }
+            PinField(stringResource(R.string.pin_label), pin) { pin = it }
             if (settingPin) {
                 Spacer(Modifier.height(8.dp))
-                PinField("Confirmar PIN", confirmation) { confirmation = it.take(4) }
+                PinField(stringResource(R.string.pin_confirm), confirmation) { confirmation = it }
             }
             Spacer(Modifier.height(16.dp))
             Button(
@@ -144,7 +169,15 @@ fun ParentDashboard(
                                     unlocked = true
                                 }
                                 is PinGateResult.Stay -> {
-                                    message = result.message
+                                    message =
+                                        pinNotice(
+                                            result,
+                                            mismatch,
+                                            pinFormat,
+                                            lockedCopy,
+                                            missingCopy,
+                                            wrongLines,
+                                        )
                                     result.speak?.let(onSpeak)
                                 }
                             }
@@ -230,7 +263,7 @@ private fun PinField(
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = onChange,
+        onValueChange = { onChange(it.filter(Char::isDigit).take(4)) },
         label = { Text(label) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -292,26 +325,60 @@ private fun SecureParentWindow() {
 internal fun ParentKeyReset(
     container: AppContainer,
     onBack: () -> Unit,
-    holdMs: Long = 1_500,
+    holdMs: Long,
+    challenge: AdultChallenge,
     onReset: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    AdultHold(
+        challenge = challenge,
+        holdMs = holdMs,
+        holdLabel = stringResource(R.string.hold_to_reset),
+        intro = stringResource(R.string.pin_unreadable),
+        onBack = onBack,
+        onPassed = {
+            scope.launch {
+                container.pinRepository.clear()
+                onReset()
+            }
+        },
+    )
+}
+
+@Composable
+internal fun AdultHold(
+    challenge: AdultChallenge,
+    holdMs: Long,
+    holdLabel: String,
+    title: String? = null,
+    intro: String? = null,
+    buttonLabel: String? = null,
+    onBack: (() -> Unit)? = null,
+    onPassed: () -> Unit,
+) {
+    val action = buttonLabel ?: stringResource(R.string.reset_pin)
     var held by remember { mutableStateOf(false) }
     var answer by remember { mutableStateOf("") }
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(stringResource(R.string.pin_unreadable))
-        Spacer(Modifier.height(12.dp))
+        if (title != null) {
+            Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(12.dp))
+        }
+        if (intro != null) {
+            Text(intro)
+            Spacer(Modifier.height(12.dp))
+        }
         if (!held) {
             Text(
-                stringResource(R.string.hold_to_reset),
+                holdLabel,
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .height(64.dp)
-                        .pointerInput(Unit) {
+                        .pointerInput(holdMs) {
                             detectTapGestures(
                                 onPress = {
                                     val released =
@@ -329,26 +396,44 @@ internal fun ParentKeyReset(
                         },
             )
         } else {
-            Text(stringResource(R.string.reset_sum))
+            Text(challenge.prompt)
             OutlinedTextField(
                 value = answer,
-                onValueChange = { answer = it.filter { ch -> ch.isDigit() }.take(2) },
+                onValueChange = { answer = it.filter(Char::isDigit).take(4) },
                 label = { Text(stringResource(R.string.answer)) },
                 modifier = Modifier.fillMaxWidth().testTag("pin-reset-answer"),
                 singleLine = true,
             )
             Button(
                 onClick = {
-                    if (answer != "13") return@Button
-                    scope.launch {
-                        container.pinRepository.clear()
-                        onReset()
-                    }
+                    if (answer != challenge.product.toString()) return@Button
+                    onPassed()
                 },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text(stringResource(R.string.reset_pin)) }
+            ) { Text(action) }
         }
-        Spacer(Modifier.height(8.dp))
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
+        if (onBack != null) {
+            Spacer(Modifier.height(8.dp))
+            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
+        }
     }
 }
+
+/**
+ * pt-PT copy for a PIN [result]. The sentences live in strings.xml.
+ */
+internal fun pinNotice(
+    result: PinGateResult.Stay,
+    mismatch: String,
+    format: String,
+    locked: String,
+    missing: String,
+    wrongLines: List<String>,
+): String =
+    when (result.notice) {
+        PinNotice.MISMATCH -> mismatch
+        PinNotice.FORMAT -> format
+        PinNotice.LOCKED -> locked
+        PinNotice.MISSING -> missing
+        PinNotice.WRONG -> wrongLines[result.remaining.coerceIn(wrongLines.indices)]
+    }

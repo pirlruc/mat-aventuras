@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -128,8 +129,23 @@ class ParentAndLessonLogicTest {
                 app.container.repository.getProfile(id)!!
             }
         compose.setContent {
-            ParentDashboard(app.container, profile, onSpeak = {}, onBack = {})
+            ParentDashboard(
+                app.container,
+                profile,
+                onSpeak = {},
+                onBack = {},
+                challenge =
+                    pt.mataventuras.domain.parent
+                        .AdultChallenge(12, 3),
+                adultHoldMs = 0,
+            )
         }
+        compose.onNodeWithText("Segurar para continuar").performTouchInput {
+            down(center)
+            up()
+        }
+        compose.onNodeWithText("Resposta").performTextInput("36")
+        compose.onNodeWithText("Continuar").performClick()
         compose.onNodeWithText(VoiceScripts.PARENT_DASHBOARD).assertIsDisplayed()
         compose.onNodeWithText("PIN").performTextInput("4242")
         compose.onNodeWithText("Confirmar PIN").performTextInput("1111")

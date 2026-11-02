@@ -62,7 +62,7 @@ class ArithmeticGames(
         val landing = random.nextInt(2, 16)
         val start = landing + jumps * step
         val prompt = "O sapo está no $start e salta $jumps vezes, de $step em $step, para trás. Onde fica?"
-        val spoken = "O sapo joga na reta numérica e salta para trás. Em que número fica?"
+        val spoken = "O sapo está num número e salta para trás. Em que número fica?"
         return ask(LearningModule.SUBTRACTION, prompt, spoken, landing, 0, 40)
     }
 

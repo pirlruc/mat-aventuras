@@ -26,6 +26,7 @@ class MoneyBoard(
             val candidate = price(otherEuros, otherCents)
             if (candidate != correct && candidate !in decoys) decoys += candidate
         }
+        fillPrices(decoys, correct, euros, cents)
         val options = (decoys + correct).shuffled(random)
         return Exercise(
             module = LearningModule.MONEY,
@@ -34,6 +35,21 @@ class MoneyBoard(
             options = options,
             correctIndex = options.indexOf(correct),
         )
+    }
+
+    /** Adds nearby prices until [decoys] has three entries. */
+    internal fun fillPrices(
+        decoys: MutableList<String>,
+        correct: String,
+        euros: Int,
+        cents: Int,
+    ) {
+        var filler = 1
+        while (decoys.size < 3) {
+            val candidate = price(euros + filler, cents)
+            filler += 1
+            if (candidate != correct && candidate !in decoys) decoys += candidate
+        }
     }
 
     /**

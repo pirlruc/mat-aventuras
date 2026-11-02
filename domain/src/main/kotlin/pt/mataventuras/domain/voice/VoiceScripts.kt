@@ -22,7 +22,7 @@ object VoiceScripts {
     const val PARENT_DASHBOARD: String = "Painel dos pais"
     const val ENTER_PIN: String = "Introduz o PIN dos pais."
     const val SET_PIN: String = "Escolhe um PIN de quatro números."
-    const val WRONG_PIN: String = "PIN incorrecto."
+    const val WRONG_PIN: String = "PIN incorreto."
     const val PIN_LOCKED: String = "Demasiadas tentativas. Espera um minuto."
     const val STAYS_ON_DEVICE: String = "Tudo fica neste aparelho. Não enviamos dados."
     const val STEER_HINT: String =

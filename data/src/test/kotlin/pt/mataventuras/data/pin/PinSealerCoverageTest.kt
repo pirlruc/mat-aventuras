@@ -62,8 +62,33 @@ class PinSealerCoverageTest {
             val context = ApplicationProvider.getApplicationContext<Context>()
             val repository = PinRepository(context, "pin_elapsed", allowPlaintextFallback = true)
             val prefs = context.getSharedPreferences("pin_elapsed_plain", Context.MODE_PRIVATE)
-            prefs.edit().putString("record", "plain:ab\ncd\n1\n2\n1000\n50").commit()
+            prefs.edit().putString("record", "plain:ab\ncd\n1\n2\n1000\n50\n7").commit()
             assertEquals(50L, repository.read()?.lockedUntilElapsedMs)
+            assertEquals(7, repository.read()?.lockoutBootCount)
+            prefs.edit().putString("record", "plain:ab\ncd\n1\n2\n1000\n50").commit()
+            assertEquals(0, repository.read()?.lockoutBootCount)
+            prefs.edit().putString("record", "plain:ab\ncd\nnope\n2\n1000").commit()
+            try {
+                repository.read()
+                throw AssertionError("a non-numeric failure count must offer a reset")
+            } catch (error: PinKeyException) {
+                assertTrue(error.cause is IllegalStateException)
+            }
+            val hookPrefs = context.getSharedPreferences("pin_hook_off", Context.MODE_PRIVATE)
+            val locked = PinRepository(context, "pin_hook_off", prefs = hookPrefs)
+            try {
+                locked.failNextRead(IllegalStateException("no"))
+                throw AssertionError("the test hook stays off without the plaintext store")
+            } catch (error: IllegalStateException) {
+                assertEquals("PIN test hook is off", error.message)
+            }
+            prefs.edit().putString("record", "plain:nope").commit()
+            try {
+                repository.read()
+                throw AssertionError("corrupt sealed record must offer a reset")
+            } catch (error: PinKeyException) {
+                assertTrue(error.cause is IllegalStateException)
+            }
             prefs.edit().putString("record", "plain:ab\ncd\n1\n2\n1000\nnope").commit()
             assertEquals(0L, repository.read()?.lockedUntilElapsedMs)
             repository.failNextRead(PinKeyException(java.io.IOException("gone")))

@@ -1381,31 +1381,31 @@ milestones:
           - KT-BUILD-002
         tasks:
           - id: MAT-016-T1
-            status: open
+            status: done
             title: Stop release builds from revealing the correct option
             verification:
               - debugAnswerTags defaults to false
               - A release option tag does not say whether the option is correct
           - id: MAT-016-T2
-            status: open
+            status: done
             title: Keep the prize deadline across rotation
             verification:
               - ComposePrizeActivity restores an elapsedRealtime deadline
               - The Godot host and the native hosts arm the limit once
           - id: MAT-016-T3
-            status: open
+            status: done
             title: Stop size and colour lessons announcing the answer
             verification:
               - Size and sort content descriptions do not name the answer
           - id: MAT-016-T4
-            status: open
+            status: done
             title: Harden the parent gate and the PIN lockout
             verification:
               - Creating the first PIN and resetting it require a randomized product
               - A corrupt sealed record opens the reset
               - A reboot does not extend the lockout past the wall-clock deadline
           - id: MAT-016-T5
-            status: open
+            status: done
             title: Close the generator and copy seams
             verification:
               - Money and numeric options pad to the expected count

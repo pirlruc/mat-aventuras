@@ -28,7 +28,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import pt.mataventuras.app.prize.PrizeLimit
 import pt.mataventuras.domain.engine.EngineInputMap
 import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.PlatformerWorld
@@ -48,7 +47,6 @@ internal object NativeRunnerHost {
         showUi: Boolean = GodotRuntime.shouldEmbed(),
         frameLimit: Int = Int.MAX_VALUE,
     ): Platformer2dLoop {
-        PrizeLimit.arm(activity)
         val seed = kotlin.math.abs(activity.mascotCode().hashCode() + activity.childName().hashCode())
         val level = PlatformerWorld.random(seed)
         val loop =

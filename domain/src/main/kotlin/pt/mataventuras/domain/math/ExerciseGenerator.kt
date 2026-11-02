@@ -114,7 +114,7 @@ open class ExerciseGenerator(
             module = LearningModule.ADDITION,
             prompt = "$a + $b = ?",
             spoken = "Quanto é $a mais $b?",
-            options = numericOptions(a + b, 20, 96),
+            options = numericOptions(a + b, band.additionLow * 2, (band.additionHigh - 1) * 2),
             correct = a + b,
         )
     }

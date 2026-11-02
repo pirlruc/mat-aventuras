@@ -6,22 +6,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import pt.mataventuras.app.R
 import pt.mataventuras.domain.model.GeometricShape
 
 /**
- * A colour circle or a shape. The name is the content description.
+ * A colour circle or a shape. The content description does not name it.
  */
 @Composable
-internal fun SortMark(label: String) {
+internal fun SortMark(
+    label: String,
+    option: Int,
+) {
     val shape = GeometricShape.entries.firstOrNull { it.displayName == label }
+    val spoken = stringResource(R.string.option_n, option)
     Canvas(
         modifier =
             Modifier
                 .size(56.dp)
-                .semantics { contentDescription = label },
+                .semantics { contentDescription = spoken },
     ) {
         drawSortMark(shape, label)
     }
