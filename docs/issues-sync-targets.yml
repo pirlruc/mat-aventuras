@@ -29,3 +29,5 @@ milestones:
     description: Broader exercise packs, instrumented coverage
   - name: Phase 3 — Hardening and engines
     description: Remaining guardrail CI gates and optional isolated engine plugin
+  - name: Phase 4 — Round 4 defects
+    description: Defects found after 0.3.1 and one androiddevops pin

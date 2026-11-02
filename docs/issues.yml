@@ -272,7 +272,7 @@ milestones:
               - KT-TEST-001
 
   - name: Phase 3 — Hardening and engines
-    status: open
+    status: done
     epics:
       - id: MAT-003
         status: done
@@ -1325,7 +1325,7 @@ milestones:
               - PrizeBoot holds the Activity in a WeakReference
 
       - id: MAT-015
-        status: open
+        status: done
         title: Sign and attest releases
         decision: >-
           In the context of a public Android release, facing an APK that is
@@ -1356,3 +1356,66 @@ milestones:
             verification:
               - release.yml passes sign true and environment release
               - The release artifact includes the CycloneDX bill
+
+  - name: Phase 4 — Round 4 defects
+    status: open
+    epics:
+      - id: MAT-016
+        status: open
+        title: Fix round-4 defects and align supply chain
+        decision: >-
+          In the context of the shipped 0.3.1 app, facing answer tags that
+          still mark the correct option in a release build and a prize timer
+          that restarts on rotation, we decided to fix those defects and to
+          read licenses from the release bill, to achieve a release a child
+          cannot read the answers from and one pin of androiddevops, accepting
+          a 0.3.2 patch instead of waiting for a larger release.
+        acceptance_criteria:
+          - A release build uses one test tag for every option
+          - The Compose prize deadline survives rotation
+          - The first PIN and a Keystore reset both require a randomized adult sum
+          - androiddevops is pinned once, at 1.2.0
+        guardrail_refs:
+          - CI-034
+          - SC-LIC-002
+          - KT-BUILD-002
+        tasks:
+          - id: MAT-016-T1
+            status: open
+            title: Stop release builds from revealing the correct option
+            verification:
+              - debugAnswerTags defaults to false
+              - A release option tag does not say whether the option is correct
+          - id: MAT-016-T2
+            status: open
+            title: Keep the prize deadline across rotation
+            verification:
+              - ComposePrizeActivity restores an elapsedRealtime deadline
+              - The Godot host and the native hosts arm the limit once
+          - id: MAT-016-T3
+            status: open
+            title: Stop size and colour lessons announcing the answer
+            verification:
+              - Size and sort content descriptions do not name the answer
+          - id: MAT-016-T4
+            status: open
+            title: Harden the parent gate and the PIN lockout
+            verification:
+              - Creating the first PIN and resetting it require a randomized product
+              - A corrupt sealed record opens the reset
+              - A reboot does not extend the lockout past the wall-clock deadline
+          - id: MAT-016-T5
+            status: open
+            title: Close the generator and copy seams
+            verification:
+              - Money and numeric options pad to the expected count
+              - App-layer parent and PIN copy lives in strings.xml
+          - id: MAT-016-T6
+            status: open
+            title: Pin androiddevops 1.2.0 and gate licenses from the bill
+            verification:
+              - ci.yml, emulator.yml, and release.yml use one androiddevops SHA
+              - verify-licenses.py reads a CycloneDX bill, or an SC-LIC-002 deviation is recorded
+            guardrail_refs:
+              - CI-034
+              - SC-LIC-002
