@@ -9,19 +9,38 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_licenses_pass(scripts) -> None:
+def test_licenses_pass(scripts, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The version catalog has no denied license."""
+    monkeypatch.setattr(scripts["verify-licenses.py"], "BILL", tmp_path / "missing.json")
     assert scripts["verify-licenses.py"].main() == 0
 
 
-def test_licenses_denied_and_allow(scripts, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_licenses_denied_and_allow(
+    scripts, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """A denied id and an allow-list miss both fail."""
     module = scripts["verify-licenses.py"]
+    monkeypatch.setattr(module, "BILL", tmp_path / "missing.json")
     first = module.modules()[0]
-    monkeypatch.setitem(module.KNOWN, first, "GPL-3.0")
+    monkeypatch.setitem(module.KNOWN, first, "AGPL-3.0")
     assert module.main() == 1
     monkeypatch.setitem(module.KNOWN, first, "Apache-2.0")
     monkeypatch.setattr(module, "ALLOW", {"MIT"})
+    assert module.main() == 1
+
+
+def test_licenses_read_the_cyclonedx_bill(
+    scripts, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A denied license in the CycloneDX bill fails the gate."""
+    module = scripts["verify-licenses.py"]
+    bill = tmp_path / "bom.json"
+    bill.write_text(
+        '{"components":[{"name":"ok","licenses":[{"license":{"id":"Apache-2.0"}}]},'
+        '{"name":"bad","licenses":[{"license":{"id":"BUSL-1.1"}}]}]}',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(module, "BILL", bill)
     assert module.main() == 1
 
 

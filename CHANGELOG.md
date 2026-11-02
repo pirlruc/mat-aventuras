@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- CI, the emulator, and release signing call androiddevops 1.2.0.
+- The license gate reads the CycloneDX bill when Gradle has generated it.
+
 ### Fixed
 
 - A release build no longer tags which option is the answer.

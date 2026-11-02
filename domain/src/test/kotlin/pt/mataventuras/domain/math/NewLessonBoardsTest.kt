@@ -139,7 +139,10 @@ class NewLessonBoardsTest {
         var grown = snake
         repeat(3) { grown = AnswerSnake.bite(grown, grown.correct, Random(8 + it)) }
         assertTrue(AnswerSnake.full(grown))
-        assertEquals(VoiceScripts.SNAKE_PROMPT, snake.prompt.substringBefore(" 1").take(VoiceScripts.SNAKE_PROMPT.length))
+        assertEquals(
+            VoiceScripts.SNAKE_PROMPT,
+            snake.prompt.substringBefore(" 1").take(VoiceScripts.SNAKE_PROMPT.length),
+        )
     }
 
     @Test

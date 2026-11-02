@@ -193,7 +193,7 @@ class DefectCoverageTest {
         compose.setContent {
             ParentDashboard(app.container, null, onSpeak = {}, onBack = {})
         }
-        compose.onNodeWithText("PIN").performTextInput("4242")
+        compose.onNodeWithText("PIN").performTextInput("a42421")
         compose.onNodeWithText("Entrar").performClick()
         compose.waitUntil(8_000) {
             compose

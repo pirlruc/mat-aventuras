@@ -1358,10 +1358,10 @@ milestones:
               - The release artifact includes the CycloneDX bill
 
   - name: Phase 4 — Round 4 defects
-    status: open
+    status: done
     epics:
       - id: MAT-016
-        status: open
+        status: done
         title: Fix round-4 defects and align supply chain
         decision: >-
           In the context of the shipped 0.3.1 app, facing answer tags that
@@ -1411,7 +1411,7 @@ milestones:
               - Money and numeric options pad to the expected count
               - App-layer parent and PIN copy lives in strings.xml
           - id: MAT-016-T6
-            status: open
+            status: done
             title: Pin androiddevops 1.2.0 and gate licenses from the bill
             verification:
               - ci.yml, emulator.yml, and release.yml use one androiddevops SHA

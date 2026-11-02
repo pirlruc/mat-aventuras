@@ -1,7 +1,7 @@
 # Quality and Android builds. Heavy jobs skip a pull request that does not
 # touch the app, the domain, Gradle, or scripts. The gate job still runs, so a
 # docs-only pull request is not blocked on a skipped Gradle build.
-# Android jobs call androiddevops 1.1.0 (CI-018).
+# Android jobs call androiddevops 1.2.0 (CI-018).
 name: ci
 
 on:
@@ -93,19 +93,21 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
+    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
     with:
-      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
+      scripts_ref: e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
       gradle_tasks: >-
         :domain:ktlintCheck :domain:detekt :domain:test :domain:koverXmlReport :domain:koverVerify
         :data:ktlintCheck :data:detekt :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug
         :app:ktlintCheck :app:detekt :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerifyDebug
         :app:lintDebug
+        cyclonedxBom
       pre_command: bash scripts/checkout-guardrails.sh
       post_command: >-
         python3 -m venv .ci-venv &&
         .ci-venv/bin/pip install --require-hashes -r requirements-ci.txt &&
-        .ci-venv/bin/python scripts/verify-coverage.py
+        .ci-venv/bin/python scripts/verify-coverage.py &&
+        python3 scripts/verify-licenses.py
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
       command_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
@@ -116,9 +118,9 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
+    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
     with:
-      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
+      scripts_ref: e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
       upload: never
       build_command: >-
         ./gradlew --no-daemon :domain:compileKotlin :data:compileDebugKotlin :app:compileDebugKotlin
@@ -130,9 +132,9 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
+    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
     with:
-      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
+      scripts_ref: e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -141,11 +143,40 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.deps == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
+    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
     with:
-      scripts_ref: bca85a8216e4e94fde2f9b54ff8d65a87af07949
+      scripts_ref: e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
+
+  wrapper:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Wrapper files changed
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          run=true
+          if [[ "${EVENT}" == "pull_request" ]]; then
+            run=false
+            git fetch --depth=1 origin "${BASE}"
+            names="$(git diff --name-only "origin/${BASE}...HEAD")"
+            if grep -Eq '^gradle/wrapper/' <<<"${names}"; then
+              run=true
+            fi
+          fi
+          echo "run=${run}" >> "${GITHUB_OUTPUT}"
+      - name: Validate Gradle wrapper
+        if: steps.filter.outputs.run == 'true'
+        uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
   dependency-review:
     if: github.event_name == 'pull_request'
@@ -163,7 +194,7 @@ jobs:
 
   gate:
     if: always()
-    needs: [changes, quality, android, codeql, mobsf, sbom, dependency-review]
+    needs: [changes, quality, android, codeql, mobsf, sbom, dependency-review, wrapper]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

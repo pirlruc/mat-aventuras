@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.kover) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.ktlint) apply false
+    alias(libs.plugins.cyclonedx)
 }
 
 // KT-TEST-002 / CI-022: one verify block for every Kover module.

@@ -39,8 +39,8 @@ internal fun answerFlashGlyph(
 /**
  * Caption under the flash glyph. Same pt-PT lines TTS already speaks.
  */
-@Suppress("MaxLineLength")
-internal fun answerFlashCaption(correct: Boolean): String = if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN
+internal fun answerFlashCaption(correct: Boolean): String =
+    if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN
 
 /**
  * Solid colour for the flash glyph.
