@@ -8,6 +8,9 @@
 # not an installable package, so installable_app is false.
 # This repo has Actions read on ci-lint and ci-python, so the job runs.
 # Fork pull requests are skipped.
+# A pull request or push runs the scan only when a Python file or a Python
+# tool config changes. python-gate still runs, so a skipped scan does not
+# leave a required check pending.
 name: python-quality
 
 on:
@@ -23,8 +26,45 @@ concurrency:
 permissions: {}
 
 jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      python: ${{ steps.set.outputs.python }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Detect Python changes
+        id: set
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          python=true
+          names=""
+          if [[ "${EVENT}" == "pull_request" ]]; then
+            python=false
+            git fetch --depth=1 origin "${BASE}"
+            names="$(git diff --name-only "origin/${BASE}...HEAD")"
+          elif [[ "${EVENT}" == "push" && "${BEFORE}" != 0000000000000000000000000000000000000000 ]]; then
+            python=false
+            names="$(git diff --name-only "${BEFORE}" HEAD)"
+          fi
+          if [[ "${python}" == "false" ]]; then
+            pattern='(^|/)[^/]+\.py$|(^|/)pyproject\.toml$|(^|/)requirements[^/]*\.txt$|(^|/)uv\.lock$|^\.bandit$|^\.python-version$|(^|/)(ruff\.toml|\.ruff\.toml|mypy\.ini|\.mypy\.ini|pytest\.ini|tox\.ini)$|^\.github/workflows/python-quality\.yml$'
+            if grep -Eq "${pattern}" <<<"${names}"; then
+              python=true
+            fi
+          fi
+          echo "python=${python}" >> "${GITHUB_OUTPUT}"
+
   python-quality:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: changes
+    if: needs.changes.outputs.python == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: write
       actions: write
@@ -44,3 +84,24 @@ jobs:
       app_install_command: >-
         UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/mat-venv" uv sync --all-groups --all-extras
         && echo "${RUNNER_TEMP}/mat-venv/bin" >> "$GITHUB_PATH"
+
+  python-gate:
+    needs: [changes, python-quality]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Fail if Python quality failed
+        env:
+          RESULTS: ${{ toJson(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          needs = json.loads(os.environ["RESULTS"])
+          changes = needs["changes"]["result"]
+          quality = needs["python-quality"]["result"]
+          if changes != "success" or quality not in ("success", "skipped"):
+              print(f"changes={changes} python-quality={quality}")
+              sys.exit(1)
+          print(f"ok python-quality={quality}")
+          PY
