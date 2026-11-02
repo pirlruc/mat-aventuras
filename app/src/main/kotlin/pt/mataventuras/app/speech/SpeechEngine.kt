@@ -3,7 +3,8 @@ package pt.mataventuras.app.speech
 import android.content.Context
 import android.speech.tts.TextToSpeech
 import java.util.Locale
-import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.languageSupported
+import pt.mataventuras.app.ui.shouldSpeak
 
 /**
  * On-device TTS in Portuguese from Portugal. No cloud voice services.
@@ -19,7 +20,7 @@ class SpeechEngine(
         if (released || status != TextToSpeech.SUCCESS) return
         val pt = Locale.forLanguageTag("pt-PT")
         val result = tts.setLanguage(pt)
-        ready = UiLogic.languageSupported(result)
+        ready = languageSupported(result)
         tts.setSpeechRate(0.92f)
     }
 
@@ -34,7 +35,7 @@ class SpeechEngine(
      * Speaks [text] in pt-PT when the engine is ready.
      */
     fun speak(text: String) {
-        if (released || !UiLogic.shouldSpeak(ready, text)) return
+        if (released || !shouldSpeak(ready, text)) return
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "mat-aventuras")
     }
 

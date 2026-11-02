@@ -27,4 +27,29 @@
     <string name="avatars">Avatares</string>
     <string name="privacy">Tudo fica neste aparelho. Não enviamos dados.</string>
     <string name="switch_profile">Outra criança</string>
+    <string name="listen">Ouvir</string>
+    <string name="listen_again">Ouvir outra vez</string>
+    <string name="stars_of_three">%1$d de 3 estrelas</string>
+    <string name="score_line">%1$d certos · %2$d pontos</string>
+    <string name="clock_face">Relógio</string>
+    <string name="pin_save">Guardar PIN</string>
+    <string name="pin_enter">Entrar</string>
+    <string name="choose_child">Escolhe um perfil de criança primeiro.</string>
+    <string name="per_module">Por módulo</string>
+    <string name="hits_misses">Acertos / erros</string>
+    <string name="close">Fechar</string>
+    <string name="prize_minutes">Tempo do prémio: %1$d min</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="pin_unreadable">Não consigo ler o PIN deste aparelho.</string>
+    <string name="hold_to_reset">Segurar para repor</string>
+    <string name="reset_sum">Quanto é 6 + 7?</string>
+    <string name="answer">Resposta</string>
+    <string name="reset_pin">Repor</string>
+    <string name="needs_work_clear" formatted="false">Nenhum módulo abaixo de 70% com amostra suficiente.</string>
+    <string name="on_this_device">Só neste aparelho — irmãos e amigos.</string>
+    <string name="rank">%1$dº</string>
+    <string name="points_accuracy">%1$d pontos · %2$d%% precisos</string>
+    <string name="hello_name">Olá, %1$s!</string>
+    <string name="points_count">%1$d pontos</string>
+    <string name="lets_go_with">Vamos com o %1$s!</string>
 </resources>

@@ -3,6 +3,9 @@ package pt.mataventuras.app.ui.lesson
 import android.media.AudioManager
 import android.media.ToneGenerator
 import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.answerHaptic
+import pt.mataventuras.app.ui.answerTone
+import pt.mataventuras.app.ui.answerToneMs
 
 /**
  * Short on-device chime for a correct or wrong tap. TTS still speaks the line.
@@ -20,12 +23,12 @@ class AnswerCuePlayer(
         haptic: (Int) -> Unit = {},
     ) {
         try {
-            playTone(UiLogic.answerTone(correct, gentle), UiLogic.answerToneMs(correct, gentle))
+            playTone(answerTone(correct, gentle), answerToneMs(correct, gentle))
         } catch (_: RuntimeException) {
             // Host tests and muted devices have no tone generator.
         }
         try {
-            haptic(UiLogic.answerHaptic(correct))
+            haptic(answerHaptic(correct))
         } catch (_: RuntimeException) {
             // Some views ignore unknown haptic codes.
         }

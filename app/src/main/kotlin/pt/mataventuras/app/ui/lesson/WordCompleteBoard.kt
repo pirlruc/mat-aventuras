@@ -14,7 +14,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.optionAnswerTag
 import pt.mataventuras.domain.math.Exercise
 
 /**
@@ -46,7 +46,7 @@ internal fun WordCompleteBoard(
                         .fillMaxWidth()
                         .height(64.dp)
                         .semantics(mergeDescendants = true) { contentDescription = letter }
-                        .testTag(UiLogic.optionAnswerTag(exercise.isCorrect(index), false)),
+                        .testTag(optionAnswerTag(exercise.isCorrect(index), false)),
             ) {
                 Text(letter, fontWeight = FontWeight.Bold, fontSize = 28.sp)
             }

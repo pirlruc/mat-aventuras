@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -40,8 +41,14 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import pt.mataventuras.app.R
 import pt.mataventuras.app.di.AppContainer
-import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.formatDuration
+import pt.mataventuras.app.ui.modulePerformanceLine
+import pt.mataventuras.app.ui.needsWorkLines
+import pt.mataventuras.app.ui.pinPrompt
+import pt.mataventuras.app.ui.pinSubmitLabel
+import pt.mataventuras.app.ui.waitingForProfile
 import pt.mataventuras.data.pin.PinKeyException
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.parent.ParentSummary
@@ -74,7 +81,7 @@ fun ParentDashboard(
     LaunchedEffect(Unit) {
         try {
             settingPin = !container.pinRepository.isSet()
-            message = UiLogic.pinPrompt(settingPin)
+            message = pinPrompt(settingPin)
             onSpeak(message)
         } catch (error: CancellationException) {
             throw error
@@ -96,7 +103,7 @@ fun ParentDashboard(
             settingPin = true
             pin = ""
             confirmation = ""
-            message = UiLogic.pinPrompt(true)
+            message = pinPrompt(true)
         }
         return
     }
@@ -156,9 +163,17 @@ fun ParentDashboard(
                 },
                 enabled = !pinBusy,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text(UiLogic.pinSubmitLabel(settingPin)) }
+            ) {
+                Text(
+                    pinSubmitLabel(
+                        settingPin,
+                        stringResource(R.string.pin_save),
+                        stringResource(R.string.pin_enter),
+                    ),
+                )
+            }
             Spacer(Modifier.height(8.dp))
-            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Voltar") }
+            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
         }
         return
     }
@@ -184,26 +199,26 @@ fun ParentDashboard(
             fontWeight = FontWeight.Bold,
         )
         Text(VoiceScripts.STAYS_ON_DEVICE, style = MaterialTheme.typography.bodyMedium)
-        if (UiLogic.waitingForProfile(profile, data)) {
-            Text("Escolhe um perfil de criança primeiro.")
+        if (waitingForProfile(profile, data)) {
+            Text(stringResource(R.string.choose_child))
         } else {
             Text(profile!!.name, style = MaterialTheme.typography.titleLarge)
-            MetricCard("Precisão", "${(data!!.accuracy * 100).toInt()} %")
+            MetricCard(stringResource(R.string.accuracy), "${(data!!.accuracy * 100).toInt()} %")
             LinearProgressIndicator(
                 progress = { data.accuracy.toFloat() },
                 modifier = Modifier.fillMaxWidth(),
             )
-            MetricCard("Acertos / erros", "${data.hits} / ${data.misses}")
-            MetricCard("Tempo", UiLogic.formatDuration(data.totalTimeMs))
-            Text("Por módulo", fontWeight = FontWeight.Bold)
+            MetricCard(stringResource(R.string.hits_misses), "${data.hits} / ${data.misses}")
+            MetricCard(stringResource(R.string.time), formatDuration(data.totalTimeMs))
+            Text(stringResource(R.string.per_module), fontWeight = FontWeight.Bold)
             data.byModule.forEach { module ->
-                Text(UiLogic.modulePerformanceLine(module))
+                Text(modulePerformanceLine(module))
             }
-            Text("Áreas a melhorar", fontWeight = FontWeight.Bold)
-            UiLogic.needsWorkLines(data.needsWork).forEach { Text(it) }
+            Text(stringResource(R.string.needs_work), fontWeight = FontWeight.Bold)
+            needsWorkLines(data.needsWork, stringResource(R.string.needs_work_clear)).forEach { Text(it) }
             PrizeLimitRow(container, profile!!)
         }
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Fechar") }
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.close)) }
     }
 }
 
@@ -231,7 +246,7 @@ private fun PrizeLimitRow(
 ) {
     val scope = rememberCoroutineScope()
     var seconds by remember(profile.id) { mutableStateOf(profile.prizeLimitSeconds) }
-    Text("Tempo do prémio: ${seconds / 60} min", fontWeight = FontWeight.Bold)
+    Text(stringResource(R.string.prize_minutes, seconds / 60), fontWeight = FontWeight.Bold)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(60, 120, 180).forEach { choice ->
             Button(
@@ -242,7 +257,7 @@ private fun PrizeLimitRow(
                         container.repository.updateProfile(profile.copy(prizeLimitSeconds = stored))
                     }
                 },
-            ) { Text("${choice / 60} min") }
+            ) { Text(stringResource(R.string.minutes_short, choice / 60)) }
         }
     }
 }
@@ -287,11 +302,11 @@ internal fun ParentKeyReset(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("Não consigo ler o PIN deste aparelho.")
+        Text(stringResource(R.string.pin_unreadable))
         Spacer(Modifier.height(12.dp))
         if (!held) {
             Text(
-                "Segurar para repor",
+                stringResource(R.string.hold_to_reset),
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -314,11 +329,11 @@ internal fun ParentKeyReset(
                         },
             )
         } else {
-            Text("Quanto é 6 + 7?")
+            Text(stringResource(R.string.reset_sum))
             OutlinedTextField(
                 value = answer,
                 onValueChange = { answer = it.filter { ch -> ch.isDigit() }.take(2) },
-                label = { Text("Resposta") },
+                label = { Text(stringResource(R.string.answer)) },
                 modifier = Modifier.fillMaxWidth().testTag("pin-reset-answer"),
                 singleLine = true,
             )
@@ -331,9 +346,9 @@ internal fun ParentKeyReset(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Repor") }
+            ) { Text(stringResource(R.string.reset_pin)) }
         }
         Spacer(Modifier.height(8.dp))
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Voltar") }
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
     }
 }

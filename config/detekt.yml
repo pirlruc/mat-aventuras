@@ -17,8 +17,7 @@ complexity:
   TooManyFunctions:
     active: true
     allowedFunctionsPerClass: 16
-    # UiLogic is a pure function table used by Compose tests. Splitting the
-    # object would only rename the same functions.
+    # A rules object may hold the constants and a short table of delegates.
     allowedFunctionsPerObject: 90
     allowedFunctionsPerFile: 25
 
