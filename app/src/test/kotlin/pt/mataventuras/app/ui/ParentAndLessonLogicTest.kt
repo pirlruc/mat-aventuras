@@ -329,17 +329,20 @@ class ParentAndLessonLogicTest {
         val profile =
             ChildProfile(2, "Rui", AgeBand.THREE_TO_FIVE, Mascot.BRAVE_PLUMBER, AvatarCode.STARTER.name, 12, 0)
         var parents = false
+        var board = false
         compose.setContent {
             MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
                 HomeScreen(
                     profile = profile,
                     onSpeak = {},
                     onModule = {},
-                    onLeaderboard = {},
+                    onLeaderboard = { board = true },
                     onParents = { parents = true },
                 )
             }
         }
+        compose.onNodeWithContentDescription(VoiceScripts.LEADERBOARD).performScrollTo().performClick()
+        assertTrue(board)
         compose.onNodeWithContentDescription(VoiceScripts.PARENT_DASHBOARD).performScrollTo().performClick()
         assertTrue(parents)
     }
