@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** Ages 6–8 can break a letter, stop a wave, and run through the right gate, beside the snake. The prize clock still ends those activities. MAT-011-T3 is closed. Do not mark MAT-011-T4 or MAT-011 done until that pull request merges. Approving reviews stay at 0.
+**Last agent focus:** MAT-011 is closed after pull request #150. The next release is 0.3.0. Do not dispatch release.yml until the owner creates the tag-restricted release environment and moves the signing secrets into it. Approving reviews stay at 0.
 
 ---
 
@@ -252,4 +252,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, the two python-quality job names, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 and MAT-006 stay open. MAT-013 is done. python-quality still runs on every pull request until the owner approves a ruleset edit.
 
-*Last updated: 2026-11-01 (ages 6–8 prizes: letter breakout, tower defence, math-gate runner).*
+*Last updated: 2026-11-02 (MAT-011 is closed after pull request #150).*
