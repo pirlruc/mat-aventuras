@@ -1049,7 +1049,7 @@ milestones:
               - scripts/check-ci-docker.sh covers the host-missing linters
 
       - id: MAT-011
-        status: open
+        status: done
         title: Further lessons and prizes
         decision: >-
           In the context of the 3–5 and 6–8 bands, facing a short lesson list,
@@ -1097,7 +1097,7 @@ milestones:
               - Colouring
               - Bubble-pop rhythm
           - id: MAT-011-T4
-            status: open
+            status: done
             title: Prizes for 6–8 beyond invaders and kart
             instructions:
               files:
