@@ -20,6 +20,10 @@ enum class LearningModule(
     ODD_ONE(setOf(AgeBand.THREE_TO_FIVE)),
     SIZE(setOf(AgeBand.THREE_TO_FIVE)),
     PATTERNS(setOf(AgeBand.THREE_TO_FIVE)),
+    SORT(setOf(AgeBand.THREE_TO_FIVE)),
+    DOTS(setOf(AgeBand.THREE_TO_FIVE)),
+    CLAPS(setOf(AgeBand.THREE_TO_FIVE)),
+    SHADOW(setOf(AgeBand.THREE_TO_FIVE)),
     CLOCK(setOf(AgeBand.SIX_TO_EIGHT)),
     MONEY(setOf(AgeBand.SIX_TO_EIGHT)),
 }

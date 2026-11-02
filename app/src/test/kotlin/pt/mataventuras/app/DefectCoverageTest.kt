@@ -3,6 +3,7 @@ package pt.mataventuras.app
 import android.os.Looper
 import android.view.View
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -34,11 +36,14 @@ import pt.mataventuras.app.ui.lesson.ClockFace
 import pt.mataventuras.app.ui.lesson.LessonScreen
 import pt.mataventuras.app.ui.lesson.SizeMark
 import pt.mataventuras.app.ui.lesson.clockHour
+import pt.mataventuras.app.ui.lesson.colourOf
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.parent.ParentKeyReset
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.data.pin.PinKeyException
 import pt.mataventuras.domain.engine.EnginePluginContract
+import pt.mataventuras.domain.math.Exercise
+import pt.mataventuras.domain.math.ExerciseGenerator
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
@@ -247,6 +252,83 @@ class DefectCoverageTest {
     }
 
     @Test
+    fun sortDotsClapsAndShadowLessonsDrawThePicture() {
+        assertEquals(Color(0xFFE53935), colourOf("vermelho"))
+        assertEquals(Color(0xFF1E88E5), colourOf("azul"))
+        assertEquals(Color(0xFFFDD835), colourOf("amarelo"))
+        assertEquals(Color(0xFF43A047), colourOf("verde"))
+        assertEquals(Color(0xFF90A4AE), colourOf("nada"))
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val younger =
+            kotlinx.coroutines.runBlocking {
+                val id = app.container.repository.createProfile("Lia", AgeBand.THREE_TO_FIVE, Mascot.PINK_PIGLET)
+                app.container.repository.getProfile(id)!!
+            }
+        compose.setContent {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
+                LessonScreen(app.container, younger, LearningModule.SHADOW, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("shadow").assertIsDisplayed()
+        compose.onNodeWithText(VoiceScripts.SHADOW_PROMPT).assertIsDisplayed()
+    }
+
+    @Test
+    fun sortLessonDrawsAColourAndAShape() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val younger = youngProfile(app, "Nuno")
+        val seed = sortSeed(colour = true)
+        val colour =
+            sortRound(seed).options.first { it in listOf("vermelho", "azul", "amarelo", "verde") }
+        app.container.useGenerator(sortGenerator(seed))
+        compose.setContent {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
+                LessonScreen(app.container, younger, LearningModule.SORT, {}, {}, {})
+            }
+        }
+        compose.onNodeWithContentDescription(colour).assertIsDisplayed()
+    }
+
+    @Test
+    fun sortLessonDrawsTheShapeRound() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val younger = youngProfile(app, "Ines")
+        val seed = sortSeed(colour = false)
+        val name = checkNotNull(sortRound(seed).targetShape).displayName
+        app.container.useGenerator(sortGenerator(seed))
+        compose.setContent {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
+                LessonScreen(app.container, younger, LearningModule.SORT, {}, {}, {})
+            }
+        }
+        compose.onNodeWithContentDescription(name).assertIsDisplayed()
+    }
+
+    @Test
+    fun dotsAndClapsLessonsSpeakThePrompt() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val younger = youngProfile(app, "Eva")
+        compose.setContent {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
+                LessonScreen(app.container, younger, LearningModule.DOTS, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("Qual é o próximo ponto?").assertIsDisplayed()
+    }
+
+    @Test
+    fun clapsLessonAsksForTheWord() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val younger = youngProfile(app, "Rita")
+        compose.setContent {
+            MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
+                LessonScreen(app.container, younger, LearningModule.CLAPS, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("Quantas palmas", substring = true).assertIsDisplayed()
+    }
+
+    @Test
     fun prizeLimitIgnoresAnEarlyTickAFinishedHostAndAClearedReference() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val intent = ComposePrizeActivity.intent(context, ComposePrize.BALLOONS, limitSeconds = 30)
@@ -328,6 +410,29 @@ class DefectCoverageTest {
         }
     }
 }
+
+private fun sortSeed(colour: Boolean): Int =
+    (0..40).first { seed ->
+        (sortRound(seed).targetShape == null) == colour
+    }
+
+private fun sortRound(seed: Int): Exercise =
+    ExerciseGenerator(Random(seed)).generate(
+        LearningModule.SORT,
+        0,
+        AgeBand.THREE_TO_FIVE,
+    )
+
+private fun sortGenerator(seed: Int): ExerciseGenerator = ExerciseGenerator(Random(seed))
+
+private fun youngProfile(
+    app: MatAventurasApp,
+    name: String,
+): ChildProfile =
+    kotlinx.coroutines.runBlocking {
+        val id = app.container.repository.createProfile(name, AgeBand.THREE_TO_FIVE, Mascot.PINK_PIGLET)
+        app.container.repository.getProfile(id)!!
+    }
 
 private fun pendingPrizeTick(): Runnable {
     val field = PrizeLimit::class.java.getDeclaredField("timers")

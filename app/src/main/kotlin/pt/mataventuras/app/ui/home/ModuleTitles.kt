@@ -45,6 +45,15 @@ internal object ModuleTitles {
             LearningModule.PATTERNS -> "Padrões"
             LearningModule.CLOCK -> "Que horas são"
             LearningModule.MONEY -> "Euros e cêntimos"
+            else -> youngNoun(module)
+        }
+
+    private fun youngNoun(module: LearningModule): String =
+        when (module) {
+            LearningModule.SORT -> "Cores e formas"
+            LearningModule.DOTS -> "Ligar os pontos"
+            LearningModule.CLAPS -> "Palmas"
+            LearningModule.SHADOW -> "Sombras"
             else -> "Jogar"
         }
 }
