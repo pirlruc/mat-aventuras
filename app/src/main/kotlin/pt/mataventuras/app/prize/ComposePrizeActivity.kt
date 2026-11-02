@@ -71,7 +71,9 @@ internal fun prizeFrom(extra: String?): ComposePrize {
 /**
  * Theme band for [prize].
  */
-internal fun ageFor(prize: ComposePrize): AgeBand {
-    if (prize == ComposePrize.BALLOONS) return AgeBand.THREE_TO_FIVE
-    return AgeBand.SIX_TO_EIGHT
-}
+internal fun ageFor(prize: ComposePrize): AgeBand =
+    when (prize) {
+        ComposePrize.BALLOONS, ComposePrize.FISHING, ComposePrize.COLOURING, ComposePrize.BUBBLES ->
+            AgeBand.THREE_TO_FIVE
+        ComposePrize.SNAKE -> AgeBand.SIX_TO_EIGHT
+    }
