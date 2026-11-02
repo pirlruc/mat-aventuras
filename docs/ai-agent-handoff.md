@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-01
-**Last agent focus:** Ages 6–8 have halves, the next number up to 100, a word problem, tangram, and first syllables. Do not mark MAT-011-T2 done until that pull request merges. MAT-011-T3 is next. Approving reviews stay at 0.
+**Last agent focus:** Ages 6–8 have halves, the next number up to 100, a word problem, tangram, and first syllables. MAT-011-T1 is closed. Do not mark MAT-011-T2 done until that pull request merges. MAT-011-T3 is next. Approving reviews stay at 0.
 
 ---
 

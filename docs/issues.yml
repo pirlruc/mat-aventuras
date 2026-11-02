@@ -1060,7 +1060,7 @@ milestones:
           - Each idea below is an open task and is not implemented in 0.1.0
         tasks:
           - id: MAT-011-T1
-            status: open
+            status: done
             title: Lessons for 3–5 beyond the current boards
             instructions:
               files:
