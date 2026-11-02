@@ -16,6 +16,9 @@ permissions: {}
 
 jobs:
   apk:
+    # The keystore secrets live in the tag-restricted release environment.
+    # The job must run from the tag, or the environment rejects the deploy.
+    environment: release
     permissions:
       contents: read
     uses: pirlruc/androiddevops/.github/workflows/android-release-apk.yml@bca85a8216e4e94fde2f9b54ff8d65a87af07949
