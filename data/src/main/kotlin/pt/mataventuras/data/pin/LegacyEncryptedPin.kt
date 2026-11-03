@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.util.Base64
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.DeterministicAead
+import com.google.crypto.tink.RegistryConfiguration
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.daead.DeterministicAeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
@@ -43,8 +44,9 @@ internal object LegacyEncryptedPin {
         DeterministicAeadConfig.register()
         AeadConfig.register()
         val app = context.applicationContext
-        val keys = keyset(app, KEY_KEYSET, fileName).getPrimitive(DeterministicAead::class.java)
-        val values = keyset(app, VALUE_KEYSET, fileName).getPrimitive(Aead::class.java)
+        val registry = RegistryConfiguration.get()
+        val keys = keyset(app, KEY_KEYSET, fileName).getPrimitive(registry, DeterministicAead::class.java)
+        val values = keyset(app, VALUE_KEYSET, fileName).getPrimitive(registry, Aead::class.java)
         return legacyFields(prefs, fileName, keys, values)
     }
 

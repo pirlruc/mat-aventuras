@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -52,6 +53,8 @@ import kotlinx.coroutines.sync.withLock
 import pt.mataventuras.app.R
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.LessonFlow
+import pt.mataventuras.app.ui.LocalCelebrate
+import pt.mataventuras.app.ui.PromptCue
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.answerFlashArgb
 import pt.mataventuras.app.ui.answerFlashCaption
@@ -67,6 +70,7 @@ import pt.mataventuras.app.ui.optionAnswerTag
 import pt.mataventuras.app.ui.optionMinHeightDp
 import pt.mataventuras.app.ui.prizeStarLine
 import pt.mataventuras.app.ui.prizeStars
+import pt.mataventuras.app.ui.promptCue
 import pt.mataventuras.app.ui.shouldRepeatSpokenPrompt
 import pt.mataventuras.app.ui.showsAnswerFlash
 import pt.mataventuras.app.ui.showsCipherLegend
@@ -137,9 +141,35 @@ fun LessonScreen(
             leaveLesson()
         }
     }
-    RepeatPromptOnResume(spoken = exercise.spoken, onSpeak = onSpeak)
-
-    LaunchedEffect(exercise.prompt) { onSpeak(exercise.spoken) }
+    val celebrate = LocalCelebrate.current
+    var holdPrompt by remember { mutableStateOf(false) }
+    var prizeReturned by remember { mutableStateOf(false) }
+    var announced by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(celebrate) {
+        if (celebrate) prizeReturned = true
+    }
+    val cue = promptCue(holdPrompt, prizeReturned, celebrate)
+    LaunchedEffect(exercise.prompt, cue) {
+        when (cue) {
+            PromptCue.Wait -> Unit
+            PromptCue.Release -> {
+                holdPrompt = false
+                announced = exercise.prompt
+                onSpeak(exercise.spoken)
+            }
+            PromptCue.Speak -> {
+                if (announced != exercise.prompt) {
+                    announced = exercise.prompt
+                    onSpeak(exercise.spoken)
+                }
+            }
+        }
+    }
+    RepeatPromptOnResume(
+        spoken = exercise.spoken,
+        onSpeak = onSpeak,
+        prizeCovering = celebrate || holdPrompt,
+    )
     LaunchedEffect(profile.id) {
         container.profileTouches.collect { id ->
             if (id != profile.id) return@collect
@@ -179,7 +209,7 @@ fun LessonScreen(
         }
         if (advance) {
             if (container.rewards.shouldOpenReward(streak)) {
-                onSpeak(VoiceScripts.LETS_PLAY)
+                holdPrompt = true
                 onReward(profile.ageGroup)
             }
             exercise = container.generator.generate(module, lessonLevel(hits), profile.ageGroup)
@@ -199,6 +229,14 @@ fun LessonScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            LessonExitBar(
+                ageGroup = profile.ageGroup,
+                confirming = confirmingExit,
+                onSpeak = onSpeak,
+                onConfirm = { confirmingExit = true },
+                onStay = { confirmingExit = false },
+                onLeave = leaveLesson,
+            )
             LessonPlayColumn(
                 modifier =
                     Modifier
@@ -220,14 +258,6 @@ fun LessonScreen(
                 age = profile.ageGroup,
                 streak = streak,
                 onSpeak = onSpeak,
-            )
-            LessonExitBar(
-                ageGroup = profile.ageGroup,
-                confirming = confirmingExit,
-                onSpeak = onSpeak,
-                onConfirm = { confirmingExit = true },
-                onStay = { confirmingExit = false },
-                onLeave = leaveLesson,
             )
         }
         AnswerFlash(
@@ -422,12 +452,18 @@ internal fun LessonExitBar(
                 }
             },
             modifier =
-                Modifier.semantics(mergeDescendants = true) {
-                    contentDescription = LessonFlow.exitLabel(confirming)
-                },
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 64.dp)
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = LessonFlow.exitLabel(confirming)
+                    },
         ) { Text(LessonFlow.exitLabel(confirming)) }
         if (LessonFlow.showsStay(confirming)) {
-            Button(onClick = onStay) { Text(VoiceScripts.STAY) }
+            Button(
+                onClick = onStay,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+            ) { Text(VoiceScripts.STAY) }
         }
     }
 }
@@ -436,16 +472,17 @@ internal fun LessonExitBar(
 internal fun RepeatPromptOnResume(
     spoken: String,
     onSpeak: (String) -> Unit,
+    prizeCovering: Boolean = false,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner, spoken) {
+    DisposableEffect(lifecycleOwner, spoken, prizeCovering) {
         var stopped = false
         val observer =
             LifecycleEventObserver { _, event ->
                 when (event) {
                     Lifecycle.Event.ON_STOP -> stopped = true
                     Lifecycle.Event.ON_RESUME -> {
-                        if (shouldRepeatSpokenPrompt(stopped)) onSpeak(spoken)
+                        if (shouldRepeatSpokenPrompt(stopped, prizeCovering)) onSpeak(spoken)
                         stopped = false
                     }
                     else -> Unit

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -48,7 +49,7 @@ import pt.mataventuras.app.ui.modulePerformanceLine
 import pt.mataventuras.app.ui.needsWorkLines
 import pt.mataventuras.app.ui.pinPrompt
 import pt.mataventuras.app.ui.pinSubmitLabel
-import pt.mataventuras.app.ui.waitingForProfile
+import pt.mataventuras.app.ui.rememberBringIntoViewOnFocus
 import pt.mataventuras.data.pin.PinKeyException
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.parent.AdultChallenge
@@ -139,8 +140,12 @@ fun ParentDashboard(
                 Modifier
                     .fillMaxSize()
                     .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
         ) {
+            Button(
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+            ) { Text(stringResource(R.string.back)) }
             Text(
                 VoiceScripts.PARENT_DASHBOARD,
                 style = MaterialTheme.typography.headlineMedium,
@@ -205,8 +210,6 @@ fun ParentDashboard(
                     ),
                 )
             }
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
         }
         return
     }
@@ -226,32 +229,37 @@ fun ParentDashboard(
                 .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        Button(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+        ) { Text(stringResource(R.string.close)) }
         Text(
             VoiceScripts.PARENT_DASHBOARD,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
         )
         Text(VoiceScripts.STAYS_ON_DEVICE, style = MaterialTheme.typography.bodyMedium)
-        if (waitingForProfile(profile, data)) {
+        val current = profile
+        val stats = data
+        if (current == null || stats == null) {
             Text(stringResource(R.string.choose_child))
         } else {
-            Text(profile!!.name, style = MaterialTheme.typography.titleLarge)
-            MetricCard(stringResource(R.string.accuracy), "${(data!!.accuracy * 100).toInt()} %")
+            Text(current.name, style = MaterialTheme.typography.titleLarge)
+            MetricCard(stringResource(R.string.accuracy), "${(stats.accuracy * 100).toInt()} %")
             LinearProgressIndicator(
-                progress = { data.accuracy.toFloat() },
+                progress = { stats.accuracy.toFloat() },
                 modifier = Modifier.fillMaxWidth(),
             )
-            MetricCard(stringResource(R.string.hits_misses), "${data.hits} / ${data.misses}")
-            MetricCard(stringResource(R.string.time), formatDuration(data.totalTimeMs))
+            MetricCard(stringResource(R.string.hits_misses), "${stats.hits} / ${stats.misses}")
+            MetricCard(stringResource(R.string.time), formatDuration(stats.totalTimeMs))
             Text(stringResource(R.string.per_module), fontWeight = FontWeight.Bold)
-            data.byModule.forEach { module ->
+            stats.byModule.forEach { module ->
                 Text(modulePerformanceLine(module))
             }
             Text(stringResource(R.string.needs_work), fontWeight = FontWeight.Bold)
-            needsWorkLines(data.needsWork, stringResource(R.string.needs_work_clear)).forEach { Text(it) }
-            PrizeLimitRow(container, profile!!)
+            needsWorkLines(stats.needsWork, stringResource(R.string.needs_work_clear)).forEach { Text(it) }
+            PrizeLimitRow(container, current)
         }
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.close)) }
     }
 }
 
@@ -267,7 +275,7 @@ private fun PinField(
         label = { Text(label) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().then(rememberBringIntoViewOnFocus()),
         singleLine = true,
     )
 }
@@ -361,8 +369,15 @@ internal fun AdultHold(
     var answer by remember { mutableStateOf("") }
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
     ) {
+        if (onBack != null) {
+            Button(
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+            ) { Text(stringResource(R.string.back)) }
+            Spacer(Modifier.height(8.dp))
+        }
         if (title != null) {
             Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
@@ -401,7 +416,7 @@ internal fun AdultHold(
                 value = answer,
                 onValueChange = { answer = it.filter(Char::isDigit).take(4) },
                 label = { Text(stringResource(R.string.answer)) },
-                modifier = Modifier.fillMaxWidth().testTag("pin-reset-answer"),
+                modifier = Modifier.fillMaxWidth().testTag("pin-reset-answer").then(rememberBringIntoViewOnFocus()),
                 singleLine = true,
             )
             Button(
@@ -411,10 +426,6 @@ internal fun AdultHold(
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(action) }
-        }
-        if (onBack != null) {
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
         }
     }
 }

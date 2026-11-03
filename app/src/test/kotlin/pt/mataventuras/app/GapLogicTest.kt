@@ -40,7 +40,9 @@ import pt.mataventuras.app.ui.ProfileResume
 import pt.mataventuras.app.ui.SoupRelease
 import pt.mataventuras.app.ui.home.ModuleTitles
 import pt.mataventuras.app.ui.lesson.AnswerCuePlayer
+import pt.mataventuras.app.ui.lesson.paintCardBack
 import pt.mataventuras.app.ui.lesson.paintCountDots
+import pt.mataventuras.app.ui.lesson.paintPips
 import pt.mataventuras.app.ui.lesson.paintShapeGlyph
 import pt.mataventuras.app.ui.lesson.paintStarDots
 import pt.mataventuras.app.ui.lesson.resolveSoupGesture
@@ -92,6 +94,8 @@ class GapLogicTest {
         runner.state = runner.state.copy(form = 2)
         CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, canvas, Size(80f, 80f)) {
             GeometricShape.entries.forEach { paintShapeGlyph(it) }
+            paintCardBack()
+            (1..6).forEach { paintPips(it) }
             paintStarDots(3)
             paintCountDots(4)
             paintKartCourse(ArrayList<OffroadSpan>(16), kart.state, circuit, Mascot.SPEEDY_HEDGEHOG)

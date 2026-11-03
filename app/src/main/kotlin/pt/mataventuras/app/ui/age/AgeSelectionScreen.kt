@@ -50,6 +50,7 @@ import pt.mataventuras.app.ui.ageButtonEmoji
 import pt.mataventuras.app.ui.fallbackChildName
 import pt.mataventuras.app.ui.mascotChipDp
 import pt.mataventuras.app.ui.mascotGlyph
+import pt.mataventuras.app.ui.rememberBringIntoViewOnFocus
 import pt.mataventuras.app.ui.selectionBorderDp
 import pt.mataventuras.app.ui.selectionHighlightArgb
 import pt.mataventuras.domain.model.AgeBand
@@ -175,7 +176,7 @@ fun AgeSelectionScreen(
                 onValueChange = { name = it.take(ChildName.MAX_LENGTH) },
                 label = { Text(VoiceScripts.YOUR_NAME) },
                 textStyle = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.bodySp.sp),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().then(rememberBringIntoViewOnFocus()),
             )
             Text(VoiceScripts.CHOOSE_FRIEND, fontSize = tokens.bodySp.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

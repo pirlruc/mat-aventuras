@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.app.ui.SHAPE_ON_BUTTON_ARGB
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.groupTokenArgb
 import pt.mataventuras.app.ui.isBoardHole
@@ -143,7 +144,7 @@ internal fun VisualOption(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (shape != null) {
-            ShapeGlyph(shape)
+            ShapeGlyph(shape, Color(SHAPE_ON_BUTTON_ARGB))
         } else if (dots > 0) {
             DotStrip(dots)
         }
@@ -175,9 +176,12 @@ internal fun DrawScope.paintCountDots(count: Int) {
 }
 
 @Composable
-internal fun ShapeGlyph(shape: GeometricShape) {
+internal fun ShapeGlyph(
+    shape: GeometricShape,
+    color: Color = Color(0xFF1565C0),
+) {
     Canvas(modifier = Modifier.size(48.dp)) {
-        paintShapeGlyph(shape)
+        paintShapeGlyph(shape, color)
     }
 }
 

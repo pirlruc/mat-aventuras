@@ -1,9 +1,13 @@
 package pt.mataventuras.app.ui
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -15,6 +19,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -510,9 +515,46 @@ class ParentAndLessonLogicTest {
                 LeaderboardAndRewardsScreen(app.container, profile) {}
             }
         }
-        compose.onNodeWithText(VoiceScripts.REWARDS).assertIsDisplayed()
-        compose.onNodeWithText("★ Primeiros passos").assertIsDisplayed()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("★ Primeiros passos").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(VoiceScripts.REWARDS).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("★ Primeiros passos").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Voltar").performClick()
+    }
+
+    @Test
+    fun prizePromptWaitsUntilTheWinCardCloses() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val profile =
+            runBlocking {
+                val id = app.container.repository.createProfile("Lia", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
+                app.container.repository.getProfile(id)!!
+            }
+        val spoken = mutableListOf<String>()
+        var rewards = 0
+        var celebrate by mutableStateOf(false)
+        compose.setContent {
+            CompositionLocalProvider(LocalCelebrate provides celebrate) {
+                LessonScreen(
+                    container = app.container,
+                    profile = profile,
+                    module = LearningModule.COUNTING,
+                    onSpeak = { spoken += it },
+                    onReward = { rewards += 1 },
+                    onExit = {},
+                )
+            }
+        }
+        repeat(3) { clickCorrect() }
+        assertEquals(1, rewards)
+        val held = spoken.size
+        celebrate = true
+        compose.waitForIdle()
+        assertEquals(held, spoken.size)
+        celebrate = false
+        compose.waitForIdle()
+        assertTrue(spoken.size > held)
     }
 
     private fun clickCorrect() {

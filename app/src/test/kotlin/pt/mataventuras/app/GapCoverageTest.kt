@@ -8,7 +8,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -333,10 +334,10 @@ class GapCoverageTest {
                 compose.onAllNodesWithText("A")[0].performClick()
             }
             PlayKind.MEMORY -> {
-                compose.onAllNodesWithText("?")[0].performClick()
+                compose.onAllNodes(hasContentDescription("carta fechada"))[0].performClick()
                 compose.onAllNodesWithText("Sol")[0].performClick()
-                if (compose.onAllNodesWithText("?").fetchSemanticsNodes().isNotEmpty()) {
-                    compose.onAllNodesWithText("?")[0].performClick()
+                if (compose.onAllNodes(hasContentDescription("carta fechada")).fetchSemanticsNodes().isNotEmpty()) {
+                    compose.onAllNodes(hasContentDescription("carta fechada"))[0].performClick()
                 }
             }
             PlayKind.WORD_COMPLETE -> compose.onNodeWithText("A").performClick()

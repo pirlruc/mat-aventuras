@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -26,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import pt.mataventuras.app.di.AppContainer
+import pt.mataventuras.app.ui.CONTINUE_BUTTON_ARGB
+import pt.mataventuras.app.ui.LocalCelebrate
 import pt.mataventuras.app.ui.ProfileResume
 import pt.mataventuras.app.ui.age.AgeSelectionScreen
 import pt.mataventuras.app.ui.home.HomeScreen
@@ -92,7 +99,13 @@ internal fun NavGraph(
     }
 
     MatAventurasTheme(ageGroup) {
-        Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .imePadding()
+                .testTag("safe-drawing"),
+        ) {
             when (val current = destination) {
                 Destination.Selection ->
                     AgeSelectionScreen(
@@ -135,21 +148,23 @@ internal fun NavGraph(
                     }
                 is Destination.Lesson ->
                     profile?.let { p ->
-                        LessonScreen(
-                            container = container,
-                            profile = p,
-                            module = current.module,
-                            onSpeak = onSpeak,
-                            onReward = { age ->
-                                onReward(age, p.favouriteMascot, p.name, p.prizeLimitSeconds)
-                            },
-                            onExit = {
-                                scope.launch {
-                                    profile = container.repository.getProfile(p.id) ?: p
-                                    destination = Destination.Home
-                                }
-                            },
-                        )
+                        CompositionLocalProvider(LocalCelebrate provides celebrate) {
+                            LessonScreen(
+                                container = container,
+                                profile = p,
+                                module = current.module,
+                                onSpeak = onSpeak,
+                                onReward = { age ->
+                                    onReward(age, p.favouriteMascot, p.name, p.prizeLimitSeconds)
+                                },
+                                onExit = {
+                                    scope.launch {
+                                        profile = container.repository.getProfile(p.id) ?: p
+                                        destination = Destination.Home
+                                    }
+                                },
+                            )
+                        }
                     }
                 Destination.Leaderboard ->
                     LeaderboardAndRewardsScreen(
@@ -187,6 +202,11 @@ private fun PrizeWinCard(onContinue: () -> Unit) {
                 Text(PrizeHud.WIN_TITLE, color = Color.White, fontSize = 48.sp)
                 Button(
                     onClick = onContinue,
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color(CONTINUE_BUTTON_ARGB),
+                            contentColor = Color.White,
+                        ),
                     modifier = Modifier.padding(top = 24.dp).height(64.dp),
                 ) {
                     Text(PrizeHud.WIN_CONTINUE)
