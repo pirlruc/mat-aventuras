@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-02
-**Last agent focus:** Tag `0.3.1` is annotated on `ef2caa3`. Run 41467120356 published a signed `app-release.apk`. `apksigner` verifies APK Signature Scheme v2. The checksum matches. Tag `0.3.0` stays on `038ff00`. Do not move either tag.
+**Last agent focus:** `0.3.2` is `versionCode` 5. The annotated tag is created on the merge commit of the release pull request. Do not move `0.1.0`, `0.2.0`, `0.3.0`, or `0.3.1`.
 
 ---
 
@@ -103,12 +103,15 @@ bash scripts/check-ci-local.sh
 - ktlint 14 flags `@Composable` PascalCase names. `.editorconfig` sets
   `ktlint_function_naming_ignore_when_annotated_with = Composable`. ktlint
   joins an expression body that fits its own line length (about 140), and
-  detekt's `MaxLineLength` is 120. A body between those two limits stays one
-  line with `@Suppress("MaxLineLength")`. A longer body is a block so
-  `ktlintFormat` does not rejoin it. Godot 4.7.2 `--import` aborts;
+  detekt's `MaxLineLength` is 120. `.editorconfig` sets `max_line_length = 120`
+  for Kotlin, so ktlint and detekt use the same limit. Godot 4.7.2 `--import` aborts;
   `scripts/check-godot.sh` uses `--editor` and fails on `SCRIPT ERROR`.
   The devcontainer stays on Temurin 17. Dependabot ignores Temurin
   semver-major under the SC-DEP-003 deviation on MAT-013.
+- An incremental Kover report can pass at 95 while a clean run and CI are
+  under it. Trust `koverVerifyDebug --rerun-tasks`. A `Canvas` draw lambda
+  counts on a host Robolectric run and does not count on the GitHub
+  `ubuntu-24.04` runner. Cover an ordinary Kotlin branch when CI is short.
 - Lesson and parent copy is in `res/values/strings.xml`. The UI rules are
   top-level functions in `LessonRules`, `ScoringRules`, `SoupGestures`,
   `SudokuRules`, `ParentCopy`, `SpeechRules`, and `ShapeGeometry`. `UiLogic`
@@ -254,9 +257,9 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Current release is `0.3.1` on `ef2caa3` (run 41467120356). `0.3.0` stays on `038ff00`. Do not move `0.1.0`, `0.2.0`, `0.3.0`, or `0.3.1`. The keystore is outside the repo. Do not commit it or copy the password.
-2. MAT-015 is done. The 0.3.1 APK and bill verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`.
-3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. The next tag is 0.3.2. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
+1. This pull request cuts `0.3.2` (`versionCode` 5). After it merges, the annotated tag goes on that merge commit and `release.yml` is dispatched with `--ref 0.3.2`. Do not move `0.1.0`, `0.2.0`, `0.3.0`, or `0.3.1`. The keystore is outside the repo. Do not commit it or copy the password.
+2. MAT-015 is done. The 0.3.1 APK and bill verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`. Check 0.3.2 the same way after the release run.
+3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
 4. The emulator job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only). Run 41358345053 failed because the runner had no KVM permission (`-accel off`), and the multi-line `script:` never executed under `sh -c`. Do not record that as a boot timeout. androiddevops 1.2.0 is the fix.
 5. When androiddevops later becomes private, this public repo cannot call its workflows. Vendor the pinned workflow. Do not change visibility from an agent session. mat-aventuras stays public.
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review after 0.3.1 dedupes this list. Do not file them again.
@@ -264,4 +267,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done: on `mat_api36`, every prize logs `boot-ready` and the frame is past the boot overlay. The JNI exclude stays. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-02 (MAT-016 done: androiddevops 1.2.0 and the license bill).*
+*Last updated: 2026-11-03 (0.3.2 release pull request).*
