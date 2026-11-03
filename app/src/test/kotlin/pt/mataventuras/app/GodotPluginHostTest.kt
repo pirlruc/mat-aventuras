@@ -196,7 +196,13 @@ class GodotPluginHostTest {
             Robolectric
                 .buildActivity(
                     RunnerPluginActivity::class.java,
-                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG, "Ana", game = RewardGame.RUNNER),
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.THREE_TO_FIVE,
+                        Mascot.SPEEDY_HEDGEHOG,
+                        "Ana",
+                        game = RewardGame.RUNNER,
+                    ),
                 ).setup()
         val runner = runnerController.get()
         var runnerScene = ""

@@ -65,6 +65,10 @@ jobs:
   python-quality:
     needs: changes
     if: needs.changes.outputs.python == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    # Union of the job permissions in pydevops python-quality 3.3.10.
+    # contents: write is the tag release job. actions: write uploads
+    # artifacts. pull-requests: write posts the quality summary.
+    # Dropping any of them makes the reusable workflow refuse the call.
     permissions:
       contents: write
       actions: write

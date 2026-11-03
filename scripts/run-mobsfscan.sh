@@ -4,7 +4,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="1.0.0"
-LOCK_SHA="bca85a8216e4e94fde2f9b54ff8d65a87af07949"
+LOCK_SHA="e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8"
 VENV="${TMPDIR:-/tmp}/mat-aventuras-mobsfscan-${VERSION}"
 OUT="${MOBSF_SARIF:-$ROOT/app/build/reports/mobsfscan.sarif}"
 mkdir -p "$(dirname "$OUT")"
@@ -14,7 +14,7 @@ install_mobsfscan() {
         curl -fsSL \
             -o "${VENV}/requirements-mobsfscan.txt" \
             "https://raw.githubusercontent.com/pirlruc/androiddevops/${LOCK_SHA}/scripts/requirements-mobsfscan.txt"
-        "$VENV/bin/pip" install --disable-pip-version-check --require-hashes \
+        "$VENV/bin/pip" install --disable-pip-version-check --require-hashes --no-deps \
             -r "${VENV}/requirements-mobsfscan.txt"
         echo "$VENV/bin/mobsfscan"
         return

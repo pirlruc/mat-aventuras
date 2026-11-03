@@ -76,8 +76,8 @@ internal fun lessonScrolls(
 /**
  * Shape for an option label, or null when the label is not a shape name.
  */
-@Suppress("MaxLineLength")
-internal fun shapeKind(option: String): GeometricShape? = GeometricShape.entries.firstOrNull { it.displayName == option }
+internal fun shapeKind(option: String): GeometricShape? =
+    GeometricShape.entries.firstOrNull { it.displayName == option }
 
 /**
  * Numeric option value, or null when the label is not a number.

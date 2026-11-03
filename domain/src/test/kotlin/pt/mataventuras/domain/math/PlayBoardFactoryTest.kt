@@ -136,7 +136,10 @@ class PlayBoardFactoryTest {
             assertTrue(mixed.isNotEmpty())
             assertTrue(mixed.any { it.play.kind == PlayKind.CHOICE } || mixed.any { it.options.size >= 2 })
         }
-        assertEquals(6, PlayBoardFactory(Random(3), generator::numericOptions).sudoku(LearningModule.ADDITION, 2).play.columns)
+        assertEquals(
+            6,
+            PlayBoardFactory(Random(3), generator::numericOptions).sudoku(LearningModule.ADDITION, 2).play.columns,
+        )
     }
 
     @Test

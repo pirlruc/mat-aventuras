@@ -7,6 +7,7 @@ and the job fails only when a denied license appears.
 
 from __future__ import annotations
 
+import json
 import pathlib
 import re
 import sys
@@ -16,16 +17,16 @@ CATALOG = ROOT / "gradle" / "libs.versions.toml"
 THRESHOLDS = ROOT / "docs" / "guardrails" / "supply-chain" / "profile.thresholds.yml"
 # Populate as third-party licenses are classified. Empty lists mean "deny nothing yet".
 ALLOW: set[str] = set()
-# Fallback matches guardrails SC-LIC-001 when the submodule is not checked out.
+# Same ids as supply-chain profile.thresholds.yml license_deny_list.
 _DENY_FALLBACK = {
-    "GPL-2.0",
-    "GPL-3.0",
     "AGPL-3.0",
     "SSPL-1.0",
     "BUSL-1.1",
     "Commons-Clause",
     "CC-BY-NC",
 }
+
+BILL = ROOT / "build" / "reports" / "cyclonedx" / "bom.json"
 
 
 def load_deny() -> set[str]:
@@ -83,12 +84,35 @@ def modules() -> list[str]:
     return sorted(set(modules))
 
 
+def bill_rows(path: pathlib.Path) -> list[tuple[str, str]]:
+    """Return component name and SPDX id pairs from a CycloneDX JSON bill."""
+    document = json.loads(path.read_text(encoding="utf-8"))
+    rows: list[tuple[str, str]] = []
+    for component in document.get("components", []):
+        name = str(component.get("bom-ref") or component.get("name") or "unknown")
+        licenses = component.get("licenses") or []
+        if not licenses:
+            rows.append((name, "UNKNOWN"))
+            continue
+        for entry in licenses:
+            license_node = entry.get("license") or entry.get("expression") or {}
+            if isinstance(license_node, str):
+                rows.append((name, license_node))
+                continue
+            rows.append((name, str(license_node.get("id") or license_node.get("name") or "UNKNOWN")))
+    return rows
+
+
 def main() -> int:
-    """Return 0 when no catalog module uses a denied license."""
+    """Return 0 when no component uses a denied license."""
     denied: list[str] = []
-    print("SC-LIC-001 license scan (version catalog):")
-    for module in modules():
-        license_id = KNOWN.get(module, "UNKNOWN")
+    if BILL.is_file():
+        print(f"SC-LIC-002 license scan ({BILL.relative_to(ROOT)}):")
+        pairs = bill_rows(BILL)
+    else:
+        print("SC-LIC-001 license scan (version catalog):")
+        pairs = [(module, KNOWN.get(module, "UNKNOWN")) for module in modules()]
+    for module, license_id in pairs:
         print(f"  {module}: {license_id}")
         if license_id in DENY:
             denied.append(f"{module} uses denied license {license_id}")

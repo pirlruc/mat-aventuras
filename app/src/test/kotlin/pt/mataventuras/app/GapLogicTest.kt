@@ -119,7 +119,14 @@ class GapLogicTest {
         assertTrue(GodotRuntime.isSurfaceReady(33, 33))
         assertFalse(GodotRuntime.isRobolectricFingerprint("google/sdk"))
         assertTrue(GodotRuntime.isRobolectricFingerprint("Robolectric"))
-        assertFalse(GodotRuntime.shouldRestartHost(alreadyRestarted = true, finishing = false, destroyed = false, fromRelaunch = false))
+        assertFalse(
+            GodotRuntime.shouldRestartHost(
+                alreadyRestarted = true,
+                finishing = false,
+                destroyed = false,
+                fromRelaunch = false,
+            ),
+        )
         assertTrue(GodotRuntime.shouldRestartHost(false, false, false, false))
 
         assertFalse(roomAllowsMainThread("google/sdk"))
@@ -171,7 +178,10 @@ class GapLogicTest {
         assertEquals(setOf(0), found)
         assertEquals(-1, picked)
         val done =
-            resolveSoupGesture(listOf(2, 3), listOf(listOf(0, 1), listOf(2, 3)), found, 4, { picked = it }, { missed = true })
+            resolveSoupGesture(listOf(2, 3), listOf(listOf(0, 1), listOf(2, 3)), found, 4, { picked = it }, {
+                missed =
+                    true
+            })
         assertEquals(2, picked)
         assertEquals(setOf(0, 1), done)
         resolveSoupGesture(listOf(0, 1), listOf(listOf(2, 3), listOf(4, 5)), emptySet(), 8, {}, { missed = true })
@@ -291,7 +301,9 @@ class GapLogicTest {
         view: android.view.View,
         label: String,
     ): Button? {
-        if (view is Button && (view.text?.toString() == label || view.tag == "prize-boot-back" || view.tag == "prize-boot-retry")) {
+        if (view is Button &&
+            (view.text?.toString() == label || view.tag == "prize-boot-back" || view.tag == "prize-boot-retry")
+        ) {
             if (view.text?.toString() == label ||
                 view.tag?.toString()?.endsWith(if (label == PrizeHud.BACK_LABEL) "back" else "retry") == true
             ) {

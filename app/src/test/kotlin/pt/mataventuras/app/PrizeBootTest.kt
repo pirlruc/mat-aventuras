@@ -86,7 +86,13 @@ class PrizeBootTest {
             Robolectric
                 .buildActivity(
                     RunnerPluginActivity::class.java,
-                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana", game = RewardGame.CLIMB),
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.THREE_TO_FIVE,
+                        Mascot.HERO_PUP,
+                        "Ana",
+                        game = RewardGame.CLIMB,
+                    ),
                 ).setup()
         val activity = controller.get()
         PrizeBoot.ready(activity)
@@ -147,7 +153,13 @@ class PrizeBootTest {
             Robolectric
                 .buildActivity(
                     RunnerPluginActivity::class.java,
-                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.PINK_PIGLET, "Eva", game = RewardGame.CHOMP),
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.THREE_TO_FIVE,
+                        Mascot.PINK_PIGLET,
+                        "Eva",
+                        game = RewardGame.CHOMP,
+                    ),
                 ).setup()
         val activity = controller.get()
         val view = View(activity)
@@ -175,7 +187,13 @@ class PrizeBootTest {
             Robolectric
                 .buildActivity(
                     RunnerPluginActivity::class.java,
-                    EngineLauncher.intentFor(ctx, AgeBand.THREE_TO_FIVE, Mascot.HERO_PUP, "Ana", game = RewardGame.RUNNER),
+                    EngineLauncher.intentFor(
+                        ctx,
+                        AgeBand.THREE_TO_FIVE,
+                        Mascot.HERO_PUP,
+                        "Ana",
+                        game = RewardGame.RUNNER,
+                    ),
                 ).setup()
         val activity = controller.get()
         PrizeBoot.show(activity, "🐶", onRetry = {}, onBack = {})

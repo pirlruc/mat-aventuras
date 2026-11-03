@@ -108,7 +108,17 @@ class ArcadeEnginesTest {
         assertFalse(ChompMaze.isOpen(2, 2))
         assertTrue(ChompMaze.isPower(3, 3))
         assertFalse(ChompMaze.isPower(2, 2))
-        var ghost2 = start.copy(px = 2, py = 3, ghost2X = 2, ghost2Y = 3, form = 0, powerTimer = 0f, invuln = 0f, lives = 1)
+        var ghost2 =
+            start.copy(
+                px = 2,
+                py = 3,
+                ghost2X = 2,
+                ghost2Y = 3,
+                form = 0,
+                powerTimer = 0f,
+                invuln = 0f,
+                lives = 1,
+            )
         ghost2 = engine.step(ghost2, 0.05f, 0, 0)
         assertFalse(ghost2.alive)
         val eaten = start.copy(px = 2, py = 3, pellets = 0)
@@ -130,7 +140,16 @@ class ArcadeEnginesTest {
         assertTrue(chase.ghost2Y != 1 || chase.alive)
         val flee =
             engine.step(
-                start.copy(invuln = 0f, powerTimer = 2f, px = 2, py = 3, ghostX = 3, ghostY = 3, ghost2X = 1, ghost2Y = 1),
+                start.copy(
+                    invuln = 0f,
+                    powerTimer = 2f,
+                    px = 2,
+                    py = 3,
+                    ghostX = 3,
+                    ghostY = 3,
+                    ghost2X = 1,
+                    ghost2Y = 1,
+                ),
                 0.05f,
                 0,
                 0,
