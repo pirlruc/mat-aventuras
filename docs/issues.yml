@@ -1419,3 +1419,175 @@ milestones:
             guardrail_refs:
               - CI-034
               - SC-LIC-002
+
+  - name: Phase 5 — Round 5
+    status: open
+    epics:
+      - id: MAT-017
+        status: open
+        title: Fix the child-facing lesson defects
+        decision: >-
+          In the context of a child playing a lesson, facing a memory board
+          that never ends, a shape the same colour as its button, and a voice
+          that speaks the next activity during the prize, we decided to fix
+          those defects in the lesson UI, to achieve a round the child can
+          finish and hear in order, accepting stricter Kotlin warnings than
+          the org gate.
+        acceptance_criteria:
+          - A finished memory board advances the lesson once
+          - Memory cards flip, and the back is not the front
+          - Ages 6 to 8 match a numeral to drawn pips, not a bullet glyph
+          - A shape option is visible on its button, and Continuar is visible on the win card
+          - The next activity is not spoken until the win card is dismissed
+          - Kotlin compiler warnings fail the build
+        guardrail_refs:
+          - KT-BUILD-002
+        tasks:
+          - id: MAT-017-T1
+            status: open
+            title: Fail the build on Kotlin warnings
+            verification:
+              - LegacyEncryptedPin uses RegistryConfiguration
+              - ParentDashboard does not use a redundant non-null assertion
+              - allWarningsAsErrors is set on app, data, and domain
+          - id: MAT-017-T2
+            status: open
+            title: Keep fields and back buttons inside the safe area
+            verification:
+              - The name field stays above the keyboard
+              - Sair, Voltar, and Fechar sit in a top bar of at least 64 dp
+          - id: MAT-017-T3
+            status: open
+            title: Finish the memory game and show the card faces
+            verification:
+              - A solved memory board advances once
+              - The card back is a patterned face, not the front
+              - Quantity faces are drawn pips
+          - id: MAT-017-T4
+            status: open
+            title: Make shape options and Continuar visible
+            verification:
+              - A shape glyph does not use the button fill colour
+              - Continuar does not use the win-card background colour
+          - id: MAT-017-T5
+            status: open
+            title: Speak the next activity after the prize
+            verification:
+              - A prize hit does not speak the next prompt
+              - RepeatPromptOnResume does not speak while the win card is up
+              - Continuar speaks the next prompt
+
+      - id: MAT-018
+        status: open
+        title: Let a parent choose how often a prize opens
+        decision: >-
+          In the context of a parent setting the pace, facing a prize every
+          three correct answers, we decided to open a prize every N completed
+          activities with a parent choice of 5, 10, or 15 and a default of 10,
+          to achieve a prize that is not constant, accepting a Room migration
+          and a counter that a miss does not reset.
+        acceptance_criteria:
+          - prizeEvery defaults to 10 and accepts 5, 10, or 15
+          - A miss does not reset the completed-activity count
+          - Existing profiles keep their rows through MIGRATION_3_4
+        guardrail_refs:
+          - KT-TEST-002
+        tasks:
+          - id: MAT-018-T1
+            status: open
+            title: Store the cadence and the completed count
+            verification:
+              - Schema version is 4
+              - MIGRATION_3_4 adds prizeEvery with default 10
+              - There is no destructive migration
+          - id: MAT-018-T2
+            status: open
+            title: Show the cadence on the parent screen
+            verification:
+              - The parent can choose 5, 10, or 15
+              - RewardsEngine opens a prize from the completed count and the chosen N
+
+      - id: MAT-019
+        status: open
+        title: Make every prize load, explain itself, and stay playable
+        decision: >-
+          In the context of a prize after a lesson, facing games that do not
+          load, a back button that starts a different game, and controls a
+          child cannot see, we decided to fix boot and to put the goal and
+          the controls on screen, to achieve a prize the child can leave and
+          understand, accepting procedural art instead of third-party assets.
+        acceptance_criteria:
+          - PrizeDeviceTest passes for every prize on mat_api36
+          - Voltar returns to the lesson and does not start the canvas game
+          - HUD and letters stay out of the display cutout
+          - Kart, runner, and climb use on-screen buttons
+          - A life loss stops the player until a new touch
+          - Each prize shows its goal before play
+        guardrail_refs:
+          - AND-TEST-001
+        tasks:
+          - id: MAT-019-T1
+            status: open
+            title: Make climb leave the boot overlay and let Voltar exit
+            verification:
+              - everyPrizeBecomesReady passes
+              - Voltar finishes the prize activity
+          - id: MAT-019-T2
+            status: open
+            title: Respect the display cutout in every prize
+            verification:
+              - The game theme uses shortEdges
+              - Godot HUD uses the display safe area
+          - id: MAT-019-T3
+            status: open
+            title: Remove the kart colour bands and the flicker
+            verification:
+              - The translucent steer bands are gone
+              - Left, right, and Impulso are buttons
+          - id: MAT-019-T4
+            status: open
+            title: Make the platformers follow the player
+            verification:
+              - On-screen move and jump buttons replace the swipe
+              - A life loss clears input until the next touch
+          - id: MAT-019-T5
+            status: open
+            title: Explain each prize before it starts
+            verification:
+              - A Jogar card states the goal and the controls
+              - Compose prizes have a top Sair button
+
+      - id: MAT-020
+        status: open
+        title: Run device flows with the Maestro image
+        decision: >-
+          In the context of checking the app on a device, facing a CLI that
+          would be installed on the host, we decided to run Maestro from the
+          androiddevops image and to keep those flows off GitHub Actions, to
+          achieve a pinned local check without spending Actions minutes,
+          accepting that the digest is recorded after the image is published.
+        acceptance_criteria:
+          - run-maestro.sh uses the pinned image digest and skips when no device is attached
+          - The flows cover the name field, memory, shape sudoku, a prize, and the cadence
+          - Wrapper validation is not path-filtered
+          - androiddevops is pinned once
+        guardrail_refs:
+          - CI-034
+          - SC-DEP-004
+        tasks:
+          - id: MAT-020-T1
+            status: open
+            title: Add the Maestro flows and the runner script
+            verification:
+              - scripts/run-maestro.sh pulls the pinned digest
+              - The script does nothing when adb lists no device
+          - id: MAT-020-T2
+            status: open
+            title: Let Scorecard see wrapper validation
+            verification:
+              - The wrapper-validation job is not limited to gradle/wrapper paths
+          - id: MAT-020-T3
+            status: open
+            title: Pin one androiddevops tag
+            verification:
+              - ci.yml, emulator.yml, and release.yml use one androiddevops SHA
