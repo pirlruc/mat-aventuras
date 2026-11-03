@@ -41,6 +41,7 @@ import pt.mataventuras.app.ui.lesson.VisualOption
 import pt.mataventuras.app.ui.lesson.clockHour
 import pt.mataventuras.app.ui.lesson.colourOf
 import pt.mataventuras.app.ui.lesson.drawSortMark
+import pt.mataventuras.app.ui.parent.AdultHold
 import pt.mataventuras.app.ui.parent.ParentDashboard
 import pt.mataventuras.app.ui.parent.ParentKeyReset
 import pt.mataventuras.app.ui.parent.pinNotice
@@ -66,6 +67,20 @@ import pt.mataventuras.plugin.RunnerPluginActivity
 class DefectCoverageTest {
     @get:Rule
     val compose = createComposeRule()
+
+    @Test
+    fun adultHoldWithoutABackButtonHasNoBackLabel() {
+        compose.setContent {
+            AdultHold(
+                challenge = AdultChallenge(6, 7),
+                holdMs = 0,
+                holdLabel = "hold",
+                onPassed = {},
+            )
+        }
+        assertTrue(compose.onAllNodesWithText("Voltar").fetchSemanticsNodes().isEmpty())
+        compose.onNodeWithText("hold").assertExists()
+    }
 
     @Test
     fun aWrongTowerIndexDoesNotFinish() {
