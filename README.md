@@ -26,11 +26,13 @@ belong to both.
 Version 0.1.0 gave ages 3–5 number ranges meant for older children. 0.2.0
 keeps that band on small numbers and sums up to 10. 0.3.0 adds the lessons
 and prize games in the table above. 0.3.1 makes those prize games leave the
-loading screen and start.
+loading screen and start. 0.3.2 asks a parent to hold the screen and answer
+a two-digit multiplication before the first PIN, and a prize keeps the time
+limit the parent chose when the screen turns.
 
 ## Install
 
-Install **0.3.1** `app-release.apk` from
+Install **0.3.2** `app-release.apk` from
 [GitHub Releases](https://github.com/pirlruc/mat-aventuras/releases/latest).
 That file is signed. Do not use the 0.1.0 debug APK for daily use.
 Also download `app-release.apk.sha256` and `app-release.cdx.json` (the
@@ -61,16 +63,21 @@ You can turn that permission off again after the install.
 
 ## Parent area
 
-The home screen has **Painel dos pais**. The first visit asks you to choose
-a PIN of four numbers. Later visits ask for that PIN. Five wrong attempts
-pause the check for a minute.
+The home screen has **Painel dos pais**. The first visit asks you to hold
+the button and answer a two-digit multiplication, then choose a PIN of four
+numbers. Later visits ask for that PIN. Five wrong attempts pause the check
+for a minute. If the tablet restarts during that pause, the pause ends at
+the clock time you were given.
+
+If the device key for the PIN fails, the same hold and multiplication let
+you choose a new PIN. Clearing the app's storage, or uninstalling it,
+deletes the profiles and the PIN.
 
 The parent area shows sessions, points, and badges for the children on this
-device. It does not send them anywhere. There is no PIN recovery. Clearing
-the app's storage, or uninstalling it, deletes the profiles and the PIN.
+device. It does not send them anywhere.
 
 A parent can set how long a prize lasts: 1, 2, or 3 minutes. The default is
-2 minutes.
+2 minutes. Turning the screen does not start that time again.
 
 ## Privacy
 
