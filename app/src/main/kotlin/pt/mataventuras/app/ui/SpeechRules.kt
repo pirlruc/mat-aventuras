@@ -4,8 +4,48 @@ import android.speech.tts.TextToSpeech
 
 /**
  * Repeat the current prompt after a reward Activity covered the host.
+ * A prize card still on screen keeps the prompt quiet.
  */
-internal fun shouldRepeatSpokenPrompt(stoppedInBackground: Boolean): Boolean = stoppedInBackground
+internal fun shouldRepeatSpokenPrompt(
+    stoppedInBackground: Boolean,
+    prizeCovering: Boolean = false,
+): Boolean = stoppedInBackground && !prizeCovering
+
+/**
+ * What to do with the exercise prompt while a prize is opening or showing.
+ */
+internal enum class PromptCue {
+    Speak,
+    Wait,
+    Release,
+}
+
+/**
+ * [Release] speaks once when Continuar dismisses the win card.
+ */
+internal fun promptCue(
+    heldForPrize: Boolean,
+    prizeReturned: Boolean,
+    celebrate: Boolean,
+): PromptCue =
+    if (celebrate || (heldForPrize && !prizeReturned)) {
+        PromptCue.Wait
+    } else if (heldForPrize) {
+        PromptCue.Release
+    } else {
+        PromptCue.Speak
+    }
+
+/**
+ * Stop any queued lesson line, then open the prize.
+ */
+internal fun beginReward(
+    stopSpeech: () -> Unit,
+    launch: () -> Unit,
+) {
+    stopSpeech()
+    launch()
+}
 
 /**
  * TTS language is usable.

@@ -26,6 +26,18 @@ class MemoryAndWordsTest {
     }
 
     @Test
+    fun olderCountingMemoryDrawsQuantities() {
+        val exercise = MemoryBoards(Random(1)).make(LearningModule.MEMORY, 0, AgeBand.SIX_TO_EIGHT)
+        assertTrue(exercise.play.cells.any { it.startsWith("qty:") })
+        assertFalse(exercise.play.cells.any { it.contains("•") })
+        val pip = exercise.play.cells.indexOfFirst { it.startsWith("qty:") }
+        val key = exercise.play.solution[pip]
+        val numeral = exercise.play.cells.indexOf(key)
+        assertTrue(numeral >= 0)
+        assertEquals(key, exercise.play.solution[numeral])
+    }
+
+    @Test
     fun letterMemoryIsSixteenCards() {
         val boards = MemoryBoards(Random(2))
         val exercise = boards.make(LearningModule.LETTERS, 0)

@@ -87,10 +87,10 @@ class MemoryBoards(
                 )
             } else {
                 listOf(
-                    "1" to "•",
-                    "2" to "••",
-                    "3" to "•••",
-                    "4" to "••••",
+                    "1" to "qty:1",
+                    "2" to "qty:2",
+                    "3" to "qty:3",
+                    "4" to "qty:4",
                     "5" to "5",
                     "6" to "6",
                     "7" to "7",

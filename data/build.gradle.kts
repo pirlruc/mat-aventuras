@@ -31,6 +31,12 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        allWarningsAsErrors.set(true)
+    }
+}
+
 androidComponents {
     beforeVariants { variant ->
         if (variant.buildType == "release") {

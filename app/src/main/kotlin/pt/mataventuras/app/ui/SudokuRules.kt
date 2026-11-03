@@ -104,4 +104,5 @@ internal fun sudokuCellArgb(
 /**
  * True when the board is solved house by house instead of one glowing cell.
  */
-internal fun sudokuFillsEveryBlank(play: PlayBoard): Boolean = play.solution.isNotEmpty()
+internal fun sudokuFillsEveryBlank(play: PlayBoard): Boolean =
+    play.kind == PlayKind.SUDOKU && play.solution.isNotEmpty()

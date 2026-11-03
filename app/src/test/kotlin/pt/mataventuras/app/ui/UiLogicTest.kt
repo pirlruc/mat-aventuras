@@ -6,6 +6,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.app.di.pinIterationsFor
 import pt.mataventuras.app.engine.GodotRuntime
+import pt.mataventuras.app.ui.lesson.pipOffsets
+import pt.mataventuras.app.ui.lesson.quantityPips
+import pt.mataventuras.app.ui.lesson.showsCardFront
 import pt.mataventuras.domain.math.GroupTokens
 import pt.mataventuras.domain.math.PlayBoard
 import pt.mataventuras.domain.math.PlayKind
@@ -158,7 +161,29 @@ class UiLogicTest {
         assertEquals(0xFFEEEEEE, sudokuCellArgb(SudokuHoles.EXTRA_BLANK, fillEveryBlank = true))
         assertEquals(0xFFE3F2FD, sudokuCellArgb("4", focused = true, fillEveryBlank = true))
         assertFalse(sudokuFillsEveryBlank(PlayBoard()))
-        assertTrue(sudokuFillsEveryBlank(PlayBoard(solution = listOf("1"))))
+        assertFalse(sudokuFillsEveryBlank(PlayBoard(kind = PlayKind.MEMORY, solution = listOf("1"))))
+        assertTrue(sudokuFillsEveryBlank(PlayBoard(kind = PlayKind.SUDOKU, solution = listOf("1"))))
+        assertTrue(contrastRatio(SHAPE_ON_BUTTON_ARGB, PRIMARY_BUTTON_ARGB) >= 4.5)
+        assertTrue(contrastRatio(SHAPE_ON_BUTTON_ARGB, CONTINUE_BUTTON_ARGB) >= 4.5)
+        assertTrue(CONTINUE_BUTTON_ARGB != PRIMARY_BUTTON_ARGB)
+        assertEquals(PromptCue.Speak, promptCue(false, false, false))
+        assertEquals(PromptCue.Wait, promptCue(true, false, false))
+        assertEquals(PromptCue.Wait, promptCue(true, true, true))
+        assertEquals(PromptCue.Release, promptCue(true, true, false))
+        assertFalse(shouldRepeatSpokenPrompt(true, prizeCovering = true))
+        val order = mutableListOf<String>()
+        beginReward(stopSpeech = { order += "stop" }, launch = { order += "launch" })
+        assertEquals(listOf("stop", "launch"), order)
+        assertEquals(1, quantityPips("qty:1"))
+        assertEquals(6, quantityPips("qty:6"))
+        assertEquals(null, quantityPips("1"))
+        assertEquals(null, quantityPips("qty:"))
+        assertEquals(null, quantityPips("qty:0"))
+        assertEquals(null, quantityPips("qty:9"))
+        assertTrue(showsCardFront(0f))
+        assertFalse(showsCardFront(180f))
+        assertEquals(listOf(1, 2, 3, 4, 5, 6), (1..6).map { pipOffsets(it).size })
+        assertTrue(contrastRatio(0xFFFFFFFF, 0xFF000000) >= 4.5)
         assertEquals("✓", answerFlashGlyph(true))
         assertEquals("✗", answerFlashGlyph(false))
         assertEquals(VoiceScripts.WELL_DONE, answerFlashCaption(true))

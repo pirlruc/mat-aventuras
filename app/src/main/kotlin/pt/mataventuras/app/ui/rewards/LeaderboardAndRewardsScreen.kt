@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -72,6 +73,10 @@ fun LeaderboardAndRewardsScreen(
                 .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        Button(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+        ) { Text(stringResource(R.string.back)) }
         Text(VoiceScripts.LEADERBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(stringResource(R.string.on_this_device))
         table.forEach { row ->
@@ -113,6 +118,5 @@ fun LeaderboardAndRewardsScreen(
             val owned = avatars.any { it.avatarId == code.name }
             Text(avatarLine(owned, code))
         }
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
     }
 }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +16,7 @@ import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.prize.PrizeLaunch
 import pt.mataventuras.app.speech.SpeechEngine
 import pt.mataventuras.app.ui.RewardReturn
+import pt.mataventuras.app.ui.beginReward
 import pt.mataventuras.app.ui.lesson.RewardRecorder
 import pt.mataventuras.app.ui.navigation.NavGraph
 
@@ -32,6 +34,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         val app = application as MatAventurasApp
         speech = SpeechEngine(this)
         setContent {
@@ -40,9 +43,11 @@ class MainActivity : ComponentActivity() {
                 onSpeak = { speech.speak(it) },
                 onReward = { ageGroup, mascot, name, limit ->
                     val seconds = app.container.rewards.prizeLimitSeconds(limit)
-                    engineLauncher.launch(
-                        PrizeLaunch.intent(this, ageGroup, mascot, name, limitSeconds = seconds),
-                    )
+                    beginReward(speech::stop) {
+                        engineLauncher.launch(
+                            PrizeLaunch.intent(this, ageGroup, mascot, name, limitSeconds = seconds),
+                        )
+                    }
                 },
                 celebrate = celebrateWin,
                 onDismissWin = { celebrateWin = false },

@@ -1424,7 +1424,7 @@ milestones:
     status: open
     epics:
       - id: MAT-017
-        status: open
+        status: done
         title: Fix the child-facing lesson defects
         decision: >-
           In the context of a child playing a lesson, facing a memory board
@@ -1444,33 +1444,33 @@ milestones:
           - KT-BUILD-002
         tasks:
           - id: MAT-017-T1
-            status: open
+            status: done
             title: Fail the build on Kotlin warnings
             verification:
               - LegacyEncryptedPin uses RegistryConfiguration
               - ParentDashboard does not use a redundant non-null assertion
               - allWarningsAsErrors is set on app, data, and domain
           - id: MAT-017-T2
-            status: open
+            status: done
             title: Keep fields and back buttons inside the safe area
             verification:
               - The name field stays above the keyboard
               - Sair, Voltar, and Fechar sit in a top bar of at least 64 dp
           - id: MAT-017-T3
-            status: open
+            status: done
             title: Finish the memory game and show the card faces
             verification:
               - A solved memory board advances once
               - The card back is a patterned face, not the front
               - Quantity faces are drawn pips
           - id: MAT-017-T4
-            status: open
+            status: done
             title: Make shape options and Continuar visible
             verification:
               - A shape glyph does not use the button fill colour
               - Continuar does not use the win-card background colour
           - id: MAT-017-T5
-            status: open
+            status: done
             title: Speak the next activity after the prize
             verification:
               - A prize hit does not speak the next prompt

@@ -5,16 +5,18 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +32,10 @@ import pt.mataventuras.app.ui.navigation.NavGraph
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.engine.PlatformerWorld
+import pt.mataventuras.domain.math.Exercise
 import pt.mataventuras.domain.math.ExerciseGenerator
+import pt.mataventuras.domain.math.PlayBoard
+import pt.mataventuras.domain.math.PlayKind
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.Mascot
@@ -53,7 +58,22 @@ class CoverageSurfacesTest {
                 val id = app.container.repository.createProfile("Rui", AgeBand.SIX_TO_EIGHT, Mascot.BRAVE_PLUMBER)
                 app.container.repository.getProfile(id)!!
             }
-        val memory = app.container.generator.generate(LearningModule.MEMORY, 0, AgeBand.THREE_TO_FIVE)
+        val memoryFinished = AtomicBoolean(false)
+        val memory =
+            Exercise(
+                module = LearningModule.MEMORY,
+                prompt = "pares",
+                spoken = "pares",
+                options = listOf("1", "qty:1"),
+                correctIndex = 0,
+                play =
+                    PlayBoard(
+                        kind = PlayKind.MEMORY,
+                        cells = listOf("1", "qty:1"),
+                        columns = 2,
+                        solution = listOf("1", "1"),
+                    ),
+            )
         val word = app.container.generator.generate(LearningModule.WORDS, 0, AgeBand.SIX_TO_EIGHT)
         val circuit = OffroadCircuit(7)
         val level = PlatformerWorld.random(3)
@@ -75,7 +95,7 @@ class CoverageSurfacesTest {
                         )
                     }
                 }
-                LearningModule.entries.size -> MemoryBoard(memory) {}
+                LearningModule.entries.size -> MemoryBoard(memory) { memoryFinished.set(true) }
                 LearningModule.entries.size + 1 -> WordCompleteBoard(word) {}
                 LearningModule.entries.size + 2 ->
                     NavGraph(
@@ -129,12 +149,18 @@ class CoverageSurfacesTest {
         show(app, stepState, LearningModule.LOGIC, 4)
         step = LearningModule.entries.size
         compose.waitForIdle()
-        compose.onAllNodesWithText("?").onFirst().performClick()
+        compose.onAllNodes(hasContentDescription("carta fechada"))[0].performClick()
+        compose.waitForIdle()
+        compose.onAllNodes(hasContentDescription("carta fechada"))[0].performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("pips-drawn", useUnmergedTree = true).assertExists()
+        assertTrue(memoryFinished.get())
         step = LearningModule.entries.size + 1
         compose.waitForIdle()
         compose.onNodeWithTag("word-complete").assertIsDisplayed()
         step = LearningModule.entries.size + 2
         compose.waitForIdle()
+        compose.onNodeWithTag("safe-drawing").assertIsDisplayed()
         compose.onNodeWithText("Continuar").performClick()
         step = LearningModule.entries.size + 3
         compose.waitForIdle()
