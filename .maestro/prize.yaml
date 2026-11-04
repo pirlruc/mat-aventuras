@@ -1,0 +1,61 @@
+appId: pt.mataventuras.app
+---
+- launchApp:
+    clearState: true
+- tapOn: "6 a 8 anos"
+- tapOn: "Como te chamas?"
+- inputText: "Rui"
+- hideKeyboard
+- tapOn: "Vamos começar!"
+- scrollUntilVisible:
+    element: "Painel dos pais"
+    direction: DOWN
+- runFlow: sub/parent.yaml
+- scrollUntilVisible:
+    element: "5 atividades"
+    direction: DOWN
+- tapOn: "5 atividades"
+- extendedWaitUntil:
+    visible: "Prémio a cada 5 atividades"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Fechar"
+    direction: UP
+    visibilityPercentage: 50
+    timeout: 15000
+- tapOn: "Fechar"
+- scrollUntilVisible:
+    element: "Números com o Cão Herói"
+    direction: UP
+    visibilityPercentage: 50
+    timeout: 20000
+- tapOn: "Números com o Cão Herói"
+- repeat:
+    times: 8
+    while:
+      notVisible: "(?i).*jogar.*"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "correct-answer"
+          direction: DOWN
+          visibilityPercentage: 50
+          timeout: 15000
+      - tapOn:
+          id: "correct-answer"
+- extendedWaitUntil:
+    visible: "(?i).*jogar.*"
+    timeout: 40000
+- tapOn: "(?i).*jogar.*"
+- pressKey: Back
+- extendedWaitUntil:
+    visible: "Sair"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      text: "Ganhaste!"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Continuar"
+    optional: true

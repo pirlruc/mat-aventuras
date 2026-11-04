@@ -26,7 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A parent chooses a prize every 5, 10, or 15 finished activities. The
   default is 10. A miss does not reset the count.
 - Each prize states its goal and its controls, then starts on Jogar.
-- Round 5 backlog: MAT-020 remains open.
+- Local device flows run in the android-maestro image. CI, the
+  emulator, and release signing call androiddevops 1.4.0.
+- Round 5 backlog: the 0.4.0 release is next.
 
 ## [0.3.2] - 2026-11-03
 

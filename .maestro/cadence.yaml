@@ -1,0 +1,18 @@
+appId: pt.mataventuras.app
+---
+- launchApp:
+    clearState: true
+- tapOn: "6 a 8 anos"
+- tapOn: "Como te chamas?"
+- inputText: "Rui"
+- hideKeyboard
+- tapOn: "Vamos começar!"
+- scrollUntilVisible:
+    element: "Painel dos pais"
+    direction: DOWN
+- runFlow: sub/parent.yaml
+- scrollUntilVisible:
+    element: "5 atividades"
+    direction: DOWN
+- tapOn: "5 atividades"
+- assertVisible: "Prémio a cada 5 atividades"

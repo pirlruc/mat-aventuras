@@ -49,6 +49,34 @@ def check_entry(name: str, entry: dict) -> str | None:
     return None
 
 
+def check_callers(data: dict) -> str | None:
+    """Return an error when the Maestro digest or the androiddevops SHA drifted."""
+    maestro = data.get("android_maestro") or {}
+    devops = data.get("androiddevops") or {}
+    if not maestro and not devops:
+        return None
+    digest = str(maestro.get("digest") or "")
+    sha = str(devops.get("sha") or "")
+    if not digest.startswith("sha256:") or len(digest) != 71:
+        return "android_maestro digest must be sha256 and 64 hex characters"
+    script = (ROOT / "scripts" / "run-maestro.sh").read_text(encoding="utf-8")
+    if digest not in script:
+        return "run-maestro.sh does not contain the maestro digest"
+    if len(sha) != 40:
+        return "androiddevops sha is required"
+    for relative in (
+        ".github/workflows/ci.yml",
+        ".github/workflows/emulator.yml",
+        ".github/workflows/release.yml",
+    ):
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        if sha not in text:
+            return f"{relative} does not pin androiddevops {sha}"
+    print(f"ok: android-maestro {digest}")
+    print(f"ok: androiddevops {devops.get('tag')} {sha}")
+    return None
+
+
 def main() -> int:
     """Return 0 when both submodule gitlinks match docs/companion-pins.yml."""
     if not PINS.is_file():
@@ -60,6 +88,9 @@ def main() -> int:
         message = check_entry(name, data.get(name) or {})
         if message:
             errors.append(message)
+    caller = check_callers(data)
+    if caller:
+        errors.append(caller)
     if errors:
         for item in errors:
             print(f"error: {item}", file=sys.stderr)

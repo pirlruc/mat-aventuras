@@ -270,8 +270,8 @@ public caller cannot use those workflows and must vendor the pinned file.
 `ci.yml` always runs `quality`. A `changes` job skips Gradle, CodeQL, MobSF,
 and the APK bill on a pull request that does not touch `app/`, `data/`,
 `domain/`, `gradle/`, or `scripts/`. `gate` treats a skipped job as success.
-Those four jobs call androiddevops `1.2.0`
-(`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and pass
+Those four jobs call androiddevops `1.4.0`
+(`4763e3be9f3a24a1b80dee3bf01530413aa3f49f`) and pass
 `secrets.GITHUB_TOKEN` as `checkout_token`. Fork pull requests skip the
 reusable jobs that need a secret.
 
@@ -285,7 +285,7 @@ reusable jobs that need a secret.
 | commondevops `common-pins-verify` | Called. `scripts/check-submodule-pins.sh` asserts the gitlinks. |
 | commondevops `common-scorecard` | Called with `blocking: false` and `publish_results: false`. |
 | commondevops `common-release` | Called from `release.yml` after `android-release-apk`. The release artifact is `android-release-apk`. The job selects the `release` environment. |
-| androiddevops | CI, the emulator, and `android-release-apk` stay on tag `1.2.0` (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`). The release job selects the `release` environment. |
+| androiddevops | CI, the emulator, and `android-release-apk` stay on tag `1.4.0` (`4763e3be9f3a24a1b80dee3bf01530413aa3f49f`). The release job selects the `release` environment. Local device flows use `ghcr.io/pirlruc/android-maestro` at the digest in `docs/companion-pins.yml`. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
 | pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `7ebee303030c09ce8f52e99660691e4c4b41238f` (annotated tag `3.3.10`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. |

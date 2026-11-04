@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.app.ui.debugAnswerTags
 import pt.mataventuras.domain.math.Exercise
 import pt.mataventuras.domain.math.MemoryFace
 
@@ -53,6 +54,33 @@ internal fun quantityPips(label: String): Int? {
 
 /** The front is visible on the near side of a Y flip. */
 internal fun showsCardFront(rotation: Float): Boolean = rotation <= 90f
+
+/** Closed debug cards expose the pair key. A release build does not. */
+internal fun memoryCardTag(
+    open: Boolean,
+    debug: Boolean,
+    pips: Int?,
+    pairKey: String,
+): String =
+    when {
+        !open && debug -> "par-$pairKey"
+        pips != null -> "memory-pip"
+        else -> "memory-face"
+    }
+
+internal fun memoryCardDescription(
+    open: Boolean,
+    debug: Boolean,
+    pips: Int?,
+    pairKey: String,
+    label: String,
+): String =
+    when {
+        !open && debug -> "par-$pairKey"
+        !open -> "carta fechada"
+        pips != null -> pips.toString()
+        else -> label
+    }
 
 /**
  * Every pair stays open. The lesson advances only when the board is finished.
@@ -79,6 +107,7 @@ internal fun MemoryBoard(
                     val open = index in face.matched || index in face.up
                     MemoryCard(
                         label = label,
+                        pairKey = exercise.play.solution[index],
                         open = open,
                         onClick = { face = face.reveal(exercise.play, index) },
                     )
@@ -91,6 +120,7 @@ internal fun MemoryBoard(
 @Composable
 private fun RowScope.MemoryCard(
     label: String,
+    pairKey: String,
     open: Boolean,
     onClick: () -> Unit,
 ) {
@@ -101,12 +131,8 @@ private fun RowScope.MemoryCard(
     )
     val pips = quantityPips(label)
     val density = LocalDensity.current.density
-    val spoken =
-        when {
-            !open -> "carta fechada"
-            pips != null -> pips.toString()
-            else -> label
-        }
+    val tag = memoryCardTag(open, debugAnswerTags, pips, pairKey)
+    val spoken = memoryCardDescription(open, debugAnswerTags, pips, pairKey, label)
     Box(
         modifier =
             Modifier
@@ -117,7 +143,7 @@ private fun RowScope.MemoryCard(
                     cameraDistance = 12f * density
                 }.clip(RoundedCornerShape(12.dp))
                 .background(if (open) Color(0xFFFFF8E1) else Color(0xFF0D47A1))
-                .testTag(if (pips != null) "memory-pip" else "memory-face")
+                .testTag(tag)
                 .clickable(onClick = onClick)
                 .semantics(mergeDescendants = true) {
                     role = Role.Button

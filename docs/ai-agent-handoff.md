@@ -35,7 +35,7 @@ equals the recorded sha.
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
 | commondevops | `.github/workflows/shared-ci.yml` | tag `5.8.0`, peeled `cb34967f` |
-| androiddevops | `.github/workflows/ci.yml`, `emulator.yml`, `release.yml` | tag `1.2.0`, peeled `e88c3b8f` |
+| androiddevops | `.github/workflows/ci.yml`, `emulator.yml`, `release.yml` | tag `1.4.0`, peeled `4763e3be` |
 | pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.3.10`, peeled `7ebee303` |
 | ci-lint image | `scripts/check-ci-docker.sh` | `sha256:f9001c4c` |
 
@@ -64,7 +64,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-017 | done | Child-facing lesson defects. GitHub #172–#177 are closed |
 | MAT-018 | done | Parent prize cadence. GitHub #178–#180 are closed |
 | MAT-019 | done | Prize boot, controls, and explanation. GitHub #181–#186 are closed |
-| MAT-020 | open | Maestro flows. Round 5 |
+| MAT-020 | done | #187–#190 closed. Maestro flows and the androiddevops 1.4.0 pin |
 
 `docs/guardrail-deviations.yml` has three entries, none of which lowers a number:
 Kover exclusions beyond kotlinx.serialization (KT-TEST-002; floors stay 95),
@@ -135,7 +135,7 @@ bash scripts/check-ci-local.sh
   the ops repo is private again, this repo still needs Actions access to read
   the workflow file. Scanner jobs pull private `ci-lint` and `ci-supply-chain`
   (this repo has Actions read). Gradle, CodeQL, MobSF, and the APK bill call
-  androiddevops `1.2.0` (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) from
+  androiddevops `1.4.0` (`4763e3be9f3a24a1b80dee3bf01530413aa3f49f`) from
   `ci.yml`, `emulator.yml`, and `release.yml`. `release.yml` still passes
   `environment: release`. The CodeQL caller must grant `actions: read`
   because the reusable upload job requests it even when `upload` is `never`.
@@ -149,6 +149,7 @@ bash scripts/check-ci-local.sh
   (zero high or critical). With the SDK, coverage is required for all three modules.
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
+- A parent cadence or time-limit write must call `publishProfile`, or the open child keeps the old pace. Godot Sair is drawn on the canvas and is not in the accessibility tree. `.maestro/prize.yaml` leaves with the Back key. Local flows use `scripts/run-maestro.sh` and do not run on GitHub Actions.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
@@ -269,6 +270,6 @@ bash scripts/check-ci-local.sh
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review after 0.3.1 dedupes this list. Do not file them again.
 7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. Callers pin `3.3.10`, which runs the containers as root, skips mypy when `installable_app` is false, reads pip-audit 2.10's dependencies object, and runs the quality report as a module. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. It is not behind `PYTHON_QUALITY_ENABLED`. `install_runner_packages` stays false. Do not pin `main`. Do not move pydevops 3.3.1 through 3.3.10. Leave pydevops `feature-cmn-551` alone.
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
-9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done. `PrizeDeviceTest.everyPrizeBecomesReady` passed on `mat_api36` on 2026-11-04, including climb. The JNI exclude stays. Scorecard BinaryArtifacts alert #4 is still open: wrapper validation in `ci.yml` is path-filtered, so Scorecard does not see it. MAT-020 removes that filter. androiddevops 1.3.0 exists and this repo still pins 1.2.0. MAT-020 moves every workflow to one newer tag. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
+9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done. `PrizeDeviceTest.everyPrizeBecomesReady` passed on `mat_api36` on 2026-11-04, including climb. The JNI exclude stays. Wrapper validation in `ci.yml` always runs, so Scorecard can see it. BinaryArtifacts alert #4 stays until Scorecard scans `main` after this merges. androiddevops is pinned once at 1.4.0. Local Maestro uses the digest in `docs/companion-pins.yml` and does not run on GitHub Actions. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-04 (MAT-019 prize boot, controls, and intro).*
+*Last updated: 2026-11-04 (MAT-020 Maestro flows and androiddevops 1.4.0).*

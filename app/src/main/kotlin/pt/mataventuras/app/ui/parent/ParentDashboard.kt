@@ -299,6 +299,7 @@ private fun PrizeLimitRow(
                         container.repository.updateProfile(
                             profile.copy(pace = profile.pace.copy(limitSeconds = stored)),
                         )
+                        container.publishProfile(profile.id)
                     }
                 },
             ) { Text(stringResource(R.string.minutes_short, choice / 60)) }
@@ -317,6 +318,7 @@ private fun PrizeLimitRow(
                             profile.copy(pace = profile.pace.copy(every = stored)),
                             cadenceOnly = true,
                         )
+                        container.publishProfile(profile.id)
                     }
                 },
             ) { Text(stringResource(R.string.every_short, choice)) }
