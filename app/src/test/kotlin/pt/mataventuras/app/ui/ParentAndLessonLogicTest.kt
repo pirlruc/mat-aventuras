@@ -176,6 +176,7 @@ class ParentAndLessonLogicTest {
                 .isNotEmpty()
         }
         compose.onNodeWithText("1 min").performScrollTo().performClick()
+        compose.onNodeWithText("5 atividades").performScrollTo().performClick()
         compose.waitForIdle()
         compose
             .onNodeWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
@@ -529,6 +530,12 @@ class ParentAndLessonLogicTest {
         val profile =
             runBlocking {
                 val id = app.container.repository.createProfile("Lia", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
+                app.container.repository.updateProfile(
+                    app.container.repository.getProfile(id)!!.let { child ->
+                        child.copy(pace = child.pace.copy(every = 5))
+                    },
+                    cadenceOnly = true,
+                )
                 app.container.repository.getProfile(id)!!
             }
         val spoken = mutableListOf<String>()
@@ -546,7 +553,7 @@ class ParentAndLessonLogicTest {
                 )
             }
         }
-        repeat(3) { clickCorrect() }
+        repeat(5) { clickCorrect() }
         assertEquals(1, rewards)
         val held = spoken.size
         celebrate = true

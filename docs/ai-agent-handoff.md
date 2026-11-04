@@ -61,8 +61,8 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-013 | done | T2 and T3 are on main. python-quality runs when a Python file or a Python tool config changes. `python-gate` is required |
 | MAT-015 | done | 0.3.1 assets verify with cosign and `gh attestation verify`. Do not move `0.3.0` or `0.3.1` |
 | MAT-016 | done | Defect fixes and the androiddevops 1.2.0 pin. Release 0.3.2 is tagged |
-| MAT-017 | done in the manifest | Child-facing lesson defects. Sync after the PR merges |
-| MAT-018 | open | Parent prize cadence. Round 5 |
+| MAT-017 | done | Child-facing lesson defects. GitHub #172–#177 are closed |
+| MAT-018 | done in the manifest | Parent prize cadence. Sync before the pull request's scaffold check |
 | MAT-019 | open | Prize boot, controls, and explanation. Round 5 |
 | MAT-020 | open | Maestro flows. Round 5 |
 
@@ -218,7 +218,7 @@ bash scripts/check-ci-local.sh
   a 2D process cannot load `kart.tscn` (or `boot.tscn`).
 - PIN unlock goes through `PinRepository.update` so lockout is not racy.
 - PIN digits are ASCII `0-9` only. `PinPolicy.derive` clears the password chars and the `PBEKeySpec`.
-- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is 3. `MIGRATION_1_2` rewrites `THREE_YEARS` and `SEVEN_YEARS`. `MIGRATION_2_3` adds `prizeLimitSeconds` (default 120). `security-crypto` is gone. `BandDifficulty.forAge` is the range switch. NUMBERS sudoku stays the small board on both bands. Do not bring back `isSevenYears()`.
+- Do not reintroduce `fallbackToDestructiveMigration`. Schema version is 4. `MIGRATION_1_2` rewrites `THREE_YEARS` and `SEVEN_YEARS`. `MIGRATION_2_3` adds `prizeLimitSeconds` (default 120). `MIGRATION_3_4` adds `prizeEvery` (default 10) and `activitiesCompleted` (default 0). A miss does not reset that count. `security-crypto` is gone. `BandDifficulty.forAge` is the range switch. NUMBERS sudoku stays the small board on both bands. Do not bring back `isSevenYears()`.
 - Prize GDScript pointer/HUD/steer helpers live on the `Host` autoload (`read_pointer`, `make_hud`, `axis_from_normalized_x`). Keep them aligned with `EngineInputMap` (dead-zone 0.14, jump flick 56 px).
 - Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
 - `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
@@ -271,4 +271,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done, and the climb frame on `mat_api36` is still the boot overlay. MAT-019 owns that. Do not write that every prize is past the overlay. The JNI exclude stays. Scorecard BinaryArtifacts alert #4 is still open: wrapper validation in `ci.yml` is path-filtered, so Scorecard does not see it. MAT-020 removes that filter. androiddevops 1.3.0 exists and this repo still pins 1.2.0. MAT-020 moves every workflow to one newer tag. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-03 (MAT-017 child-facing lesson defects).*
+*Last updated: 2026-11-03 (MAT-018 parent prize cadence).*

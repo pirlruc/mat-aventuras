@@ -111,7 +111,7 @@ fun LessonScreen(
     var exercise by remember { mutableStateOf(container.generator.generate(module, 0, profile.ageGroup)) }
     var hits by remember { mutableIntStateOf(0) }
     var misses by remember { mutableIntStateOf(0) }
-    var streak by remember { mutableIntStateOf(0) }
+    var completed by remember { mutableIntStateOf(profile.pace.completed) }
     var points by remember { mutableIntStateOf(profile.points) }
     var confirmingExit by remember { mutableStateOf(false) }
     val startedAt = remember { System.currentTimeMillis() }
@@ -194,25 +194,21 @@ fun LessonScreen(
         val delta = container.rewards.pointsForAttempt(correct, profile.ageGroup)
         points = container.rewards.applyPoints(points, delta)
         val ticket = pointsTicket.incrementAndGet()
-        if (correct) {
-            hits += 1
-            streak += 1
-        } else {
-            misses += 1
-            streak = 0
-        }
-        scope.launch {
-            pointsGate.withLock {
-                val stored = container.repository.addPoints(profile.id, delta) ?: return@withLock
-                if (ticket == pointsTicket.get()) points = stored.points
-            }
-        }
+        if (correct) hits += 1 else misses += 1
         if (advance) {
-            if (container.rewards.shouldOpenReward(streak)) {
+            completed = container.rewards.nextCompleted(completed, true)
+            if (container.rewards.shouldOpenReward(completed, profile.pace.every)) {
                 holdPrompt = true
                 onReward(profile.ageGroup)
             }
             exercise = container.generator.generate(module, lessonLevel(hits), profile.ageGroup)
+        }
+        scope.launch {
+            pointsGate.withLock {
+                val stored =
+                    container.repository.addPoints(profile.id, delta, advance) ?: return@withLock
+                if (ticket == pointsTicket.get()) points = stored.points
+            }
         }
         pickLock.set(false)
     }
@@ -256,7 +252,8 @@ fun LessonScreen(
                 fillEveryBlank = fillSudoku,
                 onBoardFocus = { index -> sudoku = SudokuPlay.focus(sudoku, index) },
                 age = profile.ageGroup,
-                streak = streak,
+                completed = completed,
+                every = profile.pace.every,
                 onSpeak = onSpeak,
             )
         }
@@ -286,7 +283,8 @@ internal fun LessonPlayColumn(
     fillEveryBlank: Boolean,
     onBoardFocus: (Int) -> Unit,
     age: AgeBand,
-    streak: Int,
+    completed: Int,
+    every: Int,
     onSpeak: (String) -> Unit,
 ) {
     val tokens = LocalUiTokens.current
@@ -300,7 +298,7 @@ internal fun LessonPlayColumn(
     ) {
         val listen = stringResource(R.string.listen)
         val listenAgain = stringResource(R.string.listen_again)
-        val stars = stringResource(R.string.stars_of_three, prizeStars(streak))
+        val stars = stringResource(R.string.stars_toward, prizeStars(completed, every), every)
         val score = lessonScoreLine(hits, points, stringResource(R.string.score_line))
         Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Button(
@@ -311,7 +309,7 @@ internal fun LessonPlayColumn(
                     .semantics(mergeDescendants = true) { contentDescription = listenAgain },
         ) { Text(listen) }
         Text(
-            prizeStarLine(streak),
+            prizeStarLine(completed, every),
             modifier = Modifier.semantics { contentDescription = stars },
         )
         if (showsStarGrid(module, exercise.visualCount, exercise.play.kind)) {

@@ -1,6 +1,15 @@
 package pt.mataventuras.domain.model
 
 /**
+ * Parent prize length, how many finished activities open the next prize, and how many are done.
+ */
+data class PrizePace(
+    val limitSeconds: Int = 120,
+    val every: Int = 10,
+    val completed: Int = 0,
+)
+
+/**
  * Local child profile on this device.
  */
 data class ChildProfile(
@@ -11,7 +20,7 @@ data class ChildProfile(
     val avatarId: String,
     val points: Int,
     val createdAtEpochMs: Long,
-    val prizeLimitSeconds: Int = 120,
+    val pace: PrizePace = PrizePace(),
 )
 
 /**

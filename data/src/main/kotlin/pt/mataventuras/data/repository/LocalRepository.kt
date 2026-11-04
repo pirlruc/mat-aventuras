@@ -68,22 +68,37 @@ class LocalRepository(
         return id
     }
 
-    /** Overwrites a stored profile. */
-    suspend fun updateProfile(profile: ChildProfile) {
-        database.profileDao().update(profile.toEntity())
+    /**
+     * Overwrites a stored profile. [cadenceOnly] writes the prize cadence and leaves the
+     * finished-activity count untouched.
+     */
+    suspend fun updateProfile(
+        profile: ChildProfile,
+        cadenceOnly: Boolean = false,
+    ) {
+        val dao = database.profileDao()
+        if (!cadenceOnly) {
+            dao.update(profile.toEntity())
+            return
+        }
+        if (dao.get(profile.id) == null) return
+        dao.setPrizeEvery(profile.id, profile.pace.every)
     }
 
     /**
      * Applies [delta] in SQL so concurrent lesson taps and reward bonuses cannot
-     * clobber each other. Returns the stored profile, or null when [id] is unknown.
+     * clobber each other. [finishedActivity] counts one completed activity and never
+     * resets that total. Returns the stored profile, or null when [id] is unknown.
      */
     suspend fun addPoints(
         id: Long,
         delta: Int,
+        finishedActivity: Boolean = false,
     ): ChildProfile? {
         val dao = database.profileDao()
         if (dao.get(id) == null) return null
         if (delta != 0) dao.addPoints(id, delta)
+        if (finishedActivity) dao.recordCompleted(id)
         return dao.get(id)?.toDomain()
     }
 

@@ -101,20 +101,26 @@ internal fun answerToneMs(
 }
 
 /**
- * Filled stars toward the next prize. A finished set shows all three.
+ * Filled stars toward the next prize. A finished set shows all [every] stars.
  */
-internal fun prizeStars(streak: Int): Int {
-    if (streak <= 0) return 0
-    val remainder = streak % 3
-    return if (remainder == 0) 3 else remainder
+internal fun prizeStars(
+    completed: Int,
+    every: Int = 10,
+): Int {
+    if (completed <= 0 || every <= 0) return 0
+    val remainder = completed % every
+    return if (remainder == 0) every else remainder
 }
 
 /**
- * Three stars, filled up to [prizeStars].
+ * [every] stars, filled up to [prizeStars].
  */
-internal fun prizeStarLine(streak: Int): String {
-    val filled = prizeStars(streak)
-    return "★".repeat(filled) + "☆".repeat(3 - filled)
+internal fun prizeStarLine(
+    completed: Int,
+    every: Int = 10,
+): String {
+    val filled = prizeStars(completed, every)
+    return "★".repeat(filled) + "☆".repeat((every - filled).coerceAtLeast(0))
 }
 
 /**

@@ -31,3 +31,20 @@ val MIGRATION_2_3: Migration =
             )
         }
     }
+
+/**
+ * Adds the parent prize cadence and the finished-activity count.
+ * Existing rows open a prize every 10 activities and start from zero.
+ * No rows are deleted.
+ */
+val MIGRATION_3_4: Migration =
+    object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE profiles ADD COLUMN prizeEvery INTEGER NOT NULL DEFAULT 10",
+            )
+            db.execSQL(
+                "ALTER TABLE profiles ADD COLUMN activitiesCompleted INTEGER NOT NULL DEFAULT 0",
+            )
+        }
+    }

@@ -41,6 +41,17 @@ interface ProfileDao {
         id: Long,
         delta: Int,
     )
+
+    /** Counts one finished activity without rewriting the rest of the row. */
+    @Query("UPDATE profiles SET activitiesCompleted = activitiesCompleted + 1 WHERE id = :id")
+    suspend fun recordCompleted(id: Long)
+
+    /** Stores the parent cadence without rewriting the finished-activity count. */
+    @Query("UPDATE profiles SET prizeEvery = :every WHERE id = :id")
+    suspend fun setPrizeEvery(
+        id: Long,
+        every: Int,
+    )
 }
 
 /**

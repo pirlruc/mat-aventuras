@@ -68,6 +68,25 @@ class RewardsEngine {
     }
 
     /**
+     * Parent-set prize cadence. Unknown values stay on every ten finished activities.
+     */
+    fun prizeEvery(every: Int): Int {
+        if (every in ALLOWED_PRIZE_EVERY) return every
+        return DEFAULT_PRIZE_EVERY
+    }
+
+    /**
+     * Finished activities after one attempt. A miss that stays on the board does not change the count.
+     */
+    fun nextCompleted(
+        completed: Int,
+        activityFinished: Boolean,
+    ): Int {
+        if (!activityFinished) return completed.coerceAtLeast(0)
+        return completed + 1
+    }
+
+    /**
      * New total, never negative.
      */
     fun applyPoints(
@@ -109,11 +128,16 @@ class RewardsEngine {
     fun pointsForRewardFinish(finished: Boolean): Int = if (finished) REWARD_FINISH_POINTS else 0
 
     /**
-     * Opens a reward level every [HITS_FOR_REWARD] consecutive hits.
+     * Opens a prize when [completed] finished activities reach a multiple of [every].
+     * A value outside 5, 10, and 15 uses the default of 10.
      */
-    fun shouldOpenReward(consecutiveHits: Int): Boolean {
-        if (consecutiveHits <= 0) return false
-        return consecutiveHits % HITS_FOR_REWARD == 0
+    fun shouldOpenReward(
+        completed: Int,
+        every: Int,
+    ): Boolean {
+        val cadence = prizeEvery(every)
+        if (completed <= 0) return false
+        return completed % cadence == 0
     }
 
     /** Scoring constants and thresholds. */
@@ -121,10 +145,11 @@ class RewardsEngine {
         const val HIT_POINTS: Int = 10
         const val MISS_POINTS: Int = -2
         const val REWARD_FINISH_POINTS: Int = 15
-        const val HITS_FOR_REWARD: Int = 3
         const val THIRTY_MINUTES_MS: Long = 30L * 60L * 1000L
         const val PERFECT_MINIMUM: Int = 5
         const val DEFAULT_PRIZE_LIMIT_SECONDS: Int = 120
+        const val DEFAULT_PRIZE_EVERY: Int = 10
         val ALLOWED_PRIZE_LIMITS: Set<Int> = setOf(60, 120, 180)
+        val ALLOWED_PRIZE_EVERY: Set<Int> = setOf(5, 10, 15)
     }
 }
