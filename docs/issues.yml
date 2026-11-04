@@ -1591,3 +1591,35 @@ milestones:
             title: Pin one androiddevops tag
             verification:
               - ci.yml, emulator.yml, and release.yml use one androiddevops SHA
+
+  - name: Documentation follow-up
+    epics:
+      - id: MAT-DOC-001
+        status: open
+        title: Record child-audience, parent gate, and age bands in this app
+        overview:
+          problem: >-
+            Guardrails rejected GR-KIDS-001, GR-KIDS-002, GR-KIDS-003, and
+            GR-GD-001. Methodologies rejected MTH-AGE-001. Those choices are
+            product decisions for this app.
+          goal: >-
+            This repo's manifest records the store policy, the parent gate,
+            the spoken control order, the safe-area HUD, and the age bands.
+        decision: >-
+          In the context of a children's game, facing org rules that do not
+          fit one product, we decided to record the decisions here, to
+          achieve a product Epic, accepting that the org packs stay generic.
+        acceptance_criteria:
+          - An Epic names the Families policy, the parent gate, and the age bands
+          - The Godot HUD safe area is a task in this repo
+        tasks:
+          - id: MAT-DOC-001-T1
+            status: open
+            title: Author the product Epics
+            instructions:
+              files:
+                - docs/issues.yml
+            verification:
+              - The manifest names the parent gate and the safe-area HUD
+            guardrail_refs:
+              - ANDROID-A11Y-001
