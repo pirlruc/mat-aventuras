@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-04
-**Last agent focus:** `versionCode` 6 / `versionName` 0.4.0 is the release cut. Tag `0.3.2` stays on `d307dc1` (tag object `8ed6e262`). Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, or `0.3.2`.
+**Last agent focus:** Tag `0.4.0` is annotated on `8f40d20` (tag object `04c8b673`). Run 41792868922 published a signed `app-release.apk`. `sha256sum -c` matched. `apksigner` verifies scheme v2 and the README fingerprint. `cosign verify-blob` and `gh attestation verify --signer-repo pirlruc/commondevops` succeeded. Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, or `0.3.2`.
 
 ---
 
@@ -262,7 +262,7 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Shipped release is still `0.3.2` (`versionCode` 5) on `d307dc1`, tag object `8ed6e262`, run 41551690631, until the `0.4.0` tag is cut. This tree is `versionCode` 6 / `0.4.0`. Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, or `0.3.2`. The keystore is outside the repo. Do not commit it or copy the password.
+1. Current release is `0.4.0` (`versionCode` 6) on `8f40d20`, tag object `04c8b673`, run 41792868922. `0.3.2` stays on `d307dc1`. Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, or `0.3.2`. The keystore is outside the repo. Do not commit it or copy the password.
 2. MAT-015 is done. The 0.3.2 APK and the 0.3.1 APK both verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`.
 3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
 4. The emulator job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only). Run 41358345053 failed because the runner had no KVM permission (`-accel off`), and the multi-line `script:` never executed under `sh -c`. Do not record that as a boot timeout. androiddevops 1.2.0 is the fix.
@@ -272,4 +272,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done. `PrizeDeviceTest.everyPrizeBecomesReady` passed on `mat_api36` on 2026-11-04, including climb. The JNI exclude stays. Wrapper validation in `ci.yml` always runs, so Scorecard can see it. BinaryArtifacts alert #4 stays until Scorecard scans `main` after this merges. androiddevops is pinned once at 1.4.0. Local Maestro uses the digest in `docs/companion-pins.yml` and does not run on GitHub Actions. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-04 (0.4.0 version cut).*
+*Last updated: 2026-11-04 (0.4.0 signed release verified).*
