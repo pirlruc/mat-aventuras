@@ -1,0 +1,30 @@
+appId: pt.mataventuras.app
+---
+- launchApp:
+    clearState: true
+- tapOn: "6 a 8 anos"
+- tapOn: "Como te chamas?"
+- inputText: "Rui"
+- hideKeyboard
+- tapOn: "Vamos começar!"
+- scrollUntilVisible:
+    element: "Memória com o Porquinho Rosa"
+    direction: DOWN
+- tapOn: "Memória com o Porquinho Rosa"
+- tapOn: "par-1"
+- tapOn: "par-1"
+- tapOn: "par-2"
+- tapOn: "par-2"
+- tapOn: "par-3"
+- tapOn: "par-3"
+- tapOn: "par-4"
+- tapOn: "par-4"
+- tapOn: "par-5"
+- tapOn: "par-5"
+- tapOn: "par-6"
+- tapOn: "par-6"
+- tapOn: "par-7"
+- tapOn: "par-7"
+- tapOn: "par-8"
+- tapOn: "par-8"
+- assertVisible: ".*1 certos.*"

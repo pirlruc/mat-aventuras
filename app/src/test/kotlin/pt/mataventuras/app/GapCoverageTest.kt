@@ -334,10 +334,11 @@ class GapCoverageTest {
                 compose.onAllNodesWithText("A")[0].performClick()
             }
             PlayKind.MEMORY -> {
-                compose.onAllNodes(hasContentDescription("carta fechada"))[0].performClick()
+                val closed = hasContentDescription("carta fechada").or(hasContentDescription("par-", substring = true))
+                compose.onAllNodes(closed)[0].performClick()
                 compose.onAllNodesWithText("Sol")[0].performClick()
-                if (compose.onAllNodes(hasContentDescription("carta fechada")).fetchSemanticsNodes().isNotEmpty()) {
-                    compose.onAllNodes(hasContentDescription("carta fechada"))[0].performClick()
+                if (compose.onAllNodes(closed).fetchSemanticsNodes().isNotEmpty()) {
+                    compose.onAllNodes(closed)[0].performClick()
                 }
             }
             PlayKind.WORD_COMPLETE -> compose.onNodeWithText("A").performClick()

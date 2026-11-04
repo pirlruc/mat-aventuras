@@ -1,0 +1,17 @@
+appId: pt.mataventuras.app
+---
+- launchApp:
+    clearState: true
+- tapOn: "3 a 5 anos"
+- tapOn: "Como te chamas?"
+- inputText: "Ana"
+- hideKeyboard
+- tapOn: "Vamos começar!"
+- tapOn: "Formas com o Porquinho Rosa"
+- tapOn:
+    id: "correct-answer"
+- scrollUntilVisible:
+    element: ".*1 certos.*"
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 15000

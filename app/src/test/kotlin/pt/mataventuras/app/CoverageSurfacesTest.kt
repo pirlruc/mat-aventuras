@@ -149,9 +149,10 @@ class CoverageSurfacesTest {
         show(app, stepState, LearningModule.LOGIC, 4)
         step = LearningModule.entries.size
         compose.waitForIdle()
-        compose.onAllNodes(hasContentDescription("carta fechada"))[0].performClick()
+        val closed = hasContentDescription("carta fechada").or(hasContentDescription("par-", substring = true))
+        compose.onAllNodes(closed)[0].performClick()
         compose.waitForIdle()
-        compose.onAllNodes(hasContentDescription("carta fechada"))[0].performClick()
+        compose.onAllNodes(closed)[0].performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("pips-drawn", useUnmergedTree = true).assertExists()
         assertTrue(memoryFinished.get())

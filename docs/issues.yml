@@ -1558,7 +1558,7 @@ milestones:
               - Compose prizes have a top Sair button
 
       - id: MAT-020
-        status: open
+        status: done
         title: Run device flows with the Maestro image
         decision: >-
           In the context of checking the app on a device, facing a CLI that
@@ -1576,18 +1576,18 @@ milestones:
           - SC-DEP-004
         tasks:
           - id: MAT-020-T1
-            status: open
+            status: done
             title: Add the Maestro flows and the runner script
             verification:
               - scripts/run-maestro.sh pulls the pinned digest
               - The script does nothing when adb lists no device
           - id: MAT-020-T2
-            status: open
+            status: done
             title: Let Scorecard see wrapper validation
             verification:
               - The wrapper-validation job is not limited to gradle/wrapper paths
           - id: MAT-020-T3
-            status: open
+            status: done
             title: Pin one androiddevops tag
             verification:
               - ci.yml, emulator.yml, and release.yml use one androiddevops SHA

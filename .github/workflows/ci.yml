@@ -1,7 +1,7 @@
 # Quality and Android builds. Heavy jobs skip a pull request that does not
 # touch the app, the domain, Gradle, or scripts. The gate job still runs, so a
 # docs-only pull request is not blocked on a skipped Gradle build.
-# Android jobs call androiddevops 1.2.0 (CI-018).
+# Android jobs call androiddevops 1.4.0 (CI-018).
 name: ci
 
 on:
@@ -93,9 +93,9 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
+    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@4763e3be9f3a24a1b80dee3bf01530413aa3f49f
     with:
-      scripts_ref: e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
+      scripts_ref: 4763e3be9f3a24a1b80dee3bf01530413aa3f49f
       gradle_tasks: >-
         :domain:ktlintCheck :domain:detekt :domain:test :domain:koverXmlReport :domain:koverVerify
         :data:ktlintCheck :data:detekt :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug
@@ -120,9 +120,9 @@ jobs:
       # The reusable upload job requests actions: read even when upload is never.
       actions: read
       security-events: write
-    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
+    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@4763e3be9f3a24a1b80dee3bf01530413aa3f49f
     with:
-      scripts_ref: e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
+      scripts_ref: 4763e3be9f3a24a1b80dee3bf01530413aa3f49f
       upload: never
       build_command: >-
         ./gradlew --no-daemon :domain:compileKotlin :data:compileDebugKotlin :app:compileDebugKotlin
@@ -134,9 +134,9 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
+    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@4763e3be9f3a24a1b80dee3bf01530413aa3f49f
     with:
-      scripts_ref: e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
+      scripts_ref: 4763e3be9f3a24a1b80dee3bf01530413aa3f49f
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -145,9 +145,9 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.deps == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
+    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@4763e3be9f3a24a1b80dee3bf01530413aa3f49f
     with:
-      scripts_ref: e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8
+      scripts_ref: 4763e3be9f3a24a1b80dee3bf01530413aa3f49f
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -157,27 +157,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
-      - name: Wrapper files changed
-        id: filter
-        env:
-          EVENT: ${{ github.event_name }}
-          BASE: ${{ github.base_ref }}
-        run: |
-          set -euo pipefail
-          run=true
-          if [[ "${EVENT}" == "pull_request" ]]; then
-            run=false
-            git fetch --depth=1 origin "${BASE}"
-            names="$(git diff --name-only "origin/${BASE}...HEAD")"
-            if grep -Eq '^gradle/wrapper/' <<<"${names}"; then
-              run=true
-            fi
-          fi
-          echo "run=${run}" >> "${GITHUB_OUTPUT}"
       - name: Validate Gradle wrapper
-        if: steps.filter.outputs.run == 'true'
         uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
   dependency-review:

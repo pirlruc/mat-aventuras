@@ -17,3 +17,11 @@ scaffold:
 
 methodologies:
   tag: "1.9.2"
+
+androiddevops:
+  tag: "1.4.0"
+  sha: "4763e3be9f3a24a1b80dee3bf01530413aa3f49f"
+
+android_maestro:
+  image: ghcr.io/pirlruc/android-maestro
+  digest: "sha256:aba49b8d5f8d87c291a6e6c59b9163d071ade024f85de61e87be1c9869b030da"

@@ -1,0 +1,12 @@
+appId: pt.mataventuras.app
+---
+- launchApp:
+    clearState: true
+- tapOn: "3 a 5 anos"
+- tapOn: "Como te chamas?"
+- hideKeyboard
+- tapOn: "Como te chamas?"
+- inputText: "Ana"
+- hideKeyboard
+- tapOn: "Vamos começar!"
+- assertVisible: "Contar com o Ouriço Veloz"

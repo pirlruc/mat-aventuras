@@ -1,0 +1,17 @@
+appId: pt.mataventuras.app
+---
+- tapOn: "Painel dos pais"
+- longPressOn: "Segurar para continuar"
+- copyTextFrom:
+    text: "Quanto é .*\\?"
+- evalScript: '${output.left = maestro.copiedText.split(" ")[2]; output.right = maestro.copiedText.split(" ")[4].replace("?", ""); output.product = (Number(output.left) * Number(output.right)).toString()}'
+- tapOn: "Resposta"
+- inputText: ${output.product}
+- hideKeyboard
+- tapOn: "Continuar"
+- tapOn: "PIN"
+- inputText: "1234"
+- tapOn: "Confirmar PIN"
+- inputText: "1234"
+- hideKeyboard
+- tapOn: "Guardar PIN"

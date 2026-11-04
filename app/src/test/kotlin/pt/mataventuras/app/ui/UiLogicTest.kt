@@ -6,6 +6,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import pt.mataventuras.app.di.pinIterationsFor
 import pt.mataventuras.app.engine.GodotRuntime
+import pt.mataventuras.app.ui.lesson.memoryCardDescription
+import pt.mataventuras.app.ui.lesson.memoryCardTag
 import pt.mataventuras.app.ui.lesson.pipOffsets
 import pt.mataventuras.app.ui.lesson.quantityPips
 import pt.mataventuras.app.ui.lesson.showsCardFront
@@ -174,6 +176,13 @@ class UiLogicTest {
         val order = mutableListOf<String>()
         beginReward(stopSpeech = { order += "stop" }, launch = { order += "launch" })
         assertEquals(listOf("stop", "launch"), order)
+        assertEquals("par-1", memoryCardTag(open = false, debug = true, pips = 1, pairKey = "1"))
+        assertEquals("memory-pip", memoryCardTag(open = true, debug = true, pips = 1, pairKey = "1"))
+        assertEquals("memory-face", memoryCardTag(open = false, debug = false, pips = null, pairKey = "A"))
+        assertEquals("par-1", memoryCardDescription(false, true, 1, "1", "1"))
+        assertEquals("carta fechada", memoryCardDescription(false, false, null, "A", "A"))
+        assertEquals("1", memoryCardDescription(true, true, 1, "1", "qty:1"))
+        assertEquals("A", memoryCardDescription(true, false, null, "A", "A"))
         assertEquals(1, quantityPips("qty:1"))
         assertEquals(6, quantityPips("qty:6"))
         assertEquals(null, quantityPips("1"))
