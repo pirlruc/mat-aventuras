@@ -1,8 +1,18 @@
 package pt.mataventuras.data.local
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+
+/**
+ * Prize columns on a profile row. Flattened by Room, so the names match the table.
+ */
+data class StoredPrizePace(
+    val prizeLimitSeconds: Int = 120,
+    val prizeEvery: Int = 10,
+    val activitiesCompleted: Int = 0,
+)
 
 /** Stored child profile. */
 @Entity(tableName = "profiles")
@@ -14,7 +24,7 @@ data class ProfileEntity(
     val avatarId: String,
     val points: Int,
     val createdAtEpochMs: Long,
-    val prizeLimitSeconds: Int = 120,
+    @Embedded val pace: StoredPrizePace = StoredPrizePace(),
 )
 
 /** Stored lesson session. */

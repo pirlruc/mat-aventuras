@@ -59,8 +59,31 @@ class AgeBandMigrationTest {
         }
     }
 
+    @Test
+    fun addsPrizeCadenceWithoutDeletingRows() {
+        helper.createDatabase(CADENCE, 3).apply {
+            execSQL(
+                "INSERT INTO profiles (name, ageGroup, mascotCode, avatarId, points, " +
+                    "createdAtEpochMs, prizeLimitSeconds) " +
+                    "VALUES ('Ana', 'THREE_TO_FIVE', 'speedy_hedgehog', 'a', 4, 1, 60)",
+            )
+            close()
+        }
+        val migrated = helper.runMigrationsAndValidate(CADENCE, 4, true, MIGRATION_3_4)
+        val columns = "name, points, prizeLimitSeconds, prizeEvery, activitiesCompleted"
+        migrated.query("SELECT $columns FROM profiles").use { cursor ->
+            assertEquals(true, cursor.moveToFirst())
+            assertEquals("Ana", cursor.getString(0))
+            assertEquals(4, cursor.getInt(1))
+            assertEquals(60, cursor.getInt(2))
+            assertEquals(10, cursor.getInt(3))
+            assertEquals(0, cursor.getInt(4))
+        }
+    }
+
     private companion object {
         const val NAME: String = "age-band-migration"
         const val PRIZE: String = "prize-limit-migration"
+        const val CADENCE: String = "prize-cadence-migration"
     }
 }

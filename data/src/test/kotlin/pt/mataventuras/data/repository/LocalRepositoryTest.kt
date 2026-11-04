@@ -60,6 +60,14 @@ class LocalRepositoryTest {
             assertEquals(27, repository.addPoints(id, 0)!!.points)
             assertEquals(0, repository.addPoints(id, -100)!!.points)
             assertEquals(null, repository.addPoints(9_999, 5))
+            assertEquals(10, repository.getProfile(id)!!.pace.every)
+            assertEquals(1, repository.addPoints(id, 0, finishedActivity = true)!!.pace.completed)
+            val paced = repository.getProfile(id)!!
+            repository.updateProfile(paced.copy(pace = paced.pace.copy(every = 5)), cadenceOnly = true)
+            assertEquals(5, repository.getProfile(id)!!.pace.every)
+            assertEquals(1, repository.getProfile(id)!!.pace.completed)
+            repository.updateProfile(paced.copy(id = 9_999, pace = paced.pace.copy(every = 15)), cadenceOnly = true)
+            assertEquals(5, repository.getProfile(id)!!.pace.every)
             repository.saveSession(
                 LearningSession(0, id, LearningModule.COUNTING, 5, 1, 2_000, 1_000),
             )

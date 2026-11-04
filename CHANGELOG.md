@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Round 5 backlog: MAT-018 through MAT-020 remain open.
+- A parent chooses a prize every 5, 10, or 15 finished activities. The
+  default is 10. A miss does not reset the count.
+- Round 5 backlog: MAT-019 and MAT-020 remain open.
 
 ## [0.3.2] - 2026-11-03
 

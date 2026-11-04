@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -286,7 +287,7 @@ private fun PrizeLimitRow(
     profile: ChildProfile,
 ) {
     val scope = rememberCoroutineScope()
-    var seconds by remember(profile.id) { mutableStateOf(profile.prizeLimitSeconds) }
+    var seconds by remember(profile.id) { mutableStateOf(profile.pace.limitSeconds) }
     Text(stringResource(R.string.prize_minutes, seconds / 60), fontWeight = FontWeight.Bold)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(60, 120, 180).forEach { choice ->
@@ -295,10 +296,30 @@ private fun PrizeLimitRow(
                     val stored = container.rewards.prizeLimitSeconds(choice)
                     seconds = stored
                     scope.launch {
-                        container.repository.updateProfile(profile.copy(prizeLimitSeconds = stored))
+                        container.repository.updateProfile(
+                            profile.copy(pace = profile.pace.copy(limitSeconds = stored)),
+                        )
                     }
                 },
             ) { Text(stringResource(R.string.minutes_short, choice / 60)) }
+        }
+    }
+    var every by remember(profile.id) { mutableIntStateOf(profile.pace.every) }
+    Text(stringResource(R.string.prize_every, every), fontWeight = FontWeight.Bold)
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(5, 10, 15).forEach { choice ->
+            Button(
+                onClick = {
+                    val stored = container.rewards.prizeEvery(choice)
+                    every = stored
+                    scope.launch {
+                        container.repository.updateProfile(
+                            profile.copy(pace = profile.pace.copy(every = stored)),
+                            cadenceOnly = true,
+                        )
+                    }
+                },
+            ) { Text(stringResource(R.string.every_short, choice)) }
         }
     }
 }

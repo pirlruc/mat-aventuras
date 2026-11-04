@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.data.local.MIGRATION_1_2
 import pt.mataventuras.data.local.MIGRATION_2_3
+import pt.mataventuras.data.local.MIGRATION_3_4
 import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.repository.LocalRepository
@@ -50,7 +51,7 @@ class AppContainer(
                 context.applicationContext,
                 MatAventurasDatabase::class.java,
                 "mat_aventuras.db",
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .apply { if (roomAllowsMainThread(processFingerprint())) allowMainThreadQueries() }
             .build()
 

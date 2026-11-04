@@ -4,11 +4,13 @@ import pt.mataventuras.data.local.AvatarEntity
 import pt.mataventuras.data.local.BadgeEntity
 import pt.mataventuras.data.local.ProfileEntity
 import pt.mataventuras.data.local.SessionEntity
+import pt.mataventuras.data.local.StoredPrizePace
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.LearningSession
 import pt.mataventuras.domain.model.Mascot
+import pt.mataventuras.domain.model.PrizePace
 import pt.mataventuras.domain.model.UnlockedAvatar
 import pt.mataventuras.domain.model.UnlockedBadge
 
@@ -22,7 +24,12 @@ fun ProfileEntity.toDomain(): ChildProfile =
         avatarId = avatarId,
         points = points,
         createdAtEpochMs = createdAtEpochMs,
-        prizeLimitSeconds = prizeLimitSeconds,
+        pace =
+            PrizePace(
+                limitSeconds = pace.prizeLimitSeconds,
+                every = pace.prizeEvery,
+                completed = pace.activitiesCompleted,
+            ),
     )
 
 /** Maps a domain profile to a Room row. */
@@ -35,7 +42,12 @@ fun ChildProfile.toEntity(): ProfileEntity =
         avatarId = avatarId,
         points = points,
         createdAtEpochMs = createdAtEpochMs,
-        prizeLimitSeconds = prizeLimitSeconds,
+        pace =
+            StoredPrizePace(
+                prizeLimitSeconds = pace.limitSeconds,
+                prizeEvery = pace.every,
+                activitiesCompleted = pace.completed,
+            ),
     )
 
 /** Maps a stored session row to the domain model. */

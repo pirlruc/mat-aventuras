@@ -155,7 +155,7 @@ internal fun NavGraph(
                                 module = current.module,
                                 onSpeak = onSpeak,
                                 onReward = { age ->
-                                    onReward(age, p.favouriteMascot, p.name, p.prizeLimitSeconds)
+                                    onReward(age, p.favouriteMascot, p.name, p.pace.limitSeconds)
                                 },
                                 onExit = {
                                     scope.launch {

@@ -28,11 +28,20 @@ class RewardsEngineTest {
     }
 
     @Test
-    fun rewardOpensEveryThreeHits() {
-        assertFalse(engine.shouldOpenReward(0))
-        assertFalse(engine.shouldOpenReward(2))
-        assertTrue(engine.shouldOpenReward(3))
-        assertTrue(engine.shouldOpenReward(6))
+    fun rewardOpensEveryChosenCompletedCount() {
+        assertEquals(10, engine.prizeEvery(4))
+        assertEquals(5, engine.prizeEvery(5))
+        assertEquals(15, engine.prizeEvery(15))
+        assertEquals(4, engine.nextCompleted(4, false))
+        assertEquals(0, engine.nextCompleted(-1, false))
+        assertEquals(5, engine.nextCompleted(4, true))
+        assertFalse(engine.shouldOpenReward(0, 10))
+        assertFalse(engine.shouldOpenReward(9, 10))
+        assertTrue(engine.shouldOpenReward(10, 10))
+        assertTrue(engine.shouldOpenReward(15, 15))
+        assertFalse(engine.shouldOpenReward(9, 7))
+        assertTrue(engine.shouldOpenReward(10, 7))
+        assertFalse(engine.shouldOpenReward(engine.nextCompleted(9, false), 10))
     }
 
     @Test

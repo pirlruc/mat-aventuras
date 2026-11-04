@@ -1478,7 +1478,7 @@ milestones:
               - Continuar speaks the next prompt
 
       - id: MAT-018
-        status: open
+        status: done
         title: Let a parent choose how often a prize opens
         decision: >-
           In the context of a parent setting the pace, facing a prize every
@@ -1494,14 +1494,14 @@ milestones:
           - KT-TEST-002
         tasks:
           - id: MAT-018-T1
-            status: open
+            status: done
             title: Store the cadence and the completed count
             verification:
               - Schema version is 4
               - MIGRATION_3_4 adds prizeEvery with default 10
               - There is no destructive migration
           - id: MAT-018-T2
-            status: open
+            status: done
             title: Show the cadence on the parent screen
             verification:
               - The parent can choose 5, 10, or 15

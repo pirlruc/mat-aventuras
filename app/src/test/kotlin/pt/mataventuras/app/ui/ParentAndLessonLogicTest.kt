@@ -176,6 +176,7 @@ class ParentAndLessonLogicTest {
                 .isNotEmpty()
         }
         compose.onNodeWithText("1 min").performScrollTo().performClick()
+        compose.onNodeWithText("5 atividades").performScrollTo().performClick()
         compose.waitForIdle()
         compose
             .onNodeWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
@@ -265,6 +266,10 @@ class ParentAndLessonLogicTest {
         val profile =
             kotlinx.coroutines.runBlocking {
                 val id = app.container.repository.createProfile("Ana", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
+                val created = app.container.repository.getProfile(id)!!
+                app.container.repository.updateProfile(
+                    created.copy(pace = created.pace.copy(completed = 8)),
+                )
                 app.container.repository.getProfile(id)!!
             }
         var rewards = 0
@@ -273,7 +278,7 @@ class ParentAndLessonLogicTest {
                 LessonScreen(
                     container = app.container,
                     profile = profile,
-                    module = LearningModule.SHAPES,
+                    module = LearningModule.COUNTING,
                     onSpeak = {},
                     onReward = { rewards += 1 },
                     onExit = {},
@@ -285,7 +290,7 @@ class ParentAndLessonLogicTest {
         }
         clickWrong()
         var attempts = 0
-        while (rewards < 1 && attempts < 12) {
+        while (rewards < 1 && attempts < 3) {
             clickCorrect()
             attempts += 1
         }
@@ -529,6 +534,12 @@ class ParentAndLessonLogicTest {
         val profile =
             runBlocking {
                 val id = app.container.repository.createProfile("Lia", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
+                app.container.repository.updateProfile(
+                    app.container.repository.getProfile(id)!!.let { child ->
+                        child.copy(pace = child.pace.copy(every = 5))
+                    },
+                    cadenceOnly = true,
+                )
                 app.container.repository.getProfile(id)!!
             }
         val spoken = mutableListOf<String>()
@@ -546,7 +557,7 @@ class ParentAndLessonLogicTest {
                 )
             }
         }
-        repeat(3) { clickCorrect() }
+        repeat(5) { clickCorrect() }
         assertEquals(1, rewards)
         val held = spoken.size
         celebrate = true

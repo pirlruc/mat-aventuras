@@ -29,7 +29,7 @@
     <string name="switch_profile">Outra criança</string>
     <string name="listen">Ouvir</string>
     <string name="listen_again">Ouvir outra vez</string>
-    <string name="stars_of_three">%1$d de 3 estrelas</string>
+    <string name="stars_toward">%1$d de %2$d estrelas</string>
     <string name="score_line">%1$d certos · %2$d pontos</string>
     <string name="clock_face">Relógio</string>
     <string name="pin_save">Guardar PIN</string>
@@ -47,6 +47,8 @@
     <string name="hits_misses">Acertos / erros</string>
     <string name="close">Fechar</string>
     <string name="prize_minutes">Tempo do prémio: %1$d min</string>
+    <string name="prize_every">Prémio a cada %1$d atividades</string>
+    <string name="every_short">%1$d atividades</string>
     <string name="minutes_short">%1$d min</string>
     <string name="pin_unreadable">Não consigo ler o PIN deste aparelho.</string>
     <string name="hold_to_reset">Segurar para repor</string>
