@@ -64,7 +64,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-017 | done | Child-facing lesson defects. GitHub #172–#177 are closed |
 | MAT-018 | done | Parent prize cadence. GitHub #178–#180 are closed |
 | MAT-019 | done | Prize boot, controls, and explanation. GitHub #181–#186 are closed |
-| MAT-020 | done in the manifest | Maestro flows and the androiddevops 1.4.0 pin. Sync before the pull request's scaffold check |
+| MAT-020 | done | #187–#190 closed. Maestro flows and the androiddevops 1.4.0 pin |
 
 `docs/guardrail-deviations.yml` has three entries, none of which lowers a number:
 Kover exclusions beyond kotlinx.serialization (KT-TEST-002; floors stay 95),
