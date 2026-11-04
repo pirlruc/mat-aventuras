@@ -266,6 +266,10 @@ class ParentAndLessonLogicTest {
         val profile =
             kotlinx.coroutines.runBlocking {
                 val id = app.container.repository.createProfile("Ana", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
+                val created = app.container.repository.getProfile(id)!!
+                app.container.repository.updateProfile(
+                    created.copy(pace = created.pace.copy(completed = 8)),
+                )
                 app.container.repository.getProfile(id)!!
             }
         var rewards = 0
@@ -274,7 +278,7 @@ class ParentAndLessonLogicTest {
                 LessonScreen(
                     container = app.container,
                     profile = profile,
-                    module = LearningModule.SHAPES,
+                    module = LearningModule.COUNTING,
                     onSpeak = {},
                     onReward = { rewards += 1 },
                     onExit = {},
@@ -286,7 +290,7 @@ class ParentAndLessonLogicTest {
         }
         clickWrong()
         var attempts = 0
-        while (rewards < 1 && attempts < 12) {
+        while (rewards < 1 && attempts < 3) {
             clickCorrect()
             attempts += 1
         }
