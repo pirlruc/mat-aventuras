@@ -38,12 +38,10 @@ var power_nodes: Array[ColorRect] = []
 var power_taken: Array[bool] = []
 var form := 0
 var star_timer := 0.0
+var freeze := 0.0
+var freeze_for := 1.0
+var wait_release := false
 var elapsed := 0.0
-var finger_down := false
-var finger_x := 0.5
-var flick_x := 0.0
-var flick_y := 0.0
-
 
 func _ready() -> void:
 	coins_target = Host.tune_i("runner", "coins")
@@ -69,6 +67,8 @@ func _ready() -> void:
 	_make_enemies()
 	_make_powers()
 	hud = Host.make_hud(self)
+	Host.add_platform_controls(self)
+	freeze_for = Host.tune("runner", "freeze")
 	_update_hud()
 	RenderingServer.set_default_clear_color(pal_sky)
 	_fit_world()
@@ -195,26 +195,8 @@ func _add_brick(px: float, py: float, w: float, h: float, color: Color) -> void:
 	world.add_child(brick)
 
 
-func _input(event: InputEvent) -> void:
-	var sample := Host.read_pointer(event)
-	if sample.is_empty():
-		return
-	var pos: Vector2 = sample.pos
-	var rel: Vector2 = sample.rel
-	finger_down = sample.down or sample.move
-	finger_x = Host.normalized_x(self, pos)
-	if sample.down:
-		move_x = Host.axis_from_normalized_x(finger_x)
-		flick_x = 0.0
-		flick_y = 0.0
-	elif sample.up:
-		move_x = 0.0
-	elif sample.move:
-		move_x = Host.axis_from_normalized_x(finger_x)
-		flick_x += rel.x
-		flick_y += rel.y
-		if Host.is_jump_flick(flick_x, flick_y):
-			jumping = true
+func _input(_event: InputEvent) -> void:
+	pass
 
 
 func _process(delta: float) -> void:
@@ -226,6 +208,19 @@ func _process(delta: float) -> void:
 	star_timer = maxf(star_timer - delta, 0.0)
 	if star_timer <= 0.0 and form == 2:
 		form = 1
+	if freeze > 0.0:
+		freeze = maxf(freeze - delta, 0.0)
+		move_x = 0.0
+		jumping = false
+		wait_release = true
+		Host.clear_holds()
+	elif wait_release and (Host.hold_left or Host.hold_right or Host.hold_jump):
+		move_x = 0.0
+		jumping = false
+	else:
+		wait_release = false
+		move_x = Host.control_axis()
+		jumping = Host.consume_jump()
 	if jumping and on_ground:
 		vy = jump_v
 		on_ground = false
@@ -242,6 +237,10 @@ func _process(delta: float) -> void:
 		vy = 0.0
 		on_ground = true
 		in_pit_fall = false
+		freeze = freeze_for
+		move_x = 0.0
+		wait_release = true
+		Host.clear_holds()
 	_fit_world()
 	_place_player()
 	_place_enemies()
@@ -254,10 +253,11 @@ func _fit_world() -> void:
 	var sz := Host.view_size(self)
 	backdrop.size = sz
 	backdrop.color = pal_sky
-	var s := sz.y / 720.0
-	camera_x = x - 240.0
+	var zoom := 1.6
+	var s := sz.y / 720.0 * zoom
+	camera_x = x - sz.x / s * 0.38
 	world.scale = Vector2(s, s)
-	world.position = Vector2(-camera_x * s, 0.0)
+	world.position = Vector2(-camera_x * s, sz.y * (1.0 - zoom) * 0.2)
 
 
 func _place_player() -> void:

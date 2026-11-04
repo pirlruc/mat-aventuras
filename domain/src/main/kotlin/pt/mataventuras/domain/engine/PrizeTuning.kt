@@ -39,6 +39,7 @@ internal data class ClimbTune(
     val barrelSpeed: Float,
     val barrelHitX: Float,
     val floorSnap: Float,
+    val freeze: Float,
 )
 
 /** Climb jump, gravity, and walk speed. */
@@ -61,6 +62,7 @@ internal data class RunnerTune(
     val pixelGravity: Float,
     val pixelJump: Float,
     val coins: Int,
+    val freeze: Float,
 )
 
 /** Dirt-race speeds. Lap count is [laps]. */
@@ -117,6 +119,7 @@ internal data class Rules(
                         barrelSpeed = values.f("climb.barrelSpeed"),
                         barrelHitX = values.f("climb.barrelHitX"),
                         floorSnap = values.f("climb.floorSnap"),
+                        freeze = values.f("climb.freeze"),
                     ),
                 climbMotion =
                     ClimbMotion(
@@ -134,6 +137,7 @@ internal data class Rules(
                         pixelGravity = values.f("runner.pixelGravity"),
                         pixelJump = values.f("runner.pixelJump"),
                         coins = values.i("runner.coins"),
+                        freeze = values.f("runner.freeze"),
                     ),
                 kart =
                     KartTune(

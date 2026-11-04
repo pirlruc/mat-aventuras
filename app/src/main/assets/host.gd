@@ -209,7 +209,8 @@ func _add_exit(layer: CanvasLayer, node: Node) -> void:
 	var u := unit(node)
 	button.text = "Sair"
 	button.custom_minimum_size = Vector2(u * 0.18, u * 0.09)
-	button.position = Vector2(view_size(node).x - button.custom_minimum_size.x - u * 0.03, u * 0.02)
+	var pad := safe_pad()
+	button.position = Vector2(view_size(node).x - button.custom_minimum_size.x - u * 0.03, pad.y + u * 0.02)
 	button.pressed.connect(_exit_prize)
 	layer.add_child(button)
 
@@ -249,10 +250,66 @@ func is_jump_flick(dx: float, dy: float) -> bool:
 	return dy <= -JUMP_FLICK and absf(dy) >= absf(dx) * 1.2
 
 
+func safe_pad() -> Vector2:
+	var area := DisplayServer.get_display_safe_area()
+	return Vector2(float(area.position.x), float(area.position.y))
+
+
+var hold_left := false
+var hold_right := false
+var hold_jump := false
+
+
+func control_axis() -> float:
+	if hold_left == hold_right:
+		return 0.0
+	return -1.0 if hold_left else 1.0
+
+
+func consume_jump() -> bool:
+	var jump := hold_jump
+	hold_jump = false
+	return jump
+
+
+func clear_holds() -> void:
+	hold_left = false
+	hold_right = false
+	hold_jump = false
+
+
+func add_platform_controls(node: Node) -> void:
+	_hold_button(node, "←", 0.04, func(): hold_left = true, func(): hold_left = false)
+	_hold_button(node, "→", 0.22, func(): hold_right = true, func(): hold_right = false)
+	_hold_button(node, "Saltar", 0.62, func(): hold_jump = true, func(): hold_jump = false)
+
+
+func add_steer_controls(node: Node) -> void:
+	_hold_button(node, "←", 0.04, func(): hold_left = true, func(): hold_left = false)
+	_hold_button(node, "→", 0.72, func(): hold_right = true, func(): hold_right = false)
+
+
+func _hold_button(node: Node, label: String, nx: float, down: Callable, up: Callable) -> void:
+	if _hud_layer == null:
+		return
+	var button := Button.new()
+	var u := unit(node)
+	var side := maxf(64.0, u * 0.16)
+	button.text = label
+	button.custom_minimum_size = Vector2(side * 1.4, side)
+	var size := view_size(node)
+	var pad := safe_pad()
+	button.position = Vector2(pad.x + size.x * nx, size.y - side - u * 0.04)
+	button.button_down.connect(down)
+	button.button_up.connect(up)
+	_hud_layer.add_child(button)
+
+
 func skin_hud(hud: Label, node: Node) -> void:
 	var u := unit(node)
 	var px := maxi(28, int(u * 0.036))
-	hud.position = Vector2(u * 0.028, u * 0.024)
+	var pad := safe_pad()
+	hud.position = Vector2(pad.x + u * 0.028, pad.y + u * 0.024)
 	hud.size = Vector2(view_size(node).x * 0.72, view_size(node).y * 0.28)
 	hud.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hud.add_theme_font_size_override("font_size", px)

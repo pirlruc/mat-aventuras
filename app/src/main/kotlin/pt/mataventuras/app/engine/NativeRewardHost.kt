@@ -2,6 +2,8 @@ package pt.mataventuras.app.engine
 
 import android.view.MotionEvent
 import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import pt.mataventuras.domain.engine.ArcadeInput
 import pt.mataventuras.domain.engine.ArcadeScene
 import pt.mataventuras.domain.engine.ArcadeSpan
@@ -112,6 +114,15 @@ internal object NativeRewardHost {
             board.show(spans)
         }
         activity.setContentView(board)
+        ViewCompat.setOnApplyWindowInsetsListener(board) { view, insets ->
+            val bars =
+                insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout(),
+                )
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
+        }
+        ViewCompat.requestApplyInsets(board)
         board.refresh()
         return board
     }

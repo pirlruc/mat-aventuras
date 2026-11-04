@@ -38,7 +38,7 @@ var pal_dirt: Color = Color("8D6E63")
 var pal_line: Color = Color("FFF59D")
 var kart_fill: Color = Color("FB8C00")
 var rivals: Array[Vector4] = [] # dist, lateral, speed, laps
-var rival_colors: Array[Color] = [Color("E53935"), Color("1E88E5"), Color("8E24AA")]
+var rival_colors: Array[Color] = [Color("E53935"), Color("43A047"), Color("8E24AA")]
 
 
 func _ready() -> void:
@@ -64,6 +64,7 @@ func _ready() -> void:
 		Vector4(84.0, -0.08, 23.0, 0.0),
 	]
 	hud = Host.make_hud(self)
+	Host.add_steer_controls(self)
 	Host.add_boost(self, _arm_boost)
 	_update_hud(false)
 	RenderingServer.set_default_clear_color(pal_sky)
@@ -142,6 +143,9 @@ func _process(delta: float) -> void:
 	var target := boost_spd if boost_timer > 0.0 else (off_road if off else cruise)
 	speed = move_toward(speed, target, accel * delta)
 	var curve := _sample(curves, distance)
+	var held := Host.control_axis()
+	if held != 0.0:
+		steer = held
 	lateral = clampf(lateral + steer * steer_rate * delta + curve * speed * drift * delta, -1.35, 1.35)
 	distance += speed * delta
 	if distance >= track_length:
@@ -201,7 +205,6 @@ func _draw() -> void:
 	_draw_meta(size, horizon, ground)
 	_draw_rivals(size, horizon, ground)
 	_draw_kart(size, ground)
-	_draw_bands(size)
 
 
 func _draw_hills(size: Vector2, horizon: float) -> void:
@@ -223,9 +226,9 @@ func _draw_strip(size: Vector2, horizon: float, ground: float, index: int) -> vo
 	var hill := _sample(hills, dist) * (1.0 - t) * 36.0
 	var center := size.x * 0.5 - lateral * 95.0 * scale + curve * 62.0 * (1.0 - t)
 	var road_w := 360.0 * scale * _sample(widths, dist)
-	draw_rect(Rect2(0, y - hill, size.x, h + 1.0), pal_grass)
-	draw_rect(Rect2(center - road_w * 0.5 - 10.0, y - hill, road_w + 20.0, h + 1.0), Color("E53935"))
-	draw_rect(Rect2(center - road_w * 0.5, y - hill, road_w, h + 1.0), pal_dirt)
+	draw_rect(Rect2(0, y - hill, size.x, h), pal_grass)
+	draw_rect(Rect2(center - road_w * 0.5 - 10.0, y - hill, road_w + 20.0, h), Color("E53935"))
+	draw_rect(Rect2(center - road_w * 0.5, y - hill, road_w, h), pal_dirt)
 	if index % 2 == 0:
 		draw_rect(Rect2(center - 4.0, y - hill, 8.0, h), pal_line)
 
@@ -314,12 +317,6 @@ func _draw_meta(size: Vector2, horizon: float, ground: float) -> void:
 	draw_rect(Rect2(center + road_w * 0.5 - post_w, y - post_h, post_w, post_h), Color("212121"))
 	draw_rect(Rect2(center - road_w * 0.5, y - post_h, road_w, 16.0 * scale), Color("FFD54F"))
 	draw_rect(Rect2(center - 28.0 * scale, y - post_h + 2.0 * scale, 56.0 * scale, 12.0 * scale), Color("212121"))
-
-
-func _draw_bands(size: Vector2) -> void:
-	draw_rect(Rect2(0, size.y * 0.82, size.x * 0.36, size.y * 0.18), Color(0.13, 0.35, 0.85, 0.22))
-	draw_rect(Rect2(size.x * 0.64, size.y * 0.82, size.x * 0.36, size.y * 0.18), Color(0.85, 0.22, 0.16, 0.22))
-	draw_rect(Rect2(size.x * 0.36, size.y * 0.82, size.x * 0.28, size.y * 0.18), Color(1.0, 0.84, 0.2, 0.22))
 
 
 func _update_hud(show_boost: bool) -> void:

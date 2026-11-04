@@ -64,7 +64,6 @@ internal object OffroadScene {
         addMeta(out, state, circuit, width, horizon, ground)
         addRivals(out, state, circuit, width, horizon, ground)
         addKart(out, mascot, width, ground, state)
-        addBands(out, width, height)
     }
 
     private fun addHorizon(
@@ -103,9 +102,9 @@ internal object OffroadScene {
         val center = width * 0.5f - state.lateral * 95f * scale + curve * 62f * (1f - t)
         val roadW = 360f * scale * circuit.widthAt(dist)
         val pal = circuit.palette
-        out.add(OffroadSpan(0f, y - hill, width, h + 1f, GRASS[pal]))
-        out.add(OffroadSpan(center - roadW * 0.5f - 10f, y - hill, roadW + 20f, h + 1f, 0xFFE53935))
-        out.add(OffroadSpan(center - roadW * 0.5f, y - hill, roadW, h + 1f, DIRT[pal]))
+        out.add(OffroadSpan(0f, y - hill, width, h, GRASS[pal]))
+        out.add(OffroadSpan(center - roadW * 0.5f - 10f, y - hill, roadW + 20f, h, 0xFFE53935))
+        out.add(OffroadSpan(center - roadW * 0.5f, y - hill, roadW, h, DIRT[pal]))
         if (index % 2 == 0) {
             out.add(OffroadSpan(center - 4f, y - hill, 8f, h, LINE[pal]))
         }
@@ -174,18 +173,6 @@ internal object OffroadScene {
         out.add(OffroadSpan(center - roadW * 0.5f, y - postH, postW, postH, 0xFF212121))
         out.add(OffroadSpan(center + roadW * 0.5f - postW, y - postH, postW, postH, 0xFF212121))
         out.add(OffroadSpan(center - roadW * 0.5f, y - postH, roadW, 16f * scale, BANNER_ARGB))
-    }
-
-    private fun addBands(
-        out: MutableList<OffroadSpan>,
-        width: Float,
-        height: Float,
-    ) {
-        val y = height * 0.82f
-        val h = height * 0.18f
-        out.add(OffroadSpan(0f, y, width * 0.36f, h, 0x382156D9))
-        out.add(OffroadSpan(width * 0.64f, y, width * 0.36f, h, 0x38D93829))
-        out.add(OffroadSpan(width * 0.36f, y, width * 0.28f, h, 0x38FFD633))
     }
 
     private fun addRivals(

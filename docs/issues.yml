@@ -1508,7 +1508,7 @@ milestones:
               - RewardsEngine opens a prize from the completed count and the chosen N
 
       - id: MAT-019
-        status: open
+        status: done
         title: Make every prize load, explain itself, and stay playable
         decision: >-
           In the context of a prize after a lesson, facing games that do not
@@ -1527,31 +1527,31 @@ milestones:
           - AND-TEST-001
         tasks:
           - id: MAT-019-T1
-            status: open
+            status: done
             title: Make climb leave the boot overlay and let Voltar exit
             verification:
               - everyPrizeBecomesReady passes
               - Voltar finishes the prize activity
           - id: MAT-019-T2
-            status: open
+            status: done
             title: Respect the display cutout in every prize
             verification:
               - The game theme uses shortEdges
               - Godot HUD uses the display safe area
           - id: MAT-019-T3
-            status: open
+            status: done
             title: Remove the kart colour bands and the flicker
             verification:
               - The translucent steer bands are gone
               - Left, right, and Impulso are buttons
           - id: MAT-019-T4
-            status: open
+            status: done
             title: Make the platformers follow the player
             verification:
               - On-screen move and jump buttons replace the swipe
               - A life loss clears input until the next touch
           - id: MAT-019-T5
-            status: open
+            status: done
             title: Explain each prize before it starts
             verification:
               - A Jogar card states the goal and the controls

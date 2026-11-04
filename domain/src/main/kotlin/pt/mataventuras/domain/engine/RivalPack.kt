@@ -4,7 +4,7 @@ package pt.mataventuras.domain.engine
  * Three AI karts that cruise the same loop a little ahead of the player.
  */
 object RivalPack {
-    private val COLOURS: LongArray = longArrayOf(0xFFE53935, 0xFF1E88E5, 0xFF8E24AA)
+    private val COLOURS: LongArray = longArrayOf(0xFFE53935, 0xFF43A047, 0xFF8E24AA)
 
     /**
      * Staggered start so the player sees someone to chase.

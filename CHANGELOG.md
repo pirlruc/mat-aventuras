@@ -16,12 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sair, Voltar, and Fechar sit in the top safe area. The name and PIN
   fields move above the keyboard.
 - Kotlin warnings fail the build in every module.
+- Voltar on a prize returns to the lesson. A life loss stays still until
+  the next touch. Kart no longer paints the translucent steer bands.
+- Climb, runner, chomp, invaders, and kart leave the boot overlay on
+  `mat_api36`.
 
 ### Added
 
 - A parent chooses a prize every 5, 10, or 15 finished activities. The
   default is 10. A miss does not reset the count.
-- Round 5 backlog: MAT-019 and MAT-020 remain open.
+- Each prize states its goal and its controls, then starts on Jogar.
+- Round 5 backlog: MAT-020 remains open.
 
 ## [0.3.2] - 2026-11-03
 
