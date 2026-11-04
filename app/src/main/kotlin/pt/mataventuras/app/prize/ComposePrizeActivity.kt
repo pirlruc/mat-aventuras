@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import kotlin.random.Random
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.domain.engine.EnginePluginContract
@@ -33,9 +34,18 @@ class ComposePrizeActivity : ComponentActivity() {
         val prize = prizeFrom(intent.getStringExtra(EXTRA))
         val random = if (intent.hasExtra(SEED)) Random(intent.getLongExtra(SEED, 1L)) else Random.Default
         PrizeLimit.arm(this)
+        enableEdgeToEdge()
         setContent {
             MatAventurasTheme(ageFor(prize)) {
-                PrizeScreen(prize, random) {
+                PrizeScreen(
+                    prize,
+                    random,
+                    introduce = true,
+                    onExit = {
+                        setResult(RESULT_CANCELED)
+                        finish()
+                    },
+                ) {
                     setResult(RESULT_OK)
                     finish()
                 }

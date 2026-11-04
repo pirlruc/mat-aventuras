@@ -20,6 +20,8 @@ data class Platformer2dState(
     val starTimer: Float = 0f,
     val stompedMask: Int = 0,
     val powerMask: Int = 0,
+    val freeze: Float = 0f,
+    val awaitRelease: Boolean = false,
 )
 
 /**
@@ -58,26 +60,52 @@ class Platformer2dEngine(
         jumping: Boolean,
         moveX: Float = 1f,
     ): Platformer2dState {
-        if (!state.alive || state.finished) return state
+        val held = heldRunner(state, dt, jumping, moveX)
+        if (held != null) return held
+        val released = if (state.awaitRelease) state.copy(awaitRelease = false) else state
         val run = moveX.coerceIn(-1f, 1f)
-        val motion = integrate(state, dt, jumping, run)
+        val motion = integrate(released, dt, jumping, run)
         val landed = settle(motion.x, motion.y, motion.vy, motion.falling)
-        if (landed.first < -2f) return respawn(state)
+        if (landed.first < -2f) return respawn(released)
         val onGround = landed.second
         val next =
-            state.copy(
+            released.copy(
                 x = motion.x,
                 y = landed.first,
                 vx = motion.vx,
                 vy = if (onGround) 0f else motion.vy,
                 onGround = onGround,
                 alive = true,
-                finished = state.rings >= state.ringsTarget,
+                finished = released.rings >= released.ringsTarget,
                 inPitFall = motion.falling && !onGround,
-                elapsed = state.elapsed + dt,
-                starTimer = (state.starTimer - dt).coerceAtLeast(0f),
+                elapsed = released.elapsed + dt,
+                starTimer = (released.starTimer - dt).coerceAtLeast(0f),
             )
         return PlatformerHazards.apply(next, level, dt)
+    }
+
+    private fun heldRunner(
+        state: Platformer2dState,
+        dt: Float,
+        jumping: Boolean,
+        moveX: Float,
+    ): Platformer2dState? {
+        if (!state.alive || state.finished || state.freeze > 0f) return stoppedRunner(state, dt)
+        if (state.awaitRelease && (moveX != 0f || jumping)) return state.copy(vx = 0f, vy = 0f)
+        return null
+    }
+
+    private fun stoppedRunner(
+        state: Platformer2dState,
+        dt: Float,
+    ): Platformer2dState {
+        if (!state.alive || state.finished) return state
+        return state.copy(
+            vx = 0f,
+            vy = 0f,
+            freeze = (state.freeze - dt.coerceAtLeast(0f)).coerceAtLeast(0f),
+            awaitRelease = true,
+        )
     }
 
     private fun integrate(
@@ -148,6 +176,8 @@ class Platformer2dEngine(
             onGround = true,
             alive = true,
             inPitFall = false,
+            freeze = PrizeTuning.rules.runner.freeze,
+            awaitRelease = true,
         )
 
     /** World X where the first floor gap begins (fall). */

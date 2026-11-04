@@ -33,8 +33,11 @@ object PrizeHud {
     /** Shown with [BACK_LABEL] after the boot timeout. */
     const val RETRY_LABEL: String = "Tentar outra vez"
 
-    /** Leaves Godot and opens the Canvas host. */
+    /** Leaves the prize and returns to the lesson. */
     const val BACK_LABEL: String = "Voltar"
+
+    /** Starts the prize after the spoken introduction. */
+    const val PLAY_LABEL: String = "Jogar"
 
     /** Status line once the boot timer has fired. */
     const val TIMEOUT_LINE: String = "O prémio demorou."

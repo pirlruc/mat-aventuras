@@ -25,9 +25,7 @@ internal object GodotRewardBinder {
         onGodot: (IsolatedEngineActivity, String) -> Unit = GodotEmbed::attach,
     ) {
         if (embed) {
-            beginGodot(activity, onGodot, RewardCatalog.scenePath(RewardGame.KART)) {
-                bindKart(activity, embed = false)
-            }
+            beginGodot(activity, onGodot, RewardCatalog.scenePath(RewardGame.KART))
         } else {
             PrizeBoot.cancel(activity)
             activity.nativeSession = NativeKartHost.attach(activity)
@@ -49,9 +47,7 @@ internal object GodotRewardBinder {
             )
         val scene = RewardCatalog.scenePath(game)
         if (embed) {
-            beginGodot(activity, onGodot, scene) {
-                bindRunner(activity, embed = false)
-            }
+            beginGodot(activity, onGodot, scene)
         } else {
             PrizeBoot.cancel(activity)
             NativeRewardHost.attach(activity, game)
@@ -62,7 +58,6 @@ internal object GodotRewardBinder {
         activity: IsolatedEngineActivity,
         onGodot: (IsolatedEngineActivity, String) -> Unit,
         scene: String,
-        onCanvas: () -> Unit,
     ) {
         onGodot(activity, scene)
         PrizeBoot.show(
@@ -74,17 +69,12 @@ internal object GodotRewardBinder {
                 PrizeBoot.arm(activity)
                 PrizeBoot.keepAboveEngine(activity)
             },
-            onBack = { openCanvas(activity, onCanvas) },
+            onBack = {
+                PrizeBoot.cancel(activity)
+                activity.completeReward(false)
+            },
         )
         PrizeBoot.arm(activity)
         PrizeBoot.keepAboveEngine(activity)
-    }
-
-    private fun openCanvas(
-        activity: IsolatedEngineActivity,
-        onCanvas: () -> Unit,
-    ) {
-        PrizeBoot.hide(activity)
-        onCanvas()
     }
 }

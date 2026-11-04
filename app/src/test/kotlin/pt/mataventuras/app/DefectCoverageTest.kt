@@ -123,6 +123,11 @@ class DefectCoverageTest {
         assertTrue(deadline > 0L)
         host.recreate()
         assertEquals(deadline, host.get().intent.getLongExtra(PrizeLimit.EXTRA_DEADLINE, 0L))
+        val plain = ComposePrizeActivity.intent(context, ComposePrize.BALLOONS)
+        val open = Robolectric.buildActivity(ComposePrizeActivity::class.java, plain).setup()
+        val saved = android.os.Bundle()
+        open.saveInstanceState(saved)
+        assertFalse(saved.containsKey(PrizeLimit.EXTRA_DEADLINE))
     }
 
     @Test

@@ -223,4 +223,22 @@ class ComposePrizeScreenTest {
         org.junit.Assert.assertTrue(scene == "INVADERS" || scene == "RUNNER")
         org.junit.Assert.assertTrue(godot.component?.className != ComposePrizeActivity::class.java.name)
     }
+
+    @Test
+    fun introSpeaksTheGoalAndVoltarLeaves() {
+        var left = 0
+        compose.setContent {
+            PrizeScreen(
+                ComposePrize.BALLOONS,
+                Random(1),
+                introduce = true,
+                onExit = { left += 1 },
+            ) { }
+        }
+        compose.onNodeWithText("Jogar").assertExists()
+        compose.onNodeWithText("Voltar").performClick()
+        assertEquals(1, left)
+        compose.onNodeWithText("Jogar").performClick()
+        compose.onNodeWithText("Jogar").assertDoesNotExist()
+    }
 }

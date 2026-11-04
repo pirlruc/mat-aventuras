@@ -2,7 +2,7 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-11-02
+**Last updated:** 2026-11-04
 **Last agent focus:** Tag `0.3.2` is annotated on `d307dc1` (tag object `8ed6e262`). Run 41551690631 published a signed `app-release.apk`. `apksigner` verifies scheme v2 and the README fingerprint. `sha256sum -c`, `cosign verify-blob`, and `gh attestation verify --signer-repo pirlruc/commondevops` succeeded. Do not move `0.1.0`, `0.2.0`, `0.3.0`, or `0.3.1`.
 
 ---
@@ -51,7 +51,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-003 | done | Godot 4 plugin in `:engine2d` and `:engine3d` |
 | MAT-004 | done | T8 MasterKey and `MIGRATION_1_2` are on main. T9–T12 record the MASVS map, the advisories link, hashed pins, and the ruleset |
 | MAT-005 | done | T1–T11 done. Release [0.2.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.2.0) attaches the signed APK, `app-release.apk.sha256`, and `app-release.cdx.json`. Tag commit `2eafb4af`. Do not move `0.1.0` or `0.2.0` |
-| MAT-006 | done | T1–T3 done in #113. T4 shipped the boot path. On `mat_api36`, climb still logs ready while the frame is the boot overlay (`PrizeDeviceTest.everyPrizeBecomesReady`). MAT-019 owns that. The Godot JNI package stays excluded from Kover |
+| MAT-006 | done | T1–T3 done in #113. T4 shipped the boot path. MAT-019 re-ran `PrizeDeviceTest.everyPrizeBecomesReady` on `mat_api36` on 2026-11-04 and it passed. The Godot JNI package stays excluded from Kover |
 | MAT-007 | done | `BandDifficulty` replaces `isSevenYears()`. Memory, word board, cell size, and pt-PT parent titles are on this branch |
 | MAT-008 | done | Domain memory and word-completion boards. The Compose gaps are MAT-007-T5 and MAT-007-T6 |
 | MAT-009 | done | Loading overlay, timeout with Tentar outra vez / Voltar, Ganhaste card, icon HUD, kart boost button, and cancelled embed retries |
@@ -62,8 +62,8 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-015 | done | 0.3.1 assets verify with cosign and `gh attestation verify`. Do not move `0.3.0` or `0.3.1` |
 | MAT-016 | done | Defect fixes and the androiddevops 1.2.0 pin. Release 0.3.2 is tagged |
 | MAT-017 | done | Child-facing lesson defects. GitHub #172–#177 are closed |
-| MAT-018 | done in the manifest | Parent prize cadence. Sync before the pull request's scaffold check |
-| MAT-019 | open | Prize boot, controls, and explanation. Round 5 |
+| MAT-018 | done | Parent prize cadence. GitHub #178–#180 are closed |
+| MAT-019 | done in the manifest | Prize boot, controls, and explanation. Sync before the pull request's scaffold check |
 | MAT-020 | open | Maestro flows. Round 5 |
 
 `docs/guardrail-deviations.yml` has three entries, none of which lowers a number:
@@ -257,7 +257,7 @@ bash scripts/check-ci-local.sh
   both GDScript and Kotlin. Ages 3–5 life text is `PrizeHud.livesLine`
   (hearts). Kart boost is the Impulso button, not the centre tap. A win sets
   `MainActivity.celebrateWin` and shows the Ganhaste card. Boot timeout is
-  12 s (`PrizeBoot`), then Tentar outra vez or Voltar to the Canvas host.
+  12 s (`PrizeBoot`), then Tentar outra vez. Voltar returns to the lesson.
 
 ## Suggested next work
 
@@ -269,6 +269,6 @@ bash scripts/check-ci-local.sh
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review after 0.3.1 dedupes this list. Do not file them again.
 7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. Callers pin `3.3.10`, which runs the containers as root, skips mypy when `installable_app` is false, reads pip-audit 2.10's dependencies object, and runs the quality report as a module. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. It is not behind `PYTHON_QUALITY_ENABLED`. `install_runner_packages` stays false. Do not pin `main`. Do not move pydevops 3.3.1 through 3.3.10. Leave pydevops `feature-cmn-551` alone.
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
-9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done, and the climb frame on `mat_api36` is still the boot overlay. MAT-019 owns that. Do not write that every prize is past the overlay. The JNI exclude stays. Scorecard BinaryArtifacts alert #4 is still open: wrapper validation in `ci.yml` is path-filtered, so Scorecard does not see it. MAT-020 removes that filter. androiddevops 1.3.0 exists and this repo still pins 1.2.0. MAT-020 moves every workflow to one newer tag. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
+9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done. `PrizeDeviceTest.everyPrizeBecomesReady` passed on `mat_api36` on 2026-11-04, including climb. The JNI exclude stays. Scorecard BinaryArtifacts alert #4 is still open: wrapper validation in `ci.yml` is path-filtered, so Scorecard does not see it. MAT-020 removes that filter. androiddevops 1.3.0 exists and this repo still pins 1.2.0. MAT-020 moves every workflow to one newer tag. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-03 (MAT-018 parent prize cadence).*
+*Last updated: 2026-11-04 (MAT-019 prize boot, controls, and intro).*

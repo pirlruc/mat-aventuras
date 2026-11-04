@@ -17,6 +17,8 @@ data class ClimbState(
     val invuln: Float,
     val alive: Boolean,
     val finished: Boolean,
+    val freeze: Float = 0f,
+    val awaitRelease: Boolean = false,
 ) {
     /** Letters picked up so far. */
     val letters: Int get() = Integer.bitCount(collectedMask)
@@ -55,14 +57,39 @@ class ClimbEngine {
         moveX: Float,
         jumping: Boolean,
     ): ClimbState {
-        if (!state.alive || state.finished) return state
         val clamped = dt.coerceIn(0.001f, 0.05f)
-        val ticking = state.copy(invuln = (state.invuln - clamped).coerceAtLeast(0f))
+        val held = heldClimb(state, clamped, moveX, jumping)
+        if (held != null) return held
+        val released = if (state.awaitRelease) state.copy(awaitRelease = false) else state
+        val ticking = released.copy(invuln = (released.invuln - clamped).coerceAtLeast(0f))
         val motion = move(ticking, clamped, moveX, jumping)
         val letters = collect(motion)
         if (letters.finished) return letters
         val grown = if (near(letters, MUSHROOM_X, FLOORS[1])) letters.copy(form = 1) else letters
         return strike(rollBarrel(grown, clamped))
+    }
+
+    private fun heldClimb(
+        state: ClimbState,
+        dt: Float,
+        moveX: Float,
+        jumping: Boolean,
+    ): ClimbState? {
+        if (!state.alive || state.finished || state.freeze > 0f) return stoppedClimb(state, dt)
+        if (state.awaitRelease && (moveX != 0f || jumping)) return state.copy(vy = 0f)
+        return null
+    }
+
+    private fun stoppedClimb(
+        state: ClimbState,
+        dt: Float,
+    ): ClimbState {
+        if (!state.alive || state.finished) return state
+        return state.copy(
+            vy = 0f,
+            freeze = (state.freeze - dt).coerceAtLeast(0f),
+            awaitRelease = true,
+        )
     }
 
     private fun move(
@@ -120,7 +147,14 @@ class ClimbEngine {
         if (state.invuln > 0f || !nearBarrel) return state
         if (state.form == 1) return state.copy(form = 0, invuln = HIT_INVULN)
         val lives = state.lives - 1
-        return state.copy(lives = lives, invuln = HIT_INVULN, alive = lives > 0)
+        return state.copy(
+            lives = lives,
+            invuln = HIT_INVULN,
+            alive = lives > 0,
+            vy = 0f,
+            freeze = if (lives > 0) PrizeTuning.rules.climb.freeze else 0f,
+            awaitRelease = lives > 0,
+        )
     }
 
     private fun near(

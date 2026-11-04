@@ -24,8 +24,9 @@ var finished := false
 var hud: Label
 var move_x := 0.0
 var jumping := false
-var flick_x := 0.0
-var flick_y := 0.0
+var freeze := 0.0
+var freeze_for := 1.0
+var wait_release := false
 var floors := PackedFloat32Array([0.12, 0.34, 0.56, 0.78])
 var letters := [Vector2(0.28, 0.12), Vector2(0.72, 0.34), Vector2(0.28, 0.56), Vector2(0.72, 0.56), Vector2(0.50, 0.78)]
 
@@ -44,29 +45,14 @@ func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("4E342E"))
 	Host.fit_viewport(self)
 	hud = Host.make_hud(self)
+	Host.add_platform_controls(self)
+	freeze_for = Host.tune("climb", "freeze")
 	_update_hud()
 	Host.mark_ready()
 
 
-func _input(event: InputEvent) -> void:
-	var sample := Host.read_pointer(event)
-	if sample.is_empty():
-		return
-	var pos: Vector2 = sample.pos
-	var rel: Vector2 = sample.rel
-	var axis := Host.axis_from_normalized_x(Host.normalized_x(self, pos))
-	if sample.down:
-		move_x = axis
-		flick_x = 0.0
-		flick_y = 0.0
-	elif sample.up:
-		move_x = 0.0
-	elif sample.move:
-		move_x = axis
-		flick_x += rel.x
-		flick_y += rel.y
-		if Host.is_jump_flick(flick_x, flick_y):
-			jumping = true
+func _input(_event: InputEvent) -> void:
+	pass
 
 
 func _process(delta: float) -> void:
@@ -74,6 +60,19 @@ func _process(delta: float) -> void:
 	delta = minf(delta, 0.05)
 	if not finished:
 		invuln = maxf(invuln - delta, 0.0)
+		if freeze > 0.0:
+			freeze = maxf(freeze - delta, 0.0)
+			move_x = 0.0
+			jumping = false
+			wait_release = true
+			Host.clear_holds()
+		elif wait_release and (Host.hold_left or Host.hold_right or Host.hold_jump):
+			move_x = 0.0
+			jumping = false
+		else:
+			wait_release = false
+			move_x = Host.control_axis()
+			jumping = Host.consume_jump()
 		if jumping and on_floor:
 			vy = jump_v
 			on_floor = false
@@ -101,6 +100,11 @@ func _process(delta: float) -> void:
 				else:
 					lives -= 1
 					invuln = hit_invuln
+					vy = 0.0
+					move_x = 0.0
+					freeze = freeze_for
+					wait_release = true
+					Host.clear_holds()
 			if lives <= 0:
 				finished = true
 				Host.finish(false)
