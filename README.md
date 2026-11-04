@@ -28,11 +28,12 @@ keeps that band on small numbers and sums up to 10. 0.3.0 adds the lessons
 and prize games in the table above. 0.3.1 makes those prize games leave the
 loading screen and start. 0.3.2 asks a parent to hold the screen and answer
 a two-digit multiplication before the first PIN, and a prize keeps the time
-limit the parent chose when the screen turns.
+limit the parent chose when the screen turns. 0.4.0 lets that parent choose
+a prize every 5, 10, or 15 finished activities. The default is 10.
 
 ## Install
 
-Install **0.3.2** `app-release.apk` from
+Install **0.4.0** `app-release.apk` from
 [GitHub Releases](https://github.com/pirlruc/mat-aventuras/releases/latest).
 That file is signed. Do not use the 0.1.0 debug APK for daily use.
 Also download `app-release.apk.sha256` and `app-release.cdx.json` (the
@@ -77,7 +78,10 @@ The parent area shows sessions, points, and badges for the children on this
 device. It does not send them anywhere.
 
 A parent can set how long a prize lasts: 1, 2, or 3 minutes. The default is
-2 minutes. Turning the screen does not start that time again.
+2 minutes. Turning the screen does not start that time again. The same screen
+sets how often a prize opens: every 5, 10, or 15 finished activities. The
+default is 10. A wrong answer that stays on the same board does not reset
+that count.
 
 ## Privacy
 
