@@ -63,7 +63,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-016 | done | Defect fixes and the androiddevops 1.2.0 pin. Release 0.3.2 is tagged |
 | MAT-017 | done | Child-facing lesson defects. GitHub #172–#177 are closed |
 | MAT-018 | done | Parent prize cadence. GitHub #178–#180 are closed |
-| MAT-019 | done in the manifest | Prize boot, controls, and explanation. Sync before the pull request's scaffold check |
+| MAT-019 | done | Prize boot, controls, and explanation. GitHub #181–#186 are closed |
 | MAT-020 | open | Maestro flows. Round 5 |
 
 `docs/guardrail-deviations.yml` has three entries, none of which lowers a number:
