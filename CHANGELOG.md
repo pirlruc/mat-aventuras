@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-11-12
+
+### Added
+
+- The parent dashboard shows a mastery heatmap for each topic the child has played.
+- A parent can save a printable worksheet as a PDF on this device.
+
+### Fixed
+
+- A double tap on an answer scores once. The next exercise accepts a tap after it is on screen.
+- Hitting an enemy in the runner freezes the run until the next touch, the same way a pit does.
+- The small size option, the prize exit control, and the parent prize buttons have larger touch targets.
+
 ## [0.5.0] - 2026-11-12
 
 ### Fixed
