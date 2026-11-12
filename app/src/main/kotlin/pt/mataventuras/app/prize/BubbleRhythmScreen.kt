@@ -35,7 +35,7 @@ fun BubbleRhythmScreen(
                 onClick = {
                     round = advanceBubbles(round, index, onFinished)
                 },
-                modifier = Modifier.testTag("bubble-$index"),
+                modifier = Modifier.prizeMinHeight().testTag("bubble-$index"),
             ) {
                 Canvas(Modifier.size(28.dp)) {
                     drawCircle(Color(0xFF7E57C2))

@@ -29,7 +29,7 @@ fun TowerScreen(
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishTower(round, index, onFinished) },
-                modifier = Modifier.testTag("tower-$index"),
+                modifier = Modifier.prizeMinHeight().testTag("tower-$index"),
             ) {
                 Canvas(Modifier.size(28.dp)) { drawCircle(Color(0xFFE53935)) }
                 Text(label)

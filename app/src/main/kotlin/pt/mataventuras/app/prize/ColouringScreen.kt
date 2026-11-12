@@ -41,7 +41,7 @@ fun ColouringScreen(
                     paint = label
                     finishIfPainted(round, index, onFinished)
                 },
-                modifier = Modifier.testTag("colour-$index"),
+                modifier = Modifier.prizeMinHeight().testTag("colour-$index"),
             ) {
                 Text(label)
             }

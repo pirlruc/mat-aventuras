@@ -28,7 +28,7 @@ fun BalloonPopScreen(
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishIfPopped(round, index, onFinished) },
-                modifier = Modifier.testTag("balloon-$index"),
+                modifier = Modifier.prizeMinHeight().testTag("balloon-$index"),
             ) {
                 Text(label)
             }

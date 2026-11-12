@@ -226,7 +226,6 @@ fun ParentDashboard(
         modifier =
             Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -234,32 +233,40 @@ fun ParentDashboard(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
         ) { Text(stringResource(R.string.close)) }
-        Text(
-            VoiceScripts.PARENT_DASHBOARD,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(VoiceScripts.STAYS_ON_DEVICE, style = MaterialTheme.typography.bodyMedium)
-        val current = profile
-        val stats = data
-        if (current == null || stats == null) {
-            Text(stringResource(R.string.choose_child))
-        } else {
-            Text(current.name, style = MaterialTheme.typography.titleLarge)
-            MetricCard(stringResource(R.string.accuracy), "${(stats.accuracy * 100).toInt()} %")
-            LinearProgressIndicator(
-                progress = { stats.accuracy.toFloat() },
-                modifier = Modifier.fillMaxWidth(),
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                VoiceScripts.PARENT_DASHBOARD,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
             )
-            MetricCard(stringResource(R.string.hits_misses), "${stats.hits} / ${stats.misses}")
-            MetricCard(stringResource(R.string.time), formatDuration(stats.totalTimeMs))
-            Text(stringResource(R.string.per_module), fontWeight = FontWeight.Bold)
-            stats.byModule.forEach { module ->
-                Text(modulePerformanceLine(module))
+            Text(VoiceScripts.STAYS_ON_DEVICE, style = MaterialTheme.typography.bodyMedium)
+            val current = profile
+            val stats = data
+            if (current == null || stats == null) {
+                Text(stringResource(R.string.choose_child))
+            } else {
+                Text(current.name, style = MaterialTheme.typography.titleLarge)
+                MetricCard(stringResource(R.string.accuracy), "${(stats.accuracy * 100).toInt()} %")
+                LinearProgressIndicator(
+                    progress = { stats.accuracy.toFloat() },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                MetricCard(stringResource(R.string.hits_misses), "${stats.hits} / ${stats.misses}")
+                MetricCard(stringResource(R.string.time), formatDuration(stats.totalTimeMs))
+                Text(stringResource(R.string.per_module), fontWeight = FontWeight.Bold)
+                stats.byModule.forEach { module ->
+                    Text(modulePerformanceLine(module))
+                }
+                Text(stringResource(R.string.needs_work), fontWeight = FontWeight.Bold)
+                needsWorkLines(stats.needsWork, stringResource(R.string.needs_work_clear)).forEach { Text(it) }
+                PrizeLimitRow(container, current)
             }
-            Text(stringResource(R.string.needs_work), fontWeight = FontWeight.Bold)
-            needsWorkLines(stats.needsWork, stringResource(R.string.needs_work_clear)).forEach { Text(it) }
-            PrizeLimitRow(container, current)
         }
     }
 }

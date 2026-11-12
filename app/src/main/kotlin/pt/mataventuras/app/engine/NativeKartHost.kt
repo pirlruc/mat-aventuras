@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -95,7 +97,7 @@ internal object NativeKartHost {
             done = true
             onDone(false)
         }
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
             Canvas(
                 modifier =
                     Modifier
@@ -140,6 +142,10 @@ internal object NativeKartHost {
                         .background(Color(0x99000000), RoundedCornerShape(12.dp))
                         .padding(horizontal = 12.dp, vertical = 8.dp),
             )
+            HoldRow(
+                kartHoldControls(loop),
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
     }
 
@@ -148,6 +154,25 @@ internal object NativeKartHost {
      */
     fun hudLines(loop: OffroadRacerLoop): Pair<String, String> = KartHud.raceOverlay(loop.state, loop.circuit.length)
 }
+
+internal fun kartHoldControls(loop: OffroadRacerLoop): List<HoldControl> =
+    listOf(
+        HoldControl(
+            "Esquerda",
+            { loop.handleTouch(0f, MotionEvent.ACTION_DOWN) },
+            { loop.handleTouch(0f, MotionEvent.ACTION_UP) },
+        ),
+        HoldControl(
+            "Impulso",
+            { loop.handleTouch(0.5f, MotionEvent.ACTION_DOWN) },
+            { loop.handleTouch(0.5f, MotionEvent.ACTION_UP) },
+        ),
+        HoldControl(
+            "Direita",
+            { loop.handleTouch(1f, MotionEvent.ACTION_DOWN) },
+            { loop.handleTouch(1f, MotionEvent.ACTION_UP) },
+        ),
+    )
 
 internal fun kartKeepsTicking(
     finished: Boolean,

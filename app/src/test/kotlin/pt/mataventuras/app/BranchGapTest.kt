@@ -5,9 +5,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import pt.mataventuras.app.engine.OffroadRacerLoop
 import pt.mataventuras.app.engine.Platformer2dLoop
+import pt.mataventuras.app.engine.kartHoldControls
 import pt.mataventuras.app.engine.kartKeepsTicking
 import pt.mataventuras.app.engine.noteRunnerJump
+import pt.mataventuras.app.engine.runnerHoldControls
 import pt.mataventuras.app.engine.runnerKeepsTicking
 import pt.mataventuras.app.prize.finishIfPopped
 import pt.mataventuras.app.ui.SoupRelease
@@ -126,5 +129,24 @@ class BranchGapTest {
             soupPickIndex(listOf(0, 1), listOf(listOf(2, 3)), emptySet(), 4),
         )
         assertEquals(null, soupIndexAt(1f, 1f, 40f, 40f, 0, 0, 1f))
+    }
+
+    @Test
+    fun holdButtonsSetAndClearTheNativeLoops() {
+        val runner = Platformer2dLoop()
+        runnerHoldControls(runner).forEach { control ->
+            control.onPress()
+            control.onRelease()
+        }
+        assertEquals(0f, runner.moveX)
+        assertFalse(runner.jumping)
+
+        val kart = OffroadRacerLoop()
+        val labels = kartHoldControls(kart).map { it.label }
+        assertEquals(listOf("Esquerda", "Impulso", "Direita"), labels)
+        kartHoldControls(kart).forEach { control ->
+            control.onPress()
+            control.onRelease()
+        }
     }
 }

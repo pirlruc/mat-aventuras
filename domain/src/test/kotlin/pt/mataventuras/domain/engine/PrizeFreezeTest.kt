@@ -55,11 +55,15 @@ class PrizeFreezeTest {
                 "SNAKE",
                 "BREAKOUT",
                 "TOWER",
+                "RUNNER_GATE",
             )
         scenes.forEach { scene ->
             assertTrue(PrizeBrief.goal(scene).isNotEmpty())
             assertTrue(PrizeBrief.controls(scene).isNotEmpty())
         }
+        assertFalse(PrizeBrief.goal("RUNNER") == PrizeBrief.goal("RUNNER_GATE"))
+        assertEquals("RUNNER_GATE", PrizeBrief.composeKey("RUNNER"))
+        assertEquals("SNAKE", PrizeBrief.composeKey("SNAKE"))
         assertEquals("Joga até ao fim.", PrizeBrief.goal("unknown"))
         assertEquals("Toca em Jogar.", PrizeBrief.controls("unknown"))
     }

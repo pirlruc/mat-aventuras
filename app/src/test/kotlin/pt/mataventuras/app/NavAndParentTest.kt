@@ -1,6 +1,7 @@
 package pt.mataventuras.app
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +34,11 @@ class NavAndParentTest {
     @get:Rule
     val compose = createComposeRule()
 
+    @Before
+    fun accessibilityChecks() {
+        compose.enableAccessibilityChecks()
+    }
+
     @Test
     fun navGraphCreatesAProfileAndOpensALesson() {
         val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
@@ -49,7 +56,7 @@ class NavAndParentTest {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText("★").performScrollTo().performClick()
-        compose.onNodeWithText("Voltar").performScrollTo().performClick()
+        compose.onNodeWithText("Voltar").performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Contar com o Ouriço Veloz").fetchSemanticsNodes().isNotEmpty()
         }

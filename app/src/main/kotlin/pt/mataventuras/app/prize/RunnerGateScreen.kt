@@ -29,7 +29,7 @@ fun RunnerGateScreen(
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishGate(round, index, onFinished) },
-                modifier = Modifier.testTag("gate-$index"),
+                modifier = Modifier.prizeMinHeight().testTag("gate-$index"),
             ) {
                 Canvas(Modifier.size(28.dp)) { drawCircle(Color(0xFFFDD835)) }
                 Text(label)

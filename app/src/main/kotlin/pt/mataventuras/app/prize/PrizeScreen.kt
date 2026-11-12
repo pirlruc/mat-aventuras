@@ -1,9 +1,9 @@
 package pt.mataventuras.app.prize
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -39,10 +39,10 @@ internal fun PrizeScreen(
     Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         Button(
             onClick = onExit,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+            modifier = Modifier.fillMaxWidth().prizeMinHeight(),
         ) { Text(PrizeHud.BACK_LABEL) }
         if (!playing) {
-            PrizeIntroCard(prize.name) { playing = true }
+            PrizeIntroCard(PrizeBrief.composeKey(prize.name)) { playing = true }
         } else {
             PrizeBody(prize, random, onFinished)
         }
@@ -62,7 +62,7 @@ private fun PrizeIntroCard(
     }
     Text(PrizeBrief.goal(scene))
     Text(PrizeBrief.controls(scene))
-    Button(onClick = onPlay, modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
+    Button(onClick = onPlay, modifier = Modifier.fillMaxWidth().prizeMinHeight()) {
         Text(PrizeHud.PLAY_LABEL)
     }
 }
@@ -84,3 +84,6 @@ private fun PrizeBody(
         ComposePrize.RUNNER -> RunnerGateScreen(random, onFinished)
     }
 }
+
+/** Compose prize controls stay at least 64 dp in both axes. */
+internal fun Modifier.prizeMinHeight(): Modifier = defaultMinSize(minWidth = 64.dp, minHeight = 64.dp)

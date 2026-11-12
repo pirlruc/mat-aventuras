@@ -10,6 +10,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -100,7 +102,7 @@ internal object NativeRunnerHost {
             done = true
             onDone(false)
         }
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
             Canvas(
                 modifier =
                     Modifier
@@ -148,9 +150,20 @@ internal object NativeRunnerHost {
                         .background(Color(0x99000000), RoundedCornerShape(12.dp))
                         .padding(horizontal = 12.dp, vertical = 8.dp),
             )
+            HoldRow(
+                runnerHoldControls(loop),
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
     }
 }
+
+internal fun runnerHoldControls(loop: Platformer2dLoop): List<HoldControl> =
+    listOf(
+        HoldControl("Esquerda", { loop.moveX = -1f }, { loop.moveX = 0f }),
+        HoldControl("Saltar", { loop.jumping = true }, { loop.jumping = false }),
+        HoldControl("Direita", { loop.moveX = 1f }, { loop.moveX = 0f }),
+    )
 
 internal fun runnerKeepsTicking(
     finished: Boolean,
