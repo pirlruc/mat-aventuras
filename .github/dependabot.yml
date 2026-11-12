@@ -38,8 +38,21 @@ updates:
     multi-ecosystem-group: all-dependencies
     cooldown:
       default-days: 7
-    # The Android jobs use Temurin 17. A major tag would leave that LTS.
-    # Recorded as SC-DEP-003 in docs/guardrail-deviations.yml.
+    # KT-BUILD-001: stay on an LTS JDK (17, 21, or 25). Ignore non-LTS tags only.
     ignore:
       - dependency-name: "eclipse-temurin"
-        update-types: ["version-update:semver-major"]
+        versions: ["22", "23", "24", "26"]
+
+  # Submodule bumps stay out of the grouped PR (SC-DEP-004). Registries stay
+  # commented in the scaffold seed until a Dependabot secret exists.
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/Lisbon
+    commit-message:
+      prefix: build
+      include: scope
+    cooldown:
+      default-days: 7

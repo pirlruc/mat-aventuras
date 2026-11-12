@@ -21,6 +21,17 @@ internal enum class PromptCue {
 }
 
 /**
+ * A prize Activity that closed without a win should let the lesson speak again.
+ * The win card stays quiet until Continuar.
+ */
+internal fun shouldDropPrizeHold(
+    closed: Int,
+    seenClosed: Int,
+    celebrate: Boolean,
+    holdPrompt: Boolean,
+): Boolean = closed != seenClosed && !celebrate && holdPrompt
+
+/**
  * [Release] speaks once when Continuar dismisses the win card.
  */
 internal fun promptCue(

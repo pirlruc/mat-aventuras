@@ -90,7 +90,8 @@ internal fun MemoryBoard(
     exercise: Exercise,
     onPick: (Int) -> Unit,
 ) {
-    var face by remember(exercise) { mutableStateOf(MemoryFace()) }
+    val boardKey = LocalExerciseId.current
+    var face by remember(boardKey) { mutableStateOf(MemoryFace()) }
     val solved = face.solved(exercise.play.cells.size)
     LaunchedEffect(solved) {
         if (solved) onPick(exercise.correctIndex)
@@ -129,6 +130,7 @@ private fun RowScope.MemoryCard(
         animationSpec = tween(FLIP_MS),
         label = "card-flip",
     )
+    val showFront = showsCardFront(rotation)
     val pips = quantityPips(label)
     val density = LocalDensity.current.density
     val tag = memoryCardTag(open, debugAnswerTags, pips, pairKey)
@@ -142,7 +144,7 @@ private fun RowScope.MemoryCard(
                     rotationY = rotation
                     cameraDistance = 12f * density
                 }.clip(RoundedCornerShape(12.dp))
-                .background(if (open) Color(0xFFFFF8E1) else Color(0xFF0D47A1))
+                .background(if (showFront) Color(0xFFFFF8E1) else Color(0xFF0D47A1))
                 .testTag(tag)
                 .clickable(onClick = onClick)
                 .semantics(mergeDescendants = true) {
@@ -151,7 +153,7 @@ private fun RowScope.MemoryCard(
                 },
         contentAlignment = Alignment.Center,
     ) {
-        if (open) {
+        if (showFront) {
             MemoryFront(label, pips)
         } else {
             Canvas(modifier = Modifier.fillMaxSize().graphicsLayer { rotationY = 180f }) {

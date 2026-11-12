@@ -5,7 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.0] - 2026-11-12
+
+### Fixed
+
+- A finished Compose prize sets `RESULT_FINISHED`, so the lesson counts it as won.
+- Leaving a prize without winning lets the next prompt speak. The following prize waits again.
+- Clock, memory, and word-search rounds that repeat a prompt speak again, and their boards start fresh.
+- Speech asked for before the voice engine is ready is spoken when it starts. The prize introduction releases that voice when the prize closes, and the game waits until Jogar.
+- The kart steer buttons own the wheel. A runner enemy hit freezes the run the same way a pit does. Runner and climb name those buttons.
+- Memory cards show the face only after the flip passes halfway, so the glyph is not mirrored.
+- Release builds keep `prizeLimitSeconds()`.
+
+### Changed
+
+- Asset directories use the current Android Gradle source-set API. Gradle tooling runs in parallel and caches task output.
+- The project license is GPL-3.0-only. NOTICE reserves commercial text-and-data-mining under Directive (EU) 2019/790 Article 4(3).
+- Room exports its schema with the AndroidX Room plugin. Companion pins are guardrails 1.15.0, scaffold 1.12.0, commondevops v6.2.0, androiddevops 1.7.0, and pydevops 3.5.0.
+- The Compose runner brief is the number gate. Native kart and runner hosts use on-screen buttons inside the safe drawing area. Parent and leaderboard top bars stay outside the scrolling column. Compose prize buttons are at least 64 dp.
 
 ## [0.4.0] - 2026-11-04
 

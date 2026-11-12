@@ -69,7 +69,6 @@ fun LeaderboardAndRewardsScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -77,46 +76,58 @@ fun LeaderboardAndRewardsScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
         ) { Text(stringResource(R.string.back)) }
-        Text(VoiceScripts.LEADERBOARD, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text(stringResource(R.string.on_this_device))
-        table.forEach { row ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Text(stringResource(R.string.rank, row.rank), fontWeight = FontWeight.Black)
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color(row.mascot.primaryArgb)),
-                    )
-                    Column(Modifier.weight(1f)) {
-                        Text(row.name, fontWeight = FontWeight.Bold)
-                        Text(
-                            stringResource(
-                                R.string.points_accuracy,
-                                row.points,
-                                (row.averageAccuracy * 100).toInt(),
-                            ),
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                VoiceScripts.LEADERBOARD,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(stringResource(R.string.on_this_device))
+            table.forEach { row ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(stringResource(R.string.rank, row.rank), fontWeight = FontWeight.Black)
+                        Box(
+                            modifier =
+                                Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(row.mascot.primaryArgb)),
                         )
+                        Column(Modifier.weight(1f)) {
+                            Text(row.name, fontWeight = FontWeight.Bold)
+                            Text(
+                                stringResource(
+                                    R.string.points_accuracy,
+                                    row.points,
+                                    (row.averageAccuracy * 100).toInt(),
+                                ),
+                            )
+                        }
                     }
                 }
             }
-        }
-        Text(VoiceScripts.REWARDS, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(stringResource(R.string.badges))
-        BadgeCode.entries.forEach { code ->
-            val owned = badges.any { it.code == code.name }
-            Text(badgeLine(owned, code))
-        }
-        Text(stringResource(R.string.avatars))
-        AvatarCode.entries.forEach { code ->
-            val owned = avatars.any { it.avatarId == code.name }
-            Text(avatarLine(owned, code))
+            Text(VoiceScripts.REWARDS, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.badges))
+            BadgeCode.entries.forEach { code ->
+                val owned = badges.any { it.code == code.name }
+                Text(badgeLine(owned, code))
+            }
+            Text(stringResource(R.string.avatars))
+            AvatarCode.entries.forEach { code ->
+                val owned = avatars.any { it.avatarId == code.name }
+                Text(avatarLine(owned, code))
+            }
         }
     }
 }

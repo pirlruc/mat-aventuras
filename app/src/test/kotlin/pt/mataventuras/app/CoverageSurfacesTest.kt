@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -17,6 +18,7 @@ import androidx.test.core.app.ApplicationProvider
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,6 +46,11 @@ import pt.mataventuras.domain.model.Mascot
 class CoverageSurfacesTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComposeHostActivity>()
+
+    @Before
+    fun accessibilityChecks() {
+        compose.enableAccessibilityChecks()
+    }
 
     @Test
     fun lessonBoardsAndPrizeCardRender() {
@@ -170,12 +177,18 @@ class CoverageSurfacesTest {
             moveBy(Offset(40f, 0f))
             up()
         }
+        listOf("Esquerda", "Impulso", "Direita").forEach { label ->
+            compose.onNodeWithText(label).performClick()
+        }
         step = LearningModule.entries.size + 4
         compose.waitForIdle()
         compose.onNodeWithTag("runner-course").performTouchInput {
             down(center)
             moveBy(Offset(24f, -80f))
             up()
+        }
+        listOf("Esquerda", "Saltar", "Direita").forEach { label ->
+            compose.onNodeWithText(label).performClick()
         }
     }
 

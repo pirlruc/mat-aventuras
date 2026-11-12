@@ -162,19 +162,21 @@ class PinRepository(
         return legacy
     }
 
-    @Suppress("ThrowsCount")
     private fun readRecord(): PinState? {
         val record = prefs.getString(KEY_RECORD, null) ?: return null
-        return try {
+        return openRecord(record)
+    }
+
+    private fun openRecord(record: String): PinState =
+        try {
             decodeRecord(sealer.open(record))
         } catch (error: GeneralSecurityException) {
-            throw PinKeyException(error)
+            rethrowPinKey(error)
         } catch (error: IOException) {
-            throw PinKeyException(error)
+            rethrowPinKey(error)
         } catch (error: IllegalStateException) {
-            throw PinKeyException(error)
+            rethrowPinKey(error)
         }
-    }
 
     private fun readPlainLegacy(): PinState? {
         val hashValue = prefs.getString(KEY_HASH, null) ?: return null
@@ -218,6 +220,8 @@ private fun decodeRecord(payload: String): PinState {
         lockoutBootCount = lines.getOrNull(6)?.toIntOrNull() ?: 0,
     )
 }
+
+private fun rethrowPinKey(error: Exception): Nothing = throw PinKeyException(error)
 
 /**
  * The Keystore key for the PIN record cannot be used. The parent may reset.

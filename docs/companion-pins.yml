@@ -7,20 +7,28 @@
 
 guardrails:
   path: docs/guardrails
-  tag: "1.13.1"
-  sha: "1945211ac851c3c0f83694bd4ea53571fdced4ab"
+  tag: "1.15.0"
+  sha: "2d4bb70e95449f6922781716857adeb22badf676"
 
 scaffold:
   path: .github/scaffold
-  tag: "1.10.2"
-  sha: "c8eddcfb2c8a808981e640fa9739cb4fcefa991e"
+  tag: "1.12.0"
+  sha: "9c443ea978851768f451b1df2020dd86dfb1a967"
 
 methodologies:
   tag: "1.9.2"
 
 androiddevops:
-  tag: "1.4.0"
-  sha: "4763e3be9f3a24a1b80dee3bf01530413aa3f49f"
+  tag: "1.7.0"
+  sha: "fb6651b3cd3246975df605e7000c4992d6b6a184"
+
+commondevops:
+  tag: "v6.2.0"
+  sha: "1e0c029bf93705f399f2a3a7e5f19810c101da65"
+
+pydevops:
+  tag: "3.5.0"
+  sha: "cca700aebb97b442bc67150a9381c528daebcfa6"
 
 android_maestro:
   image: ghcr.io/pirlruc/android-maestro

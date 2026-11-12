@@ -7,6 +7,7 @@ object PrizeBrief {
     private val goals: Map<String, String> =
         mapOf(
             "RUNNER" to "Corre e apanha os anéis.",
+            "RUNNER_GATE" to "Entra na porta com a conta certa.",
             "CLIMB" to "Sobe e apanha as letras.",
             "CHOMP" to "Come as bolinhas e foge.",
             "INVADERS" to "Desvia das naves.",
@@ -23,6 +24,7 @@ object PrizeBrief {
     private val controls: Map<String, String> =
         mapOf(
             "RUNNER" to "Setas para andar. Saltar para o ar.",
+            "RUNNER_GATE" to "Toca na porta certa.",
             "CLIMB" to "Setas para andar. Saltar para subir.",
             "CHOMP" to "Desliza para virar.",
             "INVADERS" to "Desliza para desviar.",
@@ -40,6 +42,11 @@ object PrizeBrief {
      * One sentence that says what winning looks like.
      */
     fun goal(scene: String): String = goals[scene.uppercase()] ?: "Joga até ao fim."
+
+    /**
+     * Compose runner is the number gate. Godot runner keeps the key `RUNNER`.
+     */
+    fun composeKey(name: String): String = if (name == "RUNNER") "RUNNER_GATE" else name
 
     /**
      * One sentence that says which buttons to use.

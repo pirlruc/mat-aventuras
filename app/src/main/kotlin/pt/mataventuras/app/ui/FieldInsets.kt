@@ -13,6 +13,9 @@ import kotlinx.coroutines.launch
 /** True while the Ganhaste card covers the lesson. */
 internal val LocalCelebrate = compositionLocalOf { false }
 
+/** Increments when a prize Activity returns, including a loss. */
+internal val LocalPrizeClosed = compositionLocalOf { 0 }
+
 /**
  * Scrolls a focused field above the keyboard.
  */

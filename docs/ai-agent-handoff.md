@@ -2,7 +2,7 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-11-04
+**Last updated:** 2026-11-12
 **Last agent focus:** Tag `0.4.0` is annotated on `8f40d20` (tag object `04c8b673`). Run 41792868922 published a signed `app-release.apk`. `sha256sum -c` matched. `apksigner` verifies scheme v2 and the README fingerprint. `cosign verify-blob` and `gh attestation verify --signer-repo pirlruc/commondevops` succeeded. Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, or `0.3.2`.
 
 ---
@@ -29,14 +29,14 @@ equals the recorded sha.
 | Companion | How | Value |
 | --- | --- | --- |
 | methodologies | annotated tag in docs | `1.9.2` |
-| guardrails | submodule SHA `docs/guardrails/` | `1945211a` (tag `1.13.1`) |
-| github-scaffold | submodule SHA `.github/scaffold/` | `c8eddcfb` (tag `1.10.2`) |
+| guardrails | submodule SHA `docs/guardrails/` | `2d4bb70e` (tag `1.15.0`) |
+| github-scaffold | submodule SHA `.github/scaffold/` | `9c443ea9` (tag `1.12.0`) |
 | Godot Android library | `gradle/libs.versions.toml` | `org.godotengine:godot:4.7.2.stable` |
 | Detekt Gradle plugin | `gradle/libs.versions.toml` | `dev.detekt` `2.0.0-alpha.6` |
 | actionlint | `scripts/run-actionlint.sh` | `1.7.12` (commondevops ci-lint pin) |
-| commondevops | `.github/workflows/shared-ci.yml` | tag `5.8.0`, peeled `cb34967f` |
-| androiddevops | `.github/workflows/ci.yml`, `emulator.yml`, `release.yml` | tag `1.4.0`, peeled `4763e3be` |
-| pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.3.10`, peeled `7ebee303` |
+| commondevops | `.github/workflows/shared-ci.yml` and `ci.yml` | tag `v6.2.0`, peeled `1e0c029b` |
+| androiddevops | `.github/workflows/ci.yml`, `emulator.yml`, `release.yml` | tag `1.7.0`, peeled `fb6651b3` |
+| pydevops `python-quality` | `.github/workflows/python-quality.yml` | tag `3.5.0`, peeled `cca700ae` |
 | ci-lint image | `scripts/check-ci-docker.sh` | `sha256:f9001c4c` |
 
 Stay on annotated tags (SC-DEP-004). Synced scaffold rules are the scaffold
@@ -65,11 +65,12 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-018 | done | Parent prize cadence. GitHub #178–#180 are closed |
 | MAT-019 | done | Prize boot, controls, and explanation. GitHub #181–#186 are closed |
 | MAT-020 | done | #187–#190 closed. Maestro flows and the androiddevops 1.4.0 pin |
+| MAT-DOC-001 | done | Child-audience policy: offline, zero PII, parent math plus PIN, bands 3–5 and 6–8 |
+| MAT-021 | done | GPL-3.0-only and the Directive (EU) 2019/790 Article 4(3) reservation |
+| MAT-022 | done | Round 6 defects, Room plugin, guardrails 1.15.0. Version 0.5.0 is not tagged |
 
-`docs/guardrail-deviations.yml` has three entries, none of which lowers a number:
-Kover exclusions beyond kotlinx.serialization (KT-TEST-002; floors stay 95),
-the Temurin major ignore (SC-DEP-003), and Dokka `doc_coverage` not applicable
-(KT-DOC-001). Compose functions are ignored by detekt complexity and length.
+`docs/guardrail-deviations.yml` keeps KT-DOC-001 only. It does not lower a
+number. Compose functions are ignored by detekt complexity and length.
 `NativeKartHost.attach` and `NativeRunnerHost.attach` do not suppress
 complexity. `RewardGodotFragment` keeps `@SuppressLint("MissingSuperCall")` as a
 platform-contract suppression, not a deviation. Do not add `key` /
@@ -111,7 +112,9 @@ bash scripts/check-ci-local.sh
   for Kotlin, so ktlint and detekt use the same limit. Godot 4.7.2 `--import` aborts;
   `scripts/check-godot.sh` uses `--editor` and fails on `SCRIPT ERROR`.
   The devcontainer stays on Temurin 17. Dependabot ignores Temurin
-  semver-major under the SC-DEP-003 deviation on MAT-013.
+  versions 22, 23, 24, and 26 (KT-BUILD-001). 21 and 25 stay eligible.
+  Room schema export is the AndroidX Room plugin `schemaDirectory`.
+  Unit tests still read `schemas` from the test source set.
 - An incremental Kover report can pass at 95 while a clean run and CI are
   under it. Trust `koverVerifyDebug --rerun-tasks`. A `Canvas` draw lambda
   counts on a host Robolectric run and does not count on the GitHub
@@ -130,12 +133,12 @@ bash scripts/check-ci-local.sh
   header. `verify-coverage.py` and `verify-privacy-manifest.py` parse XML
   with defusedxml. `verify-coverage.py` fails if the overlay is below the
   submodule org defaults when both exist.
-- `.github/workflows/shared-ci.yml` calls commondevops `5.8.0` at peeled SHA
-  `cb34967f230a0d4841ae1efc2c98e745bd8726a7`. `uses:` cannot take a PAT. When
+- `.github/workflows/shared-ci.yml` calls commondevops `v6.2.0` at peeled SHA
+  `1e0c029bf93705f399f2a3a7e5f19810c101da65`. `uses:` cannot take a PAT. When
   the ops repo is private again, this repo still needs Actions access to read
   the workflow file. Scanner jobs pull private `ci-lint` and `ci-supply-chain`
   (this repo has Actions read). Gradle, CodeQL, MobSF, and the APK bill call
-  androiddevops `1.4.0` (`4763e3be9f3a24a1b80dee3bf01530413aa3f49f`) from
+  androiddevops `1.7.0` (`fb6651b3cd3246975df605e7000c4992d6b6a184`) from
   `ci.yml`, `emulator.yml`, and `release.yml`. `release.yml` still passes
   `environment: release`. The CodeQL caller must grant `actions: read`
   because the reusable upload job requests it even when `upload` is `never`.
@@ -224,7 +227,7 @@ bash scripts/check-ci-local.sh
 - Kover 95% verify rules live once in the root `build.gradle.kts` `subprojects` block and read `config/kotlin.thresholds.yml`. Do not copy the bounds back into each module.
 - `MissingSuperCall` is `@SuppressLint` on `RewardGodotFragment` only. Manifest merger stubs (`tools:node="remove"`, and the `InitializationProvider` merge node) use `tools:ignore="MissingClass"`. There is no directory-wide `lint.xml`.
 - Local secret scan: `git config core.hooksPath .githooks` runs `scripts/gitleaks-pre-commit.sh` (KT-SEC-003). CI still scans; the hook fails closed if `gitleaks` is missing.
-- Guardrails tag `1.13.1` (`1945211a`) and scaffold tag `1.10.2` (`c8eddcfb`) are the pins. KT-SEC-002 is semgrep `p/kotlin` on `common-secrets-sast`; KT-SEC-003 is gitleaks there too. KT-DOC-001 Dokka `doc_coverage` does not apply (no published API) and is recorded, not lowered. The one `@SuppressLint("MissingSuperCall")` is `RewardGodotFragment`: those JNI overrides must not call super. Guardrails 1.13.1 treats that as a platform contract, so the two suppression deviations can be dropped once the pin is on `main`. The 14-day number is not lowered. `scripts/verify-licenses.py` reads `license_deny_list` from the guardrails supply-chain thresholds (SC-LIC-001), including BUSL-1.1, Commons-Clause, and CC-BY-NC. When `build/reports/cyclonedx/bom.json` exists it scans that bill instead (SC-LIC-002). The fallback deny list matches the org list and does not add GPL.
+- Guardrails tag `1.15.0` (`2d4bb70e`) and scaffold tag `1.12.0` (`9c443ea9`) are the pins. KT-SEC-002 is semgrep `p/kotlin` on `common-secrets-sast`; KT-SEC-003 is gitleaks there too. KT-DOC-001 Dokka `doc_coverage` does not apply (no published API) and is recorded, not lowered. The one `@SuppressLint("MissingSuperCall")` is `RewardGodotFragment`: those JNI overrides must not call super. That suppression is a platform contract, not a deviation. SC-DEP-003 and KT-TEST-002 are gone. The 14-day number is not lowered. `scripts/verify-licenses.py` reads `license_deny_list` from the guardrails supply-chain thresholds (SC-LIC-001), including BUSL-1.1, Commons-Clause, and CC-BY-NC. When `build/reports/cyclonedx/bom.json` exists it scans that bill instead (SC-LIC-002). The fallback deny list matches the org list and does not add GPL.
 - `:app` Kover excludes `BuildConfig`, `*ComposableSingletons*`, and `pt.mataventuras.app.engine.godot.*`. The four screen classes are measured. KT-TEST-002 records the Godot JNI package. Floors stay 95. Do not add `key`, `org_default`, or `repo_value`.
 - Do not gate jobs on `github.actor == 'dependabot[bot]'` (zizmor `bot-conditions`). Dependabot updates use `cooldown.default-days: 7`. Workflow lint is zizmor inside `common-infra-lint` (and `scripts/check-ci-docker.sh` locally). There is no in-repo zizmor-action job.
 - CodeQL action `v4.38.1` commit is `1c5b675653bb5c22dbe9b12b556ec555138e09fd` (the tag object is not the commit). `upload: never` keeps `contents: read`. The compile step must stay manual (`build-mode: manual`). The APK SBOM is the debug runtime classpath (`scripts/gradle-to-cyclonedx.py` + osv-scanner `2.6.0`). Dex has no Maven coordinates, so scanning the APK file itself yields an empty bill. Community semgrep is `p/kotlin` beside `.semgrep.yml`, still semgrep `1.128.1`, and it runs after grype so `.ci-venv` is not scanned.
@@ -249,7 +252,7 @@ bash scripts/check-ci-local.sh
   `MatAventuras` singleton lazily and calls `prizeReady()` on the object.
   `has_method` does not see those Java plugin methods, so a `has_method`
   guard never hides the boot overlay. Do not raise `PrizeBoot.TIMEOUT_MS`.
-- A parent prize limit is `prize_limit` on the reward Intent. `PrizeLimit` arms every host from `SystemClock.elapsedRealtime()`. Zero or a missing extra does not finish the activity. The Godot `Host` reads `prizeLimitSeconds()` and stops on `Time.get_ticks_msec()`. Compose prizes use `Random.Default` unless the test passes a seed. The correct-answer tag is on only when the process is debuggable or Robolectric.
+- A parent prize limit is `prize_limit` on the reward Intent. `PrizeLimit` arms every host from `SystemClock.elapsedRealtime()`. Zero or a missing extra does not finish the activity. The Godot `Host` reads `prizeLimitSeconds()` and stops on `Time.get_ticks_msec()`. Compose prizes use `Random.Default` unless the test passes a seed. The correct-answer tag is on only when the process is debuggable or Robolectric. A finished Compose prize must `setResult` with `EngineLauncher.RESULT_FINISHED`. Lesson speech, soup, memory, and the clock face key on `exerciseId`, not the prompt string. `PrizeIntro` releases its `SpeechEngine` when the card leaves the window. `Host.intro_hold()` freezes prize scripts until Jogar. Kart `steer_buttons` ignore full-screen touches. Do not lower the Kover floors.
 - A Keystore or IO failure while reading the PIN opens the hold-and-sum reset (`6 + 7`). The parent window sets `FLAG_SECURE` while that screen is composed. Lockout stores both a wall-clock deadline and `lockedUntilElapsedMs`. `PinKeyException` is an `IllegalStateException`; catch it first.
 - Prize lives, speeds, and hit tests live only in
   `domain/src/main/resources/prize-tuning.json`. The app asset source set
@@ -262,14 +265,15 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Current release is `0.4.0` (`versionCode` 6) on `8f40d20`, tag object `04c8b673`, run 41792868922. `0.3.2` stays on `d307dc1`. Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, or `0.3.2`. The keystore is outside the repo. Do not commit it or copy the password.
+1. `versionName` `0.5.0` (`versionCode` 7) is on `feature-round-6-fixes` and is not tagged. Do not create the `0.5.0` tag and do not push `main` from this branch. The published install stays `0.4.0` until that tag exists. `0.4.0` remains tag object `04c8b673` on `8f40d20`. `emulator.yml` stays `workflow_dispatch` and schedule. Dispatch it after this pull request merges. Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, `0.3.2`, or `0.4.0`. The keystore is outside the repo. Do not commit it or copy the password.
 2. MAT-015 is done. The 0.3.2 APK and the 0.3.1 APK both verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`.
 3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
 4. The emulator job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only). Run 41358345053 failed because the runner had no KVM permission (`-accel off`), and the multi-line `script:` never executed under `sh -c`. Do not record that as a boot timeout. androiddevops 1.2.0 is the fix.
 5. When androiddevops later becomes private, this public repo cannot call its workflows. Vendor the pinned workflow. Do not change visibility from an agent session. mat-aventuras stays public.
 6. Companion issues already filed stay as they are: guardrails [#187](https://github.com/pirlruc/guardrails/issues/187) GR-KT-003, [#188](https://github.com/pirlruc/guardrails/issues/188) GR-KT-004, [#189](https://github.com/pirlruc/guardrails/issues/189) GR-PACK-007; pydevops [#172](https://github.com/pirlruc/pydevops/issues/172) PDO-PYPROJECT-001, [#174](https://github.com/pirlruc/pydevops/issues/174) PDO-PYVER-001, [#175](https://github.com/pirlruc/pydevops/issues/175) PDO-COMMENT-001, [#176](https://github.com/pirlruc/pydevops/issues/176) PDO-UV-001; github-scaffold [#150](https://github.com/pirlruc/github-scaffold/issues/150) GS-AND-001. The 0.1.0 review added guardrails [#318](https://github.com/pirlruc/guardrails/issues/318) GR-GD-001, [#320](https://github.com/pirlruc/guardrails/issues/320) GR-KIDS-001, [#322](https://github.com/pirlruc/guardrails/issues/322) GR-A11Y-001, [#324](https://github.com/pirlruc/guardrails/issues/324) GR-ASSET-001, [#326](https://github.com/pirlruc/guardrails/issues/326) GR-AND-EMU-001; methodologies [#166](https://github.com/pirlruc/methodologies/issues/166) MTH-MOB-001 and [#168](https://github.com/pirlruc/methodologies/issues/168) MTH-AGE-001; github-scaffold [#211](https://github.com/pirlruc/github-scaffold/issues/211) GS-AND-002, [#213](https://github.com/pirlruc/github-scaffold/issues/213) GS-AND-003, and [#215](https://github.com/pirlruc/github-scaffold/issues/215) GS-AND-004. Do not file them again. The companion review after 0.3.1 dedupes this list. Do not file them again.
-7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. Callers pin `3.3.10`, which runs the containers as root, skips mypy when `installable_app` is false, reads pip-audit 2.10's dependencies object, and runs the quality report as a module. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. It is not behind `PYTHON_QUALITY_ENABLED`. `install_runner_packages` stays false. Do not pin `main`. Do not move pydevops 3.3.1 through 3.3.10. Leave pydevops `feature-cmn-551` alone.
+7. python-quality is Medium (CI-022 offsets), not the High/org floors, and `installable_app` is false. The install venv must stay in `RUNNER_TEMP`. `.bandit` skips assert and subprocess findings because the gate counts every result. Caller `python_version` is 3.13. The pyproject cutoff stays a timestamp. Callers pin `3.5.0`. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. It is not behind `PYTHON_QUALITY_ENABLED`. `install_runner_packages` stays false. Do not pin `main`. Do not move pydevops 3.3.1 through 3.5.0.
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done. `PrizeDeviceTest.everyPrizeBecomesReady` passed on `mat_api36` on 2026-11-04, including climb. The JNI exclude stays. Wrapper validation in `ci.yml` always runs, so Scorecard can see it. BinaryArtifacts alert #4 stays until Scorecard scans `main` after this merges. androiddevops is pinned once at 1.4.0. Local Maestro uses the digest in `docs/companion-pins.yml` and does not run on GitHub Actions. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-04 (0.4.0 signed release verified).*
+*Last updated: 2026-11-12 (Compose prize win result, prompt speech after a missed prize, queued TTS, kart and runner controls, memory flip, GPL-3.0-only).*
+*Last updated: 2026-11-12 (0.5.0, Room plugin, guardrails 1.15.0, native prize buttons, runner gate brief).*

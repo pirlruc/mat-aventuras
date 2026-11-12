@@ -31,7 +31,7 @@ fun FishingScreen(
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishIfCaught(round, index, onFinished) },
-                modifier = Modifier.testTag("fish-$index"),
+                modifier = Modifier.prizeMinHeight().testTag("fish-$index"),
             ) {
                 Canvas(Modifier.size(28.dp).testTag("fish-mark-$index")) {
                     drawCircle(Color(0xFF1E88E5))

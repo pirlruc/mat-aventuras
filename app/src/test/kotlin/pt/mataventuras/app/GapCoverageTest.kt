@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -24,6 +25,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,6 +64,11 @@ import pt.mataventuras.domain.voice.VoiceScripts
 class GapCoverageTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComposeHostActivity>()
+
+    @Before
+    fun accessibilityChecks() {
+        compose.enableAccessibilityChecks()
+    }
 
     @Test
     fun lessonBoardsCoverTheMeasuredScreens() {
@@ -189,7 +196,7 @@ class GapCoverageTest {
             compose.onAllNodesWithText("Olá, Ana!").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText(VoiceScripts.LEADERBOARD).performScrollTo().performClick()
-        compose.onNodeWithText("Voltar").performScrollTo().performClick()
+        compose.onNodeWithText("Voltar").performClick()
         mode = 2
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("Ana").fetchSemanticsNodes().isNotEmpty()
@@ -209,7 +216,7 @@ class GapCoverageTest {
         }
         compose.onNodeWithText("1 min").performClick()
         compose.onNodeWithText("3 min").performClick()
-        compose.onNodeWithText("Fechar").performScrollTo().performClick()
+        compose.onNodeWithText("Fechar").performClick()
     }
 
     @Test

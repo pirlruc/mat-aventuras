@@ -13,8 +13,8 @@ android {
         applicationId = "pt.mataventuras.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 6
-        versionName = "0.4.0"
+        versionCode = 7
+        versionName = "0.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -45,7 +45,7 @@ android {
         compose = true
     }
     sourceSets.named("main") {
-        assets.srcDir(rootProject.file("domain/src/main/resources"))
+        assets.directories.add("../domain/src/main/resources")
     }
     packaging {
         resources {
@@ -109,6 +109,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.compose.ui.test.junit4.accessibility)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

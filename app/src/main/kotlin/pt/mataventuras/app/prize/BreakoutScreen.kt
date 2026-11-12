@@ -29,7 +29,7 @@ fun BreakoutScreen(
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishBreakout(round, index, onFinished) },
-                modifier = Modifier.testTag("breakout-$index"),
+                modifier = Modifier.prizeMinHeight().testTag("breakout-$index"),
             ) {
                 Canvas(Modifier.size(28.dp)) { drawCircle(Color(0xFF43A047)) }
                 Text(label)

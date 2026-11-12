@@ -3,6 +3,7 @@ package pt.mataventuras.app
 import android.speech.tts.TextToSpeech
 import android.view.MotionEvent
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -13,6 +14,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +52,11 @@ import pt.mataventuras.domain.voice.VoiceScripts
 class AppUiTest {
     @get:Rule
     val compose = createComposeRule()
+
+    @Before
+    fun accessibilityChecks() {
+        compose.enableAccessibilityChecks()
+    }
 
     @Test
     fun engineLauncherPicksIsolatedProcessActivities() {
@@ -282,7 +289,9 @@ class AppUiTest {
         engine.release()
         engine.stop()
         val ready = SpeechEngine(ApplicationProvider.getApplicationContext())
+        ready.onInit(TextToSpeech.SUCCESS)
         ready.markReadyForTest()
+        ready.speak(" ")
         ready.speak("Olá")
         ready.release()
         ready.onInit(TextToSpeech.SUCCESS)

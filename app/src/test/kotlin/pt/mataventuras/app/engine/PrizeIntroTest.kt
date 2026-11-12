@@ -5,8 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
@@ -21,6 +23,7 @@ class PrizeIntroTest {
         PrizeIntro.attach(activity, "KART", embed = false)
         assertNull(activity.window.decorView.findViewWithTag<View>("prize-intro"))
         PrizeIntro.attach(activity, "KART", embed = true)
+        assertTrue(PrizeIntro.isHolding(activity))
         PrizeIntro.attach(activity, "KART", embed = true)
         val card = activity.window.decorView.findViewWithTag<ViewGroup>("prize-intro")
         assertNotNull(card)
@@ -41,5 +44,8 @@ class PrizeIntroTest {
                 .single()
         live.performClick()
         assertNull(activity.window.decorView.findViewWithTag<View>("prize-intro"))
+        assertFalse(PrizeIntro.isHolding(activity))
+        PrizeIntro.release(activity)
+        assertFalse(PrizeIntro.isHolding(activity))
     }
 }

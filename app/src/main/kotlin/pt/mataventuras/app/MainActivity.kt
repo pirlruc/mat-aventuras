@@ -6,7 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.prize.PrizeLaunch
 import pt.mataventuras.app.speech.SpeechEngine
+import pt.mataventuras.app.ui.LocalPrizeClosed
 import pt.mataventuras.app.ui.RewardReturn
 import pt.mataventuras.app.ui.beginReward
 import pt.mataventuras.app.ui.lesson.RewardRecorder
@@ -26,6 +29,7 @@ import pt.mataventuras.app.ui.navigation.NavGraph
 class MainActivity : ComponentActivity() {
     private lateinit var speech: SpeechEngine
     private var celebrateWin by mutableStateOf(false)
+    private var prizeClosed by mutableIntStateOf(0)
 
     private val engineLauncher =
         registerForActivityResult(
@@ -38,20 +42,22 @@ class MainActivity : ComponentActivity() {
         val app = application as MatAventurasApp
         speech = SpeechEngine(this)
         setContent {
-            NavGraph(
-                container = app.container,
-                onSpeak = { speech.speak(it) },
-                onReward = { ageGroup, mascot, name, limit ->
-                    val seconds = app.container.rewards.prizeLimitSeconds(limit)
-                    beginReward(speech::stop) {
-                        engineLauncher.launch(
-                            PrizeLaunch.intent(this, ageGroup, mascot, name, limitSeconds = seconds),
-                        )
-                    }
-                },
-                celebrate = celebrateWin,
-                onDismissWin = { celebrateWin = false },
-            )
+            CompositionLocalProvider(LocalPrizeClosed provides prizeClosed) {
+                NavGraph(
+                    container = app.container,
+                    onSpeak = { speech.speak(it) },
+                    onReward = { ageGroup, mascot, name, limit ->
+                        val seconds = app.container.rewards.prizeLimitSeconds(limit)
+                        beginReward(speech::stop) {
+                            engineLauncher.launch(
+                                PrizeLaunch.intent(this, ageGroup, mascot, name, limitSeconds = seconds),
+                            )
+                        }
+                    },
+                    celebrate = celebrateWin,
+                    onDismissWin = { celebrateWin = false },
+                )
+            }
         }
     }
 
@@ -71,6 +77,7 @@ class MainActivity : ComponentActivity() {
         }
         val finished = RewardReturn.onResult(resultCode, data, speech::speak)
         if (finished) celebrateWin = true
+        prizeClosed += 1
         val app = application as MatAventurasApp
         lifecycleScope.launch(Dispatchers.IO) {
             RewardRecorder.apply(app.container, finished)

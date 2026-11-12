@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
     alias(libs.plugins.kover)
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
@@ -21,12 +22,11 @@ android {
         unitTests.isIncludeAndroidResources = true
         unitTests.isReturnDefaultValues = true
     }
+    // Room's plugin publishes schemas on androidTest. Robolectric reads the
+    // unit-test source set, so that copy stays here.
     sourceSets {
         getByName("test") {
-            assets.srcDir("$projectDir/schemas")
-        }
-        getByName("androidTest") {
-            assets.srcDir("$projectDir/schemas")
+            assets.directories.add("schemas")
         }
     }
 }
@@ -54,8 +54,11 @@ detekt {
     source.setFrom("src/main/kotlin")
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
 ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
     // Keep Java *_Impl so Kover filters and existing tests stay valid.
     arg("room.generateKotlin", "false")
 }

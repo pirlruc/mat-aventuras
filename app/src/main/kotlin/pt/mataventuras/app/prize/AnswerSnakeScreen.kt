@@ -33,7 +33,7 @@ fun AnswerSnakeScreen(
                     round = next
                     if (AnswerSnake.full(next)) onFinished()
                 },
-                modifier = Modifier.testTag("snake-$index"),
+                modifier = Modifier.prizeMinHeight().testTag("snake-$index"),
             ) {
                 Text(label)
             }

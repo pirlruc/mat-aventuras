@@ -136,4 +136,6 @@ Portugal.
 
 ## License
 
-Apache License 2.0.
+GNU General Public License version 3 only. See [LICENSE](LICENSE) and
+<https://www.gnu.org/licenses/gpl-3.0.txt>.
+[NOTICE](NOTICE) reserves commercial text-and-data-mining.

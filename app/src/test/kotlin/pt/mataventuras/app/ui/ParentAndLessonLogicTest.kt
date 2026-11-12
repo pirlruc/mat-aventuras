@@ -2,11 +2,13 @@ package pt.mataventuras.app.ui
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -23,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,6 +52,11 @@ import pt.mataventuras.domain.voice.VoiceScripts
 class ParentAndLessonLogicTest {
     @get:Rule
     val compose = createComposeRule()
+
+    @Before
+    fun accessibilityChecks() {
+        compose.enableAccessibilityChecks()
+    }
 
     @Test
     fun recorderWritesSessionAndFirstStepsBadge() =
@@ -564,6 +572,47 @@ class ParentAndLessonLogicTest {
         compose.waitForIdle()
         assertEquals(held, spoken.size)
         celebrate = false
+        compose.waitForIdle()
+        assertTrue(spoken.size > held)
+        assertTrue(spoken.last() != VoiceScripts.WELL_DONE)
+        repeat(5) { clickCorrect() }
+        assertEquals(VoiceScripts.WELL_DONE, spoken.last())
+    }
+
+    @Test
+    fun leavingAPrizeWithoutWinningSpeaksTheNextPrompt() {
+        val app = ApplicationProvider.getApplicationContext<MatAventurasApp>()
+        val profile =
+            runBlocking {
+                val id = app.container.repository.createProfile("Nuno", AgeBand.THREE_TO_FIVE, Mascot.SPEEDY_HEDGEHOG)
+                app.container.repository.updateProfile(
+                    app.container.repository.getProfile(id)!!.let { child ->
+                        child.copy(pace = child.pace.copy(every = 5))
+                    },
+                    cadenceOnly = true,
+                )
+                app.container.repository.getProfile(id)!!
+            }
+        val spoken = mutableListOf<String>()
+        val closed = mutableIntStateOf(0)
+        compose.setContent {
+            CompositionLocalProvider(LocalPrizeClosed provides closed.intValue) {
+                MatAventurasTheme(AgeBand.THREE_TO_FIVE) {
+                    LessonScreen(
+                        container = app.container,
+                        profile = profile,
+                        module = LearningModule.COUNTING,
+                        onSpeak = { spoken += it },
+                        onReward = {},
+                        onExit = {},
+                    )
+                }
+            }
+        }
+        repeat(5) { clickCorrect() }
+        assertEquals(VoiceScripts.WELL_DONE, spoken.last())
+        val held = spoken.size
+        closed.intValue = 1
         compose.waitForIdle()
         assertTrue(spoken.size > held)
     }

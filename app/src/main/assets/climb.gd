@@ -56,6 +56,8 @@ func _input(_event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	if Host.intro_hold():
+		return
 	Host.fit_viewport(self)
 	delta = minf(delta, 0.05)
 	if not finished:
@@ -189,7 +191,7 @@ func _update_hud() -> void:
 	elif finished:
 		hud.text = "Fim de jogo\n%s" % life
 	else:
-		hud.text = "Anda e desliza para cima para saltar\nLetras %d/5 · %s%s" % [
+		hud.text = "Setas para andar. Saltar para subir.\nLetras %d/5 · %s%s" % [
 			_letter_count(), life, extra
 		]
 

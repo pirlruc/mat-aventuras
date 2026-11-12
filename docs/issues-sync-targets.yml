@@ -33,3 +33,5 @@ milestones:
     description: Defects found after 0.3.1 and one androiddevops pin
   - name: Phase 5 — Round 5
     description: Child-facing defects, prize cadence, prize play, and Maestro flows
+  - name: Phase 6 — Round 6
+    description: Child-audience policy, GPL-3.0-only, Round 6 defects, and guardrails 1.15.0
