@@ -1,0 +1,12 @@
+version = 1
+
+[[annotations]]
+path = [
+    "app/src/main/res/drawable-nodpi/ic_launcher_foreground.png",
+    "docs/branding/app-icon.png",
+    "docs/branding/screen-entry.png",
+    "docs/branding/screen-home.png",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Mat Aventuras contributors"
+SPDX-License-Identifier = "GPL-3.0-only"
