@@ -92,6 +92,20 @@ also gates `:data` and `:app` at the org 95% line and branch defaults.
 lambdas (compiler restart-group branches). Screen rules live in `UiLogic`
 and stay inside the 95% gate. There is no coverage deviation.
 
+## Parent mastery and worksheets
+
+The parent dashboard, still behind the PIN gate, reads the on-device
+`ParentAnalytics` summary. It does not add a store. Each module row is
+labelled with the Portuguese Aprendizagens Essenciais 1.º ciclo topic that
+module already teaches. The cell colour and its text name the mastery band:
+below 50, 50–79, or 80 or above. A profile with no sessions shows an empty
+state.
+
+`Worksheets.build` draws one exercise per module from the existing generators.
+The same seed repeats the same list. The app writes that list with
+`android.graphics.pdf.PdfDocument` and the parent saves it through
+`ACTION_CREATE_DOCUMENT`. No storage permission is added.
+
 ## 2.5D off-road race (native Canvas)
 
 `OffroadRacerEngine` simulates a Super Off Road-style dirt loop: distance

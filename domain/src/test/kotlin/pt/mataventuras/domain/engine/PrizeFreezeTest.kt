@@ -26,6 +26,28 @@ class PrizeFreezeTest {
     }
 
     @Test
+    fun enemyHitFreezesUntilTheHoldLifts() {
+        val level =
+            PlatformerWorld.DEFAULT.copy(
+                enemies = listOf(PlatformerEnemy(0f, 1f, 1f)),
+                powerups = emptyList(),
+            )
+        val engine = Platformer2dEngine(level = level)
+        val hit =
+            engine.step(
+                engine.initial().copy(x = 0.2f, onGround = true, form = 0, elapsed = 0.1f),
+                0.05f,
+                jumping = false,
+                moveX = 0f,
+            )
+        assertEquals(PrizeTuning.rules.runner.freeze, hit.freeze, 0.001f)
+        assertTrue(hit.awaitRelease)
+        val held = engine.step(hit, 0.05f, jumping = true, moveX = 1f)
+        assertEquals(0f, held.vx, 0f)
+        assertTrue(held.awaitRelease)
+    }
+
+    @Test
     fun climbIgnoresButtonsDuringTheFreeze() {
         val engine = ClimbEngine()
         val frozen = engine.initial().copy(freeze = 1f)

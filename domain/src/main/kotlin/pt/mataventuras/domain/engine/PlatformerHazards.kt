@@ -96,6 +96,8 @@ object PlatformerHazards {
                 inPitFall = false,
                 stompedMask = mask,
                 form = 0,
+                freeze = PrizeTuning.rules.runner.freeze,
+                awaitRelease = true,
             )
         }
         return state.copy(stompedMask = mask, form = form)

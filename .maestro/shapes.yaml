@@ -8,6 +8,12 @@ appId: pt.mataventuras.app
 - hideKeyboard
 - tapOn: "Vamos começar!"
 - tapOn: "Formas com o Porquinho Rosa"
+- scrollUntilVisible:
+    element:
+      id: "correct-answer"
+    direction: DOWN
+    visibilityPercentage: 100
+    timeout: 15000
 - tapOn:
     id: "correct-answer"
 - scrollUntilVisible:

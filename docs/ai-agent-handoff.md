@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-12
-**Last agent focus:** Annotated tag `0.5.0` (tag object `6bd3a223`) is on merge `b3f9ccc`. Run 43227999438 published the signed release from that tag. Run 43227914381 is a green emulator dispatch. Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, `0.3.2`, or `0.4.0`. A `workflow_dispatch` of `release.yml` must use `--ref 0.5.0`, because `main` cannot deploy to the `release` environment.
+**Last agent focus:** Round 7 is on `feature-mat-round-7` as version 0.6.0 (versionCode 8). MAT-023 is done. MAT-PRO-001 records Family Plus; the heatmap and worksheets are in, and billing is not. The `0.6.0` tag is cut after merge. Do not move `0.1.0` through `0.5.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
 
 ---
 
@@ -68,6 +68,8 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-DOC-001 | done | Child-audience policy: offline, zero PII, parent math plus PIN, bands 3–5 and 6–8 |
 | MAT-021 | done | GPL-3.0-only and the Directive (EU) 2019/790 Article 4(3) reservation |
 | MAT-022 | done | Round 6 defects, Room plugin, guardrails 1.15.0. Release [0.5.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.5.0) is on `b3f9ccc` |
+| MAT-023 | done | Answer lock, runner freeze on an enemy hit, larger targets, and a debug prize win for Maestro. Version 0.6.0 is not tagged yet |
+| MAT-PRO-001 | open | Family Plus. Profiles stay free. T1 heatmap and PDF worksheets are done. T2–T6 (worlds, language packs, Play Billing, classroom, workbooks) stay open. No billing code |
 
 `docs/guardrail-deviations.yml` keeps KT-DOC-001 only. It does not lower a
 number. Compose functions are ignored by detekt complexity and length.
@@ -252,6 +254,7 @@ bash scripts/check-ci-local.sh
   `MatAventuras` singleton lazily and calls `prizeReady()` on the object.
   `has_method` does not see those Java plugin methods, so a `has_method`
   guard never hides the boot overlay. Do not raise `PrizeBoot.TIMEOUT_MS`.
+- `AnswerGate` stays locked until the lesson recomposes. Do not clear it at the end of the tap handler. An enemy hit uses `PrizeTuning.rules.runner.freeze` and `awaitRelease`, the same as a pit. `debugInstantWin` is `BuildConfig.DEBUG`. Maestro taps `debug-win` after Jogar; the control is absent in release. Dependabot `github-private` stays commented until the Dependabot secret `DEPENDABOT_GITHUB_TOKEN` exists. A live registries list makes the 403 on private submodules fail the whole update.
 - A parent prize limit is `prize_limit` on the reward Intent. `PrizeLimit` arms every host from `SystemClock.elapsedRealtime()`. Zero or a missing extra does not finish the activity. The Godot `Host` reads `prizeLimitSeconds()` and stops on `Time.get_ticks_msec()`. Compose prizes use `Random.Default` unless the test passes a seed. The correct-answer tag is on only when the process is debuggable or Robolectric. A finished Compose prize must `setResult` with `EngineLauncher.RESULT_FINISHED`. Lesson speech, soup, memory, and the clock face key on `exerciseId`, not the prompt string. `PrizeIntro` releases its `SpeechEngine` when the card leaves the window. `Host.intro_hold()` freezes prize scripts until Jogar. Kart `steer_buttons` ignore full-screen touches. Do not lower the Kover floors.
 - A Keystore or IO failure while reading the PIN opens the hold-and-sum reset (`6 + 7`). The parent window sets `FLAG_SECURE` while that screen is composed. Lockout stores both a wall-clock deadline and `lockedUntilElapsedMs`. `PinKeyException` is an `IllegalStateException`; catch it first.
 - Prize lives, speeds, and hit tests live only in
@@ -265,7 +268,7 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Release [0.5.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.5.0) is published. Tag object `6bd3a223` points at `b3f9ccc`. `0.4.0` remains tag object `04c8b673` on `8f40d20`. Do not move `0.1.0` through `0.4.0`. Dispatch `release.yml` with `--ref` set to the tag. `main` is not an allowed deployment branch for the `release` environment. Emulator run 43227914381 passed. The keystore is outside the repo. Do not commit it or copy the password.
+1. Version 0.6.0 (versionCode 8) is on this branch and is not tagged. Cut the `0.6.0` tag after merge. Do not move `0.1.0` through `0.5.0`. Release [0.5.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.5.0) stays on tag object `6bd3a223` (`b3f9ccc`). Dispatch `release.yml` with `--ref` set to the tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T2 through T6 stay open. Do not add billing, ads, or a new INTERNET permission.
 2. MAT-015 is done. The 0.3.2 APK and the 0.3.1 APK both verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`.
 3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
 4. The emulator job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only). Run 41358345053 failed because the runner had no KVM permission (`-accel off`), and the multi-line `script:` never executed under `sh -c`. Do not record that as a boot timeout. androiddevops 1.2.0 is the fix.
@@ -277,3 +280,4 @@ bash scripts/check-ci-local.sh
 
 *Last updated: 2026-11-12 (Compose prize win result, prompt speech after a missed prize, queued TTS, kart and runner controls, memory flip, GPL-3.0-only).*
 *Last updated: 2026-11-12 (signed release 0.5.0, emulator dispatch green).*
+*Last updated: 2026-11-12 (MAT-023 answer lock, runner freeze, larger targets, mastery heatmap, printable worksheets; 0.6.0 tag after merge).*

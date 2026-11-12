@@ -1708,3 +1708,122 @@ milestones:
             verification:
               - docs/companion-pins.yml records guardrails 1.15.0 and scaffold 1.12.0
               - Workflow uses lines match the peeled commondevops v6.2.0, androiddevops 1.7.0, and pydevops 3.5.0 commits
+
+  - name: Phase 7 — Round 7
+    status: open
+    epics:
+      - id: MAT-023
+        status: done
+        title: Fix Round 7 scoring, runner freeze, and touch targets
+        overview:
+          problem: >-
+            A double tap can score one lesson answer twice, an enemy hit does
+            not freeze the runner, and several controls are smaller than the
+            touch target the rest of the parent and prize UI already uses.
+          goal: >-
+            One tap scores once, an enemy hit freezes the run, the short
+            targets grow, and the prize flow can assert a win.
+        decision: >-
+          In the context of round 7 play, facing a lesson that scores a
+          double tap and a runner that keeps moving after an enemy hit, we
+          decided to hold the answer lock until the exercise advances and to
+          freeze the runner the same way a pit does, to achieve one score per
+          tap and a still runner after a hit, accepting that a missed answer
+          also waits until the next frame before another tap counts.
+        acceptance_criteria:
+          - A second tap cannot score until the exercise advances
+          - An enemy hit sets the runner freeze and waits for the touch to lift
+          - The small size option, Sair, and the parent prize buttons meet the taller targets
+          - The prize flow asserts Ganhaste! and Continuar
+        guardrail_refs:
+          - ANDROID-A11Y-001
+          - ANDROID-TEST-002
+        tasks:
+          - id: MAT-023-T1
+            status: done
+            title: Hold the answer lock and freeze the native runner
+            verification:
+              - LessonScreen keeps the answer lock until the exercise advances and calls shouldAcceptAnswer
+              - An enemy hit sets PrizeTuning.rules.runner.freeze and awaitRelease
+          - id: MAT-023-T2
+            status: done
+            title: Enlarge the short targets and assert a prize win
+            verification:
+              - SizeMark keeps a 28 dp glyph and a hit box of at least 48 dp
+              - The Godot Sair control is at least 48 px tall
+              - Parent prize limit and cadence buttons are at least 64 dp tall
+              - .maestro/prize.yaml asserts Ganhaste! and Continuar without optional
+
+      - id: MAT-PRO-001
+        status: open
+        title: Offer Family Plus behind the parent gate
+        overview:
+          problem: >-
+            Families ask for more than the free game, but multiple profiles
+            already ship and a children's app cannot put a purchase in the
+            child UI.
+          goal: >-
+            The backlog records a Family Plus offering whose purchase flows
+            sit behind the parent PIN, while the mastery heatmap and printable
+            worksheets ship now.
+        decision: >-
+          In the context of a Family Plus offering, facing profiles that
+          already ship for free and the Google Play Families rule that a
+          purchase must be a parent action, we decided profiles stay free and
+          every future purchase flow sits behind the parent PIN gate, to
+          achieve a paid tier that does not bill for what already ships,
+          accepting that Play Billing, themed worlds, language packs, a
+          classroom edition, and workbook sales stay open until a later build.
+        description: >-
+          Suggested price, as product context and not as implemented billing,
+          is about 2.49 EUR per month, 19.99 EUR per year, or 14.99 EUR once.
+        out_of_scope:
+          - Charging for features that already ship
+          - Ads
+          - Referrals inside the child UI
+        acceptance_criteria:
+          - Profiles stay free
+          - Every future purchase flow sits behind the parent PIN gate
+          - The parent dashboard shows a mastery heatmap from ParentAnalytics
+          - A parent can save a printable worksheet without a new permission
+        guardrail_refs:
+          - ANDROID-A11Y-001
+          - KT-TEST-001
+        tasks:
+          - id: MAT-PRO-001-T1
+            status: done
+            title: Show a parent mastery heatmap and printable PDF worksheets
+            verification:
+              - The heatmap labels each module with its Aprendizagens Essenciais 1.º ciclo topic and names the mastery band
+              - An empty profile shows an empty state
+              - The same worksheet seed repeats the same exercises for both age bands
+              - The PDF is saved with ACTION_CREATE_DOCUMENT and adds no permission
+          - id: MAT-PRO-001-T2
+            status: open
+            title: Add themed worlds and seasonal prize games
+            verification:
+              - Themed worlds and seasonal prize games stay behind the parent gate
+          - id: MAT-PRO-001-T3
+            status: open
+            title: Add offline language and voice packs
+            verification:
+              - Language and voice packs install on device and do not add INTERNET
+          - id: MAT-PRO-001-T4
+            status: open
+            title: Add Play Billing behind the parent gate
+            verification:
+              - Billing lives in a play product flavor
+              - The foss flavor has no billing SDK
+              - The purchase flow sits behind the parent PIN gate
+          - id: MAT-PRO-001-T5
+            status: open
+            title: Add a classroom edition with a teacher dashboard
+            verification:
+              - The classroom edition has a teacher dashboard
+              - The classroom build can be distributed as an MDM APK
+          - id: MAT-PRO-001-T6
+            status: open
+            title: Sell printable workbook bundles outside the app
+            verification:
+              - Workbook bundles are sold outside the app
+              - The child UI does not offer that purchase

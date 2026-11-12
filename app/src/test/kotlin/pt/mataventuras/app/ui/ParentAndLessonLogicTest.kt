@@ -184,12 +184,20 @@ class ParentAndLessonLogicTest {
                 .isNotEmpty()
         }
         compose.onNodeWithText("1 min").performScrollTo().performClick()
+        compose.onNodeWithText("2 min").performScrollTo().performClick()
+        compose.onNodeWithText("3 min").performScrollTo().performClick()
         compose.onNodeWithText("5 atividades").performScrollTo().performClick()
+        compose.onNodeWithText("10 atividades").performScrollTo().performClick()
+        compose.onNodeWithText("15 atividades").performScrollTo().performClick()
+        compose.onNodeWithText("Imprimir ficha").performScrollTo().performClick()
         compose.waitForIdle()
         compose
             .onNodeWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
             .performScrollTo()
             .assertIsDisplayed()
+        compose.onNodeWithText("Mapa de domínio").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Ainda não há sessões neste perfil.").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Imprimir ficha").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Fechar").performClick()
     }
 
@@ -213,7 +221,8 @@ class ParentAndLessonLogicTest {
         compose.setContent {
             ParentDashboard(app.container, profile, onSpeak = {}, onBack = {})
         }
-        compose.onNodeWithText("PIN").performTextReplacement("12")
+        compose.onNodeWithText("PIN").performTextReplacement("123456")
+        compose.onNodeWithText("PIN").performTextReplacement("12ab")
         compose.onNodeWithText("Entrar").performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("O PIN tem quatro números.").fetchSemanticsNodes().isNotEmpty()
@@ -231,6 +240,8 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText("Precisão").assertIsDisplayed()
         compose.onNodeWithText("Áreas a melhorar").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("• Somar", substring = true).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Abaixo de 50").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("80 ou mais").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Fechar").performClick()
     }
 

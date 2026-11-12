@@ -2,6 +2,7 @@ package pt.mataventuras.app.prize
 
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -14,9 +15,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import pt.mataventuras.app.ComposeHostActivity
+import pt.mataventuras.app.DEBUG_WIN_TAG
+import pt.mataventuras.app.debugInstantWin
 import pt.mataventuras.app.ui.home.ModuleTitles
 import pt.mataventuras.app.ui.lesson.ShapeGlyph
 import pt.mataventuras.app.ui.lesson.StarGrid
+import pt.mataventuras.domain.engine.PrizeHud
 import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.GeometricShape
 import pt.mataventuras.domain.model.LearningModule
@@ -48,6 +52,29 @@ class ComposePrizeScreenTest {
         assertEquals("Problemas", ModuleTitles.noun(LearningModule.WORD_PROBLEM))
         assertEquals("Tangram", ModuleTitles.noun(LearningModule.TANGRAM))
         assertEquals("Sílabas", ModuleTitles.noun(LearningModule.SPELL))
+    }
+
+    @Test
+    fun debugWinFinishesAfterJogarAndIsAbsentWhenDisabled() {
+        debugInstantWin = true
+        var finished = 0
+        compose.setContent {
+            PrizeScreen(ComposePrize.BALLOONS, Random(1), introduce = true) { finished += 1 }
+        }
+        compose.onNodeWithText(PrizeHud.PLAY_LABEL).performClick()
+        compose.onNodeWithTag(DEBUG_WIN_TAG).performClick()
+        assertEquals(1, finished)
+    }
+
+    @Test
+    fun debugWinStaysHiddenWhenDisabled() {
+        debugInstantWin = false
+        compose.setContent {
+            PrizeScreen(ComposePrize.BALLOONS, Random(1), introduce = true) {}
+        }
+        compose.onNodeWithText(PrizeHud.PLAY_LABEL).performClick()
+        assertEquals(0, compose.onAllNodesWithTag(DEBUG_WIN_TAG).fetchSemanticsNodes().size)
+        debugInstantWin = true
     }
 
     @Test

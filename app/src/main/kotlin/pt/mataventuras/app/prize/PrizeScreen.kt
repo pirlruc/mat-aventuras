@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
+import pt.mataventuras.app.debugInstantWin
 import pt.mataventuras.app.speech.SpeechEngine
 import pt.mataventuras.domain.engine.PrizeBrief
 import pt.mataventuras.domain.engine.PrizeHud
@@ -44,6 +45,9 @@ internal fun PrizeScreen(
         if (!playing) {
             PrizeIntroCard(PrizeBrief.composeKey(prize.name)) { playing = true }
         } else {
+            if (debugInstantWin && introduce) {
+                DebugWinButton(onFinished)
+            }
             PrizeBody(prize, random, onFinished)
         }
     }

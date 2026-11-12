@@ -42,7 +42,7 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         PrizeLimit.arm(this)
-        PrizeIntro.attach(this, sceneCode())
+        PrizeIntro.attach(this, sceneCode(), onDebugWin = { completeReward(true) })
     }
 
     /**
