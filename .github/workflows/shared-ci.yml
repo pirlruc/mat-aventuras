@@ -67,7 +67,7 @@ jobs:
       blocking: true
       scripts_ref: 1e0c029bf93705f399f2a3a7e5f19810c101da65
     secrets:
-      packs_token: ${{ secrets.GITHUB_TOKEN }}
+      packs_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
 
   secrets-sast:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
