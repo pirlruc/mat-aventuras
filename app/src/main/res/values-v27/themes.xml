@@ -4,6 +4,5 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:keepScreenOn">true</item>
         <item name="android:windowBackground">@color/hedgehog_blue</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 </resources>
