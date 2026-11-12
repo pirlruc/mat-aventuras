@@ -184,7 +184,12 @@ class ParentAndLessonLogicTest {
                 .isNotEmpty()
         }
         compose.onNodeWithText("1 min").performScrollTo().performClick()
+        compose.onNodeWithText("2 min").performScrollTo().performClick()
+        compose.onNodeWithText("3 min").performScrollTo().performClick()
         compose.onNodeWithText("5 atividades").performScrollTo().performClick()
+        compose.onNodeWithText("10 atividades").performScrollTo().performClick()
+        compose.onNodeWithText("15 atividades").performScrollTo().performClick()
+        compose.onNodeWithText("Imprimir ficha").performScrollTo().performClick()
         compose.waitForIdle()
         compose
             .onNodeWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
@@ -216,7 +221,8 @@ class ParentAndLessonLogicTest {
         compose.setContent {
             ParentDashboard(app.container, profile, onSpeak = {}, onBack = {})
         }
-        compose.onNodeWithText("PIN").performTextReplacement("12")
+        compose.onNodeWithText("PIN").performTextReplacement("123456")
+        compose.onNodeWithText("PIN").performTextReplacement("12ab")
         compose.onNodeWithText("Entrar").performClick()
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("O PIN tem quatro números.").fetchSemanticsNodes().isNotEmpty()

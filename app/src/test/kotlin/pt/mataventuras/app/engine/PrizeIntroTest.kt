@@ -68,6 +68,8 @@ class PrizeIntroTest {
         assertEquals(DEBUG_WIN_TAG, win!!.text.toString())
         win.performClick()
         assertEquals(1, wins)
+        PrizeIntro.showDebugWin(activity) { wins += 1 }
+        assertEquals(1, wins)
         debugInstantWin = true
     }
 

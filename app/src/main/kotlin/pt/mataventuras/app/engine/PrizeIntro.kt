@@ -102,7 +102,7 @@ internal object PrizeIntro {
         return root
     }
 
-    private fun showDebugWin(
+    internal fun showDebugWin(
         activity: Activity,
         onWin: () -> Unit,
     ) {
