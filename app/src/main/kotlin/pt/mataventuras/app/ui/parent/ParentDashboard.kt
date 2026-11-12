@@ -2,6 +2,8 @@ package pt.mataventuras.app.ui.parent
 
 import android.app.Activity
 import android.view.WindowManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -52,6 +55,8 @@ import pt.mataventuras.app.ui.pinPrompt
 import pt.mataventuras.app.ui.pinSubmitLabel
 import pt.mataventuras.app.ui.rememberBringIntoViewOnFocus
 import pt.mataventuras.data.pin.PinKeyException
+import pt.mataventuras.domain.math.Worksheet
+import pt.mataventuras.domain.math.Worksheets
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.parent.AdultChallenge
 import pt.mataventuras.domain.parent.ParentSummary
@@ -59,6 +64,7 @@ import pt.mataventuras.domain.parent.PinGate
 import pt.mataventuras.domain.parent.PinGateResult
 import pt.mataventuras.domain.parent.PinNotice
 import pt.mataventuras.domain.parent.PinPolicy
+import pt.mataventuras.domain.parent.masteryGrid
 import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
@@ -265,10 +271,29 @@ fun ParentDashboard(
                 }
                 Text(stringResource(R.string.needs_work), fontWeight = FontWeight.Bold)
                 needsWorkLines(stats.needsWork, stringResource(R.string.needs_work_clear)).forEach { Text(it) }
+                MasteryHeatmap(masteryGrid(stats))
+                PrintWorksheetButton(current)
                 PrizeLimitRow(container, current)
             }
         }
     }
+}
+
+@Composable
+private fun PrintWorksheetButton(profile: ChildProfile) {
+    val context = LocalContext.current
+    var sheet by remember { mutableStateOf<Worksheet?>(null) }
+    val export =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
+            writeWorksheetIfReady(sheet, uri) { target -> context.contentResolver.openOutputStream(target) }
+        }
+    Button(
+        onClick = {
+            sheet = Worksheets.build(profile.ageGroup, profile.id)
+            export.launch("ficha.pdf")
+        },
+        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+    ) { Text(stringResource(R.string.print_worksheet)) }
 }
 
 @Composable
@@ -309,6 +334,7 @@ private fun PrizeLimitRow(
                         container.publishProfile(profile.id)
                     }
                 },
+                modifier = Modifier.heightIn(min = 64.dp),
             ) { Text(stringResource(R.string.minutes_short, choice / 60)) }
         }
     }
@@ -328,6 +354,7 @@ private fun PrizeLimitRow(
                         container.publishProfile(profile.id)
                     }
                 },
+                modifier = Modifier.heightIn(min = 64.dp),
             ) { Text(stringResource(R.string.every_short, choice)) }
         }
     }

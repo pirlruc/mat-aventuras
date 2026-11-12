@@ -47,15 +47,14 @@ appId: pt.mataventuras.app
     visible: "(?i).*jogar.*"
     timeout: 40000
 - tapOn: "(?i).*jogar.*"
-- pressKey: Back
-- extendedWaitUntil:
-    visible: "Sair"
-    timeout: 20000
+- tapOn:
+    id: "debug-win"
 - extendedWaitUntil:
     visible:
       text: "Ganhaste!"
-    timeout: 3000
-    optional: true
+    timeout: 20000
 - tapOn:
     text: "Continuar"
-    optional: true
+- extendedWaitUntil:
+    visible: "Sair"
+    timeout: 20000

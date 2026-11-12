@@ -6,10 +6,13 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import pt.mataventuras.app.DEBUG_WIN_TAG
+import pt.mataventuras.app.debugInstantWin
 import pt.mataventuras.app.speech.SpeechEngine
 import pt.mataventuras.domain.engine.PrizeBrief
 import pt.mataventuras.domain.engine.PrizeHud
@@ -42,13 +45,14 @@ internal object PrizeIntro {
         activity: Activity,
         scene: String,
         embed: Boolean = GodotRuntime.shouldEmbed(),
+        onDebugWin: (() -> Unit)? = null,
     ) {
         if (!embed) return
         val decor = activity.window.decorView as ViewGroup
         if (decor.findViewWithTag<View>(ROOT) != null) return
         val speech = SpeechEngine(activity)
         sessions[activity] = speech
-        val card = card(activity, scene)
+        val card = card(activity, scene, onDebugWin)
         card.addOnAttachStateChangeListener(releaseWhenDetached(activity))
         decor.addView(card)
         speech.speak("${VoiceScripts.LETS_PLAY} ${PrizeBrief.goal(scene)} ${PrizeBrief.controls(scene)}")
@@ -68,6 +72,7 @@ internal object PrizeIntro {
     private fun card(
         activity: Activity,
         scene: String,
+        onDebugWin: (() -> Unit)?,
     ): LinearLayout {
         val root =
             LinearLayout(activity).apply {
@@ -90,10 +95,45 @@ internal object PrizeIntro {
                 text = PrizeHud.PLAY_LABEL
                 setOnClickListener {
                     (root.parent as? ViewGroup)?.removeView(root)
+                    if (onDebugWin != null) showDebugWin(activity, onDebugWin)
                 }
             }
         root.addView(play)
         return root
+    }
+
+    private fun showDebugWin(
+        activity: Activity,
+        onWin: () -> Unit,
+    ) {
+        if (!debugInstantWin) return
+        val decor = activity.window.decorView as ViewGroup
+        if (decor.findViewWithTag<View>(DEBUG_WIN_TAG) != null) return
+        val button =
+            Button(activity).apply {
+                text = DEBUG_WIN_TAG
+                tag = DEBUG_WIN_TAG
+                contentDescription = DEBUG_WIN_TAG
+                accessibilityDelegate =
+                    object : View.AccessibilityDelegate() {
+                        override fun onInitializeAccessibilityNodeInfo(
+                            host: View,
+                            info: AccessibilityNodeInfo,
+                        ) {
+                            super.onInitializeAccessibilityNodeInfo(host, info)
+                            info.viewIdResourceName = DEBUG_WIN_TAG
+                        }
+                    }
+                setOnClickListener { onWin() }
+            }
+        decor.addView(
+            button,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL,
+            ),
+        )
     }
 
     private fun line(

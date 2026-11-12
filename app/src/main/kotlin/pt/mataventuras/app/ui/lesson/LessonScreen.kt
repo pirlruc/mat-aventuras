@@ -48,13 +48,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import pt.mataventuras.app.R
 import pt.mataventuras.app.di.AppContainer
+import pt.mataventuras.app.ui.AnswerGate
 import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.LocalCelebrate
 import pt.mataventuras.app.ui.LocalPrizeClosed
@@ -126,7 +126,8 @@ fun LessonScreen(
     val startedAt = remember { System.currentTimeMillis() }
     val pointsGate = remember { Mutex() }
     val pointsTicket = remember { AtomicInteger(0) }
-    val pickLock = remember { AtomicBoolean(false) }
+    val answerGate = remember { AnswerGate() }
+    var missSettle by remember { mutableIntStateOf(0) }
     val fillViewport = lessonFillsViewport(profile.ageGroup)
     val scrolls = lessonScrolls(profile.ageGroup, exercise.play.kind)
     val scrollState = rememberScrollState()
@@ -165,6 +166,9 @@ fun LessonScreen(
         if (drop) holdPrompt = false
     }
     val cue = promptCue(holdPrompt, prizeReturned, celebrate)
+    LaunchedEffect(exerciseId, missSettle) {
+        answerGate.release()
+    }
     LaunchedEffect(exerciseId, cue) {
         if (cue == PromptCue.Wait) return@LaunchedEffect
         if (cue == PromptCue.Release) holdPrompt = false
@@ -192,7 +196,7 @@ fun LessonScreen(
     }
 
     val noteAttempt: (Boolean, Boolean) -> Unit = handler@{ correct, advance ->
-        if (!pickLock.compareAndSet(false, true)) return@handler
+        if (!answerGate.tryBegin()) return@handler
         flashCorrect = correct
         flashTick += 1
         val gentle = !correct && profile.ageGroup == AgeBand.THREE_TO_FIVE
@@ -211,6 +215,8 @@ fun LessonScreen(
             }
             exercise = container.generator.generate(module, lessonLevel(hits), profile.ageGroup)
             exerciseId += 1
+        } else {
+            missSettle += 1
         }
         scope.launch {
             pointsGate.withLock {
@@ -219,7 +225,6 @@ fun LessonScreen(
                 if (ticket == pointsTicket.get()) points = stored.points
             }
         }
-        pickLock.set(false)
     }
     val onPick: (Int) -> Unit = { index ->
         sudoku =

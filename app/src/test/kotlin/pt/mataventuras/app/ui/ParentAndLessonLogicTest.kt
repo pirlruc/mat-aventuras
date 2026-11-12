@@ -190,6 +190,9 @@ class ParentAndLessonLogicTest {
             .onNodeWithText("Nenhum módulo abaixo de 70% com amostra suficiente.")
             .performScrollTo()
             .assertIsDisplayed()
+        compose.onNodeWithText("Mapa de domínio").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Ainda não há sessões neste perfil.").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Imprimir ficha").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Fechar").performClick()
     }
 
@@ -231,6 +234,8 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText("Precisão").assertIsDisplayed()
         compose.onNodeWithText("Áreas a melhorar").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("• Somar", substring = true).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Abaixo de 50").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("80 ou mais").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Fechar").performClick()
     }
 

@@ -27,6 +27,7 @@ class MatAventurasApp : Application() {
     override fun onCreate() {
         super.onCreate()
         debugAnswerTags = debugAnswersFor(fingerprintOrEmpty(Build.FINGERPRINT), applicationInfo.flags)
+        debugInstantWin = BuildConfig.DEBUG
         bindHostGraph()
     }
 

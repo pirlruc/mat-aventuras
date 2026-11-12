@@ -56,6 +56,8 @@
     <string name="answer">Resposta</string>
     <string name="reset_pin">Repor</string>
     <string name="needs_work_clear" formatted="false">Nenhum módulo abaixo de 70% com amostra suficiente.</string>
+    <string name="mastery_map">Mapa de domínio</string>
+    <string name="print_worksheet">Imprimir ficha</string>
     <string name="on_this_device">Só neste aparelho — irmãos e amigos.</string>
     <string name="rank">%1$dº</string>
     <string name="points_accuracy">%1$d pontos · %2$d%% precisos</string>
