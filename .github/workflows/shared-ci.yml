@@ -66,6 +66,8 @@ jobs:
     with:
       blocking: true
       scripts_ref: 1e0c029bf93705f399f2a3a7e5f19810c101da65
+    secrets:
+      packs_token: ${{ secrets.GITHUB_TOKEN }}
 
   secrets-sast:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
@@ -107,7 +109,7 @@ jobs:
     with:
       scripts_ref: 1e0c029bf93705f399f2a3a7e5f19810c101da65
     secrets:
-      checkout_token: ${{ secrets.GITHUB_TOKEN }}
+      guardrails_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
 
   threshold-drift:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
