@@ -6,33 +6,11 @@
 # Field definitions: https://github.com/pirlruc/guardrails#deviation-rule
 # Approval flow:     https://github.com/pirlruc/methodologies/blob/1.9.2/github-issue-adr/docs/process/guardrail-compliance.md
 #
-# None of these entries lower a numeric gate. statement_coverage and branch_coverage stay 95.
-# doc_coverage is not applicable (no published API). lint_exception_max_days stays 14.
-# key, org_default, and repo_value are omitted because the guardrail is not parameterized
-# by a changed number. approved_by is omitted for the same reason.
+# None of these entries lower a numeric gate. doc_coverage is not applicable (no published API).
+# lint_exception_max_days stays 14. key, org_default, and repo_value are omitted because the
+# guardrail is not parameterized by a changed number.
 
 deviations:
-  - id: KT-TEST-002
-    epic: MAT-006
-    why: >-
-      Line and branch floors stay at the org 95. The only exclusion beyond
-      BuildConfig, Room *_Impl, and ComposableSingletons is the Godot JNI
-      package, because libgodot_android.so cannot load under Robolectric.
-      Instrumented tests on the emulator cover that package. This is not a
-      lowered number.
-    owner: pirlruc
-    review: 2026-12-31
-
-  - id: SC-DEP-003
-    epic: MAT-013
-    why: >-
-      Dependabot ignores major updates of the eclipse-temurin devcontainer
-      base. The Android jobs use Temurin 17, which is the current LTS, and a
-      major tag would move that image off 17. Minor and patch updates still
-      open. This is not a lowered number.
-    owner: pirlruc
-    review: 2026-12-31
-
   - id: KT-DOC-001
     epic: MAT-006
     why: >-
