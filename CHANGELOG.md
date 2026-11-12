@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.0] - 2026-11-12
 
 ### Fixed
 
@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Asset directories use the current Android Gradle source-set API. Gradle tooling runs in parallel and caches task output.
 - The project license is GPL-3.0-only. NOTICE reserves commercial text-and-data-mining under Directive (EU) 2019/790 Article 4(3).
+- Room exports its schema with the AndroidX Room plugin. Companion pins are guardrails 1.15.0, scaffold 1.12.0, commondevops v6.2.0, androiddevops 1.7.0, and pydevops 3.5.0.
+- The Compose runner brief is the number gate. Native kart and runner hosts use on-screen buttons inside the safe drawing area. Parent and leaderboard top bars stay outside the scrolling column. Compose prize buttons are at least 64 dp.
 
 ## [0.4.0] - 2026-11-04
 

@@ -3,8 +3,8 @@
 Technical guide for the native Android educational math game.
 Methodology: [github-issue-adr @ 1.9.2](https://github.com/pirlruc/methodologies/tree/1.9.2/github-issue-adr).
 Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (no ADR markdown files).
-Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.13.1`.
-Scaffold pin: `.github/scaffold/` → [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.10.2`.
+Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.15.0`.
+Scaffold pin: `.github/scaffold/` → [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.12.0`.
 
 Language split: **code, comments, KDoc, and this documentation are English**.
 **User-visible UI copy, TTS, and dialogue are Portuguese from Portugal (pt-PT).**
@@ -122,7 +122,9 @@ scene's script compiled. Invaders ends at five lost lives or an empty fleet;
 chomp and climb use three lives with i-frames. A first-time GLES restart is
 returned to `MainActivity`, which relaunches the plugin Activity in a fresh
 isolated process. Under Robolectric they attach `NativeKartHost` /
-`NativeRunnerHost` instead.
+`NativeRunnerHost` instead. Those native hosts draw on-screen buttons
+inside the safe drawing area. The Compose runner brief is the number
+gate (`RUNNER_GATE`). The Godot runner scene keeps the key `RUNNER`.
 
 Simulation is in `:domain` (`Platformer2dEngine`, `OffroadRacerEngine`)
 so physics is unit-tested without an emulator.
@@ -205,7 +207,9 @@ optional “Continuar como …” shortcut for the last child on the device.
 ### Curriculum
 
 Home is a module grid (not numbered campaign levels). Each module is an
-infinite generator. Reward every 3 consecutive hits (`RewardsEngine`).
+infinite generator. A parent prize opens every 5, 10, or 15 finished
+activities (`RewardsEngine`). The default is 10. A miss does not reset
+the count.
 Finishing a reward Activity awards 15 bonus points on the last profile.
 
 | Band | Lessons (Compose, mascot-hosted) | Reward mini-game |
@@ -233,7 +237,7 @@ small board on both bands.
 
 ## Guardrails
 
-Pinned at `docs/guardrails/` (tag `1.13.1`) and `.github/scaffold/` (tag `1.10.2`),
+Pinned at `docs/guardrails/` (tag `1.15.0`) and `.github/scaffold/` (tag `1.12.0`),
 the same two submodules [commondevops](https://github.com/pirlruc/commondevops)
 uses. CI inits `docs/guardrails` with `GUARDRAILS_READ_TOKEN`
 (`scripts/checkout-guardrails.sh`). Push to `main` fails closed when that
@@ -261,7 +265,7 @@ modules. CodeQL compile and the APK bill are the androiddevops callers in
 ### Shared CI jobs
 
 `.github/workflows/shared-ci.yml` calls commondevops at peeled commit
-`cb34967f230a0d4841ae1efc2c98e745bd8726a7` (annotated tag `5.8.0`). `uses:`
+`1e0c029bf93705f399f2a3a7e5f19810c101da65` (annotated tag `v6.2.0`). `uses:`
 and `scripts_ref` are that same SHA (CI-018 / CI-034). A `uses:` line cannot
 carry a PAT. When an ops repo is private, this public repo still needs
 Actions access to read the workflow file. Once androiddevops is private, a
@@ -270,8 +274,8 @@ public caller cannot use those workflows and must vendor the pinned file.
 `ci.yml` always runs `quality`. A `changes` job skips Gradle, CodeQL, MobSF,
 and the APK bill on a pull request that does not touch `app/`, `data/`,
 `domain/`, `gradle/`, or `scripts/`. `gate` treats a skipped job as success.
-Those four jobs call androiddevops `1.4.0`
-(`4763e3be9f3a24a1b80dee3bf01530413aa3f49f`) and pass
+Those four jobs call androiddevops `1.7.0`
+(`fb6651b3cd3246975df605e7000c4992d6b6a184`) and pass
 `secrets.GITHUB_TOKEN` as `checkout_token`. Fork pull requests skip the
 reusable jobs that need a secret.
 
@@ -284,11 +288,14 @@ reusable jobs that need a secret.
 | commondevops `common-supply-chain` | Called (Syft directory, Grype, Trivy fs). The APK bill is the androiddevops CycloneDX job, because dex has no Maven coordinates. |
 | commondevops `common-pins-verify` | Called. `scripts/check-submodule-pins.sh` asserts the gitlinks. |
 | commondevops `common-scorecard` | Called with `blocking: false` and `publish_results: false`. |
+| commondevops `common-token-audit` | Called from `shared-ci.yml`. `scripts_ref` matches the `uses:` SHA. `GITHUB_TOKEN` is the checkout token. |
+| commondevops `common-threshold-drift` | Called with `scripts/check-threshold-drift.sh`. Missing `doc_coverage` is allowed. |
+| commondevops `common-dependency-review` | Called from `ci.yml` on pull requests with `fail_on_severity: high`. |
 | commondevops `common-release` | Called from `release.yml` after `android-release-apk`. The release artifact is `android-release-apk`. The job selects the `release` environment. |
-| androiddevops | CI, the emulator, and `android-release-apk` stay on tag `1.4.0` (`4763e3be9f3a24a1b80dee3bf01530413aa3f49f`). The release job selects the `release` environment. Local device flows use `ghcr.io/pirlruc/android-maestro` at the digest in `docs/companion-pins.yml`. |
+| androiddevops | CI, the emulator, and `android-release-apk` stay on tag `1.7.0` (`fb6651b3cd3246975df605e7000c4992d6b6a184`). The release job selects the `release` environment. Local device flows use `ghcr.io/pirlruc/android-maestro` at the digest in `docs/companion-pins.yml`. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
-| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `7ebee303030c09ce8f52e99660691e4c4b41238f` (annotated tag `3.3.10`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. |
+| pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `cca700aebb97b442bc67150a9381c528daebcfa6` (annotated tag `3.5.0`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. |
 
 Scheduled security jobs run on the 1st and the 15th so the gap stays inside
 `security_rescan_interval_days` (CI-029).
