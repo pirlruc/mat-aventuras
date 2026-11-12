@@ -45,6 +45,8 @@ func _arm_limit() -> void:
 
 
 func _process(_delta: float) -> void:
+	if intro_hold():
+		clear_holds()
 	if not _ready_sent:
 		_send_ready()
 	if not _limit_checked and bridge() != null:
@@ -258,6 +260,14 @@ func safe_pad() -> Vector2:
 var hold_left := false
 var hold_right := false
 var hold_jump := false
+var steer_buttons := false
+
+
+func intro_hold() -> bool:
+	var bridge_plugin := bridge()
+	if bridge_plugin == null:
+		return false
+	return bool(bridge_plugin.introHolding())
 
 
 func control_axis() -> float:
@@ -285,6 +295,7 @@ func add_platform_controls(node: Node) -> void:
 
 
 func add_steer_controls(node: Node) -> void:
+	steer_buttons = true
 	_hold_button(node, "←", 0.04, func(): hold_left = true, func(): hold_left = false)
 	_hold_button(node, "→", 0.72, func(): hold_right = true, func(): hold_right = false)
 

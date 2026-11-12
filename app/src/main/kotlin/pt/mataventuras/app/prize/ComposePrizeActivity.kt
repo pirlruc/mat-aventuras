@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import kotlin.random.Random
+import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.ui.theme.MatAventurasTheme
 import pt.mataventuras.domain.engine.EnginePluginContract
 import pt.mataventuras.domain.model.AgeBand
@@ -46,7 +47,7 @@ class ComposePrizeActivity : ComponentActivity() {
                         finish()
                     },
                 ) {
-                    setResult(RESULT_OK)
+                    setResult(RESULT_OK, Intent().putExtra(EngineLauncher.RESULT_FINISHED, true))
                     finish()
                 }
             }

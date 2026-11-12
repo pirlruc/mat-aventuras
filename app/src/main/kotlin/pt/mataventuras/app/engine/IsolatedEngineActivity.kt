@@ -34,6 +34,7 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
         EngineAttachRetries.cancel(this)
         PrizeBoot.cancel(this)
         PrizeLimit.cancel(this)
+        PrizeIntro.release(this)
         super.onDestroy()
     }
 

@@ -8,6 +8,8 @@
     public void prizeReady();
     public java.lang.String rewardScene();
     public void completeReward(boolean);
+    public int prizeLimitSeconds();
+    public boolean introHolding();
 }
 
 # libgodot_android.so looks up Godot, the fragment, and the plugin base by name.

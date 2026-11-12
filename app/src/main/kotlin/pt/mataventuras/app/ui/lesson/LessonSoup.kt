@@ -47,8 +47,9 @@ internal fun SoupBoard(
     val columns = exercise.play.columns.coerceAtLeast(1)
     val cells = soupBoardCells(exercise.play.cells, exercise.options)
     val paths = exercise.play.soupPaths()
-    var selected by remember(exercise.prompt) { mutableStateOf(emptyList<Int>()) }
-    var found by remember(exercise.prompt) { mutableStateOf(emptySet<Int>()) }
+    val boardKey = LocalExerciseId.current
+    var selected by remember(boardKey) { mutableStateOf(emptyList<Int>()) }
+    var found by remember(boardKey) { mutableStateOf(emptySet<Int>()) }
     val foundCells = foundSoupCells(found, paths)
     val cellDp = playCellHeightDp(columns, age)
     val onGesture: (List<Int>) -> Unit = { path ->
@@ -60,7 +61,7 @@ internal fun SoupBoard(
             Modifier
                 .fillMaxWidth()
                 .testTag("soup-board")
-                .pointerInput(exercise.prompt, columns, cells.size, found) {
+                .pointerInput(boardKey, columns, cells.size, found) {
                     awaitEachGesture {
                         val gap = 8.dp.toPx()
                         val path =

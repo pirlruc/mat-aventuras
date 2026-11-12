@@ -15,13 +15,20 @@ class SpeechEngine(
     private val tts = TextToSpeech(context.applicationContext, this)
     private var ready = false
     private var released = false
+    private var pending: String? = null
 
     override fun onInit(status: Int) {
-        if (released || status != TextToSpeech.SUCCESS) return
+        if (released || status != TextToSpeech.SUCCESS) {
+            pending = null
+            return
+        }
         val pt = Locale.forLanguageTag("pt-PT")
         val result = tts.setLanguage(pt)
         ready = languageSupported(result)
         tts.setSpeechRate(0.92f)
+        val queued = pending
+        pending = null
+        if (queued != null) speak(queued)
     }
 
     /**
@@ -35,7 +42,12 @@ class SpeechEngine(
      * Speaks [text] in pt-PT when the engine is ready.
      */
     fun speak(text: String) {
-        if (released || !shouldSpeak(ready, text)) return
+        if (released) return
+        if (!ready) {
+            if (text.isNotBlank()) pending = text
+            return
+        }
+        if (!shouldSpeak(ready, text)) return
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "mat-aventuras")
     }
 
@@ -53,6 +65,7 @@ class SpeechEngine(
     fun release() {
         released = true
         ready = false
+        pending = null
         tts.stop()
         tts.shutdown()
     }

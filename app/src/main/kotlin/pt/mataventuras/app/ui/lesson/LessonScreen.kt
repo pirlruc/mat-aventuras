@@ -21,9 +21,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +57,7 @@ import pt.mataventuras.app.R
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.LessonFlow
 import pt.mataventuras.app.ui.LocalCelebrate
+import pt.mataventuras.app.ui.LocalPrizeClosed
 import pt.mataventuras.app.ui.PromptCue
 import pt.mataventuras.app.ui.UiLogic
 import pt.mataventuras.app.ui.answerFlashArgb
@@ -71,6 +75,7 @@ import pt.mataventuras.app.ui.optionMinHeightDp
 import pt.mataventuras.app.ui.prizeStarLine
 import pt.mataventuras.app.ui.prizeStars
 import pt.mataventuras.app.ui.promptCue
+import pt.mataventuras.app.ui.shouldDropPrizeHold
 import pt.mataventuras.app.ui.shouldRepeatSpokenPrompt
 import pt.mataventuras.app.ui.showsAnswerFlash
 import pt.mataventuras.app.ui.showsCipherLegend
@@ -95,6 +100,9 @@ import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.voice.VoiceScripts
 
+/** Changes when the lesson advances, even if the prompt sentence stays the same. */
+internal val LocalExerciseId = compositionLocalOf { 0 }
+
 /**
  * One exercise round. Prompts and options are pt-PT.
  */
@@ -109,6 +117,7 @@ fun LessonScreen(
 ) {
     val scope = rememberCoroutineScope()
     var exercise by remember { mutableStateOf(container.generator.generate(module, 0, profile.ageGroup)) }
+    var exerciseId by remember { mutableIntStateOf(0) }
     var hits by remember { mutableIntStateOf(0) }
     var misses by remember { mutableIntStateOf(0) }
     var completed by remember { mutableIntStateOf(profile.pace.completed) }
@@ -142,28 +151,26 @@ fun LessonScreen(
         }
     }
     val celebrate = LocalCelebrate.current
+    val prizeClosed = LocalPrizeClosed.current
     var holdPrompt by remember { mutableStateOf(false) }
     var prizeReturned by remember { mutableStateOf(false) }
-    var announced by remember { mutableStateOf<String?>(null) }
+    var announcedId by remember { mutableIntStateOf(-1) }
+    var seenClosed by remember { mutableIntStateOf(prizeClosed) }
     LaunchedEffect(celebrate) {
         if (celebrate) prizeReturned = true
     }
+    LaunchedEffect(prizeClosed) {
+        val drop = shouldDropPrizeHold(prizeClosed, seenClosed, celebrate, holdPrompt)
+        seenClosed = prizeClosed
+        if (drop) holdPrompt = false
+    }
     val cue = promptCue(holdPrompt, prizeReturned, celebrate)
-    LaunchedEffect(exercise.prompt, cue) {
-        when (cue) {
-            PromptCue.Wait -> Unit
-            PromptCue.Release -> {
-                holdPrompt = false
-                announced = exercise.prompt
-                onSpeak(exercise.spoken)
-            }
-            PromptCue.Speak -> {
-                if (announced != exercise.prompt) {
-                    announced = exercise.prompt
-                    onSpeak(exercise.spoken)
-                }
-            }
-        }
+    LaunchedEffect(exerciseId, cue) {
+        if (cue == PromptCue.Wait) return@LaunchedEffect
+        if (cue == PromptCue.Release) holdPrompt = false
+        if (announcedId == exerciseId) return@LaunchedEffect
+        announcedId = exerciseId
+        onSpeak(exercise.spoken)
     }
     RepeatPromptOnResume(
         spoken = exercise.spoken,
@@ -180,7 +187,7 @@ fun LessonScreen(
     }
 
     val fillSudoku = sudokuFillsEveryBlank(exercise.play)
-    var sudoku by remember(exercise.prompt, exercise.play.cells) {
+    var sudoku by remember(exerciseId) {
         mutableStateOf(SudokuPlay.start(exercise.play.cells))
     }
 
@@ -199,9 +206,11 @@ fun LessonScreen(
             completed = container.rewards.nextCompleted(completed, true)
             if (container.rewards.shouldOpenReward(completed, profile.pace.every)) {
                 holdPrompt = true
+                prizeReturned = false
                 onReward(profile.ageGroup)
             }
             exercise = container.generator.generate(module, lessonLevel(hits), profile.ageGroup)
+            exerciseId += 1
         }
         scope.launch {
             pointsGate.withLock {
@@ -233,29 +242,31 @@ fun LessonScreen(
                 onStay = { confirmingExit = false },
                 onLeave = leaveLesson,
             )
-            LessonPlayColumn(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                exercise = exercise,
-                module = module,
-                hits = hits,
-                points = points,
-                fillViewport = fillViewport,
-                scrolls = scrolls,
-                scrollState = scrollState,
-                onPick = onPick,
-                onMissKeep = { noteAttempt(false, false) },
-                boardCells = if (fillSudoku) sudoku.cells else exercise.play.cells,
-                boardFocus = if (fillSudoku) sudoku.focus else -1,
-                fillEveryBlank = fillSudoku,
-                onBoardFocus = { index -> sudoku = SudokuPlay.focus(sudoku, index) },
-                age = profile.ageGroup,
-                completed = completed,
-                every = profile.pace.every,
-                onSpeak = onSpeak,
-            )
+            CompositionLocalProvider(LocalExerciseId provides exerciseId) {
+                LessonPlayColumn(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                    exercise = exercise,
+                    module = module,
+                    hits = hits,
+                    points = points,
+                    fillViewport = fillViewport,
+                    scrolls = scrolls,
+                    scrollState = scrollState,
+                    onPick = onPick,
+                    onMissKeep = { noteAttempt(false, false) },
+                    boardCells = if (fillSudoku) sudoku.cells else exercise.play.cells,
+                    boardFocus = if (fillSudoku) sudoku.focus else -1,
+                    fillEveryBlank = fillSudoku,
+                    onBoardFocus = { index -> sudoku = SudokuPlay.focus(sudoku, index) },
+                    age = profile.ageGroup,
+                    completed = completed,
+                    every = profile.pace.every,
+                    onSpeak = onSpeak,
+                )
+            }
         }
         AnswerFlash(
             correct = flashCorrect,
@@ -380,7 +391,9 @@ internal fun LessonPlayColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (module == LearningModule.CLOCK) {
-                ClockFace(clockHour(exercise.options.getOrNull(exercise.correctIndex).orEmpty()))
+                key(LocalExerciseId.current) {
+                    ClockFace(clockHour(exercise.options.getOrNull(exercise.correctIndex).orEmpty()))
+                }
             }
             if (showsSilhouette(module)) {
                 exercise.targetShape?.let { shape ->

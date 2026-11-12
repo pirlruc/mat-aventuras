@@ -45,7 +45,7 @@ android {
         compose = true
     }
     sourceSets.named("main") {
-        assets.srcDir(rootProject.file("domain/src/main/resources"))
+        assets.directories.add("../domain/src/main/resources")
     }
     packaging {
         resources {

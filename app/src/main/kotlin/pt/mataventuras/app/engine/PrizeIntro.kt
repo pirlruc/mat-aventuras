@@ -20,6 +20,19 @@ import pt.mataventuras.domain.voice.VoiceScripts
  */
 internal object PrizeIntro {
     private const val ROOT: String = "prize-intro"
+    private val sessions = HashMap<Activity, SpeechEngine>()
+
+    /**
+     * True while the Jogar card is covering this activity.
+     */
+    fun isHolding(activity: Activity): Boolean = sessions.containsKey(activity)
+
+    /**
+     * Stops the intro voice. Safe when [attach] never ran.
+     */
+    fun release(activity: Activity) {
+        sessions.remove(activity)?.release()
+    }
 
     /**
      * Shows the card on the window decor when this is a real device.
@@ -34,15 +47,27 @@ internal object PrizeIntro {
         val decor = activity.window.decorView as ViewGroup
         if (decor.findViewWithTag<View>(ROOT) != null) return
         val speech = SpeechEngine(activity)
-        val card = card(activity, scene, speech)
+        sessions[activity] = speech
+        val card = card(activity, scene)
+        card.addOnAttachStateChangeListener(releaseWhenDetached(activity))
         decor.addView(card)
         speech.speak("${VoiceScripts.LETS_PLAY} ${PrizeBrief.goal(scene)} ${PrizeBrief.controls(scene)}")
     }
 
+    private fun releaseWhenDetached(activity: Activity): View.OnAttachStateChangeListener =
+        object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(view: View) {
+                view.tag = ROOT
+            }
+
+            override fun onViewDetachedFromWindow(view: View) {
+                release(activity)
+            }
+        }
+
     private fun card(
         activity: Activity,
         scene: String,
-        speech: SpeechEngine,
     ): LinearLayout {
         val root =
             LinearLayout(activity).apply {
@@ -64,8 +89,6 @@ internal object PrizeIntro {
             Button(activity).apply {
                 text = PrizeHud.PLAY_LABEL
                 setOnClickListener {
-                    speech.stop()
-                    speech.release()
                     (root.parent as? ViewGroup)?.removeView(root)
                 }
             }

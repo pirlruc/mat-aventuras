@@ -202,6 +202,8 @@ func _input(_event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if finished:
 		return
+	if Host.intro_hold():
+		return
 	Host.fit_viewport(self)
 	delta = minf(delta, 0.05)
 	elapsed += delta
@@ -379,6 +381,10 @@ func _bump_enemies() -> void:
 			y = GROUND_Y
 			vy = 0.0
 			on_ground = true
+			freeze = freeze_for
+			move_x = 0.0
+			wait_release = true
+			Host.clear_holds()
 
 
 func _update_hud() -> void:
@@ -391,4 +397,4 @@ func _update_hud() -> void:
 	if Host.young():
 		hud.text = "🪙 %d\n%s" % [coins, extra]
 	else:
-		hud.text = "Segura à direita para avançar\nDesliza para cima: saltar\nMoedas %d/%d%s" % [coins, coins_target, extra]
+		hud.text = "Setas para andar. Saltar para o ar.\nMoedas %d/%d%s" % [coins, coins_target, extra]

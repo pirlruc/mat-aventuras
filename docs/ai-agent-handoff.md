@@ -2,7 +2,7 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-11-04
+**Last updated:** 2026-11-12
 **Last agent focus:** Tag `0.4.0` is annotated on `8f40d20` (tag object `04c8b673`). Run 41792868922 published a signed `app-release.apk`. `sha256sum -c` matched. `apksigner` verifies scheme v2 and the README fingerprint. `cosign verify-blob` and `gh attestation verify --signer-repo pirlruc/commondevops` succeeded. Do not move `0.1.0`, `0.2.0`, `0.3.0`, `0.3.1`, or `0.3.2`.
 
 ---
@@ -249,7 +249,7 @@ bash scripts/check-ci-local.sh
   `MatAventuras` singleton lazily and calls `prizeReady()` on the object.
   `has_method` does not see those Java plugin methods, so a `has_method`
   guard never hides the boot overlay. Do not raise `PrizeBoot.TIMEOUT_MS`.
-- A parent prize limit is `prize_limit` on the reward Intent. `PrizeLimit` arms every host from `SystemClock.elapsedRealtime()`. Zero or a missing extra does not finish the activity. The Godot `Host` reads `prizeLimitSeconds()` and stops on `Time.get_ticks_msec()`. Compose prizes use `Random.Default` unless the test passes a seed. The correct-answer tag is on only when the process is debuggable or Robolectric.
+- A parent prize limit is `prize_limit` on the reward Intent. `PrizeLimit` arms every host from `SystemClock.elapsedRealtime()`. Zero or a missing extra does not finish the activity. The Godot `Host` reads `prizeLimitSeconds()` and stops on `Time.get_ticks_msec()`. Compose prizes use `Random.Default` unless the test passes a seed. The correct-answer tag is on only when the process is debuggable or Robolectric. A finished Compose prize must `setResult` with `EngineLauncher.RESULT_FINISHED`. Lesson speech, soup, memory, and the clock face key on `exerciseId`, not the prompt string. `PrizeIntro` releases its `SpeechEngine` when the card leaves the window. `Host.intro_hold()` freezes prize scripts until Jogar. Kart `steer_buttons` ignore full-screen touches. Do not lower the Kover floors.
 - A Keystore or IO failure while reading the PIN opens the hold-and-sum reset (`6 + 7`). The parent window sets `FLAG_SECURE` while that screen is composed. Lockout stores both a wall-clock deadline and `lockedUntilElapsedMs`. `PinKeyException` is an `IllegalStateException`; catch it first.
 - Prize lives, speeds, and hit tests live only in
   `domain/src/main/resources/prize-tuning.json`. The app asset source set
@@ -272,4 +272,4 @@ bash scripts/check-ci-local.sh
 8. The main ruleset requires `changes`, `quality`, `gate`, `dependency-review`, `doc-verify / verify`, `infra-lint / lint`, `scaffold-verify / verify`, `secrets-sast / secrets-sast`, `supply-chain / supply-chain`, `pins / pins`, `python-gate`, and `DCO`. Reviews stay at 0. The owner chose that. Do not set required approvals to 1. Do not require the path-filtered Android jobs or the inner python-quality jobs. Private vulnerability reporting is on. Scorecard Fuzzing alert #5 is dismissed. New commits need a `Signed-off-by` trailer. Do not rewrite old history.
 9. OpenSSF baseline project [16162](https://www.bestpractices.dev/projects/16162). The README badge stays `https://www.bestpractices.dev/projects/16162/baseline`. Level 1, 2, and 3 are marked on the form. The public text is on `main`. The README lists the release-certificate SHA-256. Release 0.2.0 also has `app-release.cdx.json`. Do not invent a CPE. Do not install the DCO app or edit the ruleset. OSPS-QA-07.01 stays unmet because reviews stay at 0. Do not mark the form. androiddevops stays public. MAT-011 is done. MAT-006 is done. `PrizeDeviceTest.everyPrizeBecomesReady` passed on `mat_api36` on 2026-11-04, including climb. The JNI exclude stays. Wrapper validation in `ci.yml` always runs, so Scorecard can see it. BinaryArtifacts alert #4 stays until Scorecard scans `main` after this merges. androiddevops is pinned once at 1.4.0. Local Maestro uses the digest in `docs/companion-pins.yml` and does not run on GitHub Actions. MAT-013 is done. python-quality runs when a Python file or a Python tool config changes.
 
-*Last updated: 2026-11-04 (0.4.0 signed release verified).*
+*Last updated: 2026-11-12 (Compose prize win result, prompt speech after a missed prize, queued TTS, kart and runner controls, memory flip, GPL-3.0-only).*

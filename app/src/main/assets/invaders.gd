@@ -43,7 +43,7 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if finished:
+	if finished or Host.intro_hold():
 		return
 	var sample := Host.read_pointer(event)
 	if sample.is_empty():
@@ -60,6 +60,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	if Host.intro_hold():
+		return
 	Host.fit_viewport(self)
 	delta = minf(delta, 0.05)
 	if not finished:

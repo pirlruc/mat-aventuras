@@ -110,6 +110,8 @@ func _sample(values: Array[float], dist: float) -> float:
 
 
 func _input(event: InputEvent) -> void:
+	if Host.steer_buttons or Host.intro_hold():
+		return
 	var sample := Host.read_pointer(event)
 	if sample.is_empty():
 		return
@@ -133,6 +135,8 @@ func _steer_at(pos: Vector2, _arm_boost: bool) -> void:
 func _process(delta: float) -> void:
 	if finished:
 		return
+	if Host.intro_hold():
+		return
 	Host.fit_viewport(self)
 	delta = minf(delta, 0.05)
 	if boosting:
@@ -144,7 +148,9 @@ func _process(delta: float) -> void:
 	speed = move_toward(speed, target, accel * delta)
 	var curve := _sample(curves, distance)
 	var held := Host.control_axis()
-	if held != 0.0:
+	if Host.steer_buttons:
+		steer = held
+	elif held != 0.0:
 		steer = held
 	lateral = clampf(lateral + steer * steer_rate * delta + curve * speed * drift * delta, -1.35, 1.35)
 	distance += speed * delta
