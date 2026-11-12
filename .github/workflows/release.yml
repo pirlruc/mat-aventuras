@@ -1,7 +1,7 @@
 # Builds a release APK and its CycloneDX bill, then publishes the GitHub
-# Release for an annotated tag that already exists. common-release 5.8.0
+# Release for an annotated tag that already exists. common-release v6.2.0
 # attaches every file in the artifact, writes a .sha256 for each, and
-# signs those blobs. android-release-apk 1.4.0 and common-release both
+# signs those blobs. android-release-apk 1.7.0 and common-release both
 # select the release environment. The caller jobs cannot.
 name: release
 
@@ -19,10 +19,10 @@ jobs:
   apk:
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-release-apk.yml@4763e3be9f3a24a1b80dee3bf01530413aa3f49f
+    uses: pirlruc/androiddevops/.github/workflows/android-release-apk.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
     with:
-      scripts_ref: 4763e3be9f3a24a1b80dee3bf01530413aa3f49f
-      # 1.4.0 selects this environment inside the reusable workflow.
+      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
+      # 1.7.0 selects this environment inside the reusable workflow.
       # The caller job cannot. The keystore secrets live only there.
       environment: release
     secrets:
@@ -38,7 +38,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    uses: pirlruc/commondevops/.github/workflows/common-release.yml@cb34967f230a0d4841ae1efc2c98e745bd8726a7
+    uses: pirlruc/commondevops/.github/workflows/common-release.yml@1e0c029bf93705f399f2a3a7e5f19810c101da65
     with:
       tag: ${{ inputs.tag }}
       release_artifact: android-release-apk

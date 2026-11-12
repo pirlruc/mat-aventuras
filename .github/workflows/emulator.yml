@@ -1,5 +1,5 @@
 # Instrumented tests. Schedule and manual only, so pull requests do not
-# spend the minutes. The runner is androiddevops 1.4.0.
+# spend the minutes. The runner is androiddevops 1.7.0.
 name: emulator
 
 on:
@@ -13,9 +13,9 @@ jobs:
   connected:
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-emulator.yml@4763e3be9f3a24a1b80dee3bf01530413aa3f49f
+    uses: pirlruc/androiddevops/.github/workflows/android-emulator.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
     with:
-      scripts_ref: 4763e3be9f3a24a1b80dee3bf01530413aa3f49f
+      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
       api_level: "36"
       target: google_apis
       arch: x86_64
