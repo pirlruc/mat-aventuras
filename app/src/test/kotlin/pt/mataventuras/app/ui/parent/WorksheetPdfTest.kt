@@ -64,7 +64,11 @@ class WorksheetPdfTest {
             MasteryHeatmap(
                 listOf(
                     cell,
-                    cell.copy(module = LearningModule.SHAPES, topic = "Figuras geométricas", band = MasteryBand.BELOW_50),
+                    cell.copy(
+                        module = LearningModule.SHAPES,
+                        topic = "Figuras geométricas",
+                        band = MasteryBand.BELOW_50,
+                    ),
                     cell.copy(module = LearningModule.SIZE, band = MasteryBand.FROM_50_TO_79),
                 ),
             )
