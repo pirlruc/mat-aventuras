@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-12
-**Last agent focus:** Round 7 is on `feature-mat-round-7` as version 0.6.0 (versionCode 8). MAT-023 is done. MAT-PRO-001 records Family Plus; the heatmap and worksheets are in, and billing is not. The `0.6.0` tag is cut after merge. Do not move `0.1.0` through `0.5.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
+**Last agent focus:** Round 7 is on `main` as version 0.6.0 (versionCode 8), tag `0.6.0` on merge `1c97e2d`, release https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0. MAT-023 is done. MAT-PRO-001-T1 (heatmap and worksheets) is done. Billing is not in the app. Do not move `0.1.0` through `0.6.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
 
 ---
 
@@ -268,7 +268,7 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Version 0.6.0 (versionCode 8) is on this branch and is not tagged. Cut the `0.6.0` tag after merge. Do not move `0.1.0` through `0.5.0`. Release [0.5.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.5.0) stays on tag object `6bd3a223` (`b3f9ccc`). Dispatch `release.yml` with `--ref` set to the tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T2 through T6 stay open. Do not add billing, ads, or a new INTERNET permission.
+1. Version 0.6.0 (versionCode 8) is tagged `0.6.0` on merge `1c97e2d`. Do not move `0.1.0` through `0.6.0`. Release [0.5.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.5.0) stays on tag object `6bd3a223` (`b3f9ccc`). Release [0.6.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0) is the signed APK. Dispatch `release.yml` with `--ref` set to the tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T2 through T6 stay open. Do not add billing, ads, or a new INTERNET permission.
 2. MAT-015 is done. The 0.3.2 APK and the 0.3.1 APK both verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`.
 3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
 4. The emulator job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only). Run 41358345053 failed because the runner had no KVM permission (`-accel off`), and the multi-line `script:` never executed under `sh -c`. Do not record that as a boot timeout. androiddevops 1.2.0 is the fix.
@@ -280,4 +280,4 @@ bash scripts/check-ci-local.sh
 
 *Last updated: 2026-11-12 (Compose prize win result, prompt speech after a missed prize, queued TTS, kart and runner controls, memory flip, GPL-3.0-only).*
 *Last updated: 2026-11-12 (signed release 0.5.0, emulator dispatch green).*
-*Last updated: 2026-11-12 (MAT-023 answer lock, runner freeze, larger targets, mastery heatmap, printable worksheets; 0.6.0 tag after merge).*
+*Last updated: 2026-11-12 (signed release 0.6.0 on tag 0.6.0, merge 1c97e2d).*
