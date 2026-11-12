@@ -1421,7 +1421,7 @@ milestones:
               - SC-LIC-002
 
   - name: Phase 5 — Round 5
-    status: open
+    status: done
     epics:
       - id: MAT-017
         status: done
@@ -1591,3 +1591,120 @@ milestones:
             title: Pin one androiddevops tag
             verification:
               - ci.yml, emulator.yml, and release.yml use one androiddevops SHA
+
+  - name: Phase 6 — Round 6
+    status: done
+    epics:
+      - id: MAT-DOC-001
+        status: done
+        title: Record the child-audience policy for this app
+        overview:
+          problem: >-
+            Guardrails and methodologies do not set a product policy for a
+            children's game. This app still has to say who it is for, what
+            leaves the device, and how a parent opens the dashboard.
+          goal: >-
+            The backlog records offline play with no personal data, a parent
+            math challenge plus PIN, and the 3–5 and 6–8 age bands.
+        decision: >-
+          In the context of a children's math game that stays on the device,
+          facing org packs that do not set a product privacy or age policy,
+          we decided offline play with zero PII, a parent math challenge plus
+          PIN before the parent area, and age bands 3–5 and 6–8, to achieve
+          a child-audience policy this app can ship, accepting that those
+          choices stay in this repo and not in the org packs.
+        acceptance_criteria:
+          - The decision names offline play and zero PII
+          - The decision names the parent math challenge and the PIN
+          - The decision names age bands 3–5 and 6–8
+        guardrail_refs:
+          - ANDROID-A11Y-001
+        tasks:
+          - id: MAT-DOC-001-T1
+            status: done
+            title: Record the child-audience decisions
+            verification:
+              - The epic names offline zero-PII play, the parent math and PIN gate, and both age bands
+
+      - id: MAT-021
+        status: done
+        title: Re-license as GPL-3.0-only with a TDM reservation
+        overview:
+          problem: >-
+            The published license did not state GPL-3.0-only, and it did not
+            reserve commercial text-and-data mining.
+          goal: >-
+            The repository ships the GPL-3.0-only text and a NOTICE that
+            reserves Article 4(3) rights.
+        decision: >-
+          In the context of publishing the game, facing a license that did
+          not reserve text-and-data mining, we decided GPL-3.0-only plus an
+          EU Directive 2019/790 Article 4(3) reservation in NOTICE, to
+          achieve a free license that still opts out of commercial TDM,
+          accepting that the SPDX license text itself stays unmodified.
+        acceptance_criteria:
+          - LICENSE is GPL-3.0-only
+          - NOTICE reserves Directive (EU) 2019/790 Article 4(3)
+        guardrail_refs:
+          - SC-LIC-003
+        tasks:
+          - id: MAT-021-T1
+            status: done
+            title: Ship the GPL-3.0-only text and the TDM notice
+            verification:
+              - LICENSE identifies GPL-3.0-only
+              - NOTICE names Directive (EU) 2019/790 Article 4(3)
+
+      - id: MAT-022
+        status: done
+        title: Close Round 6 defects and match guardrails 1.15.0
+        overview:
+          problem: >-
+            Round 6 still had prize, speech, and host defects, Gradle schema
+            export was still a KSP argument, and the companion pins were
+            behind guardrails 1.15.0.
+          goal: >-
+            Those defects are fixed, the Room plugin exports the schema, and
+            the ops and guardrail pins match the annotated tags for this wave.
+        decision: >-
+          In the context of the 0.5.0 wave, facing Round 6 prize and speech
+          defects plus Gradle and guardrail drift, we decided to fix those
+          defects, apply the Room plugin, and pin guardrails 1.15.0, to
+          achieve a build that matches the org pack, accepting a version
+          bump to 0.5.0 before a store listing exists.
+        acceptance_criteria:
+          - Compose and Godot runner briefs are different texts
+          - Native kart and runner controls are on-screen buttons inside the safe drawing area
+          - Parent and leaderboard top bars sit outside the scrolling column
+          - data uses the Room Gradle plugin schemaDirectory
+          - guardrails 1.15.0, scaffold 1.12.0, commondevops v6.2.0, androiddevops 1.7.0, and pydevops 3.5.0 are the pins
+        guardrail_refs:
+          - ANDROID-TEST-002
+          - ANDROID-SDK-003
+          - ANDROID-A11Y-001
+          - KT-BUILD-002
+          - SC-DEP-004
+          - SC-LIC-003
+        tasks:
+          - id: MAT-022-T1
+            status: done
+            title: Fix the remaining prize and screen gaps
+            verification:
+              - PrizeBrief keys RUNNER and RUNNER_GATE differ
+              - NativeRunnerHost and NativeKartHost draw on-screen buttons with safeDrawingPadding
+              - ParentDashboard and LeaderboardAndRewardsScreen keep the top button outside verticalScroll
+              - Compose prize buttons are at least 64 dp tall
+              - Robolectric Compose tests enable accessibility checks
+          - id: MAT-022-T2
+            status: done
+            title: Apply the Room plugin and drop the closed deviations
+            verification:
+              - data/build.gradle.kts uses room.schemaDirectory and does not pass room.schemaLocation
+              - docs/guardrail-deviations.yml keeps KT-DOC-001 only
+              - Dependabot ignores Temurin 22, 23, 24, and 26, and not 21 or 25
+          - id: MAT-022-T3
+            status: done
+            title: Pin guardrails 1.15.0 and the ops workflows
+            verification:
+              - docs/companion-pins.yml records guardrails 1.15.0 and scaffold 1.12.0
+              - Workflow uses lines match the peeled commondevops v6.2.0, androiddevops 1.7.0, and pydevops 3.5.0 commits
