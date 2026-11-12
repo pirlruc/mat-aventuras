@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-12
-**Last agent focus:** Round 7 is on `main` as version 0.6.0 (versionCode 8), tag `0.6.0` on merge `1c97e2d`, release https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0. MAT-023 is done. MAT-PRO-001-T1 (heatmap and worksheets) is done. Billing is not in the app. Do not move `0.1.0` through `0.6.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
+**Last agent focus:** Round 7 is on `main` as version 0.6.0 (versionCode 8), tag `0.6.0` on merge `1c97e2d`, [release 0.6.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0). MAT-023 is done. MAT-PRO-001-T1 (heatmap and worksheets) is done. Billing is not in the app. Do not move `0.1.0` through `0.6.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
 
 ---
 
