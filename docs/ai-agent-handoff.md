@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-13
-**Last agent focus:** Round 8 is version 0.7.0 (versionCode 9) on `feature-mat-round-8`. Do not tag it from an agent session. 0.6.0 stays on tag `0.6.0` (merge `1c97e2d`). MAT-PRO-001-T1, T2, T3, and T7 are done. T4 and T6 are deferred. T5 stays open. The entitlement gate ships unlocked (`premiumUnlocked` defaults to true). There is no billing SDK. Do not move `0.1.0` through `0.6.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
+**Last agent focus:** Round 8 is version 0.7.0 (versionCode 9), tag `0.7.0`, release <https://github.com/pirlruc/mat-aventuras/releases/tag/0.7.0>. `gh attestation verify` on `app-release.apk` succeeded for 0.7.0 and 0.6.0. 0.6.0 stays on tag `0.6.0` (merge `1c97e2d`). MAT-PRO-001-T1, T2, T3, and T7 are done. T4 and T6 are deferred. T5 stays open. The entitlement gate ships unlocked (`premiumUnlocked` defaults to true). There is no billing SDK. Do not move `0.1.0` through `0.6.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment. API 36 (`mat_api36`) installed and displayed `MainActivity`. API 37 (`mat_api37`, `system-images;android-37.0;google_apis;x86_64`, data partition 4096M) installed the debug APK. The headless emulator then dropped the activity service, so that launch is not a clean smoke. `.maestro/world.yaml` did not run: the Docker Desktop socket is absent and this user is not in the `docker` group.
 
 ---
 
