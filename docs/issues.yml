@@ -1756,34 +1756,39 @@ milestones:
 
       - id: MAT-PRO-001
         status: open
-        title: Offer Family Plus behind the parent gate
+        title: Ship Family Plus behind an entitlement gate
         overview:
           problem: >-
-            Families ask for more than the free game, but multiple profiles
-            already ship and a children's app cannot put a purchase in the
-            child UI.
+            Families ask for themed worlds, seasonal prizes, and more languages,
+            but profiles already ship for free and a children's app cannot put
+            a purchase in the child UI.
           goal: >-
-            The backlog records a Family Plus offering whose purchase flows
-            sit behind the parent PIN, while the mastery heatmap and printable
-            worksheets ship now.
+            Family Plus features sit behind an entitlement gate and ship
+            unlocked for free. The child UI shows nothing when a feature is
+            locked. A neutral note appears only behind the parent PIN.
         decision: >-
           In the context of a Family Plus offering, facing profiles that
-          already ship for free and the Google Play Families rule that a
-          purchase must be a parent action, we decided profiles stay free and
-          every future purchase flow sits behind the parent PIN gate, to
-          achieve a paid tier that does not bill for what already ships,
-          accepting that Play Billing, themed worlds, language packs, a
-          classroom edition, and workbook sales stay open until a later build.
+          already ship for free and a children's app that must not bill from
+          the child UI, we decided Family Plus features sit behind an
+          entitlement gate and ship unlocked for free, to achieve themed
+          worlds, seasonal prizes, and offline language packs without a
+          purchase flow, accepting that Play Billing, a classroom edition,
+          and workbook sales stay deferred.
         description: >-
-          Suggested price, as product context and not as implemented billing,
-          is about 2.49 EUR per month, 19.99 EUR per year, or 14.99 EUR once.
+          The Gradle property premiumUnlocked defaults to true in every build.
+          There is no purchase flow and no billing SDK. A suggested price is
+          product context only, about 2.49 EUR per month, 19.99 EUR per year,
+          or 14.99 EUR once.
         out_of_scope:
           - Charging for features that already ship
           - Ads
           - Referrals inside the child UI
+          - A billing SDK in the APK
         acceptance_criteria:
           - Profiles stay free
-          - Every future purchase flow sits behind the parent PIN gate
+          - The entitlement gate is the only switch and the shipping build is unlocked
+          - A locked feature is absent from the child UI
+          - A neutral note appears only behind the parent PIN
           - The parent dashboard shows a mastery heatmap from ParentAnalytics
           - A parent can save a printable worksheet without a new permission
         guardrail_refs:
@@ -1799,19 +1804,27 @@ milestones:
               - The same worksheet seed repeats the same exercises for both age bands
               - The PDF is saved with ACTION_CREATE_DOCUMENT and adds no permission
           - id: MAT-PRO-001-T2
-            status: open
+            status: done
             title: Add themed worlds and seasonal prize games
             verification:
-              - Themed worlds and seasonal prize games stay behind the parent gate
+              - The parent dashboard selects the world theme when THEMED_WORLDS is unlocked
+              - The seasonal prize variant is chosen deterministically from the device date
+              - The Godot runner receives the theme
+              - A locked feature is absent from the child UI
           - id: MAT-PRO-001-T3
-            status: open
+            status: done
             title: Add offline language and voice packs
             verification:
-              - Language and voice packs install on device and do not add INTERNET
+              - Bundled EN, ES, FR, and PT-BR string resources and locales_config.xml ship in the APK
+              - The language picker sits behind the parent PIN and includes Godot strings
+              - Read-aloud uses on-device TextToSpeech and declares a TTS queries intent
+              - The manifest does not add INTERNET
+              - Read-aloud is skipped when no offline voice is installed
           - id: MAT-PRO-001-T4
             status: open
-            title: Add Play Billing behind the parent gate
+            title: Add Play Billing behind the parent gate (deferred)
             verification:
+              - The entitlement gate is the only switch
               - Billing lives in a play product flavor
               - The foss flavor has no billing SDK
               - The purchase flow sits behind the parent PIN gate
@@ -1823,7 +1836,53 @@ milestones:
               - The classroom build can be distributed as an MDM APK
           - id: MAT-PRO-001-T6
             status: open
-            title: Sell printable workbook bundles outside the app
+            title: Sell printable workbook bundles outside the app (deferred)
             verification:
+              - The entitlement gate is the only switch
               - Workbook bundles are sold outside the app
               - The child UI does not offer that purchase
+          - id: MAT-PRO-001-T7
+            status: done
+            title: Gate Family Plus on an entitlement flag that ships unlocked
+            verification:
+              - PremiumFeature lists THEMED_WORLDS, SEASONAL_PRIZES, and LANGUAGE_PACKS
+              - BuildConfigEntitlements reads BuildConfig.PREMIUM_UNLOCKED
+              - The Gradle property premiumUnlocked defaults to true in every build
+              - Tests cover both flag values
+              - A locked feature shows a neutral note only behind the parent PIN
+
+  - name: Phase 8 — Round 8
+    status: done
+    epics:
+      - id: MAT-024
+        status: done
+        title: Fix the parent PIN target and the prize exit for TalkBack
+        overview:
+          problem: >-
+            The parent PIN submit control is shorter than the other parent
+            buttons, and the Godot Sair control is drawn on the canvas where
+            TalkBack cannot activate it.
+          goal: >-
+            The PIN submit control matches the 64 dp parent target, and a
+            Compose Sair overlay above the Godot surface lets TalkBack leave
+            the prize.
+        decision: >-
+          In the context of round 8 play, facing a short PIN submit control
+          and a canvas Sair that TalkBack cannot see, we decided to give the
+          submit control a 64 dp minimum height and to draw a Compose Sair
+          overlay above the Godot surface, to achieve a parent control and a
+          prize exit that assistive technology can use, accepting that the
+          canvas Sair remains for sighted play.
+        acceptance_criteria:
+          - The parent PIN submit control is at least 64 dp tall
+          - TalkBack can activate Sair above the Godot surface
+        guardrail_refs:
+          - ANDROID-A11Y-001
+        tasks:
+          - id: MAT-024-T1
+            status: done
+            title: Raise the PIN submit control and expose Sair to TalkBack
+            verification:
+              - ParentDashboard PIN submit uses heightIn of at least 64 dp
+              - A Compose Sair overlay sits above the Godot surface
+              - The overlay click leaves the prize

@@ -43,6 +43,7 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         PrizeLimit.arm(this)
         PrizeIntro.attach(this, sceneCode(), onDebugWin = { completeReward(true) })
+        PrizeExit.attach(this, GodotRuntime.shouldEmbed()) { completeReward(false) }
     }
 
     /**
@@ -111,14 +112,15 @@ abstract class IsolatedEngineActivity : FragmentActivity() {
     internal fun requestEngineRestart(): Boolean =
         settleResult(
             RESULT_OK,
-            EngineLauncher.restartResultIntent(
-                javaClass.name,
-                mascotCode(),
-                childName(),
-                sceneCode(),
-                ageCode(),
-                intent.getStringExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT).orEmpty(),
-            ),
+            EngineLauncher
+                .restartResultIntent(
+                    javaClass.name,
+                    mascotCode(),
+                    childName(),
+                    sceneCode(),
+                    ageCode(),
+                    intent.getStringExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT).orEmpty(),
+                ).also { EngineExtras.copyFamily(intent, it) },
         )
 
     /**

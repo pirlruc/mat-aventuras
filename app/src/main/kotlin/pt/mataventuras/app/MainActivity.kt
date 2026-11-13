@@ -1,5 +1,6 @@
 package pt.mataventuras.app
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,8 +13,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.engine.EngineLauncher
 import pt.mataventuras.app.prize.PrizeLaunch
 import pt.mataventuras.app.speech.SpeechEngine
@@ -22,6 +25,9 @@ import pt.mataventuras.app.ui.RewardReturn
 import pt.mataventuras.app.ui.beginReward
 import pt.mataventuras.app.ui.lesson.RewardRecorder
 import pt.mataventuras.app.ui.navigation.NavGraph
+import pt.mataventuras.domain.entitlement.FamilyGate
+import pt.mataventuras.domain.model.AgeBand
+import pt.mataventuras.domain.model.Mascot
 
 /**
  * Compose host. Reward engines launch as separate Activities.
@@ -47,10 +53,9 @@ class MainActivity : ComponentActivity() {
                     container = app.container,
                     onSpeak = { speech.speak(it) },
                     onReward = { ageGroup, mascot, name, limit ->
-                        val seconds = app.container.rewards.prizeLimitSeconds(limit)
                         beginReward(speech::stop) {
                             engineLauncher.launch(
-                                PrizeLaunch.intent(this, ageGroup, mascot, name, limitSeconds = seconds),
+                                rewardIntent(this, app.container, ageGroup, mascot, name, limit),
                             )
                         }
                     },
@@ -93,4 +98,33 @@ class MainActivity : ComponentActivity() {
         if (::speech.isInitialized) speech.release()
         super.onDestroy()
     }
+}
+
+/**
+ * Reward intent for the parent theme and the device date, when those features are unlocked.
+ */
+internal fun rewardIntent(
+    context: Context,
+    container: AppContainer,
+    age: AgeBand,
+    mascot: Mascot,
+    name: String,
+    limit: Int,
+): Intent {
+    val today = LocalDate.now()
+    val family =
+        FamilyGate.extras(
+            container.entitlements,
+            container.family.theme(),
+            today.monthValue,
+            today.dayOfMonth,
+        )
+    return PrizeLaunch.intentForReward(
+        context,
+        age,
+        mascot,
+        name,
+        container.rewards.prizeLimitSeconds(limit),
+        family,
+    )
 }

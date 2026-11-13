@@ -104,6 +104,30 @@ func lives_text(current: int, maximum: int) -> String:
 	return str(bridge_plugin.livesLine(current, maximum))
 
 
+func world_theme() -> int:
+	var bridge_plugin := bridge()
+	if bridge_plugin == null:
+		return -1
+	return int(bridge_plugin.worldTheme())
+
+
+func season_index() -> int:
+	var bridge_plugin := bridge()
+	if bridge_plugin == null:
+		return -1
+	return int(bridge_plugin.seasonIndex())
+
+
+func hud_text(key: String, fallback: String) -> String:
+	var bridge_plugin := bridge()
+	if bridge_plugin == null:
+		return fallback
+	var line := str(bridge_plugin.hudText(key))
+	if line == "":
+		return fallback
+	return line
+
+
 func mark_ready() -> void:
 	_send_ready()
 
@@ -198,7 +222,7 @@ func add_boost(node: Node, callback: Callable) -> void:
 	var button := Button.new()
 	var u := unit(node)
 	var side := maxf(64.0, u * 0.16)
-	button.text = "Impulso"
+	button.text = hud_text("boost", "Impulso")
 	button.custom_minimum_size = Vector2(side, side)
 	var size := view_size(node)
 	button.position = Vector2(size.x * 0.5 - side * 0.5, size.y - side - u * 0.03)
@@ -209,7 +233,7 @@ func add_boost(node: Node, callback: Callable) -> void:
 func _add_exit(layer: CanvasLayer, node: Node) -> void:
 	var button := Button.new()
 	var u := unit(node)
-	button.text = "Sair"
+	button.text = hud_text("exit", "Sair")
 	button.custom_minimum_size = Vector2(u * 0.18, maxf(48.0, u * 0.09))
 	var pad := safe_pad()
 	button.position = Vector2(view_size(node).x - button.custom_minimum_size.x - u * 0.03, pad.y + u * 0.02)

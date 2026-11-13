@@ -3,7 +3,9 @@ package pt.mataventuras.app.engine.godot
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.UsedByGodot
+import pt.mataventuras.app.engine.EngineExtras
 import pt.mataventuras.app.engine.GodotBridge
+import pt.mataventuras.app.engine.GodotCopy
 import pt.mataventuras.app.engine.GodotRuntime
 import pt.mataventuras.app.engine.IsolatedEngineActivity
 import pt.mataventuras.app.engine.PrizeIntro
@@ -29,6 +31,15 @@ internal class MatAventurasGodotPlugin(
 
     @UsedByGodot
     fun youngBand(): Boolean = GodotBridge.youngBand(host)
+
+    @UsedByGodot
+    fun worldTheme(): Int = EngineExtras.theme(host.intent)
+
+    @UsedByGodot
+    fun seasonIndex(): Int = EngineExtras.season(host.intent)
+
+    @UsedByGodot
+    fun hudText(key: String): String = GodotCopy.text(host, key)
 
     @UsedByGodot
     fun prizeLimitSeconds(): Int {

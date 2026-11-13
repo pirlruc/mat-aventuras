@@ -10,6 +10,14 @@
 
     <!-- Local vibration for correct/wrong taps. No network. -->
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- On-device TTS only. No network voice and no INTERNET permission. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
     <application
         android:name=".MatAventurasApp"
         android:allowBackup="false"

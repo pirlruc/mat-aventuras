@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
@@ -55,6 +56,7 @@ import pt.mataventuras.app.ui.pinPrompt
 import pt.mataventuras.app.ui.pinSubmitLabel
 import pt.mataventuras.app.ui.rememberBringIntoViewOnFocus
 import pt.mataventuras.data.pin.PinKeyException
+import pt.mataventuras.domain.entitlement.Season
 import pt.mataventuras.domain.math.Worksheet
 import pt.mataventuras.domain.math.Worksheets
 import pt.mataventuras.domain.model.ChildProfile
@@ -207,7 +209,7 @@ fun ParentDashboard(
                     }
                 },
                 enabled = !pinBusy,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
             ) {
                 Text(
                     pinSubmitLabel(
@@ -275,6 +277,11 @@ fun ParentDashboard(
                 PrintWorksheetButton(current)
                 PrizeLimitRow(container, current)
             }
+            FamilyPlusPanel(
+                container.entitlements,
+                container.family,
+                Season.of(LocalDate.now().monthValue),
+            )
         }
     }
 }

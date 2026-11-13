@@ -1,3 +1,5 @@
+val premiumUnlocked = providers.gradleProperty("premiumUnlocked").orElse("true").get()
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -13,8 +15,9 @@ android {
         applicationId = "pt.mataventuras.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "0.6.0"
+        versionCode = 9
+        versionName = "0.7.0"
+        buildConfigField("boolean", "PREMIUM_UNLOCKED", premiumUnlocked)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         ndk {

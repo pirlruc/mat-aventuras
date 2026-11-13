@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-11-13
+
+### Added
+
+- Family Plus features sit behind an entitlement gate and ship unlocked. The Gradle property `premiumUnlocked` defaults to true. There is no purchase flow.
+- A parent can choose a world theme. The seasonal prize follows the device date, and the Godot runner receives the theme.
+- Offline language packs for English, Spanish, French, and Brazilian Portuguese, with a parent language picker, Godot strings, and on-device read-aloud. The app still has no INTERNET permission.
+
+### Fixed
+
+- The parent PIN submit control is at least 64 dp tall.
+- TalkBack can leave a Godot prize from a Compose Sair control above the game.
+
 ## [0.6.0] - 2026-11-12
 
 ### Added

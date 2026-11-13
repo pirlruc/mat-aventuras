@@ -31,6 +31,12 @@ object EnginePluginContract {
     /** Parent prize length in seconds. Zero or absent means the host did not set one. */
     const val EXTRA_PRIZE_LIMIT: String = "prize_limit"
 
+    /** Parent-selected runner palette. Absent when themed worlds are locked. */
+    const val EXTRA_WORLD_THEME: String = "world_theme"
+
+    /** Season index from the device date. Absent when seasonal prizes are locked. */
+    const val EXTRA_SEASON: String = "season"
+
     /** Result extra: true when the reward level completed. */
     const val RESULT_FINISHED: String = "finished"
 
