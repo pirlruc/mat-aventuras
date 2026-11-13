@@ -2,8 +2,8 @@
 
 Living log for agents picking up work on this repository.
 
-**Last updated:** 2026-11-12
-**Last agent focus:** Round 7 is on `main` as version 0.6.0 (versionCode 8), tag `0.6.0` on merge `1c97e2d`, [release 0.6.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0). MAT-023 is done. MAT-PRO-001-T1 (heatmap and worksheets) is done. Billing is not in the app. Do not move `0.1.0` through `0.6.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
+**Last updated:** 2026-11-13
+**Last agent focus:** Round 8 is version 0.7.0 (versionCode 9) on `feature-mat-round-8`. Do not tag it from an agent session. 0.6.0 stays on tag `0.6.0` (merge `1c97e2d`). MAT-PRO-001-T1, T2, T3, and T7 are done. T4 and T6 are deferred. T5 stays open. The entitlement gate ships unlocked (`premiumUnlocked` defaults to true). There is no billing SDK. Do not move `0.1.0` through `0.6.0`. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
 
 ---
 
@@ -68,8 +68,9 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-DOC-001 | done | Child-audience policy: offline, zero PII, parent math plus PIN, bands 3–5 and 6–8 |
 | MAT-021 | done | GPL-3.0-only and the Directive (EU) 2019/790 Article 4(3) reservation |
 | MAT-022 | done | Round 6 defects, Room plugin, guardrails 1.15.0. Release [0.5.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.5.0) is on `b3f9ccc` |
-| MAT-023 | done | Answer lock, runner freeze on an enemy hit, larger targets, and a debug prize win for Maestro. Version 0.6.0 is not tagged yet |
-| MAT-PRO-001 | open | Family Plus. Profiles stay free. T1 heatmap and PDF worksheets are done. T2–T6 (worlds, language packs, Play Billing, classroom, workbooks) stay open. No billing code |
+| MAT-023 | done | Answer lock, runner freeze on an enemy hit, larger targets, and a debug prize win for Maestro. Release [0.6.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0) is tagged |
+| MAT-024 | done | PIN submit is at least 64 dp. A Compose Sair overlay sits above the Godot surface |
+| MAT-PRO-001 | open | Family Plus ships unlocked behind `BuildConfig.PREMIUM_UNLOCKED` (`premiumUnlocked` defaults to true). T1–T3 and T7 are done. T4 and T6 are deferred. T5 (classroom) stays open. No billing SDK |
 
 `docs/guardrail-deviations.yml` keeps KT-DOC-001 only. It does not lower a
 number. Compose functions are ignored by detekt complexity and length.
@@ -154,7 +155,7 @@ bash scripts/check-ci-local.sh
   (zero high or critical). With the SDK, coverage is required for all three modules.
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
-- A parent cadence or time-limit write must call `publishProfile`, or the open child keeps the old pace. Godot Sair is drawn on the canvas and is not in the accessibility tree. `.maestro/prize.yaml` leaves with the Back key. Local flows use `scripts/run-maestro.sh` and do not run on GitHub Actions.
+- A parent cadence or time-limit write must call `publishProfile`, or the open child keeps the old pace. Godot still draws Sair on the canvas. TalkBack uses the Compose `prize-exit` overlay on the engine Activity decor view. `.maestro/prize.yaml` leaves with the Back key. `.maestro/world.yaml` selects the night theme. Local flows use `scripts/run-maestro.sh` and do not run on GitHub Actions.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
@@ -254,7 +255,7 @@ bash scripts/check-ci-local.sh
   `MatAventuras` singleton lazily and calls `prizeReady()` on the object.
   `has_method` does not see those Java plugin methods, so a `has_method`
   guard never hides the boot overlay. Do not raise `PrizeBoot.TIMEOUT_MS`.
-- `AnswerGate` stays locked until the lesson recomposes. Do not clear it at the end of the tap handler. An enemy hit uses `PrizeTuning.rules.runner.freeze` and `awaitRelease`, the same as a pit. `debugInstantWin` is `BuildConfig.DEBUG`. Maestro taps `debug-win` after Jogar; the control is absent in release. Dependabot `github-private` stays commented until the Dependabot secret `DEPENDABOT_GITHUB_TOKEN` exists. A live registries list makes the 403 on private submodules fail the whole update.
+- `AnswerGate` stays locked until the lesson recomposes. Do not clear it at the end of the tap handler. An enemy hit uses `PrizeTuning.rules.runner.freeze` and `awaitRelease`, the same as a pit. `debugInstantWin` is `BuildConfig.DEBUG`. Maestro taps `debug-win` after Jogar; the control is absent in release. Dependabot `github-private` is live and attached to gitsubmodule, uv, and github-actions. The Dependabot secret `DEPENDABOT_GITHUB_TOKEN` exists. Do not attach that registry to gradle or docker.
 - A parent prize limit is `prize_limit` on the reward Intent. `PrizeLimit` arms every host from `SystemClock.elapsedRealtime()`. Zero or a missing extra does not finish the activity. The Godot `Host` reads `prizeLimitSeconds()` and stops on `Time.get_ticks_msec()`. Compose prizes use `Random.Default` unless the test passes a seed. The correct-answer tag is on only when the process is debuggable or Robolectric. A finished Compose prize must `setResult` with `EngineLauncher.RESULT_FINISHED`. Lesson speech, soup, memory, and the clock face key on `exerciseId`, not the prompt string. `PrizeIntro` releases its `SpeechEngine` when the card leaves the window. `Host.intro_hold()` freezes prize scripts until Jogar. Kart `steer_buttons` ignore full-screen touches. Do not lower the Kover floors.
 - A Keystore or IO failure while reading the PIN opens the hold-and-sum reset (`6 + 7`). The parent window sets `FLAG_SECURE` while that screen is composed. Lockout stores both a wall-clock deadline and `lockedUntilElapsedMs`. `PinKeyException` is an `IllegalStateException`; catch it first.
 - Prize lives, speeds, and hit tests live only in
@@ -268,7 +269,7 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Version 0.6.0 (versionCode 8) is tagged `0.6.0` on merge `1c97e2d`. Do not move `0.1.0` through `0.6.0`. Release [0.5.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.5.0) stays on tag object `6bd3a223` (`b3f9ccc`). Release [0.6.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0) is the signed APK. Dispatch `release.yml` with `--ref` set to the tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T2 through T6 stay open. Do not add billing, ads, or a new INTERNET permission.
+1. Version 0.7.0 (versionCode 9) is the next release. Do not tag it until the release notes are published, and do not move `0.1.0` through `0.6.0`. Release [0.6.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0) stays on merge `1c97e2d`. Dispatch `release.yml` with `--ref` set to an existing tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T4 and T6 are deferred. T5 stays open. The entitlement gate is the only switch. Do not add billing, ads, or a new INTERNET permission.
 2. MAT-015 is done. The 0.3.2 APK and the 0.3.1 APK both verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`.
 3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
 4. The emulator job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only). Run 41358345053 failed because the runner had no KVM permission (`-accel off`), and the multi-line `script:` never executed under `sh -c`. Do not record that as a boot timeout. androiddevops 1.2.0 is the fix.
@@ -280,4 +281,5 @@ bash scripts/check-ci-local.sh
 
 *Last updated: 2026-11-12 (Compose prize win result, prompt speech after a missed prize, queued TTS, kart and runner controls, memory flip, GPL-3.0-only).*
 *Last updated: 2026-11-12 (signed release 0.5.0, emulator dispatch green).*
+*Last updated: 2026-11-13 (Family Plus entitlement gate, themed worlds, offline language packs, version 0.7.0 versionCode 9, not tagged).*
 *Last updated: 2026-11-12 (signed release 0.6.0 on tag 0.6.0, merge 1c97e2d).*

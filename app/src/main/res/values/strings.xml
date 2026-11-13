@@ -64,4 +64,24 @@
     <string name="hello_name">Olá, %1$s!</string>
     <string name="points_count">%1$d pontos</string>
     <string name="lets_go_with">Vamos com o %1$s!</string>
+    <string name="family_locked">Esta opção não está neste aparelho.</string>
+    <string name="world_theme">Mundo</string>
+    <string name="theme_meadow">Prado</string>
+    <string name="theme_sunset">Pôr do sol</string>
+    <string name="theme_sea">Mar</string>
+    <string name="theme_night">Noite</string>
+    <string name="season_line">Prémio da época: %1$s</string>
+    <string name="season_winter">Inverno</string>
+    <string name="season_spring">Primavera</string>
+    <string name="season_summer">Verão</string>
+    <string name="season_autumn">Outono</string>
+    <string name="language_heading">Língua</string>
+    <string name="lang_pt">Português</string>
+    <string name="lang_en">English</string>
+    <string name="lang_es">Español</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_br">Português (Brasil)</string>
+    <string name="godot_exit">Sair</string>
+    <string name="godot_boost">Impulso</string>
+    <string name="godot_play">Jogar</string>
 </resources>

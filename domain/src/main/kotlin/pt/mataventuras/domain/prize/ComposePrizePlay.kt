@@ -50,16 +50,34 @@ object PrizeOffers {
         age: AgeBand,
         random: Random = Random.Default,
     ): PrizeOffer {
+        val list = offers(age)
+        return list[random.nextInt(list.size)]
+    }
+
+    /**
+     * Prize at [index] for [age]. The same index always returns the same prize.
+     */
+    fun pickAt(
+        age: AgeBand,
+        index: Int,
+    ): PrizeOffer {
+        val list = offers(age)
+        return list[index.mod(list.size)]
+    }
+
+    /**
+     * Every prize [age] can open, Godot first and then Compose.
+     */
+    fun offers(age: AgeBand): List<PrizeOffer> {
         val godot = RewardCatalog.gamesFor(age, EngineKind.TWO_D).map { PrizeOffer.Godot(it) }
-        val kart =
-            if (age == AgeBand.SIX_TO_EIGHT) {
-                RewardCatalog.gamesFor(age, EngineKind.THREE_D).map { PrizeOffer.Godot(it) }
-            } else {
-                emptyList()
-            }
+        val kart = kartOffers(age)
         val compose = composePrizes(age).map { PrizeOffer.Compose(it) }
-        val offers = godot + kart + compose
-        return offers[random.nextInt(offers.size)]
+        return godot + kart + compose
+    }
+
+    private fun kartOffers(age: AgeBand): List<PrizeOffer> {
+        if (age != AgeBand.SIX_TO_EIGHT) return emptyList()
+        return RewardCatalog.gamesFor(age, EngineKind.THREE_D).map { PrizeOffer.Godot(it) }
     }
 
     /**

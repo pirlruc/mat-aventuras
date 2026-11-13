@@ -2,17 +2,22 @@ package pt.mataventuras.app.speech
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import android.speech.tts.Voice
 import java.util.Locale
+import pt.mataventuras.app.entitlement.FamilySettings
 import pt.mataventuras.app.ui.languageSupported
 import pt.mataventuras.app.ui.shouldSpeak
 
 /**
- * On-device TTS in Portuguese from Portugal. No cloud voice services.
+ * On-device read-aloud for the selected language pack. A network voice is never used.
  */
 class SpeechEngine(
     context: Context,
+    private val voiceLookup: (() -> Set<Voice>?)? = null,
+    private val languageResult: ((TextToSpeech) -> Int)? = null,
 ) : TextToSpeech.OnInitListener {
     private val tts = TextToSpeech(context.applicationContext, this)
+    private val locale = Locale.forLanguageTag(FamilySettings(context.applicationContext).language())
     private var ready = false
     private var released = false
     private var pending: String? = null
@@ -22,12 +27,13 @@ class SpeechEngine(
             pending = null
             return
         }
-        val pt = Locale.forLanguageTag("pt-PT")
-        val result = tts.setLanguage(pt)
-        ready = languageSupported(result)
+        val result = languageResult?.invoke(tts) ?: tts.setLanguage(locale)
+        val voices = if (voiceLookup != null) voiceLookup.invoke() else voicesOrNull { tts.voices }
+        ready = canSpeakOffline(languageSupported(result), offlineVoice(voices, locale))
         tts.setSpeechRate(0.92f)
         val queued = pending
         pending = null
+        if (!ready) return
         if (queued != null) speak(queued)
     }
 
@@ -39,7 +45,7 @@ class SpeechEngine(
     }
 
     /**
-     * Speaks [text] in pt-PT when the engine is ready.
+     * Speaks [text] when an offline voice for the pack is ready.
      */
     fun speak(text: String) {
         if (released) return
@@ -69,4 +75,42 @@ class SpeechEngine(
         tts.stop()
         tts.shutdown()
     }
+}
+
+/**
+ * Voices from [read], or null when the engine cannot list them.
+ */
+internal fun voicesOrNull(read: () -> Set<Voice>?): Set<Voice>? =
+    try {
+        read()
+    } catch (_: Exception) {
+        null
+    }
+
+/**
+ * True when [voices] contains an installed offline voice for [locale]'s language.
+ */
+internal fun offlineVoice(
+    voices: Set<Voice>?,
+    locale: Locale,
+): Boolean {
+    if (voices == null) return false
+    return voices.any { voice -> voiceMatches(voice, locale) }
+}
+
+/**
+ * Speak only when the language is installed and an offline voice exists.
+ */
+internal fun canSpeakOffline(
+    languageOk: Boolean,
+    offline: Boolean,
+): Boolean = languageOk && offline
+
+private fun voiceMatches(
+    voice: Voice,
+    locale: Locale,
+): Boolean {
+    if (voice.locale.language != locale.language) return false
+    if (voice.isNetworkConnectionRequired) return false
+    return !voice.features.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)
 }

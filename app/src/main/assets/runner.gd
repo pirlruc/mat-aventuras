@@ -48,8 +48,15 @@ func _ready() -> void:
 	speed = Host.tune("runner", "pixelSpeed")
 	gravity = Host.tune("runner", "pixelGravity")
 	jump_v = Host.tune("runner", "pixelJump")
-	theme = Time.get_ticks_msec() % 4
+	var chosen := Host.world_theme()
+	if chosen >= 0:
+		theme = posmod(chosen, 4)
+	else:
+		theme = Time.get_ticks_msec() % 4
 	_cache_palette()
+	var season := Host.season_index()
+	if season >= 0:
+		_apply_season(season)
 	Host.fit_viewport(self)
 	var back_layer := CanvasLayer.new()
 	back_layer.layer = -20
@@ -73,6 +80,11 @@ func _ready() -> void:
 	RenderingServer.set_default_clear_color(pal_sky)
 	_fit_world()
 	Host.mark_ready()
+
+
+func _apply_season(season: int) -> void:
+	var tints := [Color("E3F2FD"), Color("C8E6C9"), Color("FFF9C4"), Color("FFE0B2")]
+	pal_sky = pal_sky.lerp(tints[posmod(season, 4)], 0.25)
 
 
 func _cache_palette() -> void:

@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import pt.mataventuras.app.engine.GodotRuntime
+import pt.mataventuras.app.entitlement.BuildConfigEntitlements
+import pt.mataventuras.app.entitlement.FamilySettings
 import pt.mataventuras.data.local.MIGRATION_1_2
 import pt.mataventuras.data.local.MIGRATION_2_3
 import pt.mataventuras.data.local.MIGRATION_3_4
@@ -16,6 +18,7 @@ import pt.mataventuras.data.local.MatAventurasDatabase
 import pt.mataventuras.data.pin.PinRepository
 import pt.mataventuras.data.repository.LocalRepository
 import pt.mataventuras.data.session.LastProfileStore
+import pt.mataventuras.domain.entitlement.Entitlements
 import pt.mataventuras.domain.math.ExerciseGenerator
 import pt.mataventuras.domain.parent.ParentAnalytics
 import pt.mataventuras.domain.parent.PinPolicy
@@ -76,6 +79,12 @@ class AppContainer(
 
     /** Parental summary. */
     val analytics = ParentAnalytics()
+
+    /** Family Plus flag. Tests replace it. The shipping build reads BuildConfig. */
+    var entitlements: Entitlements = BuildConfigEntitlements()
+
+    /** Theme and language stored on this device. */
+    val family = FamilySettings(context.applicationContext)
 
     private val profileTouchFlow = MutableSharedFlow<Long>(extraBufferCapacity = 8)
 

@@ -1,6 +1,7 @@
 package pt.mataventuras.app
 
 import android.app.Application
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Build
 import java.io.File
@@ -10,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.engine.GodotRuntime
+import pt.mataventuras.app.entitlement.AppLanguage
 import pt.mataventuras.app.ui.debugAnswerTags
 import pt.mataventuras.domain.engine.EnginePluginContract
 
@@ -24,8 +26,13 @@ class MatAventurasApp : Application() {
     lateinit var container: AppContainer
         private set
 
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(AppLanguage.wrap(base))
+    }
+
     override fun onCreate() {
         super.onCreate()
+        AppLanguage.wrap(this)
         debugAnswerTags = debugAnswersFor(fingerprintOrEmpty(Build.FINGERPRINT), applicationInfo.flags)
         debugInstantWin = BuildConfig.DEBUG
         bindHostGraph()

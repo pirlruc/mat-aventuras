@@ -1,16 +1,16 @@
 # Dependabot (SC-DEP-001/002/003). Seeded from github-scaffold; this repo added Gradle.
 #
-# github-private stays commented until a Dependabot secret DEPENDABOT_GITHUB_TOKEN
-# exists (Settings → Secrets and variables → Dependabot, not Actions). Private
-# submodule fetches return 403 until that secret is set. Do not uncomment this
-# block before then, and do not attach a live registries list to an updates entry.
-#
-# registries:
-#   github-private:
-#     type: git
-#     url: https://github.com
-#     username: x-access-token
-#     password: ${{secrets.DEPENDABOT_GITHUB_TOKEN}}
+# github-private uses the Dependabot secret DEPENDABOT_GITHUB_TOKEN
+# (Settings → Secrets and variables → Dependabot, not Actions). It is attached
+# to gitsubmodule, uv, and github-actions. Gradle and Docker stay on public
+# registries.
+
+registries:
+  github-private:
+    type: git
+    url: https://github.com
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_GITHUB_TOKEN}}
 
 version: 2
 
@@ -28,6 +28,8 @@ multi-ecosystem-groups:
 updates:
   - package-ecosystem: github-actions
     directory: /
+    registries:
+      - github-private
     patterns: ["*"]
     multi-ecosystem-group: all-dependencies
     cooldown:
@@ -40,6 +42,8 @@ updates:
       default-days: 7
   - package-ecosystem: uv
     directory: /
+    registries:
+      - github-private
     patterns: ["*"]
     multi-ecosystem-group: all-dependencies
     cooldown:
@@ -55,10 +59,11 @@ updates:
       - dependency-name: "eclipse-temurin"
         versions: ["22", "23", "24", "26"]
 
-  # Submodule bumps stay out of the grouped PR (SC-DEP-004). Registries stay
-  # commented in the scaffold seed until a Dependabot secret exists.
+  # Submodule bumps stay out of the grouped PR (SC-DEP-004).
   - package-ecosystem: gitsubmodule
     directory: /
+    registries:
+      - github-private
     schedule:
       interval: monthly
       time: "06:00"

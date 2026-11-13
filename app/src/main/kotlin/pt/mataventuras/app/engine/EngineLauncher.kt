@@ -114,6 +114,7 @@ object EngineLauncher {
                 source.getStringExtra(EnginePluginContract.EXTRA_PRIZE_LIMIT).orEmpty(),
             )
             putExtra(EXTRA_GODOT_RELAUNCH, true)
+            EngineExtras.copyFamily(source, this)
         }
     }
 

@@ -106,6 +106,24 @@ The same seed repeats the same list. The app writes that list with
 `android.graphics.pdf.PdfDocument` and the parent saves it through
 `ACTION_CREATE_DOCUMENT`. No storage permission is added.
 
+## Family Plus entitlement
+
+`PremiumFeature` lists `THEMED_WORLDS`, `SEASONAL_PRIZES`, and
+`LANGUAGE_PACKS`. `BuildConfigEntitlements` reads
+`BuildConfig.PREMIUM_UNLOCKED`. The Gradle property `premiumUnlocked`
+defaults to true in every build, so these features ship unlocked. There
+is no purchase flow and no billing SDK. When a feature is locked, the
+child UI shows nothing. A neutral note appears only behind the parent PIN.
+
+The parent dashboard stores the runner theme on the device. The seasonal
+prize variant comes from the device date (`SeasonalCalendar`) and is
+stable for that date. The Godot runner reads the theme extra. Bundled
+string packs are `pt-PT` (default), `en`, `es`, `fr`, and `pt-BR`
+(`locales_config.xml`). The language picker is behind the parent PIN and
+covers Godot HUD strings. Read-aloud uses `android.speech.tts.TextToSpeech`
+with a `TTS_SERVICE` queries intent. If no offline voice is installed,
+read-aloud is skipped. The app still declares no `INTERNET` permission.
+
 ## 2.5D off-road race (native Canvas)
 
 `OffroadRacerEngine` simulates a Super Off Road-style dirt loop: distance
@@ -148,7 +166,7 @@ so physics is unit-tested without an emulator.
 All user data stays on the device. The app declares **no `INTERNET`
 permission**. No Retrofit, Firebase, or Play Games.
 
-### Room schema (`mat_aventuras.db`, version 3)
+### Room schema (`mat_aventuras.db`, version 4)
 
 | Table | Role |
 | --- | --- |
