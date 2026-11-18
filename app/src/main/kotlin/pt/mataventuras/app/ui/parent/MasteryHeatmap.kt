@@ -24,10 +24,14 @@ import pt.mataventuras.domain.parent.MasteryCell
  * Module-by-topic grid. Colour and text both name the mastery band.
  */
 @Composable
-internal fun MasteryHeatmap(cells: List<MasteryCell>) {
-    Text(stringResource(R.string.mastery_map), fontWeight = FontWeight.Bold)
+internal fun MasteryHeatmap(
+    cells: List<MasteryCell>,
+    heading: Boolean = true,
+) {
+    if (heading) Text(stringResource(R.string.mastery_map), fontWeight = FontWeight.Bold)
     if (cells.isEmpty()) {
-        Text(stringResource(R.string.no_sessions))
+        val empty = if (heading) R.string.no_sessions else R.string.classroom_no_play
+        Text(stringResource(empty))
         return
     }
     cells.groupBy { it.topic }.forEach { (topic, row) ->

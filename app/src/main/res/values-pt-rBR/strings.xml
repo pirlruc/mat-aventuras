@@ -84,4 +84,27 @@
     <string name="godot_exit">Sair</string>
     <string name="godot_boost">Impulso</string>
     <string name="godot_play">Jogar</string>
+
+    <string name="godot_won">Você ganhou!</string>
+    <string name="godot_game_over">Fim de jogo</string>
+    <string name="godot_off_track">Volte para a pista!</string>
+    <string name="godot_grew">Você cresceu!</string>
+    <string name="godot_powered">Transformado!</string>
+    <string name="godot_star">Estrela!</string>
+    <string name="godot_kart_hud" formatted="false">Esquerda · %s · Direita\nPasse por baixo da META\nVolta %d de %d\nLugar %d de %d\nArcos %d/%d%s</string>
+    <string name="godot_invaders_play" formatted="false">Deslize para mover · toque para atirar\nNaves %d/%d\n%s</string>
+    <string name="godot_invaders_won" formatted="false">Você ganhou!\nNaves %d/%d</string>
+    <string name="godot_climb_play" formatted="false">Setas para andar. Pule para subir.\nLetras %d/5 · %s%s</string>
+    <string name="godot_climb_won">Você ganhou!\nLetras 5/5</string>
+    <string name="godot_chomp_play" formatted="false">Deslize para o lado das bolinhas\nFaltam %d · %s%s</string>
+    <string name="godot_chomp_won">Você ganhou!\nFaltam 0</string>
+    <string name="godot_runner_play" formatted="false">Setas para andar. Pule.\nMoedas %d/%d%s</string>
+    <string name="voice_greeting_young">Olá! Eu sou o %1$s. Vamos brincar com números?</string>
+    <string name="voice_greeting_older">Olá, eu sou o %1$s. Pronto para um desafio de matemática?</string>
+    <string name="voice_exit_young">Quer sair do jogo?</string>
+    <string name="voice_exit_older">Quer sair deste desafio?</string>
+    <string name="classroom_heading">Sala de aula</string>
+    <string name="classroom_no_play">Sem atividades nesta criança.</string>
+    <string name="classroom_csv">Exportar CSV</string>
+    <string name="classroom_pdf">Exportar PDF</string>
 </resources>

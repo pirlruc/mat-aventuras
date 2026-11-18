@@ -33,6 +33,13 @@ import pt.mataventuras.domain.model.Mascot
  * Compose host. Reward engines launch as separate Activities.
  */
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(
+            pt.mataventuras.app.entitlement.AppLanguage
+                .wrap(newBase),
+        )
+    }
+
     private lateinit var speech: SpeechEngine
     private var celebrateWin by mutableStateOf(false)
     private var prizeClosed by mutableIntStateOf(0)

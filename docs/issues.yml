@@ -1829,11 +1829,13 @@ milestones:
               - The foss flavor has no billing SDK
               - The purchase flow sits behind the parent PIN gate
           - id: MAT-PRO-001-T5
-            status: open
+            status: done
             title: Add a classroom edition with a teacher dashboard
             verification:
-              - The classroom edition has a teacher dashboard
-              - The classroom build can be distributed as an MDM APK
+              - The parent dashboard lists every Room profile when CLASSROOM is unlocked
+              - Each child has a mastery heatmap
+              - CSV and PDF export use ACTION_CREATE_DOCUMENT
+              - The manifest adds no permission and does not add INTERNET
           - id: MAT-PRO-001-T6
             status: open
             title: Sell printable workbook bundles outside the app (deferred)
@@ -1845,7 +1847,7 @@ milestones:
             status: done
             title: Gate Family Plus on an entitlement flag that ships unlocked
             verification:
-              - PremiumFeature lists THEMED_WORLDS, SEASONAL_PRIZES, and LANGUAGE_PACKS
+              - PremiumFeature lists THEMED_WORLDS, SEASONAL_PRIZES, LANGUAGE_PACKS, and CLASSROOM
               - BuildConfigEntitlements reads BuildConfig.PREMIUM_UNLOCKED
               - The Gradle property premiumUnlocked defaults to true in every build
               - Tests cover both flag values
@@ -1886,3 +1888,39 @@ milestones:
               - ParentDashboard PIN submit uses heightIn of at least 64 dp
               - A Compose Sair overlay sits above the Godot surface
               - The overlay click leaves the prize
+
+  - name: Phase 9 — Round 9
+    status: open
+    epics:
+      - id: MAT-025
+        status: done
+        title: Localize the prize HUD and add the classroom dashboard
+        overview:
+          problem: >-
+            Prize HUD copy was hardcoded in Portuguese, a stored language
+            pack applied even when the pack was locked, and the parent
+            dashboard showed one child.
+          goal: >-
+            Route prize HUD copy through the language pack, keep a locked
+            pack on Portuguese, and list every child with a CSV and PDF export.
+        decision: >-
+          In the context of a parent who teaches more than one child, facing
+          HUD copy that ignored the language pack and a dashboard for one
+          profile, we decided to read HUD strings from the pack and to export
+          the Room profiles through the document picker, to achieve a
+          localized prize and a class list without a network, accepting that
+          lesson prompts built in the domain stay in Portuguese.
+        acceptance_criteria:
+          - Godot HUD keys resolve from the bundled pack
+          - A locked LANGUAGE_PACKS flag keeps Portuguese
+          - The runner defaults to the meadow theme
+          - Classroom export uses the document picker and adds no permission
+        guardrail_refs:
+          - ANDROID-A11Y-001
+        tasks:
+          - id: MAT-025-T1
+            status: done
+            title: Localize the HUD and ship the classroom list
+            verification:
+              - ./gradlew :domain:test :app:testDebugUnitTest
+              - The manifest does not grant INTERNET

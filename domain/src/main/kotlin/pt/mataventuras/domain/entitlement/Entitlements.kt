@@ -8,6 +8,7 @@ enum class PremiumFeature {
     THEMED_WORLDS,
     SEASONAL_PRIZES,
     LANGUAGE_PACKS,
+    CLASSROOM,
 }
 
 /**

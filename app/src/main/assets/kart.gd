@@ -331,10 +331,11 @@ func _update_hud(show_boost: bool) -> void:
 	var boost := Host.hud_text("boost", "Impulso")
 	var extra := "\n%s!" % boost if show_boost else ""
 	if absf(lateral) > _sample(widths, distance):
-		extra = "\nVolta à pista!"
-	hud.text = "Esquerda · %s · Direita\nPassa por baixo da META\nVolta %d de %d\nLugar %d de %d\nArcos %d/%d%s" % [
-		boost, shown, laps_target, _place(), rivals.size() + 1, gates, gates_target, extra
-	]
+		extra = "\n%s" % Host.hud_text("off_track", "Volta à pista!")
+	hud.text = Host.hud_text(
+		"kart_hud",
+		"Esquerda · %s · Direita\nPassa por baixo da META\nVolta %d de %d\nLugar %d de %d\nArcos %d/%d%s"
+	) % [boost, shown, laps_target, _place(), rivals.size() + 1, gates, gates_target, extra]
 
 
 func _finish() -> void:

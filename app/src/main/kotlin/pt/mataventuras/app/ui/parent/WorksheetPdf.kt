@@ -69,6 +69,39 @@ internal fun paintLines(
 }
 
 /**
+ * Writes [lines] as one PDF page.
+ */
+internal fun writeLinesPdf(
+    lines: List<String>,
+    output: OutputStream,
+) {
+    val document = PdfDocument()
+    try {
+        val info = PdfDocument.PageInfo.Builder(595, 842, 1).create()
+        val page = document.startPage(info)
+        paintLines(page.canvas, lines)
+        document.finishPage(page)
+        document.writeTo(output)
+    } finally {
+        document.close()
+    }
+}
+
+/**
+ * Writes [text] when the parent picked a document. A missing stream is a no-op.
+ */
+internal fun writeTextIfReady(
+    text: String,
+    uri: Uri?,
+    open: (Uri) -> OutputStream?,
+): Boolean {
+    if (uri == null) return false
+    val stream = open(uri) ?: return false
+    stream.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+    return true
+}
+
+/**
  * Writes [worksheet] when the parent picked a document. A missing stream is a no-op.
  */
 internal fun writeWorksheetIfReady(

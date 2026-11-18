@@ -38,11 +38,12 @@ internal fun FamilyPlusPanel(
     val worlds = entitlements.isUnlocked(PremiumFeature.THEMED_WORLDS)
     val seasonal = entitlements.isUnlocked(PremiumFeature.SEASONAL_PRIZES)
     val languages = entitlements.isUnlocked(PremiumFeature.LANGUAGE_PACKS)
+    val classroom = entitlements.isUnlocked(PremiumFeature.CLASSROOM)
     var theme by remember { mutableStateOf(settings.theme()) }
     var language by remember { mutableStateOf(settings.language()) }
     val activity = LocalActivity.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (!worlds || !seasonal || !languages) {
+        if (!worlds || !seasonal || !languages || !classroom) {
             Text(stringResource(R.string.family_locked))
         }
         if (worlds) {

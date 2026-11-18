@@ -84,4 +84,27 @@
     <string name="godot_exit">Quitter</string>
     <string name="godot_boost">Impulsion</string>
     <string name="godot_play">Jouer</string>
+
+    <string name="godot_won">Gagné !</string>
+    <string name="godot_game_over">Fin de partie</string>
+    <string name="godot_off_track">Reviens sur la piste !</string>
+    <string name="godot_grew">Tu as grandi !</string>
+    <string name="godot_powered">Transformé !</string>
+    <string name="godot_star">Étoile !</string>
+    <string name="godot_kart_hud" formatted="false">Gauche · %s · Droite\nPasse sous l\'ARRIVÉE\nTour %d sur %d\nPlace %d sur %d\nArches %d/%d%s</string>
+    <string name="godot_invaders_play" formatted="false">Glisse pour bouger · touche pour tirer\nVaisseaux %d/%d\n%s</string>
+    <string name="godot_invaders_won" formatted="false">Gagné !\nVaisseaux %d/%d</string>
+    <string name="godot_climb_play" formatted="false">Flèches pour marcher. Saute pour monter.\nLettres %d/5 · %s%s</string>
+    <string name="godot_climb_won">Gagné !\nLettres 5/5</string>
+    <string name="godot_chomp_play" formatted="false">Glisse vers les billes\nReste %d · %s%s</string>
+    <string name="godot_chomp_won">Gagné !\nReste 0</string>
+    <string name="godot_runner_play" formatted="false">Flèches pour marcher. Saute.\nPièces %d/%d%s</string>
+    <string name="voice_greeting_young">Bonjour ! Je suis %1$s. On joue avec les nombres ?</string>
+    <string name="voice_greeting_older">Bonjour, je suis %1$s. Prêt pour un défi de maths ?</string>
+    <string name="voice_exit_young">Tu veux quitter le jeu ?</string>
+    <string name="voice_exit_older">Tu veux quitter ce défi ?</string>
+    <string name="classroom_heading">Classe</string>
+    <string name="classroom_no_play">Pas d\'activités pour cet enfant.</string>
+    <string name="classroom_csv">Exporter CSV</string>
+    <string name="classroom_pdf">Exporter PDF</string>
 </resources>

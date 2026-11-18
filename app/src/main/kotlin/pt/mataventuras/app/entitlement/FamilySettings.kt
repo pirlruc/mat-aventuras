@@ -21,6 +21,7 @@ class BuildConfigEntitlements(
             PremiumFeature.THEMED_WORLDS,
             PremiumFeature.SEASONAL_PRIZES,
             PremiumFeature.LANGUAGE_PACKS,
+            PremiumFeature.CLASSROOM,
             -> unlocked
         }
 }
@@ -87,15 +88,21 @@ object AppLanguage {
     /**
      * Context whose configuration locale is the stored pack.
      */
-    fun wrap(base: Context): Context {
-        val tag = FamilySettings(base).language()
+    fun wrap(
+        base: Context,
+        entitlements: Entitlements = BuildConfigEntitlements(),
+    ): Context {
+        val stored = FamilySettings(base).language()
+        val tag =
+            if (entitlements.isUnlocked(PremiumFeature.LANGUAGE_PACKS)) {
+                stored
+            } else {
+                LanguagePacks.PORTUGUESE
+            }
         val locale = Locale.forLanguageTag(tag)
-        Locale.setDefault(locale)
         val config = android.content.res.Configuration(base.resources.configuration)
         config.setLocales(LocaleList.forLanguageTags(tag))
         config.setLayoutDirection(locale)
-        @Suppress("DEPRECATION")
-        base.resources.updateConfiguration(config, base.resources.displayMetrics)
         return base.createConfigurationContext(config)
     }
 }

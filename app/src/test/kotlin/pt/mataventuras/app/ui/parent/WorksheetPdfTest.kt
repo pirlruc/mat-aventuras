@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.net.Uri
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import java.io.ByteArrayOutputStream
 import org.junit.Assert.assertEquals
@@ -79,6 +80,31 @@ class WorksheetPdfTest {
         compose.onNodeWithText("80 ou mais").assertExists()
         compose.onNodeWithText("Abaixo de 50").assertExists()
         compose.onNodeWithText("50 a 79").assertExists()
+    }
+
+    @Test
+    fun classroomExportWritesTheCsvAndAPdf() {
+        val csv = ByteArrayOutputStream()
+        assertTrue(writeTextIfReady("Ana,ADDITION", Uri.parse("content://local/turma.csv")) { csv })
+        assertEquals("Ana,ADDITION", csv.toByteArray().decodeToString())
+        assertFalse(writeTextIfReady("x", null) { csv })
+        assertFalse(writeTextIfReady("x", Uri.parse("content://local/missing")) { null })
+        assertTrue(runCatching { writeClassroomPdf("Ana", null) { csv } }.isSuccess)
+        assertTrue(runCatching { writeClassroomPdf("Ana", Uri.parse("content://local/missing")) { null } }.isSuccess)
+        try {
+            writeClassroomPdf("Ana", Uri.parse("content://local/turma.pdf")) { ByteArrayOutputStream() }
+        } catch (closed: IllegalStateException) {
+            assertEquals("document is closed!", closed.message)
+        }
+        compose.setContent {
+            ClassroomPanel(
+                androidx.test.core.app.ApplicationProvider
+                    .getApplicationContext<pt.mataventuras.app.MatAventurasApp>()
+                    .container,
+                false,
+            )
+        }
+        assertEquals(0, compose.onAllNodesWithText("Sala de aula").fetchSemanticsNodes().size)
     }
 
     @Test

@@ -18,3 +18,42 @@ appId: pt.mataventuras.app
 - extendedWaitUntil:
     visible: "● Noite"
     timeout: 10000
+- scrollUntilVisible:
+    element: "5 atividades"
+    direction: DOWN
+- tapOn: "5 atividades"
+- extendedWaitUntil:
+    visible: "Prémio a cada 5 atividades"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Fechar"
+    direction: UP
+    visibilityPercentage: 50
+    timeout: 15000
+- tapOn: "Fechar"
+- scrollUntilVisible:
+    element: "Números com o Cão Herói"
+    direction: UP
+    visibilityPercentage: 50
+    timeout: 20000
+- tapOn: "Números com o Cão Herói"
+- repeat:
+    times: 8
+    while:
+      notVisible: "(?i).*jogar.*"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "correct-answer"
+          direction: DOWN
+          visibilityPercentage: 50
+          timeout: 15000
+      - tapOn:
+          id: "correct-answer"
+- extendedWaitUntil:
+    visible: "(?i).*jogar.*"
+    timeout: 40000
+- tapOn: "(?i).*jogar.*"
+- extendedWaitUntil:
+    visible: "Sair"
+    timeout: 20000

@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-11-18
+
+### Added
+
+- The parent dashboard lists every child, with a mastery heatmap, and exports a class CSV or PDF through the document picker. There is no new permission and no INTERNET permission.
+- Godot prize HUD copy follows the parent language pack. A locked language pack stays on Portuguese from Portugal. The runner theme defaults to the meadow when no extra is passed.
+
 ## [0.7.0] - 2026-11-13
 
 ### Added
