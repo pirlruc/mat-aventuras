@@ -56,6 +56,7 @@ import pt.mataventuras.app.ui.pinPrompt
 import pt.mataventuras.app.ui.pinSubmitLabel
 import pt.mataventuras.app.ui.rememberBringIntoViewOnFocus
 import pt.mataventuras.data.pin.PinKeyException
+import pt.mataventuras.domain.entitlement.PremiumFeature
 import pt.mataventuras.domain.entitlement.Season
 import pt.mataventuras.domain.math.Worksheet
 import pt.mataventuras.domain.math.Worksheets
@@ -281,6 +282,10 @@ fun ParentDashboard(
                 container.entitlements,
                 container.family,
                 Season.of(LocalDate.now().monthValue),
+            )
+            ClassroomPanel(
+                container,
+                container.entitlements.isUnlocked(PremiumFeature.CLASSROOM),
             )
         }
     }

@@ -28,6 +28,7 @@ import pt.mataventuras.app.ui.HomeNav
 import pt.mataventuras.app.ui.theme.LocalUiTokens
 import pt.mataventuras.app.ui.theme.titleSpSize
 import pt.mataventuras.app.ui.usesIconNav
+import pt.mataventuras.domain.model.AgeBand
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LearningModule
 import pt.mataventuras.domain.model.mascotFor
@@ -48,8 +49,17 @@ fun HomeScreen(
 ) {
     val tokens = LocalUiTokens.current
     val modules = modulesFor(profile.ageGroup)
+    val greeting =
+        stringResource(
+            if (profile.ageGroup == AgeBand.THREE_TO_FIVE) {
+                R.string.voice_greeting_young
+            } else {
+                R.string.voice_greeting_older
+            },
+            profile.favouriteMascot.displayName,
+        )
     LaunchedEffect(profile.id) {
-        onSpeak(VoiceScripts.greeting(profile.favouriteMascot, profile.ageGroup))
+        onSpeak(greeting)
     }
     Column(
         modifier =

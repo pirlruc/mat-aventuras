@@ -135,6 +135,16 @@ fun LessonScreen(
     val cues = remember { AnswerCuePlayer.device() }
     var flashCorrect by remember { mutableStateOf(true) }
     var flashTick by remember { mutableIntStateOf(0) }
+    val wellDone = stringResource(R.string.well_done)
+    val tryAgain = stringResource(R.string.try_again)
+    val exitSpoken =
+        stringResource(
+            if (profile.ageGroup == AgeBand.THREE_TO_FIVE) {
+                R.string.voice_exit_young
+            } else {
+                R.string.voice_exit_older
+            },
+        )
 
     DisposableEffect(cues) { onDispose { cues.release() } }
     val leaveLesson: () -> Unit = {
@@ -146,7 +156,7 @@ fun LessonScreen(
     BackHandler {
         if (LessonFlow.shouldAskExitConfirm(profile.ageGroup, confirmingExit)) {
             confirmingExit = true
-            onSpeak(VoiceScripts.confirmExit(profile.ageGroup))
+            onSpeak(exitSpoken)
         } else {
             leaveLesson()
         }
@@ -201,7 +211,7 @@ fun LessonScreen(
         flashTick += 1
         val gentle = !correct && profile.ageGroup == AgeBand.THREE_TO_FIVE
         cues.play(correct, gentle) { code -> view.performHapticFeedback(code) }
-        onSpeak(if (correct) VoiceScripts.WELL_DONE else VoiceScripts.TRY_AGAIN)
+        onSpeak(if (correct) wellDone else tryAgain)
         val delta = container.rewards.pointsForAttempt(correct, profile.ageGroup)
         points = container.rewards.applyPoints(points, delta)
         val ticket = pointsTicket.incrementAndGet()
@@ -451,6 +461,10 @@ internal fun LessonExitBar(
     onStay: () -> Unit,
     onLeave: () -> Unit,
 ) {
+    val exitSpoken =
+        stringResource(
+            if (ageGroup == AgeBand.THREE_TO_FIVE) R.string.voice_exit_young else R.string.voice_exit_older,
+        )
     Column(
         modifier =
             Modifier
@@ -462,7 +476,7 @@ internal fun LessonExitBar(
             onClick = {
                 if (LessonFlow.shouldAskExitConfirm(ageGroup, confirming)) {
                     onConfirm()
-                    onSpeak(VoiceScripts.confirmExit(ageGroup))
+                    onSpeak(exitSpoken)
                 } else {
                     onLeave()
                 }

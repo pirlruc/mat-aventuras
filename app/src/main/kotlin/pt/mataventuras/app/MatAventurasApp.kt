@@ -32,7 +32,6 @@ class MatAventurasApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AppLanguage.wrap(this)
         debugAnswerTags = debugAnswersFor(fingerprintOrEmpty(Build.FINGERPRINT), applicationInfo.flags)
         debugInstantWin = BuildConfig.DEBUG
         bindHostGraph()

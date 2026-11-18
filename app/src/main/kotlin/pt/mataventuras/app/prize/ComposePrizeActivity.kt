@@ -17,6 +17,13 @@ import pt.mataventuras.domain.prize.ComposePrize
  * Compose reward. Balloons for ages 3–5 and the answer snake for ages 6–8.
  */
 class ComposePrizeActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(
+            pt.mataventuras.app.entitlement.AppLanguage
+                .wrap(newBase),
+        )
+    }
+
     override fun onDestroy() {
         PrizeLimit.cancel(this)
         super.onDestroy()

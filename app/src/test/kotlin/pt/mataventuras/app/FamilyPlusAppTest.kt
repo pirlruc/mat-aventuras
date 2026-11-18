@@ -97,6 +97,13 @@ class FamilyPlusAppTest {
         assertEquals("Salir", AppLanguage.wrap(context).getString(pt.mataventuras.app.R.string.godot_exit))
         settings.saveLanguage(LanguagePacks.PORTUGUESE)
         assertEquals("Sair", AppLanguage.wrap(context).getString(pt.mataventuras.app.R.string.godot_exit))
+        settings.saveLanguage("es")
+        val locked =
+            object : pt.mataventuras.domain.entitlement.Entitlements {
+                override fun isUnlocked(feature: PremiumFeature): Boolean = false
+            }
+        assertEquals("Sair", AppLanguage.wrap(context, locked).getString(pt.mataventuras.app.R.string.godot_exit))
+        assertTrue(AppLanguage.wrap(context).getString(pt.mataventuras.app.R.string.godot_kart_hud).contains("META"))
         applyLanguage(null, settings, "es")
         assertEquals("es", settings.language())
         val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()

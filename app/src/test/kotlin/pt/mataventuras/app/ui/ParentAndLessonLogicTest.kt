@@ -240,8 +240,16 @@ class ParentAndLessonLogicTest {
         compose.onNodeWithText("Precisão").assertIsDisplayed()
         compose.onNodeWithText("Áreas a melhorar").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("• Somar", substring = true).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Abaixo de 50").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("80 ou mais").performScrollTo().assertIsDisplayed()
+        compose
+            .onAllNodesWithText("Abaixo de 50")
+            .onFirst()
+            .performScrollTo()
+            .assertIsDisplayed()
+        compose
+            .onAllNodesWithText("80 ou mais")
+            .onFirst()
+            .performScrollTo()
+            .assertIsDisplayed()
         compose.onNodeWithText("Fechar").performClick()
     }
 

@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -73,7 +74,8 @@ fun AgeSelectionScreen(
     var ageGroup by remember { mutableStateOf<AgeBand?>(null) }
     var name by remember { mutableStateOf("") }
     var mascot by remember { mutableStateOf(Mascot.SPEEDY_HEDGEHOG) }
-    LaunchedEffect(Unit) { onSpeak(VoiceScripts.AGE_SELECTION) }
+    val hello = stringResource(R.string.age_selection)
+    LaunchedEffect(Unit) { onSpeak(hello) }
 
     Column(
         modifier =

@@ -1,5 +1,6 @@
 package pt.mataventuras.app.engine
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
@@ -18,6 +19,13 @@ import pt.mataventuras.domain.model.Mascot
  * without sharing the Compose process.
  */
 abstract class IsolatedEngineActivity : FragmentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(
+            pt.mataventuras.app.entitlement.AppLanguage
+                .wrap(newBase),
+        )
+    }
+
     private val rewardLock = Any()
 
     private companion object {

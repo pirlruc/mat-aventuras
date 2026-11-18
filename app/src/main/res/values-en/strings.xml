@@ -84,4 +84,27 @@
     <string name="godot_exit">Exit</string>
     <string name="godot_boost">Boost</string>
     <string name="godot_play">Play</string>
+
+    <string name="godot_won">You won!</string>
+    <string name="godot_game_over">Game over</string>
+    <string name="godot_off_track">Back on the track!</string>
+    <string name="godot_grew">You grew!</string>
+    <string name="godot_powered">Powered up!</string>
+    <string name="godot_star">Star!</string>
+    <string name="godot_kart_hud" formatted="false">Left · %s · Right\nPass under the FINISH\nLap %d of %d\nPlace %d of %d\nGates %d/%d%s</string>
+    <string name="godot_invaders_play" formatted="false">Swipe to move · tap to shoot\nShips %d/%d\n%s</string>
+    <string name="godot_invaders_won" formatted="false">You won!\nShips %d/%d</string>
+    <string name="godot_climb_play" formatted="false">Arrows to walk. Jump to climb.\nLetters %d/5 · %s%s</string>
+    <string name="godot_climb_won">You won!\nLetters 5/5</string>
+    <string name="godot_chomp_play" formatted="false">Swipe toward the dots\nLeft %d · %s%s</string>
+    <string name="godot_chomp_won">You won!\nNone left</string>
+    <string name="godot_runner_play" formatted="false">Arrows to walk. Jump up.\nCoins %d/%d%s</string>
+    <string name="voice_greeting_young">Hello! I am %1$s. Shall we play with numbers?</string>
+    <string name="voice_greeting_older">Hello, I am %1$s. Ready for a math challenge?</string>
+    <string name="voice_exit_young">Do you want to leave the game?</string>
+    <string name="voice_exit_older">Do you want to leave this challenge?</string>
+    <string name="classroom_heading">Classroom</string>
+    <string name="classroom_no_play">No activities for this child.</string>
+    <string name="classroom_csv">Export CSV</string>
+    <string name="classroom_pdf">Export PDF</string>
 </resources>
