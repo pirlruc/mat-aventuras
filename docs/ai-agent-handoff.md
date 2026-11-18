@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-18
-**Last agent focus:** Round 9 is version 0.8.0 (versionCode 10) on `feature-mat-round-9` and is not tagged yet. The parent dashboard lists every child and exports CSV and PDF. Godot HUD copy follows the language pack. A locked language pack stays on Portuguese. The runner defaults to the meadow. T4 and T6 stay deferred. Do not move `0.1.0` through `0.7.0`. Release 0.7.0 stays at <https://github.com/pirlruc/mat-aventuras/releases/tag/0.7.0>. A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
+**Last agent focus:** Round 9 is version 0.8.0 (versionCode 10), tag `0.8.0` on merge `c25768c`. Release <https://github.com/pirlruc/mat-aventuras/releases/tag/0.8.0>. Workflow run 44219556001. `gh attestation verify` on `app-release.apk` exited 0. The parent dashboard lists every child and exports CSV and PDF. Godot HUD copy follows the language pack. A locked language pack stays on Portuguese. The runner defaults to the meadow. T4 and T6 stay deferred. Do not move `0.1.0` through `0.7.0` (`0.7.0` is `e0aff8d`). A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
 
 ---
 
@@ -71,6 +71,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.9.2`.
 | MAT-023 | done | Answer lock, runner freeze on an enemy hit, larger targets, and a debug prize win for Maestro. Release [0.6.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0) is tagged |
 | MAT-024 | done | PIN submit is at least 64 dp. A Compose Sair overlay sits above the Godot surface |
 | MAT-PRO-001 | open | Family Plus ships unlocked behind `BuildConfig.PREMIUM_UNLOCKED` (`premiumUnlocked` defaults to true). T1–T3, T5, and T7 are done. T4 and T6 stay open with deferred titles. No billing SDK |
+| MAT-025 | done | Classroom list and localized prize HUD. GitHub #227 and #228 are closed. Release [0.8.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.8.0) is tag `0.8.0` on merge `c25768c` |
 
 `docs/guardrail-deviations.yml` keeps KT-DOC-001 only. It does not lower a
 number. Compose functions are ignored by detekt complexity and length.
@@ -155,7 +156,8 @@ bash scripts/check-ci-local.sh
   (zero high or critical). With the SDK, coverage is required for all three modules.
 - `MatAventurasApp.shouldOpenContainer` / `resolveProcessName` (API 26–27 uses `/proc/self/cmdline`). Blank process names fail closed (no Room).
 - Reward points use `ProfileDao.addPoints`; lesson persist must not stamp an absolute Compose total.
-- A parent cadence or time-limit write must call `publishProfile`, or the open child keeps the old pace. Godot still draws Sair on the canvas. TalkBack uses the Compose `prize-exit` overlay on the engine Activity decor view. `.maestro/prize.yaml` leaves with the Back key. `.maestro/world.yaml` selects the night theme. Local flows use `scripts/run-maestro.sh` and do not run on GitHub Actions.
+- A parent cadence or time-limit write must call `publishProfile`, or the open child keeps the old pace. Godot still draws Sair on the canvas. TalkBack uses the Compose `prize-exit` overlay on the engine Activity decor view. `.maestro/prize.yaml` leaves with the Back key. `.maestro/world.yaml` selects the night theme. Local flows use `scripts/run-maestro.sh` and do not run on GitHub Actions. On `mat_api36` (2026-11-18) `profile` passed and the other seven flows failed. Six of them never found `Segurar para continuar`. `hold_for_adult` was not changed. `mat_api37` was not booted. Do not treat that as a classroom-only regression.
+- A filtered Gradle `--tests` run replaces the Kover artifact. Use a full `:app:testDebugUnitTest :app:koverVerifyDebug` before trusting 95%. The first CI run of the classroom branch was 94.88. CodeQL once failed to resolve `foojay-resolver-convention` while its tracer was preloaded; the untraced Gradle job compiled, and the next CodeQL run passed.
 - Do not add `docs/adr/`. Epic MAT-001 / MAT-003 are the decision records.
 - Scaffold branch convention is `feature-*`.
 - VM JDK may be 21; target JVM 17 bytecode without `jvmToolchain(17)`.
@@ -269,7 +271,7 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Version 0.7.0 (versionCode 9) is the next release. Do not tag it until the release notes are published, and do not move `0.1.0` through `0.6.0`. Release [0.6.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.6.0) stays on merge `1c97e2d`. Dispatch `release.yml` with `--ref` set to an existing tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T4 and T6 are deferred. T5 stays open. The entitlement gate is the only switch. Do not add billing, ads, or a new INTERNET permission.
+1. Version 0.8.0 (versionCode 10) is tagged on merge `c25768c`. Release [0.8.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.8.0). Do not move `0.1.0` through `0.7.0`. Dispatch `release.yml` with `--ref` set to an existing tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T4 and T6 stay deferred. The entitlement gate is the only switch. Do not add billing, ads, or a new INTERNET permission.
 2. MAT-015 is done. The 0.3.2 APK and the 0.3.1 APK both verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`.
 3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
 4. The emulator job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only). Run 41358345053 failed because the runner had no KVM permission (`-accel off`), and the multi-line `script:` never executed under `sh -c`. Do not record that as a boot timeout. androiddevops 1.2.0 is the fix.
@@ -283,3 +285,4 @@ bash scripts/check-ci-local.sh
 *Last updated: 2026-11-12 (signed release 0.5.0, emulator dispatch green).*
 *Last updated: 2026-11-13 (Family Plus entitlement gate, themed worlds, offline language packs, version 0.7.0 versionCode 9, not tagged).*
 *Last updated: 2026-11-12 (signed release 0.6.0 on tag 0.6.0, merge 1c97e2d).*
+*Last updated: 2026-11-18 — signed release 0.8.0 on tag `0.8.0`, merge `c25768c`, run 44219556001. Classroom export and language-pack HUD are on main. Maestro parent-gate flows failed on `mat_api36`. Do not move `0.1.0` through `0.7.0`.*
