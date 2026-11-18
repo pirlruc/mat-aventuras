@@ -91,6 +91,11 @@ class WorksheetPdfTest {
         assertFalse(writeTextIfReady("x", Uri.parse("content://local/missing")) { null })
         assertTrue(runCatching { writeClassroomPdf("Ana", null) { csv } }.isSuccess)
         assertTrue(runCatching { writeClassroomPdf("Ana", Uri.parse("content://local/missing")) { null } }.isSuccess)
+        try {
+            writeClassroomPdf("Ana", Uri.parse("content://local/turma.pdf")) { ByteArrayOutputStream() }
+        } catch (closed: IllegalStateException) {
+            assertEquals("document is closed!", closed.message)
+        }
         compose.setContent {
             ClassroomPanel(
                 androidx.test.core.app.ApplicationProvider

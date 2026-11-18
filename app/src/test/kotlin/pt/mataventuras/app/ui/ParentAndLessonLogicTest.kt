@@ -250,6 +250,8 @@ class ParentAndLessonLogicTest {
             .onFirst()
             .performScrollTo()
             .assertIsDisplayed()
+        compose.onNodeWithText("Exportar CSV").performScrollTo().performClick()
+        compose.onNodeWithText("Exportar PDF").performScrollTo().performClick()
         compose.onNodeWithText("Fechar").performClick()
     }
 
