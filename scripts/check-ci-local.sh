@@ -11,6 +11,10 @@ python3 scripts/validate-yaml.py \
     docs/companion-pins.yml \
     .github/dependabot.yml \
     .github/workflows/ci.yml \
+    .github/workflows/android-gradle.yml \
+    .github/workflows/android-codeql.yml \
+    .github/workflows/android-mobsf.yml \
+    .github/workflows/android-sbom.yml \
     .github/workflows/shared-ci.yml \
     .github/workflows/python-quality.yml \
     .github/workflows/emulator.yml \

@@ -1,0 +1,54 @@
+name: android-sbom
+
+# Own workflow name so androiddevops 1.12.0 locks android-sbom-<ref>.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 1,15 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      deps: ${{ steps.set.outputs.deps }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Detect dependency changes
+        id: set
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          deps=true
+          if [[ "${EVENT}" == "pull_request" ]]; then
+            deps=false
+            git fetch --depth=1 origin "${BASE}"
+            names="$(git diff --name-only "origin/${BASE}...HEAD")"
+            if grep -Eq '^gradle/|libs\.versions\.toml' <<<"${names}"; then
+              deps=true
+            fi
+          fi
+          echo "deps=${deps}" >> "${GITHUB_OUTPUT}"
+
+  sbom:
+    needs: changes
+    if: github.event_name != 'pull_request' || needs.changes.outputs.deps == 'true'
+    permissions:
+      contents: read
+    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
+    with:
+      scripts_ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
+    secrets:
+      checkout_token: ${{ secrets.GITHUB_TOKEN }}

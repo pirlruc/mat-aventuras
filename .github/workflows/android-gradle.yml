@@ -1,0 +1,69 @@
+name: android-gradle
+
+# Own workflow name so androiddevops 1.12.0 locks android-gradle-<ref>
+# instead of sharing one group with CodeQL, MobSF, and the APK bill.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 1,15 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.set.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Detect code changes
+        id: set
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          code=true
+          if [[ "${EVENT}" == "pull_request" ]]; then
+            code=false
+            git fetch --depth=1 origin "${BASE}"
+            names="$(git diff --name-only "origin/${BASE}...HEAD")"
+            pattern='^(app|data|domain|gradle|scripts)/|^(build|settings)\.gradle\.kts$|^gradle\.properties$|^libs/'
+            if grep -Eq "${pattern}" <<<"${names}"; then
+              code=true
+            fi
+          fi
+          echo "code=${code}" >> "${GITHUB_OUTPUT}"
+
+  android:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    permissions:
+      contents: read
+    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
+    with:
+      scripts_ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
+      gradle_tasks: >-
+        :domain:ktlintCheck :domain:detekt :domain:test :domain:koverXmlReport :domain:koverVerify
+        :data:ktlintCheck :data:detekt :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug
+        :app:ktlintCheck :app:detekt :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerifyDebug
+        :app:lintDebug
+        cyclonedxBom
+      pre_command: bash scripts/checkout-guardrails.sh
+      post_command: >-
+        python3 -m venv .ci-venv &&
+        .ci-venv/bin/pip install --require-hashes -r requirements-ci.txt &&
+        .ci-venv/bin/python scripts/verify-coverage.py &&
+        python3 scripts/verify-licenses.py
+    secrets:
+      checkout_token: ${{ secrets.GITHUB_TOKEN }}
+      command_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
