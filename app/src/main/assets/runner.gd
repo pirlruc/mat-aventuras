@@ -403,10 +403,10 @@ func _update_hud() -> void:
 	Host.skin_hud(hud, self)
 	var extra := ""
 	if form == 2:
-		extra = "\n%s" % Host.hud_text("star", "Estrela!")
+		extra = "\n%s" % Host.hud_text("star", "Star!")
 	elif form == 1:
-		extra = "\n%s" % Host.hud_text("grew", "Cresceste!")
+		extra = "\n%s" % Host.hud_text("grew", "You grew!")
 	if Host.young():
 		hud.text = "🪙 %d\n%s" % [coins, extra]
 	else:
-		hud.text = Host.hud_text("runner_play", "Setas para andar. Saltar para o ar.\nMoedas %d/%d%s") % [coins, coins_target, extra]
+		hud.text = Host.hud_text("runner_play", "Arrows to walk. Jump up.\nCoins %d/%d%s") % [coins, coins_target, extra]

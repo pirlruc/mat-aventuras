@@ -177,7 +177,7 @@ func _draw() -> void:
 
 func _update_hud() -> void:
 	Host.skin_hud(hud, self)
-	var extra := "\n%s" % Host.hud_text("grew", "Cresceste!") if form == 1 else ""
+	var extra := "\n%s" % Host.hud_text("grew", "You grew!") if form == 1 else ""
 	var life := Host.lives_text(lives, lives_max)
 	if Host.young():
 		if finished and _letter_count() >= 5:
@@ -187,11 +187,11 @@ func _update_hud() -> void:
 		else:
 			hud.text = "🔤 %d\n%s" % [_letter_count(), life]
 	elif finished and _letter_count() >= 5:
-		hud.text = Host.hud_text("climb_won", "Ganhaste!\nLetras 5/5")
+		hud.text = Host.hud_text("climb_won", "You won!\nLetters 5/5")
 	elif finished:
-		hud.text = "%s\n%s" % [Host.hud_text("game_over", "Fim de jogo"), life]
+		hud.text = "%s\n%s" % [Host.hud_text("game_over", "Game over"), life]
 	else:
-		hud.text = Host.hud_text("climb_play", "Setas para andar. Saltar para subir.\nLetras %d/5 · %s%s") % [
+		hud.text = Host.hud_text("climb_play", "Arrows to walk. Jump to climb.\nLetters %d/5 · %s%s") % [
 			_letter_count(), life, extra
 		]
 

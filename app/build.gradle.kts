@@ -15,8 +15,8 @@ android {
         applicationId = "pt.mataventuras.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10
-        versionName = "0.8.0"
+        versionCode = 11
+        versionName = "0.9.0"
         buildConfigField("boolean", "PREMIUM_UNLOCKED", premiumUnlocked)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -102,6 +102,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.room.ktx)
     debugImplementation(libs.androidx.compose.ui.tooling)

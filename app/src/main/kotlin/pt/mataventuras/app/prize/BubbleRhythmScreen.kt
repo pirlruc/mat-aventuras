@@ -13,8 +13,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
+import pt.mataventuras.app.R
+import pt.mataventuras.app.ui.packed
 import pt.mataventuras.domain.prize.BubbleRhythm
 import pt.mataventuras.domain.prize.BubbleRound
 
@@ -28,8 +31,8 @@ fun BubbleRhythmScreen(
 ) {
     var round by remember { mutableStateOf(BubbleRhythm.round(random)) }
     Column {
-        Text(round.prompt)
-        Text(modifier = Modifier.testTag("bubble-step"), text = "Bolhas: ${round.step}")
+        Text(packed(round.prompt))
+        Text(modifier = Modifier.testTag("bubble-step"), text = stringResource(R.string.bubble_step, round.step))
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = {

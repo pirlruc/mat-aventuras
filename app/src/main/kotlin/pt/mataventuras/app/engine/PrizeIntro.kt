@@ -12,11 +12,12 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import pt.mataventuras.app.DEBUG_WIN_TAG
+import pt.mataventuras.app.R
 import pt.mataventuras.app.debugInstantWin
 import pt.mataventuras.app.speech.SpeechEngine
-import pt.mataventuras.domain.engine.PrizeBrief
-import pt.mataventuras.domain.engine.PrizeHud
-import pt.mataventuras.domain.voice.VoiceScripts
+import pt.mataventuras.app.ui.prizeControls
+import pt.mataventuras.app.ui.prizeGoal
+import pt.mataventuras.app.ui.prizeIntro
 
 /**
  * Spoken goal and controls. [Jogar] dismisses the card. The game keeps loading underneath.
@@ -55,7 +56,7 @@ internal object PrizeIntro {
         val card = card(activity, scene, onDebugWin)
         card.addOnAttachStateChangeListener(releaseWhenDetached(activity))
         decor.addView(card)
-        speech.speak("${VoiceScripts.LETS_PLAY} ${PrizeBrief.goal(scene)} ${PrizeBrief.controls(scene)}")
+        speech.speak(activity.prizeIntro(scene))
     }
 
     private fun releaseWhenDetached(activity: Activity): View.OnAttachStateChangeListener =
@@ -88,11 +89,11 @@ internal object PrizeIntro {
                         Gravity.CENTER,
                     )
             }
-        root.addView(line(activity, PrizeBrief.goal(scene), 28f))
-        root.addView(line(activity, PrizeBrief.controls(scene), 22f))
+        root.addView(line(activity, activity.prizeGoal(scene), 28f))
+        root.addView(line(activity, activity.prizeControls(scene), 22f))
         val play =
             Button(activity).apply {
-                text = PrizeHud.PLAY_LABEL
+                text = activity.getString(R.string.godot_play)
                 setOnClickListener {
                     (root.parent as? ViewGroup)?.removeView(root)
                     if (onDebugWin != null) showDebugWin(activity, onDebugWin)

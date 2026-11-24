@@ -25,7 +25,10 @@ fun RunnerGateScreen(
 ) {
     val round = remember { MathGate.round(random) }
     Column {
-        Text(round.prompt)
+        Text(
+            pt.mataventuras.app.ui
+                .packed(round.prompt),
+        )
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishGate(round, index, onFinished) },

@@ -222,7 +222,7 @@ func add_boost(node: Node, callback: Callable) -> void:
 	var button := Button.new()
 	var u := unit(node)
 	var side := maxf(64.0, u * 0.16)
-	button.text = hud_text("boost", "Impulso")
+	button.text = hud_text("boost", "Boost")
 	button.custom_minimum_size = Vector2(side, side)
 	var size := view_size(node)
 	button.position = Vector2(size.x * 0.5 - side * 0.5, size.y - side - u * 0.03)
@@ -233,7 +233,7 @@ func add_boost(node: Node, callback: Callable) -> void:
 func _add_exit(layer: CanvasLayer, node: Node) -> void:
 	var button := Button.new()
 	var u := unit(node)
-	button.text = hud_text("exit", "Sair")
+	button.text = hud_text("exit", "Exit")
 	button.custom_minimum_size = Vector2(u * 0.18, maxf(48.0, u * 0.09))
 	var pad := safe_pad()
 	button.position = Vector2(view_size(node).x - button.custom_minimum_size.x - u * 0.03, pad.y + u * 0.02)

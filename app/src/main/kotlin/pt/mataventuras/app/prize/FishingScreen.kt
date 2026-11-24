@@ -27,7 +27,10 @@ fun FishingScreen(
 ) {
     val round = remember { FishCatch.round(random) }
     Column {
-        Text(round.prompt)
+        Text(
+            pt.mataventuras.app.ui
+                .packed(round.prompt),
+        )
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishIfCaught(round, index, onFinished) },

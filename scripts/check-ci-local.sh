@@ -14,7 +14,9 @@ python3 scripts/validate-yaml.py \
     .github/workflows/shared-ci.yml \
     .github/workflows/python-quality.yml \
     .github/workflows/emulator.yml \
-    .github/workflows/release.yml
+    .github/workflows/release.yml \
+    .github/workflows/dco.yml \
+    .github/workflows/artifact-sweep.yml
 python3 scripts/verify-companion-pins.py
 sh scripts/check-submodule-pins.sh
 python3 scripts/lint-doc-links.py --root "$ROOT"

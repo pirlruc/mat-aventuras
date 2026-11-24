@@ -1,0 +1,18 @@
+# Developer Certificate of Origin on pull requests. common-dco v6.11.0
+# reads the commits and skips merge commits and bot authors.
+name: DCO
+
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: dco-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  DCO:
+    permissions:
+      contents: read
+    uses: pirlruc/commondevops/.github/workflows/common-dco.yml@9350e95cbb130219be113d8737469cd7c39f155c # v6.11.0

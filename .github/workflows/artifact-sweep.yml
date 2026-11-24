@@ -1,0 +1,20 @@
+# Deletes leftover container-image artifacts and pull or tag caches.
+# commondevops artifact-sweep v6.11.0. Not a pull-request check.
+name: artifact-sweep
+
+on:
+  schedule:
+    - cron: "12 4 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: artifact-sweep-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sweep:
+    permissions:
+      actions: write
+    uses: pirlruc/commondevops/.github/workflows/artifact-sweep.yml@9350e95cbb130219be113d8737469cd7c39f155c # v6.11.0

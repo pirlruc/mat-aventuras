@@ -1,7 +1,7 @@
 # Quality and Android builds. Heavy jobs skip a pull request that does not
 # touch the app, the domain, Gradle, or scripts. The gate job still runs, so a
 # docs-only pull request is not blocked on a skipped Gradle build.
-# Android jobs call androiddevops 1.7.0 (CI-018).
+# Android jobs call androiddevops 1.12.0 (CI-018).
 name: ci
 
 on:
@@ -93,9 +93,9 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
+    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
     with:
-      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
+      scripts_ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
       gradle_tasks: >-
         :domain:ktlintCheck :domain:detekt :domain:test :domain:koverXmlReport :domain:koverVerify
         :data:ktlintCheck :data:detekt :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug
@@ -120,9 +120,9 @@ jobs:
       # The reusable upload job requests actions: read even when upload is never.
       actions: read
       security-events: write
-    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
+    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
     with:
-      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
+      scripts_ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
       upload: never
       build_command: >-
         ./gradlew --no-daemon --rerun-tasks :domain:compileKotlin :data:compileDebugKotlin :app:compileDebugKotlin
@@ -134,9 +134,9 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
+    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
     with:
-      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
+      scripts_ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -145,9 +145,9 @@ jobs:
     if: github.event_name != 'pull_request' || needs.changes.outputs.deps == 'true'
     permissions:
       contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
+    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
     with:
-      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
+      scripts_ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -166,7 +166,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    uses: pirlruc/commondevops/.github/workflows/common-dependency-review.yml@1e0c029bf93705f399f2a3a7e5f19810c101da65
+    uses: pirlruc/commondevops/.github/workflows/common-dependency-review.yml@9350e95cbb130219be113d8737469cd7c39f155c # v6.11.0
     with:
       fail_on_severity: high
 

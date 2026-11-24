@@ -29,6 +29,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -38,7 +39,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.app.ui.animatorDurationScale
 import pt.mataventuras.app.ui.debugAnswerTags
+import pt.mataventuras.app.ui.scaledDurationMillis
 import pt.mataventuras.domain.math.Exercise
 import pt.mataventuras.domain.math.MemoryFace
 
@@ -125,9 +128,10 @@ private fun RowScope.MemoryCard(
     open: Boolean,
     onClick: () -> Unit,
 ) {
+    val flipMs = scaledDurationMillis(FLIP_MS, animatorDurationScale(LocalContext.current.contentResolver))
     val rotation by animateFloatAsState(
         targetValue = if (open) 0f else 180f,
-        animationSpec = tween(FLIP_MS),
+        animationSpec = tween(flipMs),
         label = "card-flip",
     )
     val showFront = showsCardFront(rotation)

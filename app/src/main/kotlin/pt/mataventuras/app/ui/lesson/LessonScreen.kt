@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -60,6 +61,7 @@ import pt.mataventuras.app.ui.LocalCelebrate
 import pt.mataventuras.app.ui.LocalPrizeClosed
 import pt.mataventuras.app.ui.PromptCue
 import pt.mataventuras.app.ui.UiLogic
+import pt.mataventuras.app.ui.animatorDurationScale
 import pt.mataventuras.app.ui.answerFlashArgb
 import pt.mataventuras.app.ui.answerFlashCaption
 import pt.mataventuras.app.ui.answerFlashGlyph
@@ -72,9 +74,11 @@ import pt.mataventuras.app.ui.lessonScoreLine
 import pt.mataventuras.app.ui.lessonScrolls
 import pt.mataventuras.app.ui.optionAnswerTag
 import pt.mataventuras.app.ui.optionMinHeightDp
+import pt.mataventuras.app.ui.packed
 import pt.mataventuras.app.ui.prizeStarLine
 import pt.mataventuras.app.ui.prizeStars
 import pt.mataventuras.app.ui.promptCue
+import pt.mataventuras.app.ui.scaledDurationMillis
 import pt.mataventuras.app.ui.shouldDropPrizeHold
 import pt.mataventuras.app.ui.shouldRepeatSpokenPrompt
 import pt.mataventuras.app.ui.showsAnswerFlash
@@ -179,15 +183,16 @@ fun LessonScreen(
     LaunchedEffect(exerciseId, missSettle) {
         answerGate.release()
     }
+    val spoken = packed(exercise.spoken)
     LaunchedEffect(exerciseId, cue) {
         if (cue == PromptCue.Wait) return@LaunchedEffect
         if (cue == PromptCue.Release) holdPrompt = false
         if (announcedId == exerciseId) return@LaunchedEffect
         announcedId = exerciseId
-        onSpeak(exercise.spoken)
+        onSpeak(spoken)
     }
     RepeatPromptOnResume(
-        spoken = exercise.spoken,
+        spoken = spoken,
         onSpeak = onSpeak,
         prizeCovering = celebrate || holdPrompt,
     )
@@ -324,11 +329,12 @@ internal fun LessonPlayColumn(
     ) {
         val listen = stringResource(R.string.listen)
         val listenAgain = stringResource(R.string.listen_again)
+        val spoken = packed(exercise.spoken)
         val stars = stringResource(R.string.stars_toward, prizeStars(completed, every), every)
         val score = lessonScoreLine(hits, points, stringResource(R.string.score_line))
-        Text(exercise.prompt, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(packed(exercise.prompt), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Button(
-            onClick = { onSpeak(exercise.spoken) },
+            onClick = { onSpeak(spoken) },
             modifier =
                 Modifier
                     .height(64.dp)
@@ -472,6 +478,7 @@ internal fun LessonExitBar(
                 .padding(horizontal = 20.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        val exitLabel = packed(LessonFlow.exitLabel(confirming))
         Button(
             onClick = {
                 if (LessonFlow.shouldAskExitConfirm(ageGroup, confirming)) {
@@ -486,14 +493,14 @@ internal fun LessonExitBar(
                     .fillMaxWidth()
                     .heightIn(min = 64.dp)
                     .semantics(mergeDescendants = true) {
-                        contentDescription = LessonFlow.exitLabel(confirming)
+                        contentDescription = exitLabel
                     },
-        ) { Text(LessonFlow.exitLabel(confirming)) }
+        ) { Text(exitLabel) }
         if (LessonFlow.showsStay(confirming)) {
             Button(
                 onClick = onStay,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
-            ) { Text(VoiceScripts.STAY) }
+            ) { Text(packed(VoiceScripts.STAY)) }
         }
     }
 }
@@ -531,10 +538,12 @@ internal fun AnswerFlash(
     mascot: String,
 ) {
     val alpha = remember { Animatable(0f) }
+    val resolver = LocalContext.current.contentResolver
     LaunchedEffect(tick) {
         if (tick == 0) return@LaunchedEffect
         alpha.snapTo(1f)
-        alpha.animateTo(0f, animationSpec = tween(UiLogic.ANSWER_FLASH_MS))
+        val scale = animatorDurationScale(resolver)
+        alpha.animateTo(0f, animationSpec = tween(scaledDurationMillis(UiLogic.ANSWER_FLASH_MS, scale)))
     }
     val fade = alpha.value
     if (!showsAnswerFlash(fade)) return
@@ -566,7 +575,7 @@ internal fun AnswerFlash(
                 )
             }
             Text(
-                answerFlashCaption(correct),
+                packed(answerFlashCaption(correct)),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = color,

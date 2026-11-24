@@ -28,8 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.app.R
+import pt.mataventuras.app.ui.packLine
+import pt.mataventuras.app.ui.packed
 import pt.mataventuras.domain.engine.EngineInputMap
 import pt.mataventuras.domain.engine.Platformer2dEngine
 import pt.mataventuras.domain.engine.PlatformerWorld
@@ -59,7 +63,7 @@ internal object NativeRunnerHost {
             )
         if (!showUi) {
             activity.setContentView(
-                TextView(activity).apply { text = VoiceScripts.JUMP_HINT },
+                TextView(activity).apply { text = activity.packLine(VoiceScripts.JUMP_HINT) },
             )
             return loop
         }
@@ -140,8 +144,14 @@ internal object NativeRunnerHost {
             ) {
                 paintRunnerCourse(tiles, state, mascot, level)
             }
+            val coins =
+                stringResource(
+                    R.string.voice_coins,
+                    state.rings,
+                    state.ringsTarget,
+                )
             Text(
-                text = "${VoiceScripts.JUMP_HINT}\nMoedas ${state.rings}/${state.ringsTarget}",
+                text = "${packed(VoiceScripts.JUMP_HINT)}\n$coins",
                 color = Color.White,
                 fontSize = 22.sp,
                 modifier =

@@ -1,7 +1,7 @@
 # Architecture — Mat Aventuras
 
 Technical guide for the native Android educational math game.
-Methodology: [github-issue-adr @ 1.9.2](https://github.com/pirlruc/methodologies/tree/1.9.2/github-issue-adr).
+Methodology: [github-issue-adr @ 1.12.2](https://github.com/pirlruc/methodologies/tree/1.12.2/github-issue-adr).
 Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (no ADR markdown files).
 Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.15.0`.
 Scaffold pin: `.github/scaffold/` → [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.12.0`.
@@ -278,7 +278,7 @@ secret is missing. Other events, including Dependabot, skip and keep
 `docs/companion-pins.yml` (SC-DEP-004). Sync scaffold files with
 `.github/scaffold/scripts/sync-templates.sh`. Synced rules are the scaffold
 contract; do not hand-edit them. This repo's own docs cite methodologies
-`1.9.2`.
+`1.12.2`.
 
 Departures that are not lowered numbers live in `docs/guardrail-deviations.yml`
 and render into Epic MAT-006. Coverage floors stay at 95.

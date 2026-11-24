@@ -37,8 +37,11 @@ internal fun waitingForProfile(
 /**
  * One module row on the parental dashboard.
  */
-internal fun modulePerformanceLine(module: ModulePerformance): String =
-    "${ModuleTitles.noun(module.module)} — ${(module.accuracy * 100).toInt()}% " +
+internal fun modulePerformanceLine(
+    module: ModulePerformance,
+    noun: String = ModuleTitles.noun(module.module),
+): String =
+    "$noun — ${(module.accuracy * 100).toInt()}% " +
         "(${module.hits} certos, ${formatDuration(module.timeMs)})"
 
 /**
@@ -47,11 +50,12 @@ internal fun modulePerformanceLine(module: ModulePerformance): String =
 internal fun needsWorkLines(
     modules: List<LearningModule>,
     clear: String = "Nenhum módulo abaixo de 70% com amostra suficiente.",
+    noun: (LearningModule) -> String = { ModuleTitles.noun(it) },
 ): List<String> =
     if (modules.isEmpty()) {
         listOf(clear)
     } else {
-        modules.map { "• ${ModuleTitles.noun(it)}" }
+        modules.map { "• ${noun(it)}" }
     }
 
 /**

@@ -52,7 +52,7 @@ private fun MasteryCellCard(cell: MasteryCell) {
                 .padding(8.dp)
                 .semantics { contentDescription = "${cell.topic}. ${cell.band.label}" },
     ) {
-        Text(ModuleTitles.noun(cell.module))
+        Text(stringResource(ModuleTitles.nounId(cell.module)))
         Text(cell.band.label, fontWeight = FontWeight.Bold)
     }
 }
