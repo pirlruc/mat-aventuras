@@ -3,7 +3,7 @@
 Living log for agents picking up work on this repository.
 
 **Last updated:** 2026-11-24
-**Last agent focus:** Round 10 is version 0.9.0 (versionCode 11). The parent screen waits for the PIN repository, then shows a hold control tagged `adult-hold`. Maestro long-presses that id for 2000 ms. Voice, titles, prize lines, and Godot fallbacks come from the language pack. T4 and T6 stay deferred. Do not move `0.1.0` through `0.8.0` (`0.7.0` is `e0aff8d`, `0.8.0` is `c25768c`). A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
+**Last agent focus:** Round 10 shipped as [0.9.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.9.0) on merge `4c76c1d` (versionCode 11). The parent screen waits for the PIN repository, then shows a hold control tagged `adult-hold`. Maestro long-presses that id for 2000 ms. Voice, titles, prize lines, and Godot fallbacks come from the language pack. T4 and T6 stay deferred. Do not move `0.1.0` through `0.8.0` (`0.7.0` is `e0aff8d`, `0.8.0` is `c25768c`). A `workflow_dispatch` of `release.yml` must use `--ref` set to an existing tag, because `main` cannot deploy to the `release` environment.
 
 ---
 
@@ -72,7 +72,7 @@ contract; do not hand-edit them. Repo-owned docs cite methodologies `1.12.2`.
 | MAT-024 | done | PIN submit is at least 64 dp. A Compose Sair overlay sits above the Godot surface |
 | MAT-PRO-001 | open | Family Plus ships unlocked behind `BuildConfig.PREMIUM_UNLOCKED` (`premiumUnlocked` defaults to true). T1–T3, T5, and T7 are done. T4 and T6 stay open with deferred titles. No billing SDK |
 | MAT-025 | done | Classroom list and localized prize HUD. GitHub #227 and #228 are closed. Release [0.8.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.8.0) is tag `0.8.0` on merge `c25768c` |
-| MAT-026 | done | Parent hold waits for the PIN repository. Voice, titles, prize lines, and Godot fallbacks are in the language pack. Version 0.9.0, versionCode 11 |
+| MAT-026 | done | Parent hold waits for the PIN repository. Voice, titles, prize lines, and Godot fallbacks are in the language pack. Release [0.9.0](https://github.com/pirlruc/mat-aventuras/releases/tag/0.9.0) is tag `0.9.0` on merge `4c76c1d`. GitHub #231–#234 are closed |
 
 `docs/guardrail-deviations.yml` keeps KT-DOC-001 and APP-ENT-001. APP-ENT-001 is non-numeric: nothing is sold, there is no INTERNET permission, billing stays deferred, and premium is `BuildConfig.PREMIUM_UNLOCKED`. Review date 2027-05-24. It does not lower a
 number. Compose functions are ignored by detekt complexity and length.
@@ -288,7 +288,7 @@ bash scripts/check-ci-local.sh
 
 ## Suggested next work
 
-1. Version 0.9.0 (versionCode 11) is the round 10 release. Do not move `0.1.0` through `0.8.0`. Dispatch `release.yml` with `--ref` set to an existing tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T4 and T6 stay deferred. The entitlement gate is the only switch. Do not add billing, ads, or a new INTERNET permission. Maestro on `mat_api36` was not run in this session. The parent flow uses id `adult-hold` and `longPressDuration: 2000`.
+1. Version 0.9.0 (versionCode 11) is published at tag `0.9.0` on merge `4c76c1d`. Do not move `0.1.0` through `0.8.0`. Dispatch `release.yml` with `--ref` set to an existing tag. `main` is not an allowed deployment branch for the `release` environment. The keystore is outside the repo. Do not commit it or copy the password. MAT-PRO-001-T4 and T6 stay deferred. The entitlement gate is the only switch. Do not add billing, ads, or a new INTERNET permission. Maestro on `mat_api36` was not run in this session. The parent flow uses id `adult-hold` and `longPressDuration: 2000`. The APK attestation verifies with signer workflow `pirlruc/commondevops/.github/workflows/common-release-sign.yml`.
 2. MAT-015 is done. The 0.3.2 APK and the 0.3.1 APK both verify with cosign v3.0.6 and `gh attestation verify --signer-repo pirlruc/commondevops`.
 3. MAT-016 is done, including the androiddevops 1.2.0 pin (`e88c3b8f3d8ad530ca3569059fc3c9f7f2ea2ad8`) and the CycloneDX license bill. `LessonScreen`, `NavGraph`, `NativeKartHost`, and `NativeRunnerHost` stay in the Kover report.
 4. The emulator job is `.github/workflows/emulator.yml` (monthly and `workflow_dispatch` only). Run 41358345053 failed because the runner had no KVM permission (`-accel off`), and the multi-line `script:` never executed under `sh -c`. Do not record that as a boot timeout. androiddevops 1.2.0 is the fix.
@@ -302,4 +302,4 @@ bash scripts/check-ci-local.sh
 *Last updated: 2026-11-12 (signed release 0.5.0, emulator dispatch green).*
 *Last updated: 2026-11-13 (Family Plus entitlement gate, themed worlds, offline language packs, version 0.7.0 versionCode 9, not tagged).*
 *Last updated: 2026-11-12 (signed release 0.6.0 on tag 0.6.0, merge 1c97e2d).*
-*Last updated: 2026-11-24 — version 0.9.0 (versionCode 11). Parent hold waits for the PIN repository. Language-pack voice, titles, prize lines, and Godot fallbacks. Pins: guardrails 1.17.1, scaffold 1.14.3, commondevops v6.11.0, androiddevops 1.12.0, pydevops 3.10.1, methodologies 1.12.2. Maestro was not run on the emulator. Do not move `0.1.0` through `0.8.0`.*
+*Last updated: 2026-11-24 — release 0.9.0 on tag `0.9.0`, merge `4c76c1d`. Parent hold waits for the PIN repository. Language-pack voice, titles, prize lines, and Godot fallbacks. Pins: guardrails 1.17.1, scaffold 1.14.3, commondevops v6.11.0, androiddevops 1.12.0, pydevops 3.10.1, methodologies 1.12.2. Maestro was not run on the emulator. Do not move `0.1.0` through `0.8.0`.*
