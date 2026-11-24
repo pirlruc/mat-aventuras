@@ -14,7 +14,22 @@ appId: pt.mataventuras.app
 - scrollUntilVisible:
     element: "English"
     direction: DOWN
-- tapOn: "English"
+- tapOn:
+    id: lang-en
 - extendedWaitUntil:
-    visible: "● English"
-    timeout: 15000
+    visible: "Parent dashboard"
+    timeout: 20000
+- scrollUntilVisible:
+    element: "Parent dashboard"
+    direction: DOWN
+- tapOn: "Parent dashboard"
+- tapOn:
+    id: parent-pin
+- inputText: "1234"
+- hideKeyboard
+- tapOn:
+    id: parent-pin-save
+- scrollUntilVisible:
+    element: "● English"
+    direction: DOWN
+    timeout: 20000
