@@ -124,6 +124,9 @@ bash scripts/check-ci-local.sh
   under it. Trust `koverVerifyDebug --rerun-tasks`. A `Canvas` draw lambda
   counts on a host Robolectric run and does not count on the GitHub
   `ubuntu-24.04` runner. Cover an ordinary Kotlin branch when CI is short.
+- GitHub-hosted runners get HTTP 429 from `repo1.maven.org`. Gradle resolves
+  through `maven-central.storage-download.googleapis.com` first, and
+  Robolectric's own fetcher uses that same mirror.
 - Lesson and parent copy is in `res/values/strings.xml`. The UI rules are
   top-level functions in `LessonRules`, `ScoringRules`, `SoupGestures`,
   `SudokuRules`, `ParentCopy`, `SpeechRules`, and `ShapeGeometry`. `UiLogic`

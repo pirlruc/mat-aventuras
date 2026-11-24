@@ -21,6 +21,14 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.isReturnDefaultValues = true
+        unitTests.all { test ->
+            // GitHub-hosted runners are often rate-limited by repo1.maven.org.
+            test.systemProperty(
+                "robolectric.dependency.repo.url",
+                "https://maven-central.storage-download.googleapis.com/maven2",
+            )
+            test.systemProperty("robolectric.dependency.repo.id", "mavenCentralMirror")
+        }
     }
     // Room's plugin publishes schemas on androidTest. Robolectric reads the
     // unit-test source set, so that copy stays here.
