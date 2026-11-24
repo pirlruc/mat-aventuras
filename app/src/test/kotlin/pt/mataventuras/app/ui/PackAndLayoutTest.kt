@@ -1,9 +1,13 @@
 package pt.mataventuras.app.ui
 
+import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.provider.Settings
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import java.util.Locale
@@ -13,6 +17,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import pt.mataventuras.app.R
 import pt.mataventuras.app.ui.home.columnsForWidth
@@ -89,10 +94,20 @@ class PackAndLayoutTest {
     }
 
     @Test
-    fun homeColumnCountUsesTheConfigurationWidth() {
-        var columns = 0
-        compose.setContent { columns = homeColumnCount() }
-        assertTrue(columns >= 1)
+    fun homeColumnCountUsesTheActivityAndTheConfiguration() {
+        val activity: Activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
+        var fromActivity = 0
+        var fromConfiguration = 0
+        compose.setContent {
+            CompositionLocalProvider(LocalActivity provides activity) {
+                fromActivity = homeColumnCount()
+            }
+            CompositionLocalProvider(LocalActivity provides null) {
+                fromConfiguration = homeColumnCount()
+            }
+        }
+        assertTrue(fromActivity >= 1)
+        assertTrue(fromConfiguration >= 1)
     }
 
     @Test
