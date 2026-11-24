@@ -1,6 +1,9 @@
 name: android-sbom
 
-# Own workflow name so androiddevops 1.12.0 locks android-sbom-<ref>.
+# android-apk-sbom.yml at androiddevops 1.12.0 runs run-osv-sbom.sh
+# without COMMONDEVOPS_SCRIPTS. That script refuses to start unless
+# fetch-verified.sh is on that path (removed in 9a354d4). This job checks
+# out the pinned scripts and commondevops v6.11.0, then runs the same bill.
 
 on:
   push:
@@ -12,6 +15,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: android-sbom-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   changes:
@@ -45,10 +52,52 @@ jobs:
   sbom:
     needs: changes
     if: github.event_name != 'pull_request' || needs.changes.outputs.deps == 'true'
-    permissions:
-      contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
-    with:
-      scripts_ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
-    secrets:
-      checkout_token: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/androiddevops
+          ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
+          persist-credentials: false
+          path: .androiddevops
+          sparse-checkout: |
+            scripts
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          ref: 9350e95cbb130219be113d8737469cd7c39f155c # v6.11.0
+          persist-credentials: false
+          path: .commondevops
+          sparse-checkout: |
+            scripts/fetch-verified.sh
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+
+      - name: Assemble the APK
+        run: ./gradlew --no-daemon :app:assembleDebug
+
+      - name: CycloneDX and OSV
+        env:
+          COMMONDEVOPS_SCRIPTS: ${{ github.workspace }}/.commondevops/scripts
+        run: |
+          set -euo pipefail
+          export DEPS_FILE="${RUNNER_TEMP}/runtime-classpath.txt"
+          ./gradlew --no-daemon :app:dependencies \
+            --configuration debugRuntimeClasspath \
+            --console=plain > "${DEPS_FILE}"
+          bash .androiddevops/scripts/run-osv-sbom.sh \
+            app/build/outputs/apk/debug/app-debug.apk

@@ -25,6 +25,10 @@ jobs:
       # 1.12.0 selects this environment inside the reusable workflow.
       # The caller job cannot. The keystore secrets live only there.
       environment: release
+      # 1.12.0 runs run-osv-sbom.sh without COMMONDEVOPS_SCRIPTS, so the
+      # bill step fails before the APK is uploaded. The bill job below
+      # runs the pinned script with the helper set.
+      sbom: false
     secrets:
       checkout_token: ${{ secrets.GITHUB_TOKEN }}
       keystore_base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -32,8 +36,72 @@ jobs:
       key_alias: ${{ secrets.ANDROID_KEY_ALIAS }}
       key_password: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-  release:
+  bill:
     needs: apk
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/androiddevops
+          ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
+          persist-credentials: false
+          path: .androiddevops
+          sparse-checkout: |
+            scripts
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          ref: 9350e95cbb130219be113d8737469cd7c39f155c # v6.11.0
+          persist-credentials: false
+          path: .commondevops
+          sparse-checkout: |
+            scripts/fetch-verified.sh
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: android-release-apk
+          path: release-apk
+
+      - name: CycloneDX and OSV
+        env:
+          COMMONDEVOPS_SCRIPTS: ${{ github.workspace }}/.commondevops/scripts
+        run: |
+          set -euo pipefail
+          apk="$(find release-apk -type f -name '*.apk' | head -n 1)"
+          test -n "${apk}"
+          export DEPS_FILE="${RUNNER_TEMP}/runtime-classpath.txt"
+          ./gradlew --no-daemon :app:dependencies \
+            --configuration releaseRuntimeClasspath \
+            --console=plain > "${DEPS_FILE}"
+          bash .androiddevops/scripts/run-osv-sbom.sh "${apk}"
+          cp "${TMPDIR:-/tmp}/androiddevops-osv-sbom/app.cdx.json" app-release.cdx.json
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: android-release-sbom
+          path: app-release.cdx.json
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    needs: [apk, bill]
     permissions:
       contents: write
       id-token: write
@@ -42,6 +110,8 @@ jobs:
     with:
       tag: ${{ inputs.tag }}
       release_artifact: android-release-apk
+      attach_sbom: true
+      sbom_artifact: android-release-sbom
       sign: true
       environment: release
     secrets:

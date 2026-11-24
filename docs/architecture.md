@@ -307,10 +307,12 @@ public caller cannot use those workflows and must vendor the pinned file.
 are separate workflows (`android-gradle.yml`, `android-codeql.yml`,
 `android-mobsf.yml`, `android-sbom.yml`). Each skips a pull request that
 does not touch `app/`, `data/`, `domain/`, `gradle/`, or `scripts/` (the
-bill skips unless Gradle inputs change). They call androiddevops `1.12.0`
-(`29b91430c9c55f84ad05575bd0b2267ed30096d2`) and pass
-`secrets.GITHUB_TOKEN` as `checkout_token`. Each file has its own
-`name` because that reusable locks `format(github.workflow, github.ref)`.
+bill skips unless Gradle inputs change). Gradle, CodeQL, and MobSF call
+androiddevops `1.12.0` (`29b91430c9c55f84ad05575bd0b2267ed30096d2`). The bill
+runs that pin's `run-osv-sbom.sh` with `COMMONDEVOPS_SCRIPTS` set, because
+`android-apk-sbom.yml` at 1.12.0 omits the helper its script requires.
+Each file has its own `name` because the reusables lock
+`format(github.workflow, github.ref)`.
 Fork pull requests skip the reusable jobs that need a secret.
 
 | Ops repo | Reuse here |
@@ -326,7 +328,7 @@ Fork pull requests skip the reusable jobs that need a secret.
 | commondevops `common-threshold-drift` | Called with `scripts/check-threshold-drift.sh`. Missing `doc_coverage` is allowed. |
 | commondevops `common-dependency-review` | Called from `ci.yml` on pull requests with `fail_on_severity: high`. |
 | commondevops `common-release` | Called from `release.yml` after `android-release-apk`. The release artifact is `android-release-apk`. The job selects the `release` environment. |
-| androiddevops | Gradle, CodeQL, MobSF, the APK bill, the emulator, and `android-release-apk` stay on tag `1.12.0` (`29b91430c9c55f84ad05575bd0b2267ed30096d2`). The release job selects the `release` environment. Local device flows use `ghcr.io/pirlruc/android-maestro` at the digest in `docs/companion-pins.yml`. |
+| androiddevops | Gradle, CodeQL, MobSF, the emulator, and `android-release-apk` stay on tag `1.12.0` (`29b91430c9c55f84ad05575bd0b2267ed30096d2`). The APK bill runs that pin's script with `COMMONDEVOPS_SCRIPTS` set. The release job selects the `release` environment. Local device flows use `ghcr.io/pirlruc/android-maestro` at the digest in `docs/companion-pins.yml`. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
 | pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `cca700aebb97b442bc67150a9381c528daebcfa6` (annotated tag `3.5.0`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. |

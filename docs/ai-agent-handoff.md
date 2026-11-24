@@ -142,11 +142,15 @@ bash scripts/check-ci-local.sh
   `9350e95cbb130219be113d8737469cd7c39f155c`. `uses:` cannot take a PAT. When
   the ops repo is private again, this repo still needs Actions access to read
   the workflow file. Scanner jobs pull private `ci-lint` and `ci-supply-chain`
-  (this repo has Actions read). Gradle, CodeQL, MobSF, and the APK bill call
+  (this repo has Actions read). Gradle, CodeQL, and MobSF call
   androiddevops `1.12.0` (`29b91430c9c55f84ad05575bd0b2267ed30096d2`) from
   `android-gradle.yml`, `android-codeql.yml`, `android-mobsf.yml`,
-  `android-sbom.yml`, `emulator.yml`, and `release.yml`. `release.yml` publishes with
-  `common-release-sign.yml` and still passes `environment: release`.
+  `emulator.yml`, and `release.yml`. `android-apk-sbom.yml` at that pin
+  runs `run-osv-sbom.sh` without `COMMONDEVOPS_SCRIPTS`, so `android-sbom.yml`
+  and the release bill job check out the pinned script and commondevops
+  `v6.11.0` `fetch-verified.sh` and set the variable. `release.yml` passes
+  `sbom: false` to `android-release-apk` for the same reason, then publishes
+  with `common-release-sign.yml`, `attach_sbom: true`, and `environment: release`.
   `python-quality.yml` calls pydevops `3.10.1`
   (`1ebe447374d2fb655ee35eff578117be0c110865`) with caller permissions
   `contents: read`, `actions: write`, `packages: read`, and `pull-requests: write`.
