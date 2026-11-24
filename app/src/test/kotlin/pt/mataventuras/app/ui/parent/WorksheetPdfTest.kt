@@ -44,6 +44,11 @@ class WorksheetPdfTest {
         assertFalse(writeWorksheetIfReady(sheet, null) { out })
         assertFalse(writeWorksheetIfReady(sheet, uri) { null })
         try {
+            writeWorksheetIfReady(sheet, uri) { ByteArrayOutputStream() }
+        } catch (closed: IllegalStateException) {
+            assertEquals("document is closed!", closed.message)
+        }
+        try {
             WorksheetPdf.write(sheet, out)
         } catch (closed: IllegalStateException) {
             assertEquals("document is closed!", closed.message)

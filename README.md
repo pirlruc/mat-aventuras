@@ -33,7 +33,7 @@ a prize every 5, 10, or 15 finished activities. The default is 10.
 
 ## Install
 
-Install **0.8.0** `app-release.apk` from
+Install **0.9.0** `app-release.apk` from
 [GitHub Releases](https://github.com/pirlruc/mat-aventuras/releases/latest).
 That file is signed. Do not use the 0.1.0 debug APK for daily use.
 Also download `app-release.apk.sha256` and `app-release.cdx.json` (the

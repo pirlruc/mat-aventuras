@@ -65,7 +65,10 @@ def check_callers(data: dict) -> str | None:
     if len(sha) != 40:
         return "androiddevops sha is required"
     for relative in (
-        ".github/workflows/ci.yml",
+        ".github/workflows/android-gradle.yml",
+        ".github/workflows/android-codeql.yml",
+        ".github/workflows/android-mobsf.yml",
+        ".github/workflows/android-sbom.yml",
         ".github/workflows/emulator.yml",
         ".github/workflows/release.yml",
     ):

@@ -31,6 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pt.mataventuras.app.ui.packLine
 import pt.mataventuras.domain.engine.KartHud
 import pt.mataventuras.domain.engine.OffroadCircuit
 import pt.mataventuras.domain.model.Mascot
@@ -54,7 +55,7 @@ internal object NativeKartHost {
         val loop = OffroadRacerLoop(circuit = circuit)
         if (!showUi) {
             activity.setContentView(
-                TextView(activity).apply { text = VoiceScripts.STEER_HINT },
+                TextView(activity).apply { text = activity.packLine(VoiceScripts.STEER_HINT) },
             )
             return loop
         }

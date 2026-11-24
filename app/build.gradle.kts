@@ -15,8 +15,8 @@ android {
         applicationId = "pt.mataventuras.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10
-        versionName = "0.8.0"
+        versionCode = 11
+        versionName = "0.9.0"
         buildConfigField("boolean", "PREMIUM_UNLOCKED", premiumUnlocked)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -65,6 +65,14 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.isReturnDefaultValues = true
+        unitTests.all { test ->
+            // GitHub-hosted runners are often rate-limited by repo1.maven.org.
+            test.systemProperty(
+                "robolectric.dependency.repo.url",
+                "https://maven-central.storage-download.googleapis.com/maven2",
+            )
+            test.systemProperty("robolectric.dependency.repo.id", "mavenCentralMirror")
+        }
     }
     lint {
         abortOnError = true
@@ -102,6 +110,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.room.ktx)
     debugImplementation(libs.androidx.compose.ui.tooling)

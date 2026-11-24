@@ -1,11 +1,13 @@
 package pt.mataventuras.app.ui.parent
 
 import android.app.Activity
+import android.os.SystemClock
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,17 +30,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -45,13 +56,19 @@ import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import pt.mataventuras.app.R
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.formatDuration
+import pt.mataventuras.app.ui.home.ModuleTitles
 import pt.mataventuras.app.ui.modulePerformanceLine
 import pt.mataventuras.app.ui.needsWorkLines
+import pt.mataventuras.app.ui.packLine
+import pt.mataventuras.app.ui.packed
 import pt.mataventuras.app.ui.pinPrompt
 import pt.mataventuras.app.ui.pinSubmitLabel
 import pt.mataventuras.app.ui.rememberBringIntoViewOnFocus
@@ -87,12 +104,14 @@ fun ParentDashboard(
     var unlocked by remember { mutableStateOf(false) }
     var pin by remember { mutableStateOf("") }
     var confirmation by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf(VoiceScripts.ENTER_PIN) }
+    var message by remember { mutableStateOf("") }
     var settingPin by remember { mutableStateOf(false) }
+    var gateReady by remember { mutableStateOf(false) }
     var summary by remember { mutableStateOf<ParentSummary?>(null) }
     var pinBusy by remember { mutableStateOf(false) }
     var keyBroken by remember { mutableStateOf(false) }
     var adultOk by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val unreadable = stringResource(R.string.pin_unreadable)
     val mismatch = stringResource(R.string.pin_mismatch)
     val pinFormat = stringResource(R.string.pin_four_digits)
@@ -106,7 +125,7 @@ fun ParentDashboard(
         try {
             settingPin = !container.pinRepository.isSet()
             message = pinPrompt(settingPin)
-            onSpeak(message)
+            onSpeak(context.packLine(message))
         } catch (error: CancellationException) {
             throw error
         } catch (_: PinKeyException) {
@@ -114,111 +133,119 @@ fun ParentDashboard(
             message = unreadable
         } catch (_: IllegalStateException) {
             settingPin = false
-            message = VoiceScripts.TRY_AGAIN
+            message = missingCopy
         } catch (_: IllegalArgumentException) {
             settingPin = false
-            message = VoiceScripts.TRY_AGAIN
+            message = missingCopy
+        } finally {
+            gateReady = true
         }
-    }
-
-    if (keyBroken && !unlocked) {
-        ParentKeyReset(container, onBack, adultHoldMs, puzzle) {
-            keyBroken = false
-            settingPin = true
-            pin = ""
-            confirmation = ""
-            message = pinPrompt(true)
-        }
-        return
-    }
-
-    if (settingPin && !adultOk && !unlocked) {
-        AdultHold(
-            challenge = puzzle,
-            holdMs = adultHoldMs,
-            holdLabel = stringResource(R.string.hold_for_adult),
-            title = VoiceScripts.PARENT_DASHBOARD,
-            buttonLabel = stringResource(R.string.continue_label),
-            onBack = onBack,
-        ) { adultOk = true }
-        return
     }
 
     if (!unlocked) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-            verticalArrangement = Arrangement.Top,
-        ) {
-            Button(
-                onClick = onBack,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
-            ) { Text(stringResource(R.string.back)) }
-            Text(
-                VoiceScripts.PARENT_DASHBOARD,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(message)
-            Spacer(Modifier.height(12.dp))
-            PinField(stringResource(R.string.pin_label), pin) { pin = it }
-            if (settingPin) {
-                Spacer(Modifier.height(8.dp))
-                PinField(stringResource(R.string.pin_confirm), confirmation) { confirmation = it }
+        if (!gateReady) {
+            Box(Modifier.fillMaxSize().testTag("parent-loading"), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Text(stringResource(R.string.parent_loading), modifier = Modifier.padding(top = 12.dp))
+                }
             }
-            Spacer(Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    pinBusy = true
-                    scope.launch {
-                        try {
-                            val result =
-                                ParentPin.submit(settingPin, pin, confirmation, gate, container.pinRepository)
-                            when (result) {
-                                PinGateResult.Unlocked -> {
-                                    pin = ""
-                                    confirmation = ""
-                                    unlocked = true
-                                }
-                                is PinGateResult.Stay -> {
-                                    message =
-                                        pinNotice(
-                                            result,
-                                            mismatch,
-                                            pinFormat,
-                                            lockedCopy,
-                                            missingCopy,
-                                            wrongLines,
-                                        )
-                                    result.speak?.let(onSpeak)
-                                }
-                            }
-                        } catch (error: CancellationException) {
-                            throw error
-                        } catch (_: PinKeyException) {
-                            keyBroken = true
-                        } catch (_: IllegalStateException) {
-                            message = VoiceScripts.TRY_AGAIN
-                        } catch (_: IllegalArgumentException) {
-                            message = VoiceScripts.TRY_AGAIN
-                        } finally {
-                            pinBusy = false
-                        }
-                    }
-                },
-                enabled = !pinBusy,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+        } else if (keyBroken) {
+            ParentKeyReset(container, onBack, adultHoldMs, puzzle) {
+                keyBroken = false
+                settingPin = true
+                pin = ""
+                confirmation = ""
+                message = pinPrompt(true)
+            }
+        } else if (settingPin && !adultOk) {
+            AdultHold(
+                challenge = puzzle,
+                holdMs = adultHoldMs,
+                holdLabel = stringResource(R.string.hold_for_adult),
+                title = packed(VoiceScripts.PARENT_DASHBOARD),
+                buttonLabel = stringResource(R.string.continue_label),
+                onBack = onBack,
+            ) { adultOk = true }
+        } else {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                verticalArrangement = Arrangement.Top,
             ) {
+                Button(
+                    onClick = onBack,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+                ) { Text(stringResource(R.string.back)) }
                 Text(
-                    pinSubmitLabel(
-                        settingPin,
-                        stringResource(R.string.pin_save),
-                        stringResource(R.string.pin_enter),
-                    ),
+                    packed(VoiceScripts.PARENT_DASHBOARD),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
                 )
+                Spacer(Modifier.height(12.dp))
+                Text(packed(message))
+                Spacer(Modifier.height(12.dp))
+                PinField(stringResource(R.string.pin_label), pin, "parent-pin") { pin = it }
+                if (settingPin) {
+                    Spacer(Modifier.height(8.dp))
+                    PinField(stringResource(R.string.pin_confirm), confirmation, "parent-pin-confirm") {
+                        confirmation =
+                            it
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        pinBusy = true
+                        scope.launch {
+                            try {
+                                val result =
+                                    ParentPin.submit(settingPin, pin, confirmation, gate, container.pinRepository)
+                                when (result) {
+                                    PinGateResult.Unlocked -> {
+                                        pin = ""
+                                        confirmation = ""
+                                        unlocked = true
+                                    }
+                                    is PinGateResult.Stay -> {
+                                        message =
+                                            pinNotice(
+                                                result,
+                                                mismatch,
+                                                pinFormat,
+                                                lockedCopy,
+                                                missingCopy,
+                                                wrongLines,
+                                            )
+                                        result.speak?.let(onSpeak)
+                                    }
+                                }
+                            } catch (error: CancellationException) {
+                                throw error
+                            } catch (_: PinKeyException) {
+                                keyBroken = true
+                            } catch (_: IllegalStateException) {
+                                message = missingCopy
+                            } catch (_: IllegalArgumentException) {
+                                message = missingCopy
+                            } finally {
+                                pinBusy = false
+                            }
+                        }
+                    },
+                    enabled = !pinBusy,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).testTag("parent-pin-save"),
+                ) {
+                    Text(
+                        pinSubmitLabel(
+                            settingPin,
+                            stringResource(R.string.pin_save),
+                            stringResource(R.string.pin_enter),
+                        ),
+                    )
+                }
             }
         }
         return
@@ -250,11 +277,11 @@ fun ParentDashboard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                VoiceScripts.PARENT_DASHBOARD,
+                packed(VoiceScripts.PARENT_DASHBOARD),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
-            Text(VoiceScripts.STAYS_ON_DEVICE, style = MaterialTheme.typography.bodyMedium)
+            Text(packed(VoiceScripts.STAYS_ON_DEVICE), style = MaterialTheme.typography.bodyMedium)
             val current = profile
             val stats = data
             if (current == null || stats == null) {
@@ -269,11 +296,21 @@ fun ParentDashboard(
                 MetricCard(stringResource(R.string.hits_misses), "${stats.hits} / ${stats.misses}")
                 MetricCard(stringResource(R.string.time), formatDuration(stats.totalTimeMs))
                 Text(stringResource(R.string.per_module), fontWeight = FontWeight.Bold)
-                stats.byModule.forEach { module ->
-                    Text(modulePerformanceLine(module))
+                for (module in stats.byModule) {
+                    Text(
+                        modulePerformanceLine(
+                            module,
+                            stringResource(ModuleTitles.nounId(module.module)),
+                        ),
+                    )
                 }
                 Text(stringResource(R.string.needs_work), fontWeight = FontWeight.Bold)
-                needsWorkLines(stats.needsWork, stringResource(R.string.needs_work_clear)).forEach { Text(it) }
+                val clear = stringResource(R.string.needs_work_clear)
+                val nounByModule = mutableMapOf<pt.mataventuras.domain.model.LearningModule, String>()
+                for (module in stats.needsWork) {
+                    nounByModule[module] = stringResource(ModuleTitles.nounId(module))
+                }
+                needsWorkLines(stats.needsWork, clear) { nounByModule.getValue(it) }.forEach { Text(it) }
                 MasteryHeatmap(masteryGrid(stats))
                 PrintWorksheetButton(current)
                 PrizeLimitRow(container, current)
@@ -312,6 +349,7 @@ private fun PrintWorksheetButton(profile: ChildProfile) {
 private fun PinField(
     label: String,
     value: String,
+    tag: String,
     onChange: (String) -> Unit,
 ) {
     OutlinedTextField(
@@ -320,7 +358,7 @@ private fun PinField(
         label = { Text(label) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-        modifier = Modifier.fillMaxWidth().then(rememberBringIntoViewOnFocus()),
+        modifier = Modifier.fillMaxWidth().testTag(tag).then(rememberBringIntoViewOnFocus()),
         singleLine = true,
     )
 }
@@ -435,9 +473,14 @@ internal fun AdultHold(
 ) {
     val action = buttonLabel ?: stringResource(R.string.reset_pin)
     var held by remember { mutableStateOf(false) }
+    var progress by remember { mutableFloatStateOf(0f) }
     var answer by remember { mutableStateOf("") }
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Top,
     ) {
         if (onBack != null) {
@@ -456,31 +499,61 @@ internal fun AdultHold(
             Spacer(Modifier.height(12.dp))
         }
         if (!held) {
-            Text(
-                holdLabel,
+            Column(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(64.dp)
-                        .pointerInput(holdMs) {
+                        .heightIn(min = 64.dp)
+                        .testTag("adult-hold")
+                        .semantics {
+                            role = Role.Button
+                            progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
+                        }.pointerInput(holdMs) {
                             detectTapGestures(
                                 onPress = {
-                                    val released =
-                                        try {
-                                            withTimeout(holdMs) {
-                                                tryAwaitRelease()
-                                                true
+                                    val awaitRelease: suspend () -> Unit = { tryAwaitRelease() }
+                                    val start = SystemClock.elapsedRealtime()
+                                    coroutineScope {
+                                        val ticker =
+                                            launch {
+                                                while (isActive) {
+                                                    val elapsed = SystemClock.elapsedRealtime() - start
+                                                    progress = (elapsed.toFloat() / holdMs.toFloat()).coerceIn(0f, 1f)
+                                                    delay(32)
+                                                }
                                             }
-                                        } catch (_: TimeoutCancellationException) {
-                                            false
+                                        val released =
+                                            try {
+                                                withTimeout(holdMs) {
+                                                    awaitRelease()
+                                                    true
+                                                }
+                                            } catch (_: TimeoutCancellationException) {
+                                                false
+                                            }
+                                        ticker.cancel()
+                                        if (!released) {
+                                            progress = 1f
+                                            held = true
+                                        } else {
+                                            progress = 0f
                                         }
-                                    if (!released) held = true
+                                    }
                                 },
                             )
                         },
-            )
+            ) {
+                Text(holdLabel)
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         } else {
-            Text(challenge.prompt)
+            Text(
+                stringResource(R.string.adult_prompt, challenge.left, challenge.right),
+                modifier = Modifier.testTag("adult-challenge"),
+            )
             OutlinedTextField(
                 value = answer,
                 onValueChange = { answer = it.filter(Char::isDigit).take(4) },
@@ -493,7 +566,7 @@ internal fun AdultHold(
                     if (answer != challenge.product.toString()) return@Button
                     onPassed()
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).testTag("adult-continue"),
             ) { Text(action) }
         }
     }

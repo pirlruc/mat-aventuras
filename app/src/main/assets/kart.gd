@@ -328,13 +328,13 @@ func _draw_meta(size: Vector2, horizon: float, ground: float) -> void:
 func _update_hud(show_boost: bool) -> void:
 	Host.skin_hud(hud, self)
 	var shown := mini(lap + 1, laps_target)
-	var boost := Host.hud_text("boost", "Impulso")
+	var boost := Host.hud_text("boost", "Boost")
 	var extra := "\n%s!" % boost if show_boost else ""
 	if absf(lateral) > _sample(widths, distance):
-		extra = "\n%s" % Host.hud_text("off_track", "Volta à pista!")
+		extra = "\n%s" % Host.hud_text("off_track", "Back on the track!")
 	hud.text = Host.hud_text(
 		"kart_hud",
-		"Esquerda · %s · Direita\nPassa por baixo da META\nVolta %d de %d\nLugar %d de %d\nArcos %d/%d%s"
+		"Left · %s · Right\nPass under the FINISH\nLap %d of %d\nPlace %d of %d\nGates %d/%d%s"
 	) % [boost, shown, laps_target, _place(), rivals.size() + 1, gates, gates_target, extra]
 
 

@@ -199,6 +199,37 @@ if "$cygwin" || "$msys" ; then
 fi
 
 
+# Kover 0.9.11 still assigns Configuration.isVisible. Gradle 9.8 reports that
+# as a deprecation, and warning.mode=fail stops the build. The agent drops
+# those invokes. The daemon is not started in this directory, so the path
+# has to be absolute. A caller -Dorg.gradle.jvmargs replaces the properties
+# file, so the agent is appended there too.
+AGENT="$APP_HOME/gradle/kover-visibility/kover-visibility-agent.jar"
+found_jvmargs=0
+for arg in "$@"; do
+    case $arg in
+        -Dorg.gradle.jvmargs=*)
+            found_jvmargs=1
+            value=${arg#-Dorg.gradle.jvmargs=}
+            case $value in
+                *kover-visibility-agent.jar*)
+                    set -- "$@" "$arg"
+                    ;;
+                *)
+                    set -- "$@" "-Dorg.gradle.jvmargs=$value -javaagent:$AGENT"
+                    ;;
+            esac
+            ;;
+        *)
+            set -- "$@" "$arg"
+            ;;
+    esac
+    shift
+done
+if [ "$found_jvmargs" -eq 0 ]; then
+    set -- "$@" "-Dorg.gradle.jvmargs=-Xmx3g -Dfile.encoding=UTF-8 -javaagent:$AGENT"
+fi
+
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
 

@@ -1,7 +1,6 @@
-# Quality and Android builds. Heavy jobs skip a pull request that does not
-# touch the app, the domain, Gradle, or scripts. The gate job still runs, so a
-# docs-only pull request is not blocked on a skipped Gradle build.
-# Android jobs call androiddevops 1.7.0 (CI-018).
+# Quality, wrapper validation, and dependency review. Gradle, CodeQL, MobSF,
+# and the APK bill each have their own workflow. androiddevops 1.12.0 locks
+# format(github.workflow, github.ref), so those callers cannot share a name.
 name: ci
 
 on:
@@ -13,7 +12,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-orchestrator-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -88,69 +87,6 @@ jobs:
       - name: License allow/deny (SC-LIC-001)
         run: python3 scripts/verify-licenses.py
 
-  android:
-    needs: changes
-    if: needs.changes.outputs.code == 'true'
-    permissions:
-      contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-gradle-ci.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
-    with:
-      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
-      gradle_tasks: >-
-        :domain:ktlintCheck :domain:detekt :domain:test :domain:koverXmlReport :domain:koverVerify
-        :data:ktlintCheck :data:detekt :data:testDebugUnitTest :data:koverXmlReportDebug :data:koverVerifyDebug
-        :app:ktlintCheck :app:detekt :app:testDebugUnitTest :app:koverXmlReportDebug :app:koverVerifyDebug
-        :app:lintDebug
-        cyclonedxBom
-      pre_command: bash scripts/checkout-guardrails.sh
-      post_command: >-
-        python3 -m venv .ci-venv &&
-        .ci-venv/bin/pip install --require-hashes -r requirements-ci.txt &&
-        .ci-venv/bin/python scripts/verify-coverage.py &&
-        python3 scripts/verify-licenses.py
-    secrets:
-      checkout_token: ${{ secrets.GITHUB_TOKEN }}
-      command_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
-
-  codeql:
-    needs: changes
-    if: needs.changes.outputs.code == 'true'
-    permissions:
-      contents: read
-      # The reusable upload job requests actions: read even when upload is never.
-      actions: read
-      security-events: write
-    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
-    with:
-      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
-      upload: never
-      build_command: >-
-        ./gradlew --no-daemon --rerun-tasks :domain:compileKotlin :data:compileDebugKotlin :app:compileDebugKotlin
-    secrets:
-      checkout_token: ${{ secrets.GITHUB_TOKEN }}
-
-  mobsf:
-    needs: changes
-    if: needs.changes.outputs.code == 'true'
-    permissions:
-      contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-mobsf.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
-    with:
-      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
-    secrets:
-      checkout_token: ${{ secrets.GITHUB_TOKEN }}
-
-  sbom:
-    needs: changes
-    if: github.event_name != 'pull_request' || needs.changes.outputs.deps == 'true'
-    permissions:
-      contents: read
-    uses: pirlruc/androiddevops/.github/workflows/android-apk-sbom.yml@fb6651b3cd3246975df605e7000c4992d6b6a184
-    with:
-      scripts_ref: fb6651b3cd3246975df605e7000c4992d6b6a184
-    secrets:
-      checkout_token: ${{ secrets.GITHUB_TOKEN }}
-
   wrapper:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -166,13 +102,13 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    uses: pirlruc/commondevops/.github/workflows/common-dependency-review.yml@1e0c029bf93705f399f2a3a7e5f19810c101da65
+    uses: pirlruc/commondevops/.github/workflows/common-dependency-review.yml@9350e95cbb130219be113d8737469cd7c39f155c # v6.11.0
     with:
       fail_on_severity: high
 
   gate:
     if: always()
-    needs: [changes, quality, android, codeql, mobsf, sbom, dependency-review, wrapper]
+    needs: [changes, quality, dependency-review, wrapper]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

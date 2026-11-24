@@ -31,6 +31,7 @@ import pt.mataventuras.app.R
 import pt.mataventuras.app.di.AppContainer
 import pt.mataventuras.app.ui.avatarLine
 import pt.mataventuras.app.ui.badgeLine
+import pt.mataventuras.app.ui.packed
 import pt.mataventuras.domain.model.ChildProfile
 import pt.mataventuras.domain.model.LeaderboardEntry
 import pt.mataventuras.domain.model.UnlockedAvatar
@@ -84,7 +85,7 @@ fun LeaderboardAndRewardsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                VoiceScripts.LEADERBOARD,
+                packed(VoiceScripts.LEADERBOARD),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
@@ -117,7 +118,11 @@ fun LeaderboardAndRewardsScreen(
                     }
                 }
             }
-            Text(VoiceScripts.REWARDS, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(
+                packed(VoiceScripts.REWARDS),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
             Text(stringResource(R.string.badges))
             BadgeCode.entries.forEach { code ->
                 val owned = badges.any { it.code == code.name }

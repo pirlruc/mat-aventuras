@@ -25,7 +25,10 @@ fun TowerScreen(
 ) {
     val round = remember { TowerDefence.round(random) }
     Column {
-        Text(round.prompt)
+        Text(
+            pt.mataventuras.app.ui
+                .packed(round.prompt),
+        )
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishTower(round, index, onFinished) },

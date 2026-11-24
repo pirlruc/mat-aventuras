@@ -51,6 +51,7 @@ import pt.mataventuras.app.ui.ageButtonEmoji
 import pt.mataventuras.app.ui.fallbackChildName
 import pt.mataventuras.app.ui.mascotChipDp
 import pt.mataventuras.app.ui.mascotGlyph
+import pt.mataventuras.app.ui.packed
 import pt.mataventuras.app.ui.rememberBringIntoViewOnFocus
 import pt.mataventuras.app.ui.selectionBorderDp
 import pt.mataventuras.app.ui.selectionHighlightArgb
@@ -89,43 +90,44 @@ fun AgeSelectionScreen(
     ) {
         Image(
             painter = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = "Ícone de ${VoiceScripts.APP_TITLE}",
+            contentDescription = stringResource(R.string.voice_app_icon, stringResource(R.string.app_name)),
             modifier =
                 Modifier
                     .size(96.dp)
                     .clip(CircleShape),
         )
         Text(
-            text = VoiceScripts.APP_TITLE,
+            text = packed(VoiceScripts.APP_TITLE),
             fontSize = 36.sp,
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center,
             color = Color(0xFF0D47A1),
         )
         Text(
-            text = VoiceScripts.APP_TAGLINE,
+            text = packed(VoiceScripts.APP_TAGLINE),
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
             color = Color(0xFF1565C0),
         )
         Text(
-            text = VoiceScripts.APP_DESCRIPTION,
+            text = packed(VoiceScripts.APP_DESCRIPTION),
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
             color = Color(0xFF37474F),
         )
         Text(
-            text = VoiceScripts.AGE_SELECTION,
+            text = packed(VoiceScripts.AGE_SELECTION),
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center,
             color = Color(0xFF0D47A1),
         )
         if (lastProfile != null) {
+            val continueLabel = packed(EntryLogic.continueLabel(lastProfile))
             Button(
                 onClick = {
-                    onSpeak(EntryLogic.continueLabel(lastProfile))
+                    onSpeak(continueLabel)
                     onContinueLast()
                 },
                 modifier =
@@ -135,35 +137,37 @@ fun AgeSelectionScreen(
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFB8C00)),
             ) {
-                Text(EntryLogic.continueLabel(lastProfile), fontWeight = FontWeight.Bold)
+                Text(packed(EntryLogic.continueLabel(lastProfile)), fontWeight = FontWeight.Bold)
             }
         }
+        val youngTap = stringResource(R.string.voice_age_young_tap)
+        val olderTap = stringResource(R.string.voice_age_older_tap)
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             AgeButton(
-                label = VoiceScripts.THREE_TO_FIVE,
+                label = packed(VoiceScripts.THREE_TO_FIVE),
                 selected = ageGroup == AgeBand.THREE_TO_FIVE,
                 color = Color(0xFF42A5F5),
                 huge = true,
                 onClick = {
                     ageGroup = AgeBand.THREE_TO_FIVE
-                    onSpeak("3 a 5 anos. Vamos brincar!")
+                    onSpeak(youngTap)
                 },
             )
             AgeButton(
-                label = VoiceScripts.SIX_TO_EIGHT,
+                label = packed(VoiceScripts.SIX_TO_EIGHT),
                 selected = ageGroup == AgeBand.SIX_TO_EIGHT,
                 color = Color(0xFF66BB6A),
                 huge = false,
                 onClick = {
                     ageGroup = AgeBand.SIX_TO_EIGHT
-                    onSpeak("6 a 8 anos. Pronto para desafios?")
+                    onSpeak(olderTap)
                 },
             )
         }
         val preview = EntryLogic.previewFor(ageGroup)
         if (preview.isNotEmpty()) {
             Text(
-                text = preview,
+                text = packed(preview),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
@@ -176,18 +180,19 @@ fun AgeSelectionScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it.take(ChildName.MAX_LENGTH) },
-                label = { Text(VoiceScripts.YOUR_NAME) },
+                label = { Text(packed(VoiceScripts.YOUR_NAME)) },
                 textStyle = MaterialTheme.typography.titleLarge.copy(fontSize = tokens.bodySp.sp),
                 modifier = Modifier.fillMaxWidth().then(rememberBringIntoViewOnFocus()),
             )
-            Text(VoiceScripts.CHOOSE_FRIEND, fontSize = tokens.bodySp.sp)
+            Text(packed(VoiceScripts.CHOOSE_FRIEND), fontSize = tokens.bodySp.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Mascot.entries.forEach { candidate ->
+                for (candidate in Mascot.entries) {
                     val chosen = mascot == candidate
+                    val mascotLine = stringResource(R.string.voice_mascot_me, candidate.displayName)
                     Button(
                         onClick = {
                             mascot = candidate
-                            onSpeak("Eu sou o ${candidate.displayName}!")
+                            onSpeak(mascotLine)
                         },
                         colors =
                             ButtonDefaults.buttonColors(
@@ -226,11 +231,11 @@ fun AgeSelectionScreen(
                         .height(tokens.minButtonDp.dp),
                 shape = RoundedCornerShape(24.dp),
             ) {
-                Text(VoiceScripts.START, fontSize = tokens.titleSp.sp)
+                Text(packed(VoiceScripts.START), fontSize = tokens.titleSp.sp)
             }
         }
         Text(
-            text = VoiceScripts.STAYS_ON_DEVICE,
+            text = packed(VoiceScripts.STAYS_ON_DEVICE),
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
             color = Color(0xFF546E7A),

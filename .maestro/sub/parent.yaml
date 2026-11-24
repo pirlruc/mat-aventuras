@@ -1,17 +1,25 @@
 appId: pt.mataventuras.app
 ---
-- tapOn: "Painel dos pais"
-- longPressOn: "Segurar para continuar"
+- tapOn:
+    id: parent-open
+- longPressOn:
+    id: adult-hold
+    longPressDuration: 2000
 - copyTextFrom:
-    text: "Quanto é .*\\?"
-- evalScript: '${output.left = maestro.copiedText.split(" ")[2]; output.right = maestro.copiedText.split(" ")[4].replace("?", ""); output.product = (Number(output.left) * Number(output.right)).toString()}'
-- tapOn: "Resposta"
+    id: adult-challenge
+- evalScript: ${output.parts = maestro.copiedText.split(/[^0-9]+/).filter(function (part) { return part.length > 0; }); output.product = (Number(output.parts[0]) * Number(output.parts[1])).toString();}
+- tapOn:
+    id: pin-reset-answer
 - inputText: ${output.product}
 - hideKeyboard
-- tapOn: "Continuar"
-- tapOn: "PIN"
+- tapOn:
+    id: adult-continue
+- tapOn:
+    id: parent-pin
 - inputText: "1234"
-- tapOn: "Confirmar PIN"
+- tapOn:
+    id: parent-pin-confirm
 - inputText: "1234"
 - hideKeyboard
-- tapOn: "Guardar PIN"
+- tapOn:
+    id: parent-pin-save

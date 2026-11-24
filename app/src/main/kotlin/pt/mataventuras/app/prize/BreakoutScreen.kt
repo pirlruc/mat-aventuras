@@ -25,7 +25,10 @@ fun BreakoutScreen(
 ) {
     val round = remember { LetterBreakout.round(random) }
     Column {
-        Text(round.prompt)
+        Text(
+            pt.mataventuras.app.ui
+                .packed(round.prompt),
+        )
         round.labels.forEachIndexed { index, label ->
             Button(
                 onClick = { finishBreakout(round, index, onFinished) },

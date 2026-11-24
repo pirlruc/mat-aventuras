@@ -16,14 +16,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
+import pt.mataventuras.app.R
 import pt.mataventuras.app.debugInstantWin
 import pt.mataventuras.app.speech.SpeechEngine
+import pt.mataventuras.app.ui.prizeControls
+import pt.mataventuras.app.ui.prizeGoal
+import pt.mataventuras.app.ui.prizeIntro
 import pt.mataventuras.domain.engine.PrizeBrief
-import pt.mataventuras.domain.engine.PrizeHud
 import pt.mataventuras.domain.prize.ComposePrize
-import pt.mataventuras.domain.voice.VoiceScripts
 
 /**
  * The Compose prize for [prize]. [introduce] speaks the goal before play.
@@ -41,7 +44,7 @@ internal fun PrizeScreen(
         Button(
             onClick = onExit,
             modifier = Modifier.fillMaxWidth().prizeMinHeight(),
-        ) { Text(PrizeHud.BACK_LABEL) }
+        ) { Text(stringResource(R.string.back)) }
         if (!playing) {
             PrizeIntroCard(PrizeBrief.composeKey(prize.name)) { playing = true }
         } else {
@@ -62,12 +65,12 @@ private fun PrizeIntroCard(
     val speech = remember { SpeechEngine(context) }
     DisposableEffect(speech) { onDispose { speech.release() } }
     LaunchedEffect(scene) {
-        speech.speak("${VoiceScripts.LETS_PLAY} ${PrizeBrief.goal(scene)} ${PrizeBrief.controls(scene)}")
+        speech.speak(context.prizeIntro(scene))
     }
-    Text(PrizeBrief.goal(scene))
-    Text(PrizeBrief.controls(scene))
+    Text(context.prizeGoal(scene))
+    Text(context.prizeControls(scene))
     Button(onClick = onPlay, modifier = Modifier.fillMaxWidth().prizeMinHeight()) {
-        Text(PrizeHud.PLAY_LABEL)
+        Text(stringResource(R.string.godot_play))
     }
 }
 

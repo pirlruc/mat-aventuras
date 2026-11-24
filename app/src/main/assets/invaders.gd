@@ -194,8 +194,8 @@ func _update_hud() -> void:
 		else:
 			hud.text = "🚀 %d\n%s" % [hits, life]
 	elif finished and left == 0:
-		hud.text = Host.hud_text("invaders_won", "Ganhaste!\nNaves %d/%d") % [fleet, fleet]
+		hud.text = Host.hud_text("invaders_won", "You won!\nShips %d/%d") % [fleet, fleet]
 	elif finished:
-		hud.text = "%s\n%s" % [Host.hud_text("game_over", "Fim de jogo"), life]
+		hud.text = "%s\n%s" % [Host.hud_text("game_over", "Game over"), life]
 	else:
-		hud.text = Host.hud_text("invaders_play", "Desliza para mover · toca para disparar\nNaves %d/%d\n%s") % [hits, fleet, life]
+		hud.text = Host.hud_text("invaders_play", "Swipe to move · tap to shoot\nShips %d/%d\n%s") % [hits, fleet, life]

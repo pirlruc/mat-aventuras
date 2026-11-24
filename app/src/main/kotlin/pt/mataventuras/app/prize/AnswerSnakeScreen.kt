@@ -10,7 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import kotlin.random.Random
+import pt.mataventuras.app.R
+import pt.mataventuras.app.ui.packed
 import pt.mataventuras.domain.prize.AnswerSnake
 import pt.mataventuras.domain.voice.VoiceScripts
 
@@ -24,8 +27,8 @@ fun AnswerSnakeScreen(
 ) {
     var round by remember { mutableStateOf(AnswerSnake.round(random)) }
     Column {
-        Text(round.prompt)
-        Text(modifier = Modifier.testTag("snake-length"), text = "Cobra: ${round.length}")
+        Text(packed(round.prompt))
+        Text(modifier = Modifier.testTag("snake-length"), text = stringResource(R.string.snake_length, round.length))
         round.options.forEachIndexed { index, label ->
             Button(
                 onClick = {
@@ -38,6 +41,6 @@ fun AnswerSnakeScreen(
                 Text(label)
             }
         }
-        if (AnswerSnake.full(round)) Text(VoiceScripts.SNAKE_DONE)
+        if (AnswerSnake.full(round)) Text(packed(VoiceScripts.SNAKE_DONE))
     }
 }

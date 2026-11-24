@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
 import pt.mataventuras.app.ui.lesson.colourOf
+import pt.mataventuras.app.ui.packed
 import pt.mataventuras.domain.prize.ColourRound
 import pt.mataventuras.domain.prize.Colouring
 import pt.mataventuras.domain.voice.VoiceScripts
@@ -30,8 +31,8 @@ fun ColouringScreen(
     val round = remember { Colouring.round(random) }
     var paint by remember { mutableStateOf(round.labels.first()) }
     Column {
-        Text(round.prompt)
-        Text(VoiceScripts.COLOUR_SPOKEN)
+        Text(packed(round.prompt))
+        Text(packed(VoiceScripts.COLOUR_SPOKEN))
         Canvas(Modifier.size(72.dp).testTag("paint")) {
             drawCircle(colourOf(paint))
         }

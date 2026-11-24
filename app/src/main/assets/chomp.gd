@@ -175,7 +175,7 @@ func _dot(x: float, y: float, cell: float, color: Color) -> void:
 
 func _update_hud() -> void:
 	Host.skin_hud(hud, self)
-	var extra := "\n%s" % Host.hud_text("powered", "Transformado!") if form == 1 else ""
+	var extra := "\n%s" % Host.hud_text("powered", "Powered up!") if form == 1 else ""
 	var left := 0
 	var v := pellets
 	while v != 0:
@@ -190,8 +190,8 @@ func _update_hud() -> void:
 		else:
 			hud.text = "● %d\n%s" % [left, life]
 	elif finished and left == 0:
-		hud.text = Host.hud_text("chomp_won", "Ganhaste!\nFaltam 0")
+		hud.text = Host.hud_text("chomp_won", "You won!\nNone left")
 	elif finished:
-		hud.text = "%s\n%s" % [Host.hud_text("game_over", "Fim de jogo"), life]
+		hud.text = "%s\n%s" % [Host.hud_text("game_over", "Game over"), life]
 	else:
-		hud.text = Host.hud_text("chomp_play", "Desliza para o lado das bolinhas\nFaltam %d · %s%s") % [left, life, extra]
+		hud.text = Host.hud_text("chomp_play", "Swipe toward the dots\nLeft %d · %s%s") % [left, life, extra]

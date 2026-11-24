@@ -1,7 +1,7 @@
 # Authored backlog for pirlruc/mat-aventuras.
 #
 # Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
-# Methodology: https://github.com/pirlruc/methodologies/tree/1.9.2/github-issue-adr
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.12.2/github-issue-adr
 #
 # The Epic is the decision record — there are no ADR markdown files.
 # Deviations from guardrails go in docs/guardrail-deviations.yml, not here.
@@ -1924,3 +1924,61 @@ milestones:
             verification:
               - ./gradlew :domain:test :app:testDebugUnitTest
               - The manifest does not grant INTERNET
+
+  - name: Phase 10 — Round 10
+    status: done
+    epics:
+      - id: MAT-026
+        status: done
+        title: Fix the parent hold, localize speech, and bump the release pins
+        overview:
+          problem: >-
+            The parent gate composed the PIN form before the repository
+            answered, so Maestro never found the hold. Voice, module titles,
+            prize copy, and Godot fallbacks were still Portuguese literals.
+          goal: >-
+            Wait for the PIN repository, expose a stable hold control, and
+            speak every moved line from the language pack.
+        decision: >-
+          In the context of a child opening the parent dashboard, facing a
+          hold control that was not on screen until after the first frame and
+          copy that ignored the language pack, we decided to resolve the PIN
+          before choosing the hold or the form and to read voice, titles,
+          prize lines, and Godot fallbacks from the locale resources, to
+          achieve a gate Maestro can hold and speech that follows the pack,
+          accepting that arithmetic prompts built in the domain stay Portuguese
+          until a later pass and that billing stays deferred.
+        acceptance_criteria:
+          - The parent screen shows a loading state until the PIN repository answers
+          - The hold control is a button with test tag adult-hold and a 1500 ms hold
+          - Maestro long-presses adult-hold for 2000 ms and does not pin a Portuguese label
+          - TTS speaks the localized string for the moved copy
+          - versionName is 0.9.0 and versionCode is 11
+          - Kover floors stay 95/95
+        guardrail_refs:
+          - APP-I18N-001
+          - APP-ENT-001
+          - ANDROID-A11Y-001
+          - KT-BUILD-005
+          - KT-TEST-002
+        tasks:
+          - id: MAT-026-T1
+            status: done
+            title: Resolve the parent gate before the first choice
+            verification:
+              - ParentDashboard waits on the PIN repository before AdultHold or the PIN form
+              - AdultHold uses test tag adult-hold, button semantics, and a progress indication
+              - The 6-8 parent control and the post-hold Continue button are at least 64 dp
+          - id: MAT-026-T2
+            status: done
+            title: Move voice, titles, prize lines, and Godot fallbacks into locale resources
+            verification:
+              - values, values-pt-rPT, values-pt-rBR, values-en, values-es, and values-fr carry the lines
+              - SpeechEngine speaks the localized string
+              - .maestro/sub/parent.yaml long-presses id adult-hold
+          - id: MAT-026-T3
+            status: done
+            title: Follow reduced motion and the window size class
+            verification:
+              - Memory flips use the system animator duration scale
+              - The home grid adds columns at the medium and expanded widths

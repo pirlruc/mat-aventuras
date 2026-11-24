@@ -1,7 +1,7 @@
 # Architecture — Mat Aventuras
 
 Technical guide for the native Android educational math game.
-Methodology: [github-issue-adr @ 1.9.2](https://github.com/pirlruc/methodologies/tree/1.9.2/github-issue-adr).
+Methodology: [github-issue-adr @ 1.12.2](https://github.com/pirlruc/methodologies/tree/1.12.2/github-issue-adr).
 Decision record: Epics **MAT-001** and **MAT-003** in `docs/issues.yml` (no ADR markdown files).
 Guardrails pin: `docs/guardrails/` → [pirlruc/guardrails](https://github.com/pirlruc/guardrails) @ `1.15.0`.
 Scaffold pin: `.github/scaffold/` → [pirlruc/github-scaffold](https://github.com/pirlruc/github-scaffold) @ `1.12.0`.
@@ -278,7 +278,7 @@ secret is missing. Other events, including Dependabot, skip and keep
 `docs/companion-pins.yml` (SC-DEP-004). Sync scaffold files with
 `.github/scaffold/scripts/sync-templates.sh`. Synced rules are the scaffold
 contract; do not hand-edit them. This repo's own docs cite methodologies
-`1.9.2`.
+`1.12.2`.
 
 Departures that are not lowered numbers live in `docs/guardrail-deviations.yml`
 and render into Epic MAT-006. Coverage floors stay at 95.
@@ -292,24 +292,28 @@ still carry KDoc (`scripts/verify-kdoc.py`).
 unset (`settings.gradle.kts`). A machine with the SDK compiles them. CI
 runs ktlint, detekt, unit tests, Kover, and `:app:lintDebug` on all three
 modules. CodeQL compile and the APK bill are the androiddevops callers in
-`ci.yml` (MAT-006-T3).
+`android-codeql.yml` and `android-sbom.yml` (MAT-006-T3).
 
 ### Shared CI jobs
 
 `.github/workflows/shared-ci.yml` calls commondevops at peeled commit
-`1e0c029bf93705f399f2a3a7e5f19810c101da65` (annotated tag `v6.2.0`). `uses:`
+`9350e95cbb130219be113d8737469cd7c39f155c` (annotated tag `v6.11.0`). `uses:`
 and `scripts_ref` are that same SHA (CI-018 / CI-034). A `uses:` line cannot
 carry a PAT. When an ops repo is private, this public repo still needs
 Actions access to read the workflow file. Once androiddevops is private, a
 public caller cannot use those workflows and must vendor the pinned file.
 
-`ci.yml` always runs `quality`. A `changes` job skips Gradle, CodeQL, MobSF,
-and the APK bill on a pull request that does not touch `app/`, `data/`,
-`domain/`, `gradle/`, or `scripts/`. `gate` treats a skipped job as success.
-Those four jobs call androiddevops `1.7.0`
-(`fb6651b3cd3246975df605e7000c4992d6b6a184`) and pass
-`secrets.GITHUB_TOKEN` as `checkout_token`. Fork pull requests skip the
-reusable jobs that need a secret.
+`ci.yml` always runs `quality`. Gradle, CodeQL, MobSF, and the APK bill
+are separate workflows (`android-gradle.yml`, `android-codeql.yml`,
+`android-mobsf.yml`, `android-sbom.yml`). Each skips a pull request that
+does not touch `app/`, `data/`, `domain/`, `gradle/`, or `scripts/` (the
+bill skips unless Gradle inputs change). Gradle, CodeQL, and MobSF call
+androiddevops `1.12.0` (`29b91430c9c55f84ad05575bd0b2267ed30096d2`). The bill
+runs that pin's `run-osv-sbom.sh` with `COMMONDEVOPS_SCRIPTS` set, because
+`android-apk-sbom.yml` at 1.12.0 omits the helper its script requires.
+Each file has its own `name` because the reusables lock
+`format(github.workflow, github.ref)`.
+Fork pull requests skip the reusable jobs that need a secret.
 
 | Ops repo | Reuse here |
 | --- | --- |
@@ -324,7 +328,7 @@ reusable jobs that need a secret.
 | commondevops `common-threshold-drift` | Called with `scripts/check-threshold-drift.sh`. Missing `doc_coverage` is allowed. |
 | commondevops `common-dependency-review` | Called from `ci.yml` on pull requests with `fail_on_severity: high`. |
 | commondevops `common-release` | Called from `release.yml` after `android-release-apk`. The release artifact is `android-release-apk`. The job selects the `release` environment. |
-| androiddevops | CI, the emulator, and `android-release-apk` stay on tag `1.7.0` (`fb6651b3cd3246975df605e7000c4992d6b6a184`). The release job selects the `release` environment. Local device flows use `ghcr.io/pirlruc/android-maestro` at the digest in `docs/companion-pins.yml`. |
+| androiddevops | Gradle, CodeQL, MobSF, the emulator, and `android-release-apk` stay on tag `1.12.0` (`29b91430c9c55f84ad05575bd0b2267ed30096d2`). The APK bill runs that pin's script with `COMMONDEVOPS_SCRIPTS` set. The release job selects the `release` environment. Local device flows use `ghcr.io/pirlruc/android-maestro` at the digest in `docs/companion-pins.yml`. |
 | containerdevops | No production image or Compose stack. |
 | cppdevops | No C++ sources. Godot gameplay is GDScript plus the Kotlin simulation. |
 | pydevops `python-quality` | Caller is `python-quality.yml` at peeled commit `cca700aebb97b442bc67150a9381c528daebcfa6` (annotated tag `3.5.0`). `installable_app` is false. This repo has Actions read on `ci-lint` and `ci-python`, so the job runs. |

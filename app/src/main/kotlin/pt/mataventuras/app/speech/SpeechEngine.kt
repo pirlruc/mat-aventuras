@@ -6,6 +6,7 @@ import android.speech.tts.Voice
 import java.util.Locale
 import pt.mataventuras.app.entitlement.FamilySettings
 import pt.mataventuras.app.ui.languageSupported
+import pt.mataventuras.app.ui.packLine
 import pt.mataventuras.app.ui.shouldSpeak
 
 /**
@@ -16,7 +17,8 @@ class SpeechEngine(
     private val voiceLookup: (() -> Set<Voice>?)? = null,
     private val languageResult: ((TextToSpeech) -> Int)? = null,
 ) : TextToSpeech.OnInitListener {
-    private val tts = TextToSpeech(context.applicationContext, this)
+    private val lines = context.applicationContext
+    private val tts = TextToSpeech(lines, this)
     private val locale = Locale.forLanguageTag(FamilySettings(context.applicationContext).language())
     private var ready = false
     private var released = false
@@ -48,13 +50,14 @@ class SpeechEngine(
      * Speaks [text] when an offline voice for the pack is ready.
      */
     fun speak(text: String) {
+        val spoken = lines.packLine(text)
         if (released) return
         if (!ready) {
-            if (text.isNotBlank()) pending = text
+            if (spoken.isNotBlank()) pending = spoken
             return
         }
-        if (!shouldSpeak(ready, text)) return
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "mat-aventuras")
+        if (!shouldSpeak(ready, spoken)) return
+        tts.speak(spoken, TextToSpeech.QUEUE_FLUSH, null, "mat-aventuras")
     }
 
     /**

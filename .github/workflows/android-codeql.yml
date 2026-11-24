@@ -1,0 +1,61 @@
+name: android-codeql
+
+# Own workflow name so androiddevops 1.12.0 locks android-codeql-<ref>.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 1,15 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.set.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Detect code changes
+        id: set
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          code=true
+          if [[ "${EVENT}" == "pull_request" ]]; then
+            code=false
+            git fetch --depth=1 origin "${BASE}"
+            names="$(git diff --name-only "origin/${BASE}...HEAD")"
+            pattern='^(app|data|domain|gradle|scripts)/|^(build|settings)\.gradle\.kts$|^gradle\.properties$|^libs/'
+            if grep -Eq "${pattern}" <<<"${names}"; then
+              code=true
+            fi
+          fi
+          echo "code=${code}" >> "${GITHUB_OUTPUT}"
+
+  codeql:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    permissions:
+      contents: read
+      # The reusable upload job requests actions: read even when upload is never.
+      actions: read
+      security-events: write
+    uses: pirlruc/androiddevops/.github/workflows/android-codeql.yml@29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
+    with:
+      scripts_ref: 29b91430c9c55f84ad05575bd0b2267ed30096d2 # 1.12.0
+      upload: never
+      build_command: >-
+        ./gradlew --no-daemon --rerun-tasks :domain:compileKotlin :data:compileDebugKotlin :app:compileDebugKotlin
+    secrets:
+      checkout_token: ${{ secrets.GITHUB_TOKEN }}
