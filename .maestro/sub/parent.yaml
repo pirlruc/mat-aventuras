@@ -4,7 +4,6 @@ appId: pt.mataventuras.app
     id: parent-open
 - longPressOn:
     id: adult-hold
-    longPressDuration: 2000
 - copyTextFrom:
     id: adult-challenge
 - evalScript: ${output.parts = maestro.copiedText.split(/[^0-9]+/).filter(function (part) { return part.length > 0; }); output.product = (Number(output.parts[0]) * Number(output.parts[1])).toString();}
